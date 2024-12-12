@@ -12,8 +12,99 @@ tags:
 
 paths:
   /oauth2/code:
-    $ref: "./paths/oauth2_code.yml"
+    get:
+      operationId: "getOauth2Code"
+      tags:
+        - "oauth2"
+      summary: "OAuth2認証コードの取得・traQの認可ページにリダイレクト"
+      description: "OAuth2の認証に必要なCode Verifierを生成し、traQの認可ページにリダイレクトします。"
+      responses:
+        303:
+          description: "traQの認可ページにリダイレクトします。"
+          headers:
+            Location:
+              schema:
+                type: "string"
+                format: "uri"
+                example: "https://q.trap.jp/oauth2/authorize?response_type=code&client_id=client_id&redirect_uri=http://localhost:8080/api/oauth2/callback&state=state&code_challenge=code_challenge&code_challenge_method=S256"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
   /oauth2/callback:
-    $ref: "./paths/oauth2_callback.yml"
+    get:
+      operationId: "getOauth2Callback"
+      tags:
+        - "oauth2"
+      summary: "traQからのリダイレクト"
+      description: "traQ上での認証後にtraQから Authorization Codeがクエリパラメーターにつけられて、 リダイレクトされます。"
+      parameters:
+        - name: "code"
+          in: "query"
+          description: "traQからのAuthorization Code"
+          required: true
+          schema:
+            type: "string"
+            example: "authorization_code"
+      responses:
+        200:
+          description: "認証に成功しました。"
+        400:
+          description: "セッションやAuthorization Codeに誤りがあり、認証に失敗しました"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+                    example: "認証に失敗しました。"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
   /oauth2/logout:
-    $ref: "./paths/oauth2_logout.yml"
+    post:
+      summary: "ログアウト"
+      description: "ログアウトし、セッションを削除します"
+      tags:
+        - "oauth2"
+      operationId: "postOauth2Logout"
+      responses:
+        200:
+          description: "ログアウトしました。"
+        400:
+          description: "セッションに誤りがあり、認証に失敗しました"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+                    example: "誤りの内容"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+components:
+  responses:
+    Unauthorized:
+      description: "Unauthorized"
+      content:
+        application/json:
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+                example: "Unauthorized"
+    InternalServerError:
+      description: "Internal Server Error"
+      content:
+        application/json:
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+                example: "Internal Server Error"
