@@ -3,6 +3,7 @@ post:
   description: "ログアウトし、セッションを削除します"
   tags:
     - "oauth2"
+  operationId: "postOauth2Logout"
   responses:
     200:
       description: "ログアウトしました。"
