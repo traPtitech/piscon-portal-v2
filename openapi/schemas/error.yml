@@ -1,0 +1,21 @@
+responses:
+  Unauthorized:
+    description: "Unauthorized"
+    content:
+      application/json:
+        schema:
+          type: "object"
+          properties:
+            message:
+              type: "string"
+              example: "Unauthorized"
+  InternalServerError:
+    description: "Internal Server Error"
+    content:
+      application/json:
+        schema:
+          type: "object"
+          properties:
+            message:
+              type: "string"
+              example: "Internal Server Error"

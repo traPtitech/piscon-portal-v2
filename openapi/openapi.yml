@@ -1,0 +1,19 @@
+openapi: 3.0.3
+info:
+  title: "piscon-portal-v2"
+  version: "v0.0.0"
+servers:
+  - url: "http://localhost:8080/api"
+    description: "Local server"
+
+tags:
+  - name: "oauth2"
+    description: "OAuth2を使った部員の認証"
+
+paths:
+  /oauth2/code:
+    $ref: "./paths/oauth2_code.yml"
+  /oauth2/callback:
+    $ref: "./paths/oauth2_callback.yml"
+  /oauth2/logout:
+    $ref: "./paths/oauth2_logout.yml"
