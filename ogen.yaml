@@ -1,0 +1,6 @@
+generator:
+  features:
+    enable:
+      - "client/request/validation"
+      - "server/response/validation"
+    disable_all: true
