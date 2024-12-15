@@ -320,6 +320,43 @@ paths:
           $ref: "#/components/responses/NotFound"
         500:
           $ref: "#/components/responses/InternalServerError"
+    patch:
+      tags: ["instance"]
+      summary: "インスタンス状態変更"
+      description: "インスタンスの状態を変更します"
+      operationId: "patchInstance"
+      security:
+        - TeamAuth: []
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/teamId"
+        - $ref: "#/components/parameters/instanceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                status:
+                  $ref: "#/components/schemas/InstanceStatus"
+      responses:
+        200:
+          description: "インスタンスのステータス変更に成功"
+        400:
+          description: "現在と同じステータスである、無効なステータスである。"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
 
 components:
   requestBodies:
@@ -381,9 +418,9 @@ components:
     InstanceStatus:
       type: "string"
       enum:
+        - "building"
         - "running"
         - "stopped"
-        - "terminated"
       example: "running"
     Instance:
       type: "object"
