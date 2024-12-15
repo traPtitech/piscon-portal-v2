@@ -130,6 +130,28 @@ paths:
         500:
           $ref: "#/components/responses/InternalServerError"
 
+  /teams:
+    get:
+      tags: ["teams"]
+      summary: "チーム一覧取得"
+      description: "チーム一覧を取得します"
+      operationId: "getTeams"
+      security:
+        - UserAuth: []
+      responses:
+        200:
+          description: "チーム一覧の取得に成功"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Team"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
 components:
   schemas:
     UserId:
@@ -159,10 +181,38 @@ components:
         - id
         - name
         - isAdmin
+
     TeamId:
       type: "string"
       format: "uuid"
       example: "00000000-0000-0000-0000-000000000000"
+    TeamName:
+      type: "string"
+      example: "team1"
+      description: "チーム名"
+    Team:
+      type: "object"
+      description: "チーム"
+      properties:
+        id:
+          $ref: "#/components/schemas/TeamId"
+        name:
+          $ref: "#/components/schemas/TeamName"
+        members:
+          description: "チームに所属している部員のID"
+          maxItems: 3
+          type: "array"
+          items:
+            $ref: "#/components/schemas/UserId"
+        createdAt:
+          type: "string"
+          format: "date-time"
+          example: "2021-01-01T00:00:00Z"
+      required:
+        - id
+        - name
+        - members
+        - createdAt
 
   responses:
     Unauthorized:
