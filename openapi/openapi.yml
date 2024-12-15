@@ -13,6 +13,8 @@ tags:
     description: "部員に関するAPI"
   - name: "teams"
     description: "チームに関するAPI"
+  - name: "instance"
+    description: "インスタンスに関するAPI"
 
 paths:
   /oauth2/code:
@@ -234,6 +236,152 @@ paths:
         500:
           $ref: "#/components/responses/InternalServerError"
 
+  /teams/{teamId}/instances:
+    get:
+      tags: ["instance"]
+      summary: "インスタンス一覧取得"
+      description: "チームに所属しているインスタンス一覧を取得します"
+      operationId: "getTeamInstances"
+      security:
+        - TeamAuth: []
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/teamId"
+      responses:
+        200:
+          description: "インスタンス一覧の取得に成功"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Instance"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+    post:
+      tags: ["instance"]
+      summary: "インスタンス起動"
+      description: "インスタンスを起動してチームに追加します"
+      operationId: "createTeamInstance"
+      security:
+        - TeamAuth: []
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/teamId"
+      responses:
+        201:
+          description: "インスタンスの起動に成功"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Instance"
+        400:
+          description: "インスタンス数の上限に達しているなど"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /teams/{teamId}/instances/{instanceId}:
+    delete:
+      tags: ["instance"]
+      summary: "インスタンス削除"
+      description: "インスタンスを削除します"
+      operationId: "deleteTeamInstance"
+      security:
+        - TeamAuth: []
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/teamId"
+        - $ref: "#/components/parameters/instanceId"
+      responses:
+        200:
+          description: "インスタンスの削除に成功"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+    patch:
+      tags: ["instance"]
+      summary: "インスタンス状態変更"
+      description: "インスタンスの状態を変更します"
+      operationId: "patchTeamInstance"
+      security:
+        - TeamAuth: []
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/teamId"
+        - $ref: "#/components/parameters/instanceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                status:
+                  $ref: "#/components/schemas/InstanceStatus"
+      responses:
+        200:
+          description: "インスタンスのステータス変更に成功"
+        400:
+          description: "現在と同じステータスである、無効なステータスである。"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /instances:
+    get:
+      tags: ["instance"]
+      summary: "インスタンス一覧取得"
+      description: "全インスタンス一覧を取得します"
+      operationId: "getInstances"
+      security:
+        - AdminAuth: []
+      responses:
+        200:
+          description: "インスタンス一覧の取得に成功。チームIDの昇順で返す"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Instance"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
 components:
   requestBodies:
     NewTeam:
@@ -278,8 +426,65 @@ components:
       required: true
       schema:
         $ref: "#/components/schemas/TeamId"
+    instanceId:
+      name: "instanceId"
+      in: "path"
+      description: "インスタンスID"
+      required: true
+      schema:
+        $ref: "#/components/schemas/InstanceId"
 
   schemas:
+    InstanceId:
+      type: "string"
+      format: "uuid"
+      example: "00000000-0000-0000-0000-000000000000"
+    InstanceStatus:
+      type: "string"
+      enum:
+        - "building"
+        - "running"
+        - "stopped"
+      example: "running"
+    Instance:
+      type: "object"
+      description: "サーバーのインスタンス"
+      properties:
+        id:
+          $ref: "#/components/schemas/InstanceId"
+        teamId:
+          $ref: "#/components/schemas/TeamId"
+        serverId:
+          type: "integer"
+          example: 1
+          minimum: 1
+          description: |
+            サーバーのID。チームごとに1から始まる。表示用。
+            新しくインスタンスを起動する場合は、1以上の現在使われていない整数が採用される。
+            インスタンスを削除したら、そのIDは使用されていないものとし、再利用できる。
+        publicIPAddress:
+          $ref: "#/components/schemas/IPAddress"
+        privateIPAddress:
+          $ref: "#/components/schemas/IPAddress"
+        status:
+          $ref: "#/components/schemas/InstanceStatus"
+        createdAt:
+          type: "string"
+          format: "date-time"
+          example: "2021-01-01T00:00:00Z"
+      required:
+        - id
+        - teamId
+        - serverId
+        - publicIPAddress
+        - privateIPAddress
+        - status
+        - createdAt
+
+    IPAddress:
+      type: "string"
+      example: "192.0.2.0"
+
     UserId:
       type: "string"
       format: "uuid"
@@ -340,17 +545,20 @@ components:
         - members
         - createdAt
 
+    ErrorBadRequest:
+      type: "object"
+      properties:
+        message:
+          type: "string"
+          example: "Invalid xxx"
+
   responses:
     BadRequest:
       description: "Bad Request. リクエストが不正です"
       content:
         application/json:
           schema:
-            type: "object"
-            properties:
-              message:
-                type: "string"
-                example: "Invalid xxx"
+            $ref: "#/components/schemas/ErrorBadRequest"
     Unauthorized:
       description: "Unauthorized. 認証に失敗しました"
       content:
