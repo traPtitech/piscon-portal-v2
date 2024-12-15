@@ -358,6 +358,30 @@ paths:
         500:
           $ref: "#/components/responses/InternalServerError"
 
+  /instances:
+    get:
+      tags: ["instance"]
+      summary: "インスタンス一覧取得"
+      description: "全インスタンス一覧を取得します"
+      operationId: "getInstances"
+      security:
+        - AdminAuth: []
+      responses:
+        200:
+          description: "インスタンス一覧の取得に成功。チームIDの昇順で返す"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Instance"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
 components:
   requestBodies:
     NewTeam:
