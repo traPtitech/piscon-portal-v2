@@ -269,7 +269,7 @@ paths:
       tags: ["instance"]
       summary: "インスタンス起動"
       description: "インスタンスを起動してチームに追加します"
-      operationId: "createInstance"
+      operationId: "createTeamInstance"
       security:
         - TeamAuth: []
         - AdminAuth: []
@@ -302,7 +302,7 @@ paths:
       tags: ["instance"]
       summary: "インスタンス削除"
       description: "インスタンスを削除します"
-      operationId: "deleteInstance"
+      operationId: "deleteTeamInstance"
       security:
         - TeamAuth: []
         - AdminAuth: []
@@ -324,7 +324,7 @@ paths:
       tags: ["instance"]
       summary: "インスタンス状態変更"
       description: "インスタンスの状態を変更します"
-      operationId: "patchInstance"
+      operationId: "patchTeamInstance"
       security:
         - TeamAuth: []
         - AdminAuth: []
