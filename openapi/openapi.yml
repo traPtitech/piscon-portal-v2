@@ -297,6 +297,30 @@ paths:
         500:
           $ref: "#/components/responses/InternalServerError"
 
+  /teams/{teamId}/instances/{instanceId}:
+    delete:
+      tags: ["instance"]
+      summary: "インスタンス削除"
+      description: "インスタンスを削除します"
+      operationId: "deleteInstance"
+      security:
+        - TeamAuth: []
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/teamId"
+        - $ref: "#/components/parameters/instanceId"
+      responses:
+        200:
+          description: "インスタンスの削除に成功"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
 components:
   requestBodies:
     NewTeam:
@@ -341,6 +365,13 @@ components:
       required: true
       schema:
         $ref: "#/components/schemas/TeamId"
+    instanceId:
+      name: "instanceId"
+      in: "path"
+      description: "インスタンスID"
+      required: true
+      schema:
+        $ref: "#/components/schemas/InstanceId"
 
   schemas:
     InstanceId:
