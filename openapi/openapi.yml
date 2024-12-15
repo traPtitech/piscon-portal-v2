@@ -88,7 +88,82 @@ paths:
         500:
           $ref: "#/components/responses/InternalServerError"
 
+  /users:
+    get:
+      tags: ["users"]
+      summary: "部員一覧取得"
+      description: "凍結されていない部員一覧を取得します"
+      operationId: "getUsers"
+      security:
+        - UserAuth: []
+      responses:
+        200:
+          description: "部員一覧の取得に成功"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/User"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /users/me:
+    get:
+      tags: ["users"]
+      summary: "自分の情報取得"
+      description: "自分の情報を取得します"
+      operationId: "getMe"
+      security:
+        - UserAuth: []
+      responses:
+        200:
+          description: "自分の情報の取得に成功"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
 components:
+  schemas:
+    UserId:
+      type: "string"
+      format: "uuid"
+      example: "00000000-0000-0000-0000-000000000000"
+      description: "traQのUUID"
+    UserName:
+      type: "string"
+      example: "ikura-hamu"
+      description: "traQのID"
+    User:
+      type: "object"
+      description: "部員"
+      properties:
+        id:
+          $ref: "#/components/schemas/UserId"
+        name:
+          $ref: "#/components/schemas/UserName"
+        teamId:
+          $ref: "#/components/schemas/TeamId"
+        isAdmin:
+          type: "boolean"
+          example: false
+          description: "管理者権限を持っているかどうか"
+      required:
+        - id
+        - name
+        - isAdmin
+    TeamId:
+      type: "string"
+      format: "uuid"
+      example: "00000000-0000-0000-0000-000000000000"
+
   responses:
     Unauthorized:
       description: "Unauthorized"
