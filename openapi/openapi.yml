@@ -347,6 +347,13 @@ components:
       type: "string"
       format: "uuid"
       example: "00000000-0000-0000-0000-000000000000"
+    InstanceStatus:
+      type: "string"
+      enum:
+        - "running"
+        - "stopped"
+        - "terminated"
+      example: "running"
     Instance:
       type: "object"
       description: "サーバーのインスタンス"
@@ -367,6 +374,8 @@ components:
           $ref: "#/components/schemas/IPAddress"
         privateIPAddress:
           $ref: "#/components/schemas/IPAddress"
+        status:
+          $ref: "#/components/schemas/InstanceStatus"
         createdAt:
           type: "string"
           format: "date-time"
@@ -374,6 +383,10 @@ components:
       required:
         - id
         - teamId
+        - serverId
+        - publicIPAddress
+        - privateIPAddress
+        - status
         - createdAt
 
     IPAddress:
