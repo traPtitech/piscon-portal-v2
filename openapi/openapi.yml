@@ -9,6 +9,10 @@ servers:
 tags:
   - name: "oauth2"
     description: "OAuth2を使った部員の認証"
+  - name: "users"
+    description: "部員に関するAPI"
+  - name: "teams"
+    description: "チームに関するAPI"
 
 paths:
   /oauth2/code:
@@ -130,7 +134,151 @@ paths:
         500:
           $ref: "#/components/responses/InternalServerError"
 
+  /teams:
+    get:
+      tags: ["teams"]
+      summary: "チーム一覧取得"
+      description: "チーム一覧を取得します"
+      operationId: "getTeams"
+      security:
+        - UserAuth: []
+      responses:
+        200:
+          description: "チーム一覧の取得に成功"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Team"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+    post:
+      tags: ["teams"]
+      summary: "チーム作成"
+      description: "チームを作成します"
+      operationId: "postTeam"
+      security:
+        - UserAuth: []
+      requestBody:
+        required: true
+        $ref: "#/components/requestBodies/NewTeam"
+      responses:
+        201:
+          description: "チームの作成に成功"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Team"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /teams/{teamId}:
+    get:
+      tags: ["teams"]
+      summary: "チーム情報取得"
+      description: "チーム情報を取得します"
+      operationId: "getTeam"
+      security:
+        - UserAuth: []
+      parameters:
+        - $ref: "#/components/parameters/teamId"
+      responses:
+        200:
+          description: "チーム情報の取得に成功"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Team"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+    patch:
+      tags: ["teams"]
+      summary: "チーム情報更新"
+      description: "チーム情報やメンバーを更新します"
+      operationId: "patchTeam"
+      security:
+        - TeamAuth: []
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/teamId"
+      requestBody:
+        required: true
+        $ref: "#/components/requestBodies/PatchTeam"
+      responses:
+        200:
+          description: "チーム情報の更新に成功"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Team"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
 components:
+  requestBodies:
+    NewTeam:
+      content:
+        application/json:
+          schema:
+            type: "object"
+            properties:
+              name:
+                $ref: "#/components/schemas/TeamName"
+              members:
+                description: "チームに所属させる部員のID"
+                maxItems: 3
+                minItems: 1
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/UserId"
+            required:
+              - name
+              - members
+    PatchTeam:
+      content:
+        application/json:
+          schema:
+            type: "object"
+            properties:
+              name:
+                $ref: "#/components/schemas/TeamName"
+              members:
+                description: "チームに所属させる部員のID"
+                minItems: 1
+                maxItems: 3
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/UserId"
+
+  parameters:
+    teamId:
+      name: "teamId"
+      in: "path"
+      description: "チームID"
+      required: true
+      schema:
+        $ref: "#/components/schemas/TeamId"
+
   schemas:
     UserId:
       type: "string"
@@ -159,14 +307,52 @@ components:
         - id
         - name
         - isAdmin
+
     TeamId:
       type: "string"
       format: "uuid"
       example: "00000000-0000-0000-0000-000000000000"
+    TeamName:
+      type: "string"
+      example: "team1"
+      description: "チーム名"
+    Team:
+      type: "object"
+      description: "チーム"
+      properties:
+        id:
+          $ref: "#/components/schemas/TeamId"
+        name:
+          $ref: "#/components/schemas/TeamName"
+        members:
+          description: "チームに所属している部員のID"
+          maxItems: 3
+          type: "array"
+          items:
+            $ref: "#/components/schemas/UserId"
+        createdAt:
+          type: "string"
+          format: "date-time"
+          example: "2021-01-01T00:00:00Z"
+      required:
+        - id
+        - name
+        - members
+        - createdAt
 
   responses:
+    BadRequest:
+      description: "Bad Request. リクエストが不正です"
+      content:
+        application/json:
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+                example: "Invalid xxx"
     Unauthorized:
-      description: "Unauthorized"
+      description: "Unauthorized. 認証に失敗しました"
       content:
         application/json:
           schema:
@@ -175,6 +361,26 @@ components:
               message:
                 type: "string"
                 example: "Unauthorized"
+    Forbidden:
+      description: "Forbidden. 権限がありません"
+      content:
+        application/json:
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+                example: "Forbidden"
+    NotFound:
+      description: "Not Found. リソースが見つかりません"
+      content:
+        application/json:
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+                example: "xxx not found"
     InternalServerError:
       description: "Internal Server Error"
       content:
@@ -197,3 +403,8 @@ components:
       in: cookie
       name: piscon_session
       description: "管理者である場合にアクセスできる"
+    TeamAuth:
+      type: apiKey
+      in: cookie
+      name: piscon_session
+      description: "チームメンバーである場合にアクセスできる"
