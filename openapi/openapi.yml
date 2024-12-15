@@ -265,6 +265,38 @@ paths:
         500:
           $ref: "#/components/responses/InternalServerError"
 
+    post:
+      tags: ["instance"]
+      summary: "インスタンス起動"
+      description: "インスタンスを起動してチームに追加します"
+      operationId: "createInstance"
+      security:
+        - TeamAuth: []
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/teamId"
+      responses:
+        201:
+          description: "インスタンスの起動に成功"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Instance"
+        400:
+          description: "インスタンス数の上限に達しているなど"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
 components:
   requestBodies:
     NewTeam:
@@ -408,17 +440,20 @@ components:
         - members
         - createdAt
 
+    ErrorBadRequest:
+      type: "object"
+      properties:
+        message:
+          type: "string"
+          example: "Invalid xxx"
+
   responses:
     BadRequest:
       description: "Bad Request. リクエストが不正です"
       content:
         application/json:
           schema:
-            type: "object"
-            properties:
-              message:
-                type: "string"
-                example: "Invalid xxx"
+            $ref: "#/components/schemas/ErrorBadRequest"
     Unauthorized:
       description: "Unauthorized. 認証に失敗しました"
       content:
