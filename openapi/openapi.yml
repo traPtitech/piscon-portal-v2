@@ -203,6 +203,36 @@ paths:
           $ref: "#/components/responses/NotFound"
         500:
           $ref: "#/components/responses/InternalServerError"
+    patch:
+      tags: ["teams"]
+      summary: "チーム情報更新"
+      description: "チーム情報やメンバーを更新します"
+      operationId: "patchTeam"
+      security:
+        - TeamAuth: []
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/teamId"
+      requestBody:
+        required: true
+        $ref: "#/components/requestBodies/PatchTeam"
+      responses:
+        200:
+          description: "チーム情報の更新に成功"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Team"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
 
 components:
   requestBodies:
@@ -224,6 +254,21 @@ components:
             required:
               - name
               - members
+    PatchTeam:
+      content:
+        application/json:
+          schema:
+            type: "object"
+            properties:
+              name:
+                $ref: "#/components/schemas/TeamName"
+              members:
+                description: "チームに所属させる部員のID"
+                minItems: 1
+                maxItems: 3
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/UserId"
 
   parameters:
     teamId:
@@ -316,6 +361,16 @@ components:
               message:
                 type: "string"
                 example: "Unauthorized"
+    Forbidden:
+      description: "Forbidden"
+      content:
+        application/json:
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+                example: "Forbidden"
     NotFound:
       description: "Not Found"
       content:
@@ -348,3 +403,8 @@ components:
       in: cookie
       name: piscon_session
       description: "管理者である場合にアクセスできる"
+    TeamAuth:
+      type: apiKey
+      in: cookie
+      name: piscon_session
+      description: "チームメンバーである場合にアクセスできる"
