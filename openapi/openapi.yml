@@ -67,6 +67,8 @@ paths:
       description: "ログアウトし、セッションを削除します"
       tags:
         - "oauth2"
+      security:
+        - UserAuth: []
       operationId: "postOauth2Logout"
       responses:
         200:
@@ -108,3 +110,15 @@ components:
               message:
                 type: "string"
                 example: "Internal Server Error"
+
+  securitySchemes:
+    UserAuth:
+      type: apiKey
+      in: cookie
+      name: piscon_session
+      description: "部員である場合にアクセスできる"
+    AdminAuth:
+      type: apiKey
+      in: cookie
+      name: piscon_session
+      description: "管理者である場合にアクセスできる"
