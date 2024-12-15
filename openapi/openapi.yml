@@ -342,7 +342,7 @@ components:
 
   responses:
     BadRequest:
-      description: "Bad Request"
+      description: "Bad Request. リクエストが不正です"
       content:
         application/json:
           schema:
@@ -352,7 +352,7 @@ components:
                 type: "string"
                 example: "Invalid xxx"
     Unauthorized:
-      description: "Unauthorized"
+      description: "Unauthorized. 認証に失敗しました"
       content:
         application/json:
           schema:
@@ -362,7 +362,7 @@ components:
                 type: "string"
                 example: "Unauthorized"
     Forbidden:
-      description: "Forbidden"
+      description: "Forbidden. 権限がありません"
       content:
         application/json:
           schema:
@@ -372,7 +372,7 @@ components:
                 type: "string"
                 example: "Forbidden"
     NotFound:
-      description: "Not Found"
+      description: "Not Found. リソースが見つかりません"
       content:
         application/json:
           schema:
