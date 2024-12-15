@@ -9,6 +9,10 @@ servers:
 tags:
   - name: "oauth2"
     description: "OAuth2を使った部員の認証"
+  - name: "users"
+    description: "部員に関するAPI"
+  - name: "teams"
+    description: "チームに関するAPI"
 
 paths:
   /oauth2/code:
@@ -152,7 +156,40 @@ paths:
         500:
           $ref: "#/components/responses/InternalServerError"
 
+  /teams/{teamId}:
+    get:
+      tags: ["teams"]
+      summary: "チーム情報取得"
+      description: "チーム情報を取得します"
+      operationId: "getTeam"
+      security:
+        - UserAuth: []
+      parameters:
+        - $ref: "#/components/parameters/teamId"
+      responses:
+        200:
+          description: "チーム情報の取得に成功"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Team"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
 components:
+  parameters:
+    teamId:
+      name: "teamId"
+      in: "path"
+      description: "チームID"
+      required: true
+      schema:
+        $ref: "#/components/schemas/TeamId"
+
   schemas:
     UserId:
       type: "string"
@@ -225,6 +262,16 @@ components:
               message:
                 type: "string"
                 example: "Unauthorized"
+    NotFound:
+      description: "Not Found"
+      content:
+        application/json:
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+                example: "○○が見つかりません"
     InternalServerError:
       description: "Internal Server Error"
       content:
