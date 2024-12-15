@@ -156,6 +156,30 @@ paths:
         500:
           $ref: "#/components/responses/InternalServerError"
 
+    post:
+      tags: ["teams"]
+      summary: "チーム作成"
+      description: "チームを作成します"
+      operationId: "postTeam"
+      security:
+        - UserAuth: []
+      requestBody:
+        required: true
+        $ref: "#/components/requestBodies/NewTeam"
+      responses:
+        201:
+          description: "チームの作成に成功"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Team"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
   /teams/{teamId}:
     get:
       tags: ["teams"]
@@ -181,6 +205,26 @@ paths:
           $ref: "#/components/responses/InternalServerError"
 
 components:
+  requestBodies:
+    NewTeam:
+      content:
+        application/json:
+          schema:
+            type: "object"
+            properties:
+              name:
+                $ref: "#/components/schemas/TeamName"
+              members:
+                description: "チームに所属させる部員のID"
+                maxItems: 3
+                minItems: 1
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/UserId"
+            required:
+              - name
+              - members
+
   parameters:
     teamId:
       name: "teamId"
@@ -252,6 +296,16 @@ components:
         - createdAt
 
   responses:
+    BadRequest:
+      description: "Bad Request"
+      content:
+        application/json:
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+                example: "Invalid xxx"
     Unauthorized:
       description: "Unauthorized"
       content:
@@ -271,7 +325,7 @@ components:
             properties:
               message:
                 type: "string"
-                example: "○○が見つかりません"
+                example: "xxx not found"
     InternalServerError:
       description: "Internal Server Error"
       content:
