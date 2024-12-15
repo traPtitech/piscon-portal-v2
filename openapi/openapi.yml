@@ -13,6 +13,8 @@ tags:
     description: "部員に関するAPI"
   - name: "teams"
     description: "チームに関するAPI"
+  - name: "instance"
+    description: "インスタンスに関するAPI"
 
 paths:
   /oauth2/code:
@@ -234,6 +236,35 @@ paths:
         500:
           $ref: "#/components/responses/InternalServerError"
 
+  /teams/{teamId}/instances:
+    get:
+      tags: ["instance"]
+      summary: "インスタンス一覧取得"
+      description: "チームに所属しているインスタンス一覧を取得します"
+      operationId: "getTeamInstances"
+      security:
+        - TeamAuth: []
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/teamId"
+      responses:
+        200:
+          description: "インスタンス一覧の取得に成功"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Instance"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
 components:
   requestBodies:
     NewTeam:
@@ -280,6 +311,43 @@ components:
         $ref: "#/components/schemas/TeamId"
 
   schemas:
+    InstanceId:
+      type: "string"
+      format: "uuid"
+      example: "00000000-0000-0000-0000-000000000000"
+    Instance:
+      type: "object"
+      description: "サーバーのインスタンス"
+      properties:
+        id:
+          $ref: "#/components/schemas/InstanceId"
+        teamId:
+          $ref: "#/components/schemas/TeamId"
+        serverId:
+          type: "integer"
+          example: 1
+          minimum: 1
+          description: |
+            サーバーのID。チームごとに1から始まる。表示用。
+            新しくインスタンスを起動する場合は、1以上の現在使われていない整数が採用される。
+            インスタンスを削除したら、そのIDは使用されていないものとし、再利用できる。
+        publicIPAddress:
+          $ref: "#/components/schemas/IPAddress"
+        privateIPAddress:
+          $ref: "#/components/schemas/IPAddress"
+        createdAt:
+          type: "string"
+          format: "date-time"
+          example: "2021-01-01T00:00:00Z"
+      required:
+        - id
+        - teamId
+        - createdAt
+
+    IPAddress:
+      type: "string"
+      example: "192.0.2.0"
+
     UserId:
       type: "string"
       format: "uuid"
