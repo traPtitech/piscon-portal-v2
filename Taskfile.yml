@@ -1,0 +1,17 @@
+version: "3"
+
+tasks:
+  gen:
+    cmds:
+      - task: up-db
+      - go generate ./...
+    sources:
+      - openapi/openapi.yml
+      - schema.sql
+    generates:
+      - server/openapi/*.go
+      - server/models/**/*.go
+
+  up-db:
+    cmds:
+      - docker compose up -d --wait db
