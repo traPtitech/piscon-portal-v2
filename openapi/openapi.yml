@@ -413,6 +413,36 @@ paths:
         500:
           $ref: "#/components/responses/InternalServerError"
 
+    get:
+      tags: ["benchmark"]
+      summary: "ベンチマーク一覧取得"
+      description: "全チームのベンチマーク一覧を取得します"
+      operationId: "getBenchmarks"
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: "status"
+          in: "query"
+          description: "ベンチマークのステータス。指定が無い場合は全て"
+          required: false
+          schema:
+            $ref: "#/components/schemas/BenchmarkStatus"
+      responses:
+        200:
+          description: "ベンチマーク一覧の取得に成功"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Benchmark"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
 components:
   requestBodies:
     NewTeam:
