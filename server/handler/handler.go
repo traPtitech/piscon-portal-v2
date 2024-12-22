@@ -50,5 +50,5 @@ func (h *Handler) SetupRoutes(e *echo.Echo) {
 
 	api.GET("/oauth2/code", h.GetOauth2Code)
 	api.GET("/oauth2/callback", h.Oauth2Callback)
-	api.GET("/oauth2/logout", h.Logout, h.AuthMiddleware())
+	api.POST("/oauth2/logout", h.Logout, h.AuthMiddleware())
 }

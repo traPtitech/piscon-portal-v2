@@ -33,7 +33,7 @@ func TestAuthorize(t *testing.T) {
 	}
 
 	// logout
-	res, err := client.Get(ServerURL + "/api/oauth2/logout")
+	res, err := client.Post(ServerURL+"/api/oauth2/logout", "", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -43,7 +43,7 @@ func TestAuthorize(t *testing.T) {
 	}
 
 	// logout after logout should be unauthorized
-	res, err = client.Get(server.URL + "/api/oauth2/logout")
+	res, err = client.Post(server.URL+"/api/oauth2/logout", "", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -84,7 +84,7 @@ func TestExpiredSession(t *testing.T) {
 	}
 
 	// now, logout should be unauthorized
-	res, err := client.Get(server.URL + "/api/oauth2/logout")
+	res, err := client.Post(server.URL+"/api/oauth2/logout", "", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
