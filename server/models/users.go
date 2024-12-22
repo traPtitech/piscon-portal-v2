@@ -39,14 +39,15 @@ type User struct {
 type UserSlice []*User
 
 // Users contains methods to work with the users table
-var Users = mysql.NewTablex[*User, UserSlice, *UserSetter]("users", []string{"id"})
+var Users = mysql.NewTablex[*User, UserSlice, *UserSetter]("users", []string{"name"}, []string{"id"})
 
 // UsersQuery is a query on the users table
 type UsersQuery = *mysql.ViewQuery[*User, UserSlice]
 
 // userR is where relationships are stored.
 type userR struct {
-	Team *Team // users_ibfk_1
+	Sessions SessionSlice // sessions_ibfk_1
+	Team     *Team        // users_ibfk_1
 }
 
 type userColumnNames struct {
@@ -102,6 +103,14 @@ func buildUserWhere[Q mysql.Filterable](cols userColumns) userWhere[Q] {
 		TeamID:  mysql.WhereNull[Q, string](cols.TeamID),
 		IsAdmin: mysql.Where[Q, bool](cols.IsAdmin),
 	}
+}
+
+var UserErrors = &userErrors{
+	ErrUniqueName: &errUniqueConstraint{s: "name"},
+}
+
+type userErrors struct {
+	ErrUniqueName error
 }
 
 // UserSetter is used for insert/upsert/update operations
@@ -435,8 +444,9 @@ func (o UserSlice) ReloadAll(ctx context.Context, exec bob.Executor) error {
 }
 
 type userJoins[Q dialect.Joinable] struct {
-	typ  string
-	Team func(context.Context) modAs[Q, teamColumns]
+	typ      string
+	Sessions func(context.Context) modAs[Q, sessionColumns]
+	Team     func(context.Context) modAs[Q, teamColumns]
 }
 
 func (j userJoins[Q]) aliasedAs(alias string) userJoins[Q] {
@@ -445,8 +455,28 @@ func (j userJoins[Q]) aliasedAs(alias string) userJoins[Q] {
 
 func buildUserJoins[Q dialect.Joinable](cols userColumns, typ string) userJoins[Q] {
 	return userJoins[Q]{
-		typ:  typ,
-		Team: usersJoinTeam[Q](cols, typ),
+		typ:      typ,
+		Sessions: usersJoinSessions[Q](cols, typ),
+		Team:     usersJoinTeam[Q](cols, typ),
+	}
+}
+
+func usersJoinSessions[Q dialect.Joinable](from userColumns, typ string) func(context.Context) modAs[Q, sessionColumns] {
+	return func(ctx context.Context) modAs[Q, sessionColumns] {
+		return modAs[Q, sessionColumns]{
+			c: SessionColumns,
+			f: func(to sessionColumns) bob.Mod[Q] {
+				mods := make(mods.QueryMods[Q], 0, 1)
+
+				{
+					mods = append(mods, dialect.Join[Q](typ, Sessions.Name().As(to.Alias())).On(
+						to.UserID.EQ(from.ID),
+					))
+				}
+
+				return mods
+			},
+		}
 	}
 }
 
@@ -467,6 +497,24 @@ func usersJoinTeam[Q dialect.Joinable](from userColumns, typ string) func(contex
 			},
 		}
 	}
+}
+
+// Sessions starts a query for related objects on sessions
+func (o *User) Sessions(mods ...bob.Mod[*dialect.SelectQuery]) SessionsQuery {
+	return Sessions.Query(append(mods,
+		sm.Where(SessionColumns.UserID.EQ(mysql.Arg(o.ID))),
+	)...)
+}
+
+func (os UserSlice) Sessions(mods ...bob.Mod[*dialect.SelectQuery]) SessionsQuery {
+	PKArgs := make([]bob.Expression, len(os))
+	for i, o := range os {
+		PKArgs[i] = mysql.ArgGroup(o.ID)
+	}
+
+	return Sessions.Query(append(mods,
+		sm.Where(mysql.Group(SessionColumns.UserID).In(PKArgs...)),
+	)...)
 }
 
 // Team starts a query for related objects on teams
@@ -493,6 +541,20 @@ func (o *User) Preload(name string, retrieved any) error {
 	}
 
 	switch name {
+	case "Sessions":
+		rels, ok := retrieved.(SessionSlice)
+		if !ok {
+			return fmt.Errorf("user cannot load %T as %q", retrieved, name)
+		}
+
+		o.R.Sessions = rels
+
+		for _, rel := range rels {
+			if rel != nil {
+				rel.R.User = o
+			}
+		}
+		return nil
 	case "Team":
 		rel, ok := retrieved.(*Team)
 		if !ok {
@@ -508,6 +570,78 @@ func (o *User) Preload(name string, retrieved any) error {
 	default:
 		return fmt.Errorf("user has no relationship %q", name)
 	}
+}
+
+func ThenLoadUserSessions(queryMods ...bob.Mod[*dialect.SelectQuery]) mysql.Loader {
+	return mysql.Loader(func(ctx context.Context, exec bob.Executor, retrieved any) error {
+		loader, isLoader := retrieved.(interface {
+			LoadUserSessions(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
+		})
+		if !isLoader {
+			return fmt.Errorf("object %T cannot load UserSessions", retrieved)
+		}
+
+		err := loader.LoadUserSessions(ctx, exec, queryMods...)
+
+		// Don't cause an issue due to missing relationships
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil
+		}
+
+		return err
+	})
+}
+
+// LoadUserSessions loads the user's Sessions into the .R struct
+func (o *User) LoadUserSessions(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if o == nil {
+		return nil
+	}
+
+	// Reset the relationship
+	o.R.Sessions = nil
+
+	related, err := o.Sessions(mods...).All(ctx, exec)
+	if err != nil {
+		return err
+	}
+
+	for _, rel := range related {
+		rel.R.User = o
+	}
+
+	o.R.Sessions = related
+	return nil
+}
+
+// LoadUserSessions loads the user's Sessions into the .R struct
+func (os UserSlice) LoadUserSessions(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if len(os) == 0 {
+		return nil
+	}
+
+	sessions, err := os.Sessions(mods...).All(ctx, exec)
+	if err != nil {
+		return err
+	}
+
+	for _, o := range os {
+		o.R.Sessions = nil
+	}
+
+	for _, o := range os {
+		for _, rel := range sessions {
+			if o.ID != rel.UserID {
+				continue
+			}
+
+			rel.R.User = o
+
+			o.R.Sessions = append(o.R.Sessions, rel)
+		}
+	}
+
+	return nil
 }
 
 func PreloadUserTeam(opts ...mysql.PreloadOption) mysql.Preloader {
@@ -590,6 +724,74 @@ func (os UserSlice) LoadUserTeam(ctx context.Context, exec bob.Executor, mods ..
 			o.R.Team = rel
 			break
 		}
+	}
+
+	return nil
+}
+
+func insertUserSessions0(ctx context.Context, exec bob.Executor, sessions1 []*SessionSetter, user0 *User) (SessionSlice, error) {
+	for i := range sessions1 {
+		sessions1[i].UserID = omit.From(user0.ID)
+	}
+
+	ret, err := Sessions.Insert(bob.ToMods(sessions1...)).All(ctx, exec)
+	if err != nil {
+		return ret, fmt.Errorf("insertUserSessions0: %w", err)
+	}
+
+	return ret, nil
+}
+
+func attachUserSessions0(ctx context.Context, exec bob.Executor, count int, sessions1 SessionSlice, user0 *User) (SessionSlice, error) {
+	setter := &SessionSetter{
+		UserID: omit.From(user0.ID),
+	}
+
+	err := sessions1.UpdateAll(ctx, exec, *setter)
+	if err != nil {
+		return nil, fmt.Errorf("attachUserSessions0: %w", err)
+	}
+
+	return sessions1, nil
+}
+
+func (user0 *User) InsertSessions(ctx context.Context, exec bob.Executor, related ...*SessionSetter) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+
+	sessions1, err := insertUserSessions0(ctx, exec, related, user0)
+	if err != nil {
+		return err
+	}
+
+	user0.R.Sessions = append(user0.R.Sessions, sessions1...)
+
+	for _, rel := range sessions1 {
+		rel.R.User = user0
+	}
+	return nil
+}
+
+func (user0 *User) AttachSessions(ctx context.Context, exec bob.Executor, related ...*Session) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	sessions1 := SessionSlice(related)
+
+	_, err = attachUserSessions0(ctx, exec, len(related), sessions1, user0)
+	if err != nil {
+		return err
+	}
+
+	user0.R.Sessions = append(user0.R.Sessions, sessions1...)
+
+	for _, rel := range related {
+		rel.R.User = user0
 	}
 
 	return nil
