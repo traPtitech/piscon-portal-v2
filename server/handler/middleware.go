@@ -1,12 +1,11 @@
 package handler
 
 import (
-	"database/sql"
 	"errors"
 	"time"
 
 	"github.com/labstack/echo/v4"
-	"github.com/traPtitech/piscon-portal-v2/server/models"
+	"github.com/traPtitech/piscon-portal-v2/server/repository"
 )
 
 func (h *Handler) AuthMiddleware() echo.MiddlewareFunc {
@@ -19,17 +18,16 @@ func (h *Handler) AuthMiddleware() echo.MiddlewareFunc {
 				return internalServerErrorResponse(c, err.Error())
 			}
 
-			session, err := models.Sessions.Query(models.SelectWhere.Sessions.ID.EQ(sessID)).One(ctx, h.db)
+			session, err := h.repo.FindSession(ctx, sessID)
 			if err != nil {
-				if errors.Is(err, sql.ErrNoRows) {
+				if errors.Is(err, repository.ErrNotFound) {
 					return unauthorizedResponse(c, "session not found")
 				}
 				return internalServerErrorResponse(c, err.Error())
 			}
-			if session.ExpiredAt.Before(time.Now()) {
+			if session.ExpiresAt.Before(time.Now()) {
 				// delete expired session
-				_, err := models.Sessions.Delete(models.DeleteWhere.Sessions.ID.EQ(sessID)).Exec(ctx, h.db)
-				if err != nil {
+				if err := h.repo.DeleteSession(ctx, sessID); err != nil {
 					return internalServerErrorResponse(c, err.Error())
 				}
 				return unauthorizedResponse(c, "session expired")

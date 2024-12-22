@@ -8,6 +8,8 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/traPtitech/piscon-portal-v2/server/handler"
+	dbrepo "github.com/traPtitech/piscon-portal-v2/server/repository/db"
+	"github.com/traPtitech/piscon-portal-v2/server/services/oauth2"
 )
 
 func main() {
@@ -31,7 +33,7 @@ func main() {
 	config := handler.Config{
 		RootURL:       os.Getenv("ROOT_URL"),
 		SessionSecret: os.Getenv("SESSION_SECRET"),
-		Oauth2: handler.Oauth2Config{
+		Oauth2: oauth2.Config{
 			Issuer:       "https://q.trap.jp",
 			ClientID:     os.Getenv("CLIENT_ID"),
 			ClientSecret: os.Getenv("CLIENT_SECRET"),
@@ -39,7 +41,8 @@ func main() {
 			TokenURL:     "https://q.trap.jp/api/v3/oauth2/token",
 		},
 	}
-	handler, err := handler.New(db, config)
+	repo := dbrepo.NewRepository(db)
+	handler, err := handler.New(repo, config)
 	if err != nil {
 		panic(err)
 	}

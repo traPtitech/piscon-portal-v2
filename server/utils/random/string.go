@@ -1,12 +1,12 @@
-package handler
+package random
 
 import (
 	"crypto/rand"
 	"encoding/base64"
 )
 
-func generateRandomString(bytes int) string {
+func String(bytes int) string {
 	b := make([]byte, bytes)
-	rand.Read(b)
+	_, _ = rand.Read(b)
 	return base64.RawURLEncoding.EncodeToString(b)
 }

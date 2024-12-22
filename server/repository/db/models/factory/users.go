@@ -12,7 +12,7 @@ import (
 	"github.com/aarondl/opt/omitnull"
 	"github.com/jaswdr/faker/v2"
 	"github.com/stephenafamo/bob"
-	models "github.com/traPtitech/piscon-portal-v2/server/models"
+	models "github.com/traPtitech/piscon-portal-v2/server/repository/db/models"
 )
 
 type UserMod interface {

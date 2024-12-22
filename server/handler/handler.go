@@ -1,44 +1,35 @@
 package handler
 
 import (
-	"database/sql"
 	"strings"
 
 	"github.com/labstack/echo/v4"
-	"github.com/stephenafamo/bob"
+	"github.com/traPtitech/piscon-portal-v2/server/repository"
+	"github.com/traPtitech/piscon-portal-v2/server/services/oauth2"
 )
 
 type Handler struct {
-	db             bob.DB
+	repo           repository.Repository
 	sessionManager *sessionManager
-	oauth2Service  *oauth2Service
+	oauth2Service  *oauth2.Service
 }
 
 type Config struct {
 	RootURL       string
 	Debug         bool
 	SessionSecret string
-	Oauth2        Oauth2Config
+	Oauth2        oauth2.Config
 }
 
-type Oauth2Config struct {
-	Issuer       string
-	ClientID     string
-	ClientSecret string
-	AuthURL      string
-	TokenURL     string
-}
-
-func New(db *sql.DB, config Config) (*Handler, error) {
-	bobDB := bob.NewDB(db)
+func New(repo repository.Repository, config Config) (*Handler, error) {
 	sessionManager := newSessionManager(config.SessionSecret, config.Debug)
 
-	oauth2Service, err := newOauth2Service(config.Oauth2, strings.TrimSuffix(config.RootURL, "/")+"/api/oauth2/callback")
+	oauth2Service, err := oauth2.NewService(config.Oauth2, strings.TrimSuffix(config.RootURL, "/")+"/api/oauth2/callback")
 	if err != nil {
 		return nil, err
 	}
 	return &Handler{
-		db:             bobDB,
+		repo:           repo,
 		sessionManager: sessionManager,
 		oauth2Service:  oauth2Service,
 	}, nil
