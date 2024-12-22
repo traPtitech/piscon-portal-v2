@@ -1,13 +1,27 @@
 version: "3"
 
 tasks:
+  run-server:
+    dotenv:
+      - .env
+    cmds:
+      - go run cmd/server/main.go
+
+  test:
+    deps:
+      - up-test-db
+    cmds:
+      - go test -cover ./...
+
   gen:
     cmds:
       - task: up-db
       - go generate ./...
     sources:
       - openapi/openapi.yml
-      - schema.sql
+      - server/bobgen.yaml
+      - server/ogen.yaml
+      - server/schema.sql
     generates:
       - server/openapi/*.go
       - server/models/**/*.go
@@ -15,3 +29,14 @@ tasks:
   up-db:
     cmds:
       - docker compose up -d --wait db
+
+  up-test-db:
+    cmds:
+      - docker compose down db # stop existing db
+      - docker stop test-db || true
+      - docker run --rm -d --name test-db -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=test -v ./server/schema.sql:/docker-entrypoint-initdb.d/schema.sql --health-cmd "mysqladmin ping -h localhost" -p 3306:3306 mysql:8
+      - sleep 30 # FIXME: wait for db to start
+
+  rm-test-db:
+    cmds:
+      - docker stop test-db || true
