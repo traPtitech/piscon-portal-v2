@@ -4,6 +4,8 @@ tasks:
   run-server:
     dotenv:
       - .env
+    deps:
+      - up-db
     cmds:
       - go run cmd/server/main.go
 
