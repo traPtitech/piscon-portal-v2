@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"strings"
+	"net/url"
 
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
@@ -24,7 +24,11 @@ type Config struct {
 func New(repo repository.Repository, config Config) (*Handler, error) {
 	sessionManager := newSessionManager(config.SessionSecret, config.Debug)
 
-	oauth2Service, err := oauth2.NewService(config.Oauth2, strings.TrimSuffix(config.RootURL, "/")+"/api/oauth2/callback")
+	redirectURI, err := url.JoinPath(config.RootURL, "/api/oauth2/callback")
+	if err != nil {
+		return nil, err
+	}
+	oauth2Service, err := oauth2.NewService(config.Oauth2, redirectURI)
 	if err != nil {
 		return nil, err
 	}
