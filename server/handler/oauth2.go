@@ -60,7 +60,11 @@ func (h *Handler) Oauth2Callback(c echo.Context) error {
 			}
 		}
 
-		// create new session
+		// create new session to prevent session fixation
+		sessionID, err := h.sessionManager.setSessionID(c, 7*24*time.Hour) // max age 1 week
+		if err != nil {
+			return err
+		}
 		session := domain.NewSession(sessionID, user.ID, time.Now().Add(7*24*time.Hour))
 		err = r.CreateSession(ctx, session)
 		if err != nil {
