@@ -17,6 +17,7 @@ require (
 	github.com/labstack/echo/v4 v4.13.2
 	github.com/ogen-go/ogen v1.8.1
 	github.com/stephenafamo/bob v0.29.0
+	go.uber.org/mock v0.5.0
 	golang.org/x/oauth2 v0.24.0
 )
 

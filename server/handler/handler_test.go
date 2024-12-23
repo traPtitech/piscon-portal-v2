@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha256"
-	"database/sql"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -18,46 +17,31 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/jellydator/ttlcache/v3"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/piscon-portal-v2/server/handler"
+	"github.com/traPtitech/piscon-portal-v2/server/repository"
+	"github.com/traPtitech/piscon-portal-v2/server/services/oauth2"
 )
 
 const Oauth2ServerURL = "http://localhost:9000"
 
-var (
-	ServerURL string
-
-	db     *sql.DB
-	server *httptest.Server
-)
-
 func TestMain(m *testing.M) {
-	var err error
-	db, err = sql.Open("mysql", "root:password@tcp(localhost:3306)/test?parseTime=true")
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-
 	oauth2Server := newOauth2Server()
 	defer oauth2Server.Close()
-
-	server = newPortalServer()
-	defer server.Close()
 
 	m.Run()
 }
 
-func newPortalServer() *httptest.Server {
+func newPortalServer(repo repository.Repository) *httptest.Server {
 	e := echo.New()
 	server := httptest.NewTLSServer(e)
-	ServerURL = server.URL
 
 	config := handler.Config{
 		RootURL:       server.URL,
 		SessionSecret: "secret",
-		Oauth2: handler.Oauth2Config{
+		Oauth2: oauth2.Config{
 			Issuer:       Oauth2ServerURL,
 			ClientID:     "client-id",
 			ClientSecret: "client-secret",
@@ -65,7 +49,7 @@ func newPortalServer() *httptest.Server {
 			TokenURL:     Oauth2ServerURL + "/token",
 		},
 	}
-	h, err := handler.New(db, config)
+	h, err := handler.New(repo, config)
 	if err != nil {
 		panic(err)
 	}
@@ -75,7 +59,7 @@ func newPortalServer() *httptest.Server {
 	return server
 }
 
-func NewClient() *http.Client {
+func NewClient(server *httptest.Server) *http.Client {
 	jar, _ := cookiejar.New(nil)
 	client := &http.Client{
 		Transport: server.Client().Transport,
@@ -84,7 +68,7 @@ func NewClient() *http.Client {
 	return client
 }
 
-func Login(t *testing.T, client *http.Client, userName string) error {
+func Login(t *testing.T, server *httptest.Server, client *http.Client, userID string) error {
 	t.Helper()
 
 	// not following redirect for the first request
@@ -106,7 +90,7 @@ func Login(t *testing.T, client *http.Client, userName string) error {
 	// set username for testing
 	authURL, _ := url.Parse(codeRes.Header.Get("Location"))
 	q := authURL.Query()
-	q.Add("user", userName)
+	q.Add("user", userID)
 	authURL.RawQuery = q.Encode()
 
 	// from here, follow redirect
@@ -125,6 +109,14 @@ func Login(t *testing.T, client *http.Client, userName string) error {
 	}
 
 	return nil
+}
+
+func joinPath(base, path string) string {
+	res, err := url.JoinPath(base, path)
+	if err != nil {
+		panic(err)
+	}
+	return res
 }
 
 type oauth2Server struct {
@@ -194,12 +186,12 @@ func (s *oauth2Server) handleToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var userName string
+	var userID string
 	user, found := s.userMap.GetAndDelete(code)
 	if !found {
-		userName = "test-user"
+		userID = uuid.NewString()
 	} else {
-		userName = user.Value()
+		userID = user.Value()
 	}
 
 	claims := struct {
@@ -208,11 +200,11 @@ func (s *oauth2Server) handleToken(w http.ResponseWriter, r *http.Request) {
 	}{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    s.rootURL,
-			Subject:   userName,
+			Subject:   userID,
 			Audience:  []string{"client-id"},
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
 		},
-		Name: userName,
+		Name: "test-user",
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	idToken, err := token.SignedString(s.key)

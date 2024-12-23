@@ -4,36 +4,77 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 
-	"github.com/aarondl/opt/omit"
-	"github.com/stephenafamo/bob"
-	"github.com/stephenafamo/bob/dialect/mysql"
-	"github.com/stephenafamo/bob/dialect/mysql/sm"
-	"github.com/traPtitech/piscon-portal-v2/server/models"
+	"github.com/google/uuid"
+	"github.com/traPtitech/piscon-portal-v2/server/domain"
+	"github.com/traPtitech/piscon-portal-v2/server/repository"
+	"github.com/traPtitech/piscon-portal-v2/server/repository/mock"
+	"go.uber.org/mock/gomock"
 )
 
-func TestAuthorize(t *testing.T) {
-	client := NewClient()
-	userName := t.Name()
+func TestLogin(t *testing.T) {
+	ctrl := gomock.NewController(t)
 
-	// login and create user
-	if err := Login(t, client, userName); err != nil {
+	mockRepo := mock.NewMockRepository(ctrl)
+
+	server := newPortalServer(mockRepo)
+	client := NewClient(server)
+	userID := uuid.NewString()
+
+	testFirstLogin(t, mockRepo, server, client, userID)
+}
+
+func TestLoginAsExistingUser(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	mockRepo := mock.NewMockRepository(ctrl)
+
+	server := newPortalServer(mockRepo)
+	client := NewClient(server)
+	userID := uuid.NewString()
+
+	// user already exists, so only create session
+	mockRepo.EXPECT().Transaction(gomock.Any(), gomock.Any()).
+		DoAndReturn(func(ctx context.Context, f func(context.Context, repository.Repository) error) error {
+			return f(ctx, mockRepo)
+		})
+	mockRepo.EXPECT().FindUser(gomock.Any(), gomock.Any()).Return(domain.User{ID: userID}, nil)
+	mockRepo.EXPECT().
+		CreateSession(gomock.Any(), gomock.Cond(func(s domain.Session) bool { return s.UserID == userID })).
+		Return(nil)
+
+	if err := Login(t, server, client, userID); err != nil {
 		t.FailNow()
 	}
+}
 
-	// check if the user is created
-	exists, err := models.Users.Query(models.SelectWhere.Users.Name.EQ(userName)).Exists(context.TODO(), bob.NewDB(db))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !exists {
-		t.Fatal("user not created")
-	}
+func TestLogout(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	mockRepo := mock.NewMockRepository(ctrl)
+
+	server := newPortalServer(mockRepo)
+	client := NewClient(server)
+	userID := uuid.NewString()
+
+	testFirstLogin(t, mockRepo, server, client, userID)
 
 	// logout
-	res, err := client.Post(ServerURL+"/api/oauth2/logout", "", nil)
+	// return not expired session
+	mockRepo.EXPECT().FindSession(gomock.Any(), gomock.Any()).
+		DoAndReturn(func(ctx context.Context, sid string) (domain.Session, error) {
+			return domain.Session{
+				ID:        sid,
+				UserID:    userID,
+				ExpiresAt: time.Now().Add(time.Hour),
+			}, nil
+		})
+	mockRepo.EXPECT().DeleteSession(gomock.Any(), gomock.Any()).Return(nil)
+
+	res, err := client.Post(joinPath(server.URL, "/api/oauth2/logout"), "", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -41,55 +82,78 @@ func TestAuthorize(t *testing.T) {
 		msg, _ := io.ReadAll(res.Body)
 		t.Fatalf("status code is %d: %s", res.StatusCode, msg)
 	}
+}
 
-	// logout after logout should be unauthorized
-	res, err = client.Post(server.URL+"/api/oauth2/logout", "", nil)
+func TestUnauthorizedLogout(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	mockRepo := mock.NewMockRepository(ctrl)
+
+	server := newPortalServer(mockRepo)
+	client := NewClient(server)
+
+	mockRepo.EXPECT().FindSession(gomock.Any(), gomock.Any()).Return(domain.Session{}, repository.ErrNotFound)
+
+	res, err := client.Post(joinPath(server.URL, "/api/oauth2/logout"), "", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if res.StatusCode != http.StatusUnauthorized {
 		msg, _ := io.ReadAll(res.Body)
 		t.Fatalf("status code is %d: %s", res.StatusCode, msg)
-	}
-
-	// login again
-	if err := Login(t, client, userName); err != nil {
-		t.FailNow()
 	}
 }
 
 func TestExpiredSession(t *testing.T) {
-	client := NewClient()
-	userName := t.Name()
+	ctrl := gomock.NewController(t)
 
-	if err := Login(t, client, userName); err != nil {
-		t.FailNow()
-	}
-	// get session id
-	session, err := models.Sessions.Query(
-		models.SelectJoins.Sessions.InnerJoin.User(context.Background()),
-		sm.Where(mysql.Quote("users", "name").EQ(mysql.S(userName))),
-	).One(context.TODO(), bob.NewDB(db))
-	if err != nil {
-		t.Fatal(err)
-	}
+	mockRepo := mock.NewMockRepository(ctrl)
 
-	// update expiredAt to past
-	_, err = models.Sessions.Update(
-		models.UpdateWhere.Sessions.ID.EQ(session.ID),
-		models.SessionSetter{ExpiredAt: omit.From(time.Now().Add(-time.Hour))}.UpdateMod(),
-	).Exec(context.Background(), bob.NewDB(db))
-	if err != nil {
-		t.Fatal(err)
-	}
+	server := newPortalServer(mockRepo)
 
-	// now, logout should be unauthorized
-	res, err := client.Post(server.URL+"/api/oauth2/logout", "", nil)
+	client := NewClient(server)
+	userID := uuid.NewString()
+
+	testFirstLogin(t, mockRepo, server, client, userID)
+
+	// logout
+	// return expired session
+	mockRepo.EXPECT().FindSession(gomock.Any(), gomock.Any()).
+		DoAndReturn(func(ctx context.Context, sid string) (domain.Session, error) {
+			return domain.Session{
+				ID:        sid,
+				UserID:    userID,
+				ExpiresAt: time.Now().Add(-time.Hour),
+			}, nil
+		})
+	// expired session should be deleted
+	mockRepo.EXPECT().DeleteSession(gomock.Any(), gomock.Any()).Return(nil)
+
+	res, err := client.Post(joinPath(server.URL, "/api/oauth2/logout"), "", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if res.StatusCode != http.StatusUnauthorized {
 		msg, _ := io.ReadAll(res.Body)
 		t.Fatalf("status code is %d: %s", res.StatusCode, msg)
+	}
+}
+
+func testFirstLogin(t *testing.T, mockRepo *mock.MockRepository, server *httptest.Server, client *http.Client, userID string) {
+	// create user and session
+	mockRepo.EXPECT().Transaction(gomock.Any(), gomock.Any()).
+		DoAndReturn(func(ctx context.Context, f func(context.Context, repository.Repository) error) error {
+			return f(ctx, mockRepo)
+		})
+	mockRepo.EXPECT().FindUser(gomock.Any(), gomock.Eq(userID)).Return(domain.User{}, repository.ErrNotFound)
+	mockRepo.EXPECT().
+		CreateUser(gomock.Any(), gomock.Cond(func(u domain.User) bool { return u.ID == userID })).
+		Return(nil)
+	mockRepo.EXPECT().
+		CreateSession(gomock.Any(), gomock.Cond(func(s domain.Session) bool { return s.UserID == userID })).
+		Return(nil)
+
+	if err := Login(t, server, client, userID); err != nil {
+		t.FailNow()
 	}
 }
