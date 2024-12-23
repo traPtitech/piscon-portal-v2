@@ -6,7 +6,7 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
-	"github.com/traPtitech/piscon-portal-v2/server/utils/random"
+	"github.com/traPtitech/piscon-portal-v2/server/domain"
 )
 
 type sessionManager struct {
@@ -48,7 +48,7 @@ func (sm *sessionManager) setSessionID(c echo.Context, maxAge time.Duration) (st
 	if err != nil {
 		return "", err
 	}
-	sessID := random.String(32)
+	sessID := domain.NewSessionID()
 	sess.Values["session_id"] = sessID
 	sess.Options = &sessions.Options{
 		Path:     "/",
