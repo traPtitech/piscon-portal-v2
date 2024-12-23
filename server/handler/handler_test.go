@@ -23,6 +23,7 @@ import (
 	"github.com/traPtitech/piscon-portal-v2/server/handler"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
 	"github.com/traPtitech/piscon-portal-v2/server/services/oauth2"
+	"github.com/traPtitech/piscon-portal-v2/server/utils/random"
 )
 
 const Oauth2ServerURL = "http://localhost:9000"
@@ -159,7 +160,7 @@ func (s *oauth2Server) handleAuthorize(w http.ResponseWriter, r *http.Request) {
 	codeChallenge := q.Get("code_challenge")
 	state := q.Get("state")
 
-	code := randomString()
+	code := random.String(32)
 
 	s.codeChallengeMap.Set(code, codeChallenge, 15*time.Minute)
 	// use user params as username for testing
@@ -256,10 +257,4 @@ func (s *oauth2Server) handleJWKS(w http.ResponseWriter, _ *http.Request) {
 			},
 		},
 	})
-}
-
-func randomString() string {
-	b := make([]byte, 32)
-	rand.Read(b)
-	return base64.RawURLEncoding.EncodeToString(b)
 }
