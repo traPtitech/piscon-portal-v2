@@ -15,6 +15,7 @@ type sessionManager struct {
 }
 
 const sessionName = "picon-portal-v2-session"
+const sessionIDKey = "session_id"
 
 func newSessionManager(secret string, debug bool) *sessionManager {
 	return &sessionManager{
@@ -36,7 +37,7 @@ func (sm *sessionManager) getSessionID(c echo.Context) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	sessID, ok := sess.Values["session_id"].(string)
+	sessID, ok := sess.Values[sessionIDKey].(string)
 	if !ok {
 		return "", nil
 	}
@@ -49,7 +50,7 @@ func (sm *sessionManager) setSessionID(c echo.Context, maxAge time.Duration) (st
 		return "", err
 	}
 	sessID := domain.NewSessionID()
-	sess.Values["session_id"] = sessID
+	sess.Values[sessionIDKey] = sessID
 	sess.Options = &sessions.Options{
 		Path:     "/",
 		MaxAge:   int(maxAge.Milliseconds() / 1000),
@@ -67,6 +68,6 @@ func (sm *sessionManager) clearSessionID(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	delete(sess.Values, "session_id")
+	delete(sess.Values, sessionIDKey)
 	return sess.Save(c.Request(), c.Response())
 }
