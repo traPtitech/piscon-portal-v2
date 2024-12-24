@@ -30,6 +30,6 @@ tasks:
     cmds:
       - docker compose up -d --wait db
 
-  rm-test-db:
+  down-db:
     cmds:
-      - docker stop test-db || true
+      - docker compose down db
