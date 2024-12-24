@@ -77,7 +77,7 @@ func Login(t *testing.T, server *httptest.Server, client *http.Client, userID st
 		return http.ErrUseLastResponse
 	}
 
-	codeRes, err := client.Get(server.URL + "/api/oauth2/code")
+	codeRes, err := client.Get(joinPath(t, server.URL, "/api/oauth2/code"))
 	if err != nil {
 		t.Error(err)
 		return err
@@ -89,7 +89,11 @@ func Login(t *testing.T, server *httptest.Server, client *http.Client, userID st
 		return errors.New(msg)
 	}
 	// set username for testing
-	authURL, _ := url.Parse(codeRes.Header.Get("Location"))
+	authURL, err := url.Parse(codeRes.Header.Get("Location"))
+	if err != nil {
+		t.Error(err)
+		return err
+	}
 	q := authURL.Query()
 	q.Add("user", userID)
 	authURL.RawQuery = q.Encode()
@@ -112,10 +116,11 @@ func Login(t *testing.T, server *httptest.Server, client *http.Client, userID st
 	return nil
 }
 
-func joinPath(base, path string) string {
+func joinPath(t *testing.T, base, path string) string {
+	t.Helper()
 	res, err := url.JoinPath(base, path)
 	if err != nil {
-		panic(err)
+		t.Fatal(err)
 	}
 	return res
 }

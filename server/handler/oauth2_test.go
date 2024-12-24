@@ -74,7 +74,7 @@ func TestLogout(t *testing.T) {
 		})
 	mockRepo.EXPECT().DeleteSession(gomock.Any(), gomock.Any()).Return(nil)
 
-	res, err := client.Post(joinPath(server.URL, "/api/oauth2/logout"), "", nil)
+	res, err := client.Post(joinPath(t, server.URL, "/api/oauth2/logout"), "", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,7 +94,7 @@ func TestUnauthorizedLogout(t *testing.T) {
 
 	mockRepo.EXPECT().FindSession(gomock.Any(), gomock.Any()).Return(domain.Session{}, repository.ErrNotFound)
 
-	res, err := client.Post(joinPath(server.URL, "/api/oauth2/logout"), "", nil)
+	res, err := client.Post(joinPath(t, server.URL, "/api/oauth2/logout"), "", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -129,7 +129,7 @@ func TestExpiredSession(t *testing.T) {
 	// expired session should be deleted
 	mockRepo.EXPECT().DeleteSession(gomock.Any(), gomock.Any()).Return(nil)
 
-	res, err := client.Post(joinPath(server.URL, "/api/oauth2/logout"), "", nil)
+	res, err := client.Post(joinPath(t, server.URL, "/api/oauth2/logout"), "", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
