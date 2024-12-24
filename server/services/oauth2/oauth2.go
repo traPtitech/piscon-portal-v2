@@ -44,8 +44,12 @@ func NewService(config Config, redirectURL string) (*Service, error) {
 	}
 	verifier := provider.Verifier(&oidc.Config{ClientID: config.ClientID})
 
-	stateStorage := ttlcache.New[string, string]()
-	codeVerifierStorage := ttlcache.New[string, string]()
+	stateStorage := ttlcache.New(
+		ttlcache.WithTTL[string, string](15 * time.Minute),
+	)
+	codeVerifierStorage := ttlcache.New(
+		ttlcache.WithTTL[string, string](15 * time.Minute),
+	)
 	go stateStorage.Start()
 	go codeVerifierStorage.Start()
 
@@ -59,10 +63,10 @@ func NewService(config Config, redirectURL string) (*Service, error) {
 }
 
 func (s *Service) AuthCodeURL(sessionID string, state string) string {
-	s.stateStorage.Set(sessionID, state, 15*time.Minute)
+	s.stateStorage.Set(sessionID, state, ttlcache.DefaultTTL)
 
 	codeVerifier := oauth2.GenerateVerifier()
-	s.codeVerifierStorage.Set(sessionID, codeVerifier, 15*time.Minute)
+	s.codeVerifierStorage.Set(sessionID, codeVerifier, ttlcache.DefaultTTL)
 
 	return s.config.AuthCodeURL(state, oauth2.S256ChallengeOption(codeVerifier))
 }
