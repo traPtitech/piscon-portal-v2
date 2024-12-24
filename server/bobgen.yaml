@@ -1,5 +1,6 @@
 wipe: true
+no_tests: true
 
 mysql:
   dsn: root:password@tcp(127.0.0.1:3306)/portal
-  output: models
+  output: repository/db/models

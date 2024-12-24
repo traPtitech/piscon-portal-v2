@@ -15,17 +15,26 @@ import (
 )
 
 var TableNames = struct {
-	Teams string
-	Users string
+	Sessions string
+	Teams    string
+	Users    string
 }{
-	Teams: "teams",
-	Users: "users",
+	Sessions: "sessions",
+	Teams:    "teams",
+	Users:    "users",
 }
 
 var ColumnNames = struct {
-	Teams teamColumnNames
-	Users userColumnNames
+	Sessions sessionColumnNames
+	Teams    teamColumnNames
+	Users    userColumnNames
 }{
+	Sessions: sessionColumnNames{
+		ID:        "id",
+		UserID:    "user_id",
+		CreatedAt: "created_at",
+		ExpiredAt: "expired_at",
+	},
 	Teams: teamColumnNames{
 		ID:        "id",
 		Name:      "name",
@@ -46,15 +55,18 @@ var (
 )
 
 func Where[Q mysql.Filterable]() struct {
-	Teams teamWhere[Q]
-	Users userWhere[Q]
+	Sessions sessionWhere[Q]
+	Teams    teamWhere[Q]
+	Users    userWhere[Q]
 } {
 	return struct {
-		Teams teamWhere[Q]
-		Users userWhere[Q]
+		Sessions sessionWhere[Q]
+		Teams    teamWhere[Q]
+		Users    userWhere[Q]
 	}{
-		Teams: buildTeamWhere[Q](TeamColumns),
-		Users: buildUserWhere[Q](UserColumns),
+		Sessions: buildSessionWhere[Q](SessionColumns),
+		Teams:    buildTeamWhere[Q](TeamColumns),
+		Users:    buildUserWhere[Q](UserColumns),
 	}
 }
 
@@ -79,8 +91,9 @@ func (j joinSet[Q]) AliasedAs(alias string) joinSet[Q] {
 }
 
 type joins[Q dialect.Joinable] struct {
-	Teams joinSet[teamJoins[Q]]
-	Users joinSet[userJoins[Q]]
+	Sessions joinSet[sessionJoins[Q]]
+	Teams    joinSet[teamJoins[Q]]
+	Users    joinSet[userJoins[Q]]
 }
 
 func buildJoinSet[Q interface{ aliasedAs(string) Q }, C any, F func(C, string) Q](c C, f F) joinSet[Q] {
@@ -93,8 +106,9 @@ func buildJoinSet[Q interface{ aliasedAs(string) Q }, C any, F func(C, string) Q
 
 func getJoins[Q dialect.Joinable]() joins[Q] {
 	return joins[Q]{
-		Teams: buildJoinSet[teamJoins[Q]](TeamColumns, buildTeamJoins),
-		Users: buildJoinSet[userJoins[Q]](UserColumns, buildUserJoins),
+		Sessions: buildJoinSet[sessionJoins[Q]](SessionColumns, buildSessionJoins),
+		Teams:    buildJoinSet[teamJoins[Q]](TeamColumns, buildTeamJoins),
+		Users:    buildJoinSet[userJoins[Q]](UserColumns, buildUserJoins),
 	}
 }
 

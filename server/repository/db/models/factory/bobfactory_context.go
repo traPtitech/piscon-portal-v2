@@ -6,14 +6,15 @@ package factory
 import (
 	"context"
 
-	models "github.com/traPtitech/piscon-portal-v2/server/models"
+	models "github.com/traPtitech/piscon-portal-v2/server/repository/db/models"
 )
 
 type contextKey string
 
 var (
-	teamCtx = newContextual[*models.Team]("team")
-	userCtx = newContextual[*models.User]("user")
+	sessionCtx = newContextual[*models.Session]("session")
+	teamCtx    = newContextual[*models.Team]("team")
+	userCtx    = newContextual[*models.User]("user")
 )
 
 // Contextual is a convienience wrapper around context.WithValue and context.Value
