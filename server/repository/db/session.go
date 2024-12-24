@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/aarondl/opt/omit"
 	"github.com/stephenafamo/bob"
@@ -42,7 +43,7 @@ func findSession(ctx context.Context, executor bob.Executor, id string) (domain.
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Session{}, repository.ErrNotFound
 		}
-		return domain.Session{}, err
+		return domain.Session{}, fmt.Errorf("find session: %w", err)
 	}
 
 	return toDomainSession(session), nil
@@ -54,12 +55,18 @@ func createSession(ctx context.Context, executor bob.Executor, session domain.Se
 		UserID:    omit.From(session.UserID),
 		ExpiredAt: omit.From(session.ExpiresAt),
 	}).Exec(ctx, executor)
-	return err
+	if err != nil {
+		return fmt.Errorf("create session: %w", err)
+	}
+	return nil
 }
 
 func deleteSession(ctx context.Context, executor bob.Executor, id string) error {
 	_, err := models.Sessions.Delete(models.DeleteWhere.Sessions.ID.EQ(id)).Exec(ctx, executor)
-	return err
+	if err != nil {
+		return fmt.Errorf("delete session: %w", err)
+	}
+	return nil
 }
 
 func toDomainSession(session *models.Session) domain.Session {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/aarondl/opt/omit"
 	"github.com/stephenafamo/bob"
@@ -34,7 +35,7 @@ func findUser(ctx context.Context, executor bob.Executor, id string) (domain.Use
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.User{}, repository.ErrNotFound
 		}
-		return domain.User{}, err
+		return domain.User{}, fmt.Errorf("find user: %w", err)
 	}
 
 	return toDomainUser(user), nil
@@ -45,7 +46,10 @@ func createUser(ctx context.Context, executor bob.Executor, user domain.User) er
 		ID:   omit.From(user.ID),
 		Name: omit.From(user.Name),
 	}).Exec(ctx, executor)
-	return err
+	if err != nil {
+		return fmt.Errorf("create user: %w", err)
+	}
+	return nil
 }
 
 func toDomainUser(user *models.User) domain.User {
