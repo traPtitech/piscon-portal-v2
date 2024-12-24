@@ -11,7 +11,7 @@ tasks:
 
   test:
     cmds:
-      - go test -cover ./...
+      - go test -cover -race ./...
 
   gen:
     cmds:
