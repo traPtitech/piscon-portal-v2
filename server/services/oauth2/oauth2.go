@@ -88,22 +88,22 @@ type TraQUserInfo struct {
 	Name string `json:"name"`
 }
 
-func (s *Service) GetUserInfo(ctx context.Context, token *oauth2.Token) (TraQUserInfo, error) {
+func (s *Service) GetUserInfo(ctx context.Context, token *oauth2.Token) (*TraQUserInfo, error) {
 	rawIDToken, ok := token.Extra("id_token").(string)
 	if !ok {
-		return TraQUserInfo{}, errors.New("missing id_token")
+		return nil, errors.New("missing id_token")
 	}
 	idToken, err := s.verifier.Verify(ctx, rawIDToken)
 	if err != nil {
-		return TraQUserInfo{}, err
+		return nil, err
 	}
 
 	// traQ returns username in "name" claim
 	// ref: https://github.com/traPtitech/traQ/blob/v3.21.0/service/oidc/userinfo.go#L57
 	var info TraQUserInfo
 	if err := idToken.Claims(&info); err != nil {
-		return TraQUserInfo{}, err
+		return nil, err
 	}
 
-	return info, nil
+	return &info, nil
 }
