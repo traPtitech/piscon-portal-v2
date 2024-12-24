@@ -16,4 +16,5 @@ SESSION_SECRET=secret
 CLIENT_ID=my-client-id
 CLIENT_SECRET=my-client-secret
 ```
-`task run-server` で portal server が起動します。
+traQで作成するClientは リダイレクトURL に `http://localhost:8080/api/oauth2/callback`、スコープに `openid`, `profile` を指定します。
+`task run-server` で portal server が 8080番 ポートで起動します。
