@@ -15,7 +15,7 @@ import (
 func (h *Handler) GetOauth2Code(c echo.Context) error {
 	sessID, err := h.sessionManager.setSessionID(c, 7*24*time.Hour) // max age 1 week
 	if err != nil {
-		return internalServerErrorResponse(c, err.Error())
+		return internalServerErrorResponse(c, err)
 	}
 
 	state := random.String(16)
@@ -29,7 +29,7 @@ func (h *Handler) Oauth2Callback(c echo.Context) error {
 
 	sessionID, err := h.sessionManager.getSessionID(c)
 	if err != nil {
-		return internalServerErrorResponse(c, err.Error())
+		return internalServerErrorResponse(c, err)
 	}
 
 	code := c.QueryParam("code")
@@ -40,11 +40,12 @@ func (h *Handler) Oauth2Callback(c echo.Context) error {
 
 	token, err := h.oauth2Service.Exchange(ctx, sessionID, code)
 	if err != nil {
-		return internalServerErrorResponse(c, err.Error())
+		return internalServerErrorResponse(c, err)
 	}
 	userInfo, err := h.oauth2Service.GetUserInfo(ctx, token)
 	if err != nil {
-		return c.String(http.StatusBadRequest, err.Error())
+		c.Logger().Warn(err)
+		return c.String(http.StatusBadRequest, "invalid token")
 	}
 
 	err = h.repo.Transaction(ctx, func(ctx context.Context, r repository.Repository) error {
@@ -74,7 +75,7 @@ func (h *Handler) Oauth2Callback(c echo.Context) error {
 		return nil
 	})
 	if err != nil {
-		return internalServerErrorResponse(c, err.Error())
+		return internalServerErrorResponse(c, err)
 	}
 
 	return c.Redirect(http.StatusSeeOther, "/")
@@ -85,17 +86,17 @@ func (h *Handler) Logout(c echo.Context) error {
 
 	sessID, err := h.sessionManager.getSessionID(c)
 	if err != nil {
-		return internalServerErrorResponse(c, err.Error())
+		return internalServerErrorResponse(c, err)
 	}
 
 	// delete sessionID
 	err = h.repo.DeleteSession(ctx, sessID)
 	if err != nil {
-		return internalServerErrorResponse(c, err.Error())
+		return internalServerErrorResponse(c, err)
 	}
 
 	if err := h.sessionManager.clearSessionID(c); err != nil {
-		return internalServerErrorResponse(c, err.Error())
+		return internalServerErrorResponse(c, err)
 	}
 
 	return c.NoContent(http.StatusOK)

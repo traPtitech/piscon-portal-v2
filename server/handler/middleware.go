@@ -15,7 +15,7 @@ func (h *Handler) AuthMiddleware() echo.MiddlewareFunc {
 
 			sessID, err := h.sessionManager.getSessionID(c)
 			if err != nil {
-				return internalServerErrorResponse(c, err.Error())
+				return internalServerErrorResponse(c, err)
 			}
 
 			session, err := h.repo.FindSession(ctx, sessID)
@@ -23,12 +23,12 @@ func (h *Handler) AuthMiddleware() echo.MiddlewareFunc {
 				if errors.Is(err, repository.ErrNotFound) {
 					return unauthorizedResponse(c, "session not found")
 				}
-				return internalServerErrorResponse(c, err.Error())
+				return internalServerErrorResponse(c, err)
 			}
 			if session.ExpiresAt.Before(time.Now()) {
 				// delete expired session
 				if err := h.repo.DeleteSession(ctx, sessID); err != nil {
-					return internalServerErrorResponse(c, err.Error())
+					return internalServerErrorResponse(c, err)
 				}
 				return unauthorizedResponse(c, "session expired")
 			}
