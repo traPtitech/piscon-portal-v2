@@ -391,13 +391,13 @@ paths:
       description: "指定したインスタンスに向けてベンチマークを実行します"
       operationId: "postBenchmark"
       security:
-        - UserAuth: []
+        - TeamAuth:: []
       requestBody:
         required: true
         $ref: "#/components/requestBodies/NewBenchmark"
       responses:
         201:
-          description: "ベンチマークの実行に成功"
+          description: "ベンチマークの実行(enqueue)に成功"
           content:
             application/json:
               schema:
@@ -410,6 +410,8 @@ paths:
                 $ref: "#/components/schemas/ErrorBadRequest"
         401:
           $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
         500:
           $ref: "#/components/responses/InternalServerError"
 
