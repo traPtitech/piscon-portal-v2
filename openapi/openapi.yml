@@ -421,12 +421,7 @@ paths:
       security:
         - AdminAuth: []
       parameters:
-        - name: "status"
-          in: "query"
-          description: "ベンチマークのステータス。指定が無い場合は全て"
-          required: false
-          schema:
-            $ref: "#/components/schemas/BenchmarkStatus"
+        - $ref: "#/components/parameters/benchmarkStatus"
       responses:
         200:
           description: "ベンチマーク一覧の取得に成功"
@@ -464,6 +459,36 @@ paths:
                   $ref: "#/components/schemas/Benchmark"
         401:
           $ref: "#/components/responses/Unauthorized"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /teams/{teamId}/benchmarks:
+    get:
+      tags: ["benchmark"]
+      summary: "チームのベンチマーク一覧取得"
+      description: "チームのベンチマーク一覧を取得します"
+      operationId: "getTeamBenchmarks"
+      security:
+        - TeamAuth: []
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/teamId"
+        - $ref: "#/components/parameters/benchmarkStatus"
+      responses:
+        200:
+          description: "チームのベンチマーク一覧の取得に成功"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Benchmark"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
         500:
           $ref: "#/components/responses/InternalServerError"
 
@@ -529,6 +554,13 @@ components:
       required: true
       schema:
         $ref: "#/components/schemas/InstanceId"
+    benchmarkStatus:
+      name: "status"
+      in: "query"
+      description: "ベンチマークのステータス。指定が無い場合は全て"
+      required: false
+      schema:
+        $ref: "#/components/schemas/BenchmarkStatus"
 
   schemas:
     InstanceId:
