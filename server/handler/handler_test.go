@@ -35,7 +35,7 @@ func TestMain(m *testing.M) {
 	m.Run()
 }
 
-func newPortalServer(repo repository.Repository) *httptest.Server {
+func NewPortalServer(repo repository.Repository) *httptest.Server {
 	e := echo.New()
 	server := httptest.NewTLSServer(e)
 
@@ -58,6 +58,28 @@ func newPortalServer(repo repository.Repository) *httptest.Server {
 	h.SetupRoutes(e)
 
 	return server
+}
+
+// NewHandler returns a new handler for middleware testing.
+func NewHandler(repo repository.Repository, sessionManager handler.SessionManager) *handler.Handler {
+	config := handler.Config{
+		RootURL:       "http://localhost",
+		SessionSecret: "secret",
+		Oauth2: oauth2.Config{
+			Issuer:       Oauth2ServerURL,
+			ClientID:     "client-id",
+			ClientSecret: "client-secret",
+			AuthURL:      Oauth2ServerURL + "/authorize",
+			TokenURL:     Oauth2ServerURL + "/token",
+		},
+		SessionManager: sessionManager,
+	}
+	h, err := handler.New(repo, config)
+	if err != nil {
+		panic(err)
+	}
+
+	return h
 }
 
 func NewClient(server *httptest.Server) *http.Client {

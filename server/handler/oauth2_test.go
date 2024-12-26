@@ -20,7 +20,7 @@ func TestLogin(t *testing.T) {
 
 	mockRepo := mock.NewMockRepository(ctrl)
 
-	server := newPortalServer(mockRepo)
+	server := NewPortalServer(mockRepo)
 	client := NewClient(server)
 	userID := uuid.NewString()
 
@@ -32,7 +32,7 @@ func TestLoginAsExistingUser(t *testing.T) {
 
 	mockRepo := mock.NewMockRepository(ctrl)
 
-	server := newPortalServer(mockRepo)
+	server := NewPortalServer(mockRepo)
 	client := NewClient(server)
 	userID := uuid.NewString()
 
@@ -56,7 +56,7 @@ func TestLogout(t *testing.T) {
 
 	mockRepo := mock.NewMockRepository(ctrl)
 
-	server := newPortalServer(mockRepo)
+	server := NewPortalServer(mockRepo)
 	client := NewClient(server)
 	userID := uuid.NewString()
 
@@ -79,61 +79,6 @@ func TestLogout(t *testing.T) {
 		t.Fatal(err)
 	}
 	if res.StatusCode != http.StatusOK {
-		msg, _ := io.ReadAll(res.Body)
-		t.Fatalf("status code is %d: %s", res.StatusCode, msg)
-	}
-}
-
-func TestUnauthorizedLogout(t *testing.T) {
-	ctrl := gomock.NewController(t)
-
-	mockRepo := mock.NewMockRepository(ctrl)
-
-	server := newPortalServer(mockRepo)
-	client := NewClient(server)
-
-	mockRepo.EXPECT().FindSession(gomock.Any(), gomock.Any()).Return(domain.Session{}, repository.ErrNotFound)
-
-	res, err := client.Post(joinPath(t, server.URL, "/api/oauth2/logout"), "", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if res.StatusCode != http.StatusUnauthorized {
-		msg, _ := io.ReadAll(res.Body)
-		t.Fatalf("status code is %d: %s", res.StatusCode, msg)
-	}
-}
-
-func TestExpiredSession(t *testing.T) {
-	ctrl := gomock.NewController(t)
-
-	mockRepo := mock.NewMockRepository(ctrl)
-
-	server := newPortalServer(mockRepo)
-
-	client := NewClient(server)
-	userID := uuid.NewString()
-
-	testFirstLogin(t, mockRepo, server, client, userID)
-
-	// logout
-	// return expired session
-	mockRepo.EXPECT().FindSession(gomock.Any(), gomock.Any()).
-		DoAndReturn(func(ctx context.Context, sid string) (domain.Session, error) {
-			return domain.Session{
-				ID:        sid,
-				UserID:    userID,
-				ExpiresAt: time.Now().Add(-time.Hour),
-			}, nil
-		})
-	// expired session should be deleted
-	mockRepo.EXPECT().DeleteSession(gomock.Any(), gomock.Any()).Return(nil)
-
-	res, err := client.Post(joinPath(t, server.URL, "/api/oauth2/logout"), "", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if res.StatusCode != http.StatusUnauthorized {
 		msg, _ := io.ReadAll(res.Body)
 		t.Fatalf("status code is %d: %s", res.StatusCode, msg)
 	}
