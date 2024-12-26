@@ -764,6 +764,11 @@ components:
       description: "ベンチマークの実行終了日時"
       example: "2021-01-01T00:01:00Z"
 
+    Score:
+      type: "number"
+      example: 100
+      description: "ベンチマークのスコア"
+
     Benchmark:
       type: "object"
       description: "ベンチマーク"
@@ -779,9 +784,7 @@ components:
         status:
           $ref: "#/components/schemas/BenchmarkStatus"
         score:
-          type: "number"
-          example: 100
-          description: "ベンチマークのスコア"
+          $ref: "#/components/schemas/Score"
         createdAt:
           $ref: "#/components/schemas/CreatedAt"
         startedAt:
@@ -815,9 +818,7 @@ components:
           example: "log"
           description: "ベンチマークの競技者用ログ（標準出力）"
         score:
-          type: "number"
-          example: 100
-          description: "ベンチマークのスコア"
+          $ref: "#/components/schemas/Score"
         createdAt:
           $ref: "#/components/schemas/CreatedAt"
         startedAt:
@@ -859,9 +860,7 @@ components:
           example: "admin log"
           description: "ベンチマークの管理者用ログ（標準エラー出力）"
         score:
-          type: "number"
-          example: 100
-          description: "ベンチマークのスコア"
+          $ref: "#/components/schemas/Score"
         createdAt:
           $ref: "#/components/schemas/CreatedAt"
         startedAt:
