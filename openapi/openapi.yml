@@ -492,6 +492,34 @@ paths:
         500:
           $ref: "#/components/responses/InternalServerError"
 
+  /teams/{teamId}/benchmarks/{benchmarkId}:
+    get:
+      tags: ["benchmark"]
+      summary: "ベンチマーク結果取得"
+      description: "ベンチマークの結果を取得します"
+      operationId: "getTeamBenchmarkResult"
+      security:
+        - TeamAuth: []
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/teamId"
+        - $ref: "#/components/parameters/benchmarkId"
+      responses:
+        200:
+          description: "ベンチマーク結果の取得に成功"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BenchmarkResult"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
 components:
   requestBodies:
     NewTeam:
@@ -554,6 +582,13 @@ components:
       required: true
       schema:
         $ref: "#/components/schemas/InstanceId"
+    benchmarkId:
+      name: "benchmarkId"
+      in: "path"
+      description: "ベンチマークID"
+      required: true
+      schema:
+        $ref: "#/components/schemas/BenchmarkId"
     benchmarkStatus:
       name: "status"
       in: "query"
@@ -725,6 +760,55 @@ components:
         - userId
         - status
         - createdAt
+
+    BenchmarkResult:
+      type: "object"
+      description: "ベンチマーク結果"
+      properties:
+        id:
+          $ref: "#/components/schemas/BenchmarkId"
+        instanceId:
+          $ref: "#/components/schemas/InstanceId"
+        teamId:
+          $ref: "#/components/schemas/TeamId"
+        userId:
+          $ref: "#/components/schemas/UserId"
+        status:
+          $ref: "#/components/schemas/BenchmarkStatus"
+        log:
+          type: "string"
+          example: "log"
+          description: "ベンチマークの競技者用ログ（標準出力）"
+        score:
+          type: "number"
+          example: 100
+          description: "ベンチマークのスコア"
+        createdAt:
+          type: "string"
+          format: "date-time"
+          description: "ベンチマークの実行リクエスト日時"
+          example: "2021-01-01T00:00:00Z"
+        startedAt:
+          type: "string"
+          format: "date-time"
+          description: "ベンチマークの実行開始日時"
+          example: "2021-01-01T00:00:30Z"
+        finishedAt:
+          type: "string"
+          format: "date-time"
+          description: "ベンチマークの実行終了日時"
+          example: "2021-01-01T00:01:00Z"
+      required:
+        - id
+        - instanceId
+        - teamId
+        - userId
+        - status
+        - log
+        - score
+        - createdAt
+        - startedAt
+        - finishedAt
 
     ErrorBadRequest:
       type: "object"
