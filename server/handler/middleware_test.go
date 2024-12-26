@@ -8,7 +8,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
-	"github.com/traPtitech/piscon-portal-v2/server/handler/internal/mock"
+	sessmock "github.com/traPtitech/piscon-portal-v2/server/handler/internal/mock"
 	repomock "github.com/traPtitech/piscon-portal-v2/server/repository/mock"
 	"go.uber.org/mock/gomock"
 )
@@ -17,7 +17,7 @@ func TestAuthMiddleware(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	mockRepo := repomock.NewMockRepository(ctrl)
-	mockSessManager := mock.NewMockSessionManager(ctrl)
+	mockSessManager := sessmock.NewMockSessionManager(ctrl)
 	handler := NewHandler(mockRepo, mockSessManager)
 
 	needAuthorize := handler.AuthMiddleware()(func(c echo.Context) error {
@@ -43,7 +43,7 @@ func TestAuthMiddleware_SessionNotFound(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	mockRepo := repomock.NewMockRepository(ctrl)
-	mockSessManager := mock.NewMockSessionManager(ctrl)
+	mockSessManager := sessmock.NewMockSessionManager(ctrl)
 	handler := NewHandler(mockRepo, mockSessManager)
 
 	needAuthorize := handler.AuthMiddleware()(func(c echo.Context) error {
@@ -64,7 +64,7 @@ func TestAuthMiddleware_ExpiredSession(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	mockRepo := repomock.NewMockRepository(ctrl)
-	mockSessManager := mock.NewMockSessionManager(ctrl)
+	mockSessManager := sessmock.NewMockSessionManager(ctrl)
 	handler := NewHandler(mockRepo, mockSessManager)
 
 	needAuthorize := handler.AuthMiddleware()(func(c echo.Context) error {
