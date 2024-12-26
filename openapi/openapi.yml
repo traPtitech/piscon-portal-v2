@@ -391,7 +391,7 @@ paths:
       description: "指定したインスタンスに向けてベンチマークを実行します"
       operationId: "postBenchmark"
       security:
-        - TeamAuth: []
+        - UserAuth: []
       requestBody:
         required: true
         $ref: "#/components/requestBodies/NewBenchmark"
