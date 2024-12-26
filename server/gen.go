@@ -5,6 +5,3 @@ package portal
 
 // ORM generator
 //go:generate go run github.com/stephenafamo/bob/gen/bobgen-mysql@v0.29.0 -c bobgen.yaml
-
-// repository mock
-//go:generate mockgen -source=repository/repository.go -destination=repository/mock/repository.go -package=mock -typed=true

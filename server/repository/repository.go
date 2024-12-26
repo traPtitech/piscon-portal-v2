@@ -7,6 +7,7 @@ import (
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 )
 
+//go:generate go run go.uber.org/mock/mockgen@v0.5.0 -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed=true
 type Repository interface {
 	Transaction(ctx context.Context, f func(ctx context.Context, r Repository) error) error
 
