@@ -443,6 +443,30 @@ paths:
         500:
           $ref: "#/components/responses/InternalServerError"
 
+  /benchmarks/queue:
+    get:
+      tags: ["benchmark"]
+      summary: "ベンチマーク待ち行列取得"
+      description: |
+        ベンチマーク待ちのキューを取得します。
+        createdAtの昇順になっており、現在実行中のベンチマークと、実行待ちのベンチマークが含まれます。
+      operationId: "getBenchmarkQueue"
+      security:
+        - UserAuth: []
+      responses:
+        200:
+          description: "ベンチマーク待ち行列の取得に成功"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Benchmark"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
 components:
   requestBodies:
     NewTeam:
