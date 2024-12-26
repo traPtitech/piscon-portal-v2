@@ -13,7 +13,7 @@ import (
 )
 
 func (h *Handler) GetOauth2Code(c echo.Context) error {
-	sessID, err := h.sessionManager.setSessionID(c, 7*24*time.Hour) // max age 1 week
+	sessID, err := h.sessionManager.SetSessionID(c, 7*24*time.Hour) // max age 1 week
 	if err != nil {
 		return internalServerErrorResponse(c, err)
 	}
@@ -27,7 +27,7 @@ func (h *Handler) GetOauth2Code(c echo.Context) error {
 func (h *Handler) Oauth2Callback(c echo.Context) error {
 	ctx := c.Request().Context()
 
-	sessionID, err := h.sessionManager.getSessionID(c)
+	sessionID, err := h.sessionManager.GetSessionID(c)
 	if err != nil {
 		return internalServerErrorResponse(c, err)
 	}
@@ -62,7 +62,7 @@ func (h *Handler) Oauth2Callback(c echo.Context) error {
 		}
 
 		// create new session to prevent session fixation
-		sessionID, err := h.sessionManager.setSessionID(c, 7*24*time.Hour) // max age 1 week
+		sessionID, err := h.sessionManager.SetSessionID(c, 7*24*time.Hour) // max age 1 week
 		if err != nil {
 			return err
 		}
@@ -84,7 +84,7 @@ func (h *Handler) Oauth2Callback(c echo.Context) error {
 func (h *Handler) Logout(c echo.Context) error {
 	ctx := c.Request().Context()
 
-	sessID, err := h.sessionManager.getSessionID(c)
+	sessID, err := h.sessionManager.GetSessionID(c)
 	if err != nil {
 		return internalServerErrorResponse(c, err)
 	}
@@ -95,7 +95,7 @@ func (h *Handler) Logout(c echo.Context) error {
 		return internalServerErrorResponse(c, err)
 	}
 
-	if err := h.sessionManager.clearSessionID(c); err != nil {
+	if err := h.sessionManager.ClearSessionID(c); err != nil {
 		return internalServerErrorResponse(c, err)
 	}
 

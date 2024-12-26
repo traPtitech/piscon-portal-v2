@@ -4,13 +4,14 @@ import (
 	"net/url"
 
 	"github.com/labstack/echo/v4"
+	"github.com/traPtitech/piscon-portal-v2/server/handler/internal"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
 	"github.com/traPtitech/piscon-portal-v2/server/services/oauth2"
 )
 
 type Handler struct {
 	repo           repository.Repository
-	sessionManager *sessionManager
+	sessionManager SessionManager
 	oauth2Service  *oauth2.Service
 }
 
@@ -19,10 +20,17 @@ type Config struct {
 	Debug         bool
 	SessionSecret string
 	Oauth2        oauth2.Config
+	// if SessionManager is nil, use default session manager
+	SessionManager SessionManager
 }
 
 func New(repo repository.Repository, config Config) (*Handler, error) {
-	sessionManager := newSessionManager(config.SessionSecret, config.Debug)
+	var sessionManager SessionManager
+	if config.SessionManager == nil {
+		sessionManager = internal.NewSessionManager(config.SessionSecret, config.Debug)
+	} else {
+		sessionManager = config.SessionManager
+	}
 
 	redirectURI, err := url.JoinPath(config.RootURL, "/api/oauth2/callback")
 	if err != nil {
@@ -41,7 +49,7 @@ func New(repo repository.Repository, config Config) (*Handler, error) {
 
 func (h *Handler) SetupRoutes(e *echo.Echo) {
 	api := e.Group("/api")
-	h.sessionManager.init(api)
+	h.sessionManager.Init(api)
 
 	api.GET("/oauth2/code", h.GetOauth2Code)
 	api.GET("/oauth2/callback", h.Oauth2Callback)

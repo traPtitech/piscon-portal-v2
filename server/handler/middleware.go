@@ -13,9 +13,12 @@ func (h *Handler) AuthMiddleware() echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			ctx := c.Request().Context()
 
-			sessID, err := h.sessionManager.getSessionID(c)
+			sessID, err := h.sessionManager.GetSessionID(c)
 			if err != nil {
 				return internalServerErrorResponse(c, err)
+			}
+			if sessID == "" {
+				return unauthorizedResponse(c, "session not found")
 			}
 
 			session, err := h.repo.FindSession(ctx, sessID)
