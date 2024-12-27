@@ -26,7 +26,7 @@ import (
 	"github.com/traPtitech/piscon-portal-v2/server/utils/random"
 )
 
-const Oauth2ServerURL = "http://localhost:9000"
+var oauth2ServerURL string
 
 func TestMain(m *testing.M) {
 	oauth2Server := newOauth2Server()
@@ -43,11 +43,11 @@ func NewPortalServer(repo repository.Repository) *httptest.Server {
 		RootURL:       server.URL,
 		SessionSecret: "secret",
 		Oauth2: oauth2.Config{
-			Issuer:       Oauth2ServerURL,
+			Issuer:       oauth2ServerURL,
 			ClientID:     "client-id",
 			ClientSecret: "client-secret",
-			AuthURL:      Oauth2ServerURL + "/authorize",
-			TokenURL:     Oauth2ServerURL + "/token",
+			AuthURL:      oauth2ServerURL + "/authorize",
+			TokenURL:     oauth2ServerURL + "/token",
 		},
 	}
 	h, err := handler.New(repo, config)
@@ -66,11 +66,11 @@ func NewHandler(repo repository.Repository, sessionManager handler.SessionManage
 		RootURL:       "http://localhost",
 		SessionSecret: "secret",
 		Oauth2: oauth2.Config{
-			Issuer:       Oauth2ServerURL,
+			Issuer:       oauth2ServerURL,
 			ClientID:     "client-id",
 			ClientSecret: "client-secret",
-			AuthURL:      Oauth2ServerURL + "/authorize",
-			TokenURL:     Oauth2ServerURL + "/token",
+			AuthURL:      oauth2ServerURL + "/authorize",
+			TokenURL:     oauth2ServerURL + "/token",
 		},
 		SessionManager: sessionManager,
 	}
@@ -155,13 +155,16 @@ type oauth2Server struct {
 	userMap          *ttlcache.Cache[string, string]
 }
 
-func newOauth2Server() *http.Server {
+func newOauth2Server() *httptest.Server {
 	mux := http.NewServeMux()
+
+	server := httptest.NewServer(mux)
+	oauth2ServerURL = server.URL
 
 	key, _ := rsa.GenerateKey(rand.Reader, 2048)
 	s := &oauth2Server{
 		key:              key,
-		rootURL:          Oauth2ServerURL,
+		rootURL:          oauth2ServerURL,
 		codeChallengeMap: ttlcache.New[string, string](),
 		userMap:          ttlcache.New[string, string](),
 	}
@@ -170,12 +173,6 @@ func newOauth2Server() *http.Server {
 	mux.HandleFunc("/jwks", s.handleJWKS)
 	mux.HandleFunc("/authorize", s.handleAuthorize)
 	mux.HandleFunc("/token", s.handleToken)
-
-	server := &http.Server{
-		Addr:    ":9000",
-		Handler: mux,
-	}
-	go server.ListenAndServe()
 
 	return server
 }
