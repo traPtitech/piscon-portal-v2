@@ -4,12 +4,25 @@
 package factory
 
 type Factory struct {
-	baseTeamMods TeamModSlice
-	baseUserMods UserModSlice
+	baseSessionMods SessionModSlice
+	baseTeamMods    TeamModSlice
+	baseUserMods    UserModSlice
 }
 
 func New() *Factory {
 	return &Factory{}
+}
+
+func (f *Factory) NewSession(mods ...SessionMod) *SessionTemplate {
+	o := &SessionTemplate{f: f}
+
+	if f != nil {
+		f.baseSessionMods.Apply(o)
+	}
+
+	SessionModSlice(mods).Apply(o)
+
+	return o
 }
 
 func (f *Factory) NewTeam(mods ...TeamMod) *TeamTemplate {
@@ -34,6 +47,14 @@ func (f *Factory) NewUser(mods ...UserMod) *UserTemplate {
 	UserModSlice(mods).Apply(o)
 
 	return o
+}
+
+func (f *Factory) ClearBaseSessionMods() {
+	f.baseSessionMods = nil
+}
+
+func (f *Factory) AddBaseSessionMod(mods ...SessionMod) {
+	f.baseSessionMods = append(f.baseSessionMods, mods...)
 }
 
 func (f *Factory) ClearBaseTeamMods() {

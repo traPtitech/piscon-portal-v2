@@ -46,9 +46,14 @@ type UserTemplate struct {
 }
 
 type userR struct {
-	Team *userRTeamR
+	Sessions []*userRSessionsR
+	Team     *userRTeamR
 }
 
+type userRSessionsR struct {
+	number int
+	o      *SessionTemplate
+}
 type userRTeamR struct {
 	o *TeamTemplate
 }
@@ -96,6 +101,19 @@ func (o UserTemplate) toModels(number int) models.UserSlice {
 // setModelRels creates and sets the relationships on *models.User
 // according to the relationships in the template. Nothing is inserted into the db
 func (t UserTemplate) setModelRels(o *models.User) {
+	if t.r.Sessions != nil {
+		rel := models.SessionSlice{}
+		for _, r := range t.r.Sessions {
+			related := r.o.toModels(r.number)
+			for _, rel := range related {
+				rel.UserID = o.ID
+				rel.R.User = o
+			}
+			rel = append(rel, related...)
+		}
+		o.R.Sessions = rel
+	}
+
 	if t.r.Team != nil {
 		rel := t.r.Team.o.toModel()
 		rel.R.Users = append(rel.R.Users, o)
@@ -175,13 +193,28 @@ func ensureCreatableUser(m *models.UserSetter) {
 func (o *UserTemplate) insertOptRels(ctx context.Context, exec bob.Executor, m *models.User) (context.Context, error) {
 	var err error
 
+	if o.r.Sessions != nil {
+		for _, r := range o.r.Sessions {
+			var rel0 models.SessionSlice
+			ctx, rel0, err = r.o.createMany(ctx, exec, r.number)
+			if err != nil {
+				return ctx, err
+			}
+
+			err = m.AttachSessions(ctx, exec, rel0...)
+			if err != nil {
+				return ctx, err
+			}
+		}
+	}
+
 	if o.r.Team != nil {
-		var rel0 *models.Team
-		ctx, rel0, err = o.r.Team.o.create(ctx, exec)
+		var rel1 *models.Team
+		ctx, rel1, err = o.r.Team.o.create(ctx, exec)
 		if err != nil {
 			return ctx, err
 		}
-		err = m.AttachTeam(ctx, exec, rel0)
+		err = m.AttachTeam(ctx, exec, rel1)
 		if err != nil {
 			return ctx, err
 		}
@@ -452,5 +485,43 @@ func (m userMods) WithNewTeam(mods ...TeamMod) UserMod {
 func (m userMods) WithoutTeam() UserMod {
 	return UserModFunc(func(o *UserTemplate) {
 		o.r.Team = nil
+	})
+}
+
+func (m userMods) WithSessions(number int, related *SessionTemplate) UserMod {
+	return UserModFunc(func(o *UserTemplate) {
+		o.r.Sessions = []*userRSessionsR{{
+			number: number,
+			o:      related,
+		}}
+	})
+}
+
+func (m userMods) WithNewSessions(number int, mods ...SessionMod) UserMod {
+	return UserModFunc(func(o *UserTemplate) {
+		related := o.f.NewSession(mods...)
+		m.WithSessions(number, related).Apply(o)
+	})
+}
+
+func (m userMods) AddSessions(number int, related *SessionTemplate) UserMod {
+	return UserModFunc(func(o *UserTemplate) {
+		o.r.Sessions = append(o.r.Sessions, &userRSessionsR{
+			number: number,
+			o:      related,
+		})
+	})
+}
+
+func (m userMods) AddNewSessions(number int, mods ...SessionMod) UserMod {
+	return UserModFunc(func(o *UserTemplate) {
+		related := o.f.NewSession(mods...)
+		m.AddSessions(number, related).Apply(o)
+	})
+}
+
+func (m userMods) WithoutSessions() UserMod {
+	return UserModFunc(func(o *UserTemplate) {
+		o.r.Sessions = nil
 	})
 }

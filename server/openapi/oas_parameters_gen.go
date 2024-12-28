@@ -16,6 +16,18 @@ type DeleteTeamInstanceParams struct {
 	InstanceId InstanceId
 }
 
+// GetBenchmarkResultParams is parameters of getBenchmarkResult operation.
+type GetBenchmarkResultParams struct {
+	// ベンチマークID.
+	BenchmarkId BenchmarkId
+}
+
+// GetBenchmarksParams is parameters of getBenchmarks operation.
+type GetBenchmarksParams struct {
+	// ベンチマークのステータス。指定が無い場合は全て.
+	Status OptBenchmarkStatus
+}
+
 // GetOauth2CallbackParams is parameters of getOauth2Callback operation.
 type GetOauth2CallbackParams struct {
 	// TraQからのAuthorization Code.
@@ -26,6 +38,22 @@ type GetOauth2CallbackParams struct {
 type GetTeamParams struct {
 	// チームID.
 	TeamId TeamId
+}
+
+// GetTeamBenchmarkResultParams is parameters of getTeamBenchmarkResult operation.
+type GetTeamBenchmarkResultParams struct {
+	// チームID.
+	TeamId TeamId
+	// ベンチマークID.
+	BenchmarkId BenchmarkId
+}
+
+// GetTeamBenchmarksParams is parameters of getTeamBenchmarks operation.
+type GetTeamBenchmarksParams struct {
+	// チームID.
+	TeamId TeamId
+	// ベンチマークのステータス。指定が無い場合は全て.
+	Status OptBenchmarkStatus
 }
 
 // GetTeamInstancesParams is parameters of getTeamInstances operation.
