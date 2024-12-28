@@ -24,6 +24,413 @@ func (s *AdminAuth) SetAPIKey(val string) {
 	s.APIKey = val
 }
 
+// ベンチマーク.
+// Ref: #/components/schemas/Benchmark
+type Benchmark struct {
+	ID         BenchmarkId     `json:"id"`
+	InstanceId InstanceId      `json:"instanceId"`
+	TeamId     TeamId          `json:"teamId"`
+	UserId     UserId          `json:"userId"`
+	Status     BenchmarkStatus `json:"status"`
+	Score      OptScore        `json:"score"`
+	CreatedAt  CreatedAt       `json:"createdAt"`
+	StartedAt  OptStartedAt    `json:"startedAt"`
+	FinishedAt OptFinishedAt   `json:"finishedAt"`
+}
+
+// GetID returns the value of ID.
+func (s *Benchmark) GetID() BenchmarkId {
+	return s.ID
+}
+
+// GetInstanceId returns the value of InstanceId.
+func (s *Benchmark) GetInstanceId() InstanceId {
+	return s.InstanceId
+}
+
+// GetTeamId returns the value of TeamId.
+func (s *Benchmark) GetTeamId() TeamId {
+	return s.TeamId
+}
+
+// GetUserId returns the value of UserId.
+func (s *Benchmark) GetUserId() UserId {
+	return s.UserId
+}
+
+// GetStatus returns the value of Status.
+func (s *Benchmark) GetStatus() BenchmarkStatus {
+	return s.Status
+}
+
+// GetScore returns the value of Score.
+func (s *Benchmark) GetScore() OptScore {
+	return s.Score
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *Benchmark) GetCreatedAt() CreatedAt {
+	return s.CreatedAt
+}
+
+// GetStartedAt returns the value of StartedAt.
+func (s *Benchmark) GetStartedAt() OptStartedAt {
+	return s.StartedAt
+}
+
+// GetFinishedAt returns the value of FinishedAt.
+func (s *Benchmark) GetFinishedAt() OptFinishedAt {
+	return s.FinishedAt
+}
+
+// SetID sets the value of ID.
+func (s *Benchmark) SetID(val BenchmarkId) {
+	s.ID = val
+}
+
+// SetInstanceId sets the value of InstanceId.
+func (s *Benchmark) SetInstanceId(val InstanceId) {
+	s.InstanceId = val
+}
+
+// SetTeamId sets the value of TeamId.
+func (s *Benchmark) SetTeamId(val TeamId) {
+	s.TeamId = val
+}
+
+// SetUserId sets the value of UserId.
+func (s *Benchmark) SetUserId(val UserId) {
+	s.UserId = val
+}
+
+// SetStatus sets the value of Status.
+func (s *Benchmark) SetStatus(val BenchmarkStatus) {
+	s.Status = val
+}
+
+// SetScore sets the value of Score.
+func (s *Benchmark) SetScore(val OptScore) {
+	s.Score = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *Benchmark) SetCreatedAt(val CreatedAt) {
+	s.CreatedAt = val
+}
+
+// SetStartedAt sets the value of StartedAt.
+func (s *Benchmark) SetStartedAt(val OptStartedAt) {
+	s.StartedAt = val
+}
+
+// SetFinishedAt sets the value of FinishedAt.
+func (s *Benchmark) SetFinishedAt(val OptFinishedAt) {
+	s.FinishedAt = val
+}
+
+func (*Benchmark) postBenchmarkRes() {}
+
+// Adminが見ることができるベンチマーク結果.
+// Ref: #/components/schemas/BenchmarkAdminResult
+type BenchmarkAdminResult struct {
+	ID         BenchmarkId     `json:"id"`
+	InstanceId InstanceId      `json:"instanceId"`
+	TeamId     TeamId          `json:"teamId"`
+	UserId     UserId          `json:"userId"`
+	Status     BenchmarkStatus `json:"status"`
+	// ベンチマークの競技者用ログ（標準出力）.
+	Log string `json:"log"`
+	// ベンチマークの管理者用ログ（標準エラー出力）.
+	AdminLog   string     `json:"adminLog"`
+	Score      Score      `json:"score"`
+	CreatedAt  CreatedAt  `json:"createdAt"`
+	StartedAt  StartedAt  `json:"startedAt"`
+	FinishedAt FinishedAt `json:"finishedAt"`
+}
+
+// GetID returns the value of ID.
+func (s *BenchmarkAdminResult) GetID() BenchmarkId {
+	return s.ID
+}
+
+// GetInstanceId returns the value of InstanceId.
+func (s *BenchmarkAdminResult) GetInstanceId() InstanceId {
+	return s.InstanceId
+}
+
+// GetTeamId returns the value of TeamId.
+func (s *BenchmarkAdminResult) GetTeamId() TeamId {
+	return s.TeamId
+}
+
+// GetUserId returns the value of UserId.
+func (s *BenchmarkAdminResult) GetUserId() UserId {
+	return s.UserId
+}
+
+// GetStatus returns the value of Status.
+func (s *BenchmarkAdminResult) GetStatus() BenchmarkStatus {
+	return s.Status
+}
+
+// GetLog returns the value of Log.
+func (s *BenchmarkAdminResult) GetLog() string {
+	return s.Log
+}
+
+// GetAdminLog returns the value of AdminLog.
+func (s *BenchmarkAdminResult) GetAdminLog() string {
+	return s.AdminLog
+}
+
+// GetScore returns the value of Score.
+func (s *BenchmarkAdminResult) GetScore() Score {
+	return s.Score
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *BenchmarkAdminResult) GetCreatedAt() CreatedAt {
+	return s.CreatedAt
+}
+
+// GetStartedAt returns the value of StartedAt.
+func (s *BenchmarkAdminResult) GetStartedAt() StartedAt {
+	return s.StartedAt
+}
+
+// GetFinishedAt returns the value of FinishedAt.
+func (s *BenchmarkAdminResult) GetFinishedAt() FinishedAt {
+	return s.FinishedAt
+}
+
+// SetID sets the value of ID.
+func (s *BenchmarkAdminResult) SetID(val BenchmarkId) {
+	s.ID = val
+}
+
+// SetInstanceId sets the value of InstanceId.
+func (s *BenchmarkAdminResult) SetInstanceId(val InstanceId) {
+	s.InstanceId = val
+}
+
+// SetTeamId sets the value of TeamId.
+func (s *BenchmarkAdminResult) SetTeamId(val TeamId) {
+	s.TeamId = val
+}
+
+// SetUserId sets the value of UserId.
+func (s *BenchmarkAdminResult) SetUserId(val UserId) {
+	s.UserId = val
+}
+
+// SetStatus sets the value of Status.
+func (s *BenchmarkAdminResult) SetStatus(val BenchmarkStatus) {
+	s.Status = val
+}
+
+// SetLog sets the value of Log.
+func (s *BenchmarkAdminResult) SetLog(val string) {
+	s.Log = val
+}
+
+// SetAdminLog sets the value of AdminLog.
+func (s *BenchmarkAdminResult) SetAdminLog(val string) {
+	s.AdminLog = val
+}
+
+// SetScore sets the value of Score.
+func (s *BenchmarkAdminResult) SetScore(val Score) {
+	s.Score = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *BenchmarkAdminResult) SetCreatedAt(val CreatedAt) {
+	s.CreatedAt = val
+}
+
+// SetStartedAt sets the value of StartedAt.
+func (s *BenchmarkAdminResult) SetStartedAt(val StartedAt) {
+	s.StartedAt = val
+}
+
+// SetFinishedAt sets the value of FinishedAt.
+func (s *BenchmarkAdminResult) SetFinishedAt(val FinishedAt) {
+	s.FinishedAt = val
+}
+
+func (*BenchmarkAdminResult) getBenchmarkResultRes() {}
+
+type BenchmarkId uuid.UUID
+
+// ベンチマーク結果.
+// Ref: #/components/schemas/BenchmarkResult
+type BenchmarkResult struct {
+	ID         BenchmarkId     `json:"id"`
+	InstanceId InstanceId      `json:"instanceId"`
+	TeamId     TeamId          `json:"teamId"`
+	UserId     UserId          `json:"userId"`
+	Status     BenchmarkStatus `json:"status"`
+	// ベンチマークの競技者用ログ（標準出力）.
+	Log        string     `json:"log"`
+	Score      Score      `json:"score"`
+	CreatedAt  CreatedAt  `json:"createdAt"`
+	StartedAt  StartedAt  `json:"startedAt"`
+	FinishedAt FinishedAt `json:"finishedAt"`
+}
+
+// GetID returns the value of ID.
+func (s *BenchmarkResult) GetID() BenchmarkId {
+	return s.ID
+}
+
+// GetInstanceId returns the value of InstanceId.
+func (s *BenchmarkResult) GetInstanceId() InstanceId {
+	return s.InstanceId
+}
+
+// GetTeamId returns the value of TeamId.
+func (s *BenchmarkResult) GetTeamId() TeamId {
+	return s.TeamId
+}
+
+// GetUserId returns the value of UserId.
+func (s *BenchmarkResult) GetUserId() UserId {
+	return s.UserId
+}
+
+// GetStatus returns the value of Status.
+func (s *BenchmarkResult) GetStatus() BenchmarkStatus {
+	return s.Status
+}
+
+// GetLog returns the value of Log.
+func (s *BenchmarkResult) GetLog() string {
+	return s.Log
+}
+
+// GetScore returns the value of Score.
+func (s *BenchmarkResult) GetScore() Score {
+	return s.Score
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *BenchmarkResult) GetCreatedAt() CreatedAt {
+	return s.CreatedAt
+}
+
+// GetStartedAt returns the value of StartedAt.
+func (s *BenchmarkResult) GetStartedAt() StartedAt {
+	return s.StartedAt
+}
+
+// GetFinishedAt returns the value of FinishedAt.
+func (s *BenchmarkResult) GetFinishedAt() FinishedAt {
+	return s.FinishedAt
+}
+
+// SetID sets the value of ID.
+func (s *BenchmarkResult) SetID(val BenchmarkId) {
+	s.ID = val
+}
+
+// SetInstanceId sets the value of InstanceId.
+func (s *BenchmarkResult) SetInstanceId(val InstanceId) {
+	s.InstanceId = val
+}
+
+// SetTeamId sets the value of TeamId.
+func (s *BenchmarkResult) SetTeamId(val TeamId) {
+	s.TeamId = val
+}
+
+// SetUserId sets the value of UserId.
+func (s *BenchmarkResult) SetUserId(val UserId) {
+	s.UserId = val
+}
+
+// SetStatus sets the value of Status.
+func (s *BenchmarkResult) SetStatus(val BenchmarkStatus) {
+	s.Status = val
+}
+
+// SetLog sets the value of Log.
+func (s *BenchmarkResult) SetLog(val string) {
+	s.Log = val
+}
+
+// SetScore sets the value of Score.
+func (s *BenchmarkResult) SetScore(val Score) {
+	s.Score = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *BenchmarkResult) SetCreatedAt(val CreatedAt) {
+	s.CreatedAt = val
+}
+
+// SetStartedAt sets the value of StartedAt.
+func (s *BenchmarkResult) SetStartedAt(val StartedAt) {
+	s.StartedAt = val
+}
+
+// SetFinishedAt sets the value of FinishedAt.
+func (s *BenchmarkResult) SetFinishedAt(val FinishedAt) {
+	s.FinishedAt = val
+}
+
+func (*BenchmarkResult) getTeamBenchmarkResultRes() {}
+
+// Ref: #/components/schemas/BenchmarkStatus
+type BenchmarkStatus string
+
+const (
+	BenchmarkStatusWaiting  BenchmarkStatus = "waiting"
+	BenchmarkStatusRunning  BenchmarkStatus = "running"
+	BenchmarkStatusFinished BenchmarkStatus = "finished"
+)
+
+// AllValues returns all BenchmarkStatus values.
+func (BenchmarkStatus) AllValues() []BenchmarkStatus {
+	return []BenchmarkStatus{
+		BenchmarkStatusWaiting,
+		BenchmarkStatusRunning,
+		BenchmarkStatusFinished,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s BenchmarkStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case BenchmarkStatusWaiting:
+		return []byte(s), nil
+	case BenchmarkStatusRunning:
+		return []byte(s), nil
+	case BenchmarkStatusFinished:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *BenchmarkStatus) UnmarshalText(data []byte) error {
+	switch BenchmarkStatus(data) {
+	case BenchmarkStatusWaiting:
+		*s = BenchmarkStatusWaiting
+		return nil
+	case BenchmarkStatusRunning:
+		*s = BenchmarkStatusRunning
+		return nil
+	case BenchmarkStatusFinished:
+		*s = BenchmarkStatusFinished
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type CreatedAt time.Time
+
 // DeleteTeamInstanceOK is response for DeleteTeamInstance operation.
 type DeleteTeamInstanceOK struct{}
 
@@ -47,7 +454,10 @@ func (s *ErrorBadRequest) SetMessage(val OptString) {
 func (*ErrorBadRequest) createTeamInstanceRes() {}
 func (*ErrorBadRequest) patchTeamInstanceRes()  {}
 func (*ErrorBadRequest) patchTeamRes()          {}
+func (*ErrorBadRequest) postBenchmarkRes()      {}
 func (*ErrorBadRequest) postTeamRes()           {}
+
+type FinishedAt time.Time
 
 type Forbidden struct {
 	Message OptString `json:"message"`
@@ -63,12 +473,25 @@ func (s *Forbidden) SetMessage(val OptString) {
 	s.Message = val
 }
 
-func (*Forbidden) createTeamInstanceRes() {}
-func (*Forbidden) deleteTeamInstanceRes() {}
-func (*Forbidden) getInstancesRes()       {}
-func (*Forbidden) getTeamInstancesRes()   {}
-func (*Forbidden) patchTeamInstanceRes()  {}
-func (*Forbidden) patchTeamRes()          {}
+func (*Forbidden) createTeamInstanceRes()     {}
+func (*Forbidden) deleteTeamInstanceRes()     {}
+func (*Forbidden) getBenchmarkResultRes()     {}
+func (*Forbidden) getBenchmarksRes()          {}
+func (*Forbidden) getInstancesRes()           {}
+func (*Forbidden) getTeamBenchmarkResultRes() {}
+func (*Forbidden) getTeamBenchmarksRes()      {}
+func (*Forbidden) getTeamInstancesRes()       {}
+func (*Forbidden) patchTeamInstanceRes()      {}
+func (*Forbidden) patchTeamRes()              {}
+func (*Forbidden) postBenchmarkRes()          {}
+
+type GetBenchmarkQueueOKApplicationJSON []Benchmark
+
+func (*GetBenchmarkQueueOKApplicationJSON) getBenchmarkQueueRes() {}
+
+type GetBenchmarksOKApplicationJSON []Benchmark
+
+func (*GetBenchmarksOKApplicationJSON) getBenchmarksRes() {}
 
 type GetInstancesOKApplicationJSON []Instance
 
@@ -123,6 +546,10 @@ func (s *GetOauth2CodeSeeOther) SetLocation(val OptURI) {
 }
 
 func (*GetOauth2CodeSeeOther) getOauth2CodeRes() {}
+
+type GetTeamBenchmarksOKApplicationJSON []Benchmark
+
+func (*GetTeamBenchmarksOKApplicationJSON) getTeamBenchmarksRes() {}
 
 type GetTeamInstancesOKApplicationJSON []Instance
 
@@ -290,20 +717,26 @@ func (s *InternalServerError) SetMessage(val OptString) {
 	s.Message = val
 }
 
-func (*InternalServerError) createTeamInstanceRes() {}
-func (*InternalServerError) deleteTeamInstanceRes() {}
-func (*InternalServerError) getInstancesRes()       {}
-func (*InternalServerError) getMeRes()              {}
-func (*InternalServerError) getOauth2CallbackRes()  {}
-func (*InternalServerError) getOauth2CodeRes()      {}
-func (*InternalServerError) getTeamInstancesRes()   {}
-func (*InternalServerError) getTeamRes()            {}
-func (*InternalServerError) getTeamsRes()           {}
-func (*InternalServerError) getUsersRes()           {}
-func (*InternalServerError) patchTeamInstanceRes()  {}
-func (*InternalServerError) patchTeamRes()          {}
-func (*InternalServerError) postOauth2LogoutRes()   {}
-func (*InternalServerError) postTeamRes()           {}
+func (*InternalServerError) createTeamInstanceRes()     {}
+func (*InternalServerError) deleteTeamInstanceRes()     {}
+func (*InternalServerError) getBenchmarkQueueRes()      {}
+func (*InternalServerError) getBenchmarkResultRes()     {}
+func (*InternalServerError) getBenchmarksRes()          {}
+func (*InternalServerError) getInstancesRes()           {}
+func (*InternalServerError) getMeRes()                  {}
+func (*InternalServerError) getOauth2CallbackRes()      {}
+func (*InternalServerError) getOauth2CodeRes()          {}
+func (*InternalServerError) getTeamBenchmarkResultRes() {}
+func (*InternalServerError) getTeamBenchmarksRes()      {}
+func (*InternalServerError) getTeamInstancesRes()       {}
+func (*InternalServerError) getTeamRes()                {}
+func (*InternalServerError) getTeamsRes()               {}
+func (*InternalServerError) getUsersRes()               {}
+func (*InternalServerError) patchTeamInstanceRes()      {}
+func (*InternalServerError) patchTeamRes()              {}
+func (*InternalServerError) postBenchmarkRes()          {}
+func (*InternalServerError) postOauth2LogoutRes()       {}
+func (*InternalServerError) postTeamRes()               {}
 
 type NotFound struct {
 	Message OptString `json:"message"`
@@ -319,12 +752,107 @@ func (s *NotFound) SetMessage(val OptString) {
 	s.Message = val
 }
 
-func (*NotFound) createTeamInstanceRes() {}
-func (*NotFound) deleteTeamInstanceRes() {}
-func (*NotFound) getTeamInstancesRes()   {}
-func (*NotFound) getTeamRes()            {}
-func (*NotFound) patchTeamInstanceRes()  {}
-func (*NotFound) patchTeamRes()          {}
+func (*NotFound) createTeamInstanceRes()     {}
+func (*NotFound) deleteTeamInstanceRes()     {}
+func (*NotFound) getBenchmarkResultRes()     {}
+func (*NotFound) getTeamBenchmarkResultRes() {}
+func (*NotFound) getTeamBenchmarksRes()      {}
+func (*NotFound) getTeamInstancesRes()       {}
+func (*NotFound) getTeamRes()                {}
+func (*NotFound) patchTeamInstanceRes()      {}
+func (*NotFound) patchTeamRes()              {}
+
+// NewOptBenchmarkStatus returns new OptBenchmarkStatus with value set to v.
+func NewOptBenchmarkStatus(v BenchmarkStatus) OptBenchmarkStatus {
+	return OptBenchmarkStatus{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBenchmarkStatus is optional BenchmarkStatus.
+type OptBenchmarkStatus struct {
+	Value BenchmarkStatus
+	Set   bool
+}
+
+// IsSet returns true if OptBenchmarkStatus was set.
+func (o OptBenchmarkStatus) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBenchmarkStatus) Reset() {
+	var v BenchmarkStatus
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBenchmarkStatus) SetTo(v BenchmarkStatus) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBenchmarkStatus) Get() (v BenchmarkStatus, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBenchmarkStatus) Or(d BenchmarkStatus) BenchmarkStatus {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptFinishedAt returns new OptFinishedAt with value set to v.
+func NewOptFinishedAt(v FinishedAt) OptFinishedAt {
+	return OptFinishedAt{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptFinishedAt is optional FinishedAt.
+type OptFinishedAt struct {
+	Value FinishedAt
+	Set   bool
+}
+
+// IsSet returns true if OptFinishedAt was set.
+func (o OptFinishedAt) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptFinishedAt) Reset() {
+	var v FinishedAt
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptFinishedAt) SetTo(v FinishedAt) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptFinishedAt) Get() (v FinishedAt, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptFinishedAt) Or(d FinishedAt) FinishedAt {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
 
 // NewOptInstanceStatus returns new OptInstanceStatus with value set to v.
 func NewOptInstanceStatus(v InstanceStatus) OptInstanceStatus {
@@ -418,6 +946,52 @@ func (o OptPatchTeamReq) Or(d PatchTeamReq) PatchTeamReq {
 	return d
 }
 
+// NewOptPostBenchmarkReq returns new OptPostBenchmarkReq with value set to v.
+func NewOptPostBenchmarkReq(v PostBenchmarkReq) OptPostBenchmarkReq {
+	return OptPostBenchmarkReq{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptPostBenchmarkReq is optional PostBenchmarkReq.
+type OptPostBenchmarkReq struct {
+	Value PostBenchmarkReq
+	Set   bool
+}
+
+// IsSet returns true if OptPostBenchmarkReq was set.
+func (o OptPostBenchmarkReq) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptPostBenchmarkReq) Reset() {
+	var v PostBenchmarkReq
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptPostBenchmarkReq) SetTo(v PostBenchmarkReq) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptPostBenchmarkReq) Get() (v PostBenchmarkReq, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptPostBenchmarkReq) Or(d PostBenchmarkReq) PostBenchmarkReq {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptPostTeamReq returns new OptPostTeamReq with value set to v.
 func NewOptPostTeamReq(v PostTeamReq) OptPostTeamReq {
 	return OptPostTeamReq{
@@ -458,6 +1032,98 @@ func (o OptPostTeamReq) Get() (v PostTeamReq, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptPostTeamReq) Or(d PostTeamReq) PostTeamReq {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptScore returns new OptScore with value set to v.
+func NewOptScore(v Score) OptScore {
+	return OptScore{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptScore is optional Score.
+type OptScore struct {
+	Value Score
+	Set   bool
+}
+
+// IsSet returns true if OptScore was set.
+func (o OptScore) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptScore) Reset() {
+	var v Score
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptScore) SetTo(v Score) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptScore) Get() (v Score, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptScore) Or(d Score) Score {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptStartedAt returns new OptStartedAt with value set to v.
+func NewOptStartedAt(v StartedAt) OptStartedAt {
+	return OptStartedAt{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptStartedAt is optional StartedAt.
+type OptStartedAt struct {
+	Value StartedAt
+	Set   bool
+}
+
+// IsSet returns true if OptStartedAt was set.
+func (o OptStartedAt) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptStartedAt) Reset() {
+	var v StartedAt
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptStartedAt) SetTo(v StartedAt) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptStartedAt) Get() (v StartedAt, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptStartedAt) Or(d StartedAt) StartedAt {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -693,6 +1359,20 @@ func (s *PatchTeamReq) SetMembers(val []UserId) {
 	s.Members = val
 }
 
+type PostBenchmarkReq struct {
+	InstanceId InstanceId `json:"instanceId"`
+}
+
+// GetInstanceId returns the value of InstanceId.
+func (s *PostBenchmarkReq) GetInstanceId() InstanceId {
+	return s.InstanceId
+}
+
+// SetInstanceId sets the value of InstanceId.
+func (s *PostBenchmarkReq) SetInstanceId(val InstanceId) {
+	s.InstanceId = val
+}
+
 type PostOauth2LogoutBadRequest struct {
 	Message OptString `json:"message"`
 }
@@ -739,6 +1419,10 @@ func (s *PostTeamReq) SetName(val TeamName) {
 func (s *PostTeamReq) SetMembers(val []UserId) {
 	s.Members = val
 }
+
+type Score float64
+
+type StartedAt time.Time
 
 // チーム.
 // Ref: #/components/schemas/Team
@@ -826,18 +1510,24 @@ func (s *Unauthorized) SetMessage(val OptString) {
 	s.Message = val
 }
 
-func (*Unauthorized) createTeamInstanceRes() {}
-func (*Unauthorized) deleteTeamInstanceRes() {}
-func (*Unauthorized) getInstancesRes()       {}
-func (*Unauthorized) getMeRes()              {}
-func (*Unauthorized) getTeamInstancesRes()   {}
-func (*Unauthorized) getTeamRes()            {}
-func (*Unauthorized) getTeamsRes()           {}
-func (*Unauthorized) getUsersRes()           {}
-func (*Unauthorized) patchTeamInstanceRes()  {}
-func (*Unauthorized) patchTeamRes()          {}
-func (*Unauthorized) postOauth2LogoutRes()   {}
-func (*Unauthorized) postTeamRes()           {}
+func (*Unauthorized) createTeamInstanceRes()     {}
+func (*Unauthorized) deleteTeamInstanceRes()     {}
+func (*Unauthorized) getBenchmarkQueueRes()      {}
+func (*Unauthorized) getBenchmarkResultRes()     {}
+func (*Unauthorized) getBenchmarksRes()          {}
+func (*Unauthorized) getInstancesRes()           {}
+func (*Unauthorized) getMeRes()                  {}
+func (*Unauthorized) getTeamBenchmarkResultRes() {}
+func (*Unauthorized) getTeamBenchmarksRes()      {}
+func (*Unauthorized) getTeamInstancesRes()       {}
+func (*Unauthorized) getTeamRes()                {}
+func (*Unauthorized) getTeamsRes()               {}
+func (*Unauthorized) getUsersRes()               {}
+func (*Unauthorized) patchTeamInstanceRes()      {}
+func (*Unauthorized) patchTeamRes()              {}
+func (*Unauthorized) postBenchmarkRes()          {}
+func (*Unauthorized) postOauth2LogoutRes()       {}
+func (*Unauthorized) postTeamRes()               {}
 
 // 部員.
 // Ref: #/components/schemas/User
