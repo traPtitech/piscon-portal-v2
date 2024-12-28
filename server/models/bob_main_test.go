@@ -5,6 +5,9 @@ package models
 
 import "github.com/stephenafamo/bob"
 
+// Make sure the type Session runs hooks after queries
+var _ bob.HookableType = &Session{}
+
 // Make sure the type Team runs hooks after queries
 var _ bob.HookableType = &Team{}
 
