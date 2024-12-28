@@ -391,7 +391,7 @@ paths:
       description: "指定したインスタンスに向けてベンチマークを実行します"
       operationId: "postBenchmark"
       security:
-        - TeamAuth: []
+        - UserAuth: []
       requestBody:
         required: true
         $ref: "#/components/requestBodies/NewBenchmark"
@@ -951,4 +951,4 @@ components:
       type: apiKey
       in: cookie
       name: piscon_session
-      description: "チームメンバーである場合にアクセスできる"
+      description: "該当するチームのメンバーである場合にアクセスできる"
