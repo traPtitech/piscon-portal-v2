@@ -29,7 +29,7 @@ import (
 var oauth2ServerURL string
 
 func TestMain(m *testing.M) {
-	oauth2Server := newOauth2Server()
+	oauth2Server := newOauth2MockServer()
 	defer oauth2Server.Close()
 
 	m.Run()
@@ -147,7 +147,7 @@ func joinPath(t *testing.T, base, path string) string {
 	return res
 }
 
-type oauth2Server struct {
+type oauth2MockServer struct {
 	key     *rsa.PrivateKey
 	rootURL string
 
@@ -155,14 +155,14 @@ type oauth2Server struct {
 	userMap          *ttlcache.Cache[string, string]
 }
 
-func newOauth2Server() *httptest.Server {
+func newOauth2MockServer() *httptest.Server {
 	mux := http.NewServeMux()
 
 	server := httptest.NewServer(mux)
 	oauth2ServerURL = server.URL
 
 	key, _ := rsa.GenerateKey(rand.Reader, 2048)
-	s := &oauth2Server{
+	s := &oauth2MockServer{
 		key:              key,
 		rootURL:          oauth2ServerURL,
 		codeChallengeMap: ttlcache.New[string, string](),
@@ -177,7 +177,7 @@ func newOauth2Server() *httptest.Server {
 	return server
 }
 
-func (s *oauth2Server) handleAuthorize(w http.ResponseWriter, r *http.Request) {
+func (s *oauth2MockServer) handleAuthorize(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 
 	redirectURI := q.Get("redirect_uri")
@@ -195,7 +195,7 @@ func (s *oauth2Server) handleAuthorize(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, fmt.Sprintf("%s?code=%s&state=%s", redirectURI, code, state), http.StatusSeeOther)
 }
 
-func (s *oauth2Server) handleToken(w http.ResponseWriter, r *http.Request) {
+func (s *oauth2MockServer) handleToken(w http.ResponseWriter, r *http.Request) {
 	codeVerifier := r.FormValue("code_verifier")
 	code := r.FormValue("code")
 
@@ -257,7 +257,7 @@ func (s *oauth2Server) handleToken(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
-func (s *oauth2Server) handleWellKnown(w http.ResponseWriter, r *http.Request) {
+func (s *oauth2MockServer) handleWellKnown(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]any{
 		"issuer":                 s.rootURL,
@@ -267,7 +267,7 @@ func (s *oauth2Server) handleWellKnown(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (s *oauth2Server) handleJWKS(w http.ResponseWriter, _ *http.Request) {
+func (s *oauth2MockServer) handleJWKS(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]any{
 		"keys": []map[string]any{
