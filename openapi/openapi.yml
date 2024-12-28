@@ -54,8 +54,14 @@ paths:
             type: "string"
             example: "authorization_code"
       responses:
-        200:
-          description: "認証に成功しました。"
+        303:
+          description: "認証に成功し、トップページにリダイレクトします。"
+          headers:
+            Location:
+              schema:
+                type: "string"
+                format: "uri"
+                example: "http://localhost:8080/"
         400:
           description: "セッションやAuthorization Codeに誤りがあり、認証に失敗しました"
           content:

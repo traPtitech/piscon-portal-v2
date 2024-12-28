@@ -513,10 +513,22 @@ func (s *GetOauth2CallbackBadRequest) SetMessage(val OptString) {
 
 func (*GetOauth2CallbackBadRequest) getOauth2CallbackRes() {}
 
-// GetOauth2CallbackOK is response for GetOauth2Callback operation.
-type GetOauth2CallbackOK struct{}
+// GetOauth2CallbackSeeOther is response for GetOauth2Callback operation.
+type GetOauth2CallbackSeeOther struct {
+	Location OptURI
+}
 
-func (*GetOauth2CallbackOK) getOauth2CallbackRes() {}
+// GetLocation returns the value of Location.
+func (s *GetOauth2CallbackSeeOther) GetLocation() OptURI {
+	return s.Location
+}
+
+// SetLocation sets the value of Location.
+func (s *GetOauth2CallbackSeeOther) SetLocation(val OptURI) {
+	s.Location = val
+}
+
+func (*GetOauth2CallbackSeeOther) getOauth2CallbackRes() {}
 
 // GetOauth2CodeSeeOther is response for GetOauth2Code operation.
 type GetOauth2CodeSeeOther struct {
