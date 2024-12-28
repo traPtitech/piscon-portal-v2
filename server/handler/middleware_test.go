@@ -14,6 +14,8 @@ import (
 )
 
 func TestAuthMiddleware(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 
 	mockRepo := repomock.NewMockRepository(ctrl)
@@ -24,65 +26,57 @@ func TestAuthMiddleware(t *testing.T) {
 		return c.NoContent(http.StatusOK)
 	})
 
-	mockSessManager.EXPECT().GetSessionID(gomock.Any()).Return("sessionID", nil)
-	mockRepo.EXPECT().FindSession(gomock.Any(), "sessionID").Return(domain.Session{
-		ID:        "sessionID",
-		UserID:    "test-user-id",
-		ExpiresAt: time.Now().Add(time.Hour),
-	}, nil)
-
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	rec := httptest.NewRecorder()
-	needAuthorize(echo.New().NewContext(req, rec))
-	if rec.Code != http.StatusOK {
-		t.Errorf("unexpected status code: %d", rec.Code)
+	tests := []struct {
+		name         string
+		setup        func()
+		expectStatus int
+	}{
+		{
+			name: "ok",
+			setup: func() {
+				mockSessManager.EXPECT().GetSessionID(gomock.Any()).Return("sessionID", nil)
+				mockRepo.EXPECT().FindSession(gomock.Any(), "sessionID").Return(domain.Session{
+					ID:        "sessionID",
+					UserID:    "test-user-id",
+					ExpiresAt: time.Now().Add(time.Hour),
+				}, nil)
+			},
+			expectStatus: http.StatusOK,
+		},
+		{
+			name: "session not found",
+			setup: func() {
+				mockSessManager.EXPECT().GetSessionID(gomock.Any()).Return("", nil)
+			},
+			expectStatus: http.StatusUnauthorized,
+		},
+		{
+			name: "expired session",
+			setup: func() {
+				mockSessManager.EXPECT().GetSessionID(gomock.Any()).Return("sessionID", nil)
+				mockRepo.EXPECT().FindSession(gomock.Any(), "sessionID").Return(domain.Session{
+					ID:        "sessionID",
+					UserID:    "test-user-id",
+					ExpiresAt: time.Now().Add(-time.Hour),
+				}, nil)
+				// expired session should be deleted
+				mockRepo.EXPECT().DeleteSession(gomock.Any(), "sessionID").Return(nil)
+			},
+			expectStatus: http.StatusUnauthorized,
+		},
 	}
-}
 
-func TestAuthMiddleware_SessionNotFound(t *testing.T) {
-	ctrl := gomock.NewController(t)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			tt.setup()
 
-	mockRepo := repomock.NewMockRepository(ctrl)
-	mockSessManager := sessmock.NewMockSessionManager(ctrl)
-	handler := NewHandler(mockRepo, mockSessManager)
-
-	needAuthorize := handler.AuthMiddleware()(func(c echo.Context) error {
-		return c.NoContent(http.StatusOK)
-	})
-
-	mockSessManager.EXPECT().GetSessionID(gomock.Any()).Return("", nil)
-
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	rec := httptest.NewRecorder()
-	needAuthorize(echo.New().NewContext(req, rec))
-	if rec.Code != http.StatusUnauthorized {
-		t.Errorf("unexpected status code: %d", rec.Code)
-	}
-}
-
-func TestAuthMiddleware_ExpiredSession(t *testing.T) {
-	ctrl := gomock.NewController(t)
-
-	mockRepo := repomock.NewMockRepository(ctrl)
-	mockSessManager := sessmock.NewMockSessionManager(ctrl)
-	handler := NewHandler(mockRepo, mockSessManager)
-
-	needAuthorize := handler.AuthMiddleware()(func(c echo.Context) error {
-		return c.NoContent(http.StatusOK)
-	})
-
-	mockSessManager.EXPECT().GetSessionID(gomock.Any()).Return("sessionID", nil)
-	mockRepo.EXPECT().FindSession(gomock.Any(), "sessionID").Return(domain.Session{
-		ID:        "sessionID",
-		UserID:    "test-user-id",
-		ExpiresAt: time.Now().Add(-time.Hour),
-	}, nil)
-	mockRepo.EXPECT().DeleteSession(gomock.Any(), "sessionID").Return(nil)
-
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	rec := httptest.NewRecorder()
-	needAuthorize(echo.New().NewContext(req, rec))
-	if rec.Code != http.StatusUnauthorized {
-		t.Errorf("unexpected status code: %d", rec.Code)
+			req := httptest.NewRequest(http.MethodGet, "/", nil)
+			rec := httptest.NewRecorder()
+			needAuthorize(echo.New().NewContext(req, rec))
+			if rec.Code != tt.expectStatus {
+				t.Errorf("unexpected status code: expected=%d, got=%d", tt.expectStatus, rec.Code)
+			}
+		})
 	}
 }
