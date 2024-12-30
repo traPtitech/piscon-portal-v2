@@ -13,7 +13,7 @@ require (
 	github.com/gorilla/sessions v1.4.0
 	github.com/jaswdr/faker/v2 v2.3.3
 	github.com/jellydator/ttlcache/v3 v3.3.0
-	github.com/labstack/echo-contrib v0.17.1
+	github.com/labstack/echo-contrib v0.17.2
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/ogen-go/ogen v1.8.1
 	github.com/stephenafamo/bob v0.29.0
