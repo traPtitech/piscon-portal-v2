@@ -72,7 +72,7 @@ func TestAuthMiddleware(t *testing.T) {
 
 			req := httptest.NewRequest(http.MethodGet, "/", nil)
 			rec := httptest.NewRecorder()
-			needAuthorize(echo.New().NewContext(req, rec))
+			_ = needAuthorize(echo.New().NewContext(req, rec))
 			if rec.Code != tt.expectStatus {
 				t.Errorf("unexpected status code: expected=%d, got=%d", tt.expectStatus, rec.Code)
 			}

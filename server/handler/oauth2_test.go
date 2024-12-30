@@ -65,7 +65,7 @@ func TestLogout(t *testing.T) {
 	// logout
 	// return not expired session
 	mockRepo.EXPECT().FindSession(gomock.Any(), gomock.Any()).
-		DoAndReturn(func(ctx context.Context, sid string) (domain.Session, error) {
+		DoAndReturn(func(_ context.Context, sid string) (domain.Session, error) {
 			return domain.Session{
 				ID:        sid,
 				UserID:    userID,
