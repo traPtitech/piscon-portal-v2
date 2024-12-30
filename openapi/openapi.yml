@@ -409,7 +409,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Benchmark"
         400:
-          description: "インスタンスが存在しない、チームに所属していないなど"
+          description: "インスタンスが存在しない、チームに所属していない、すでにそのチームのベンチマークがキューに入っているなど"
           content:
             application/json:
               schema:
