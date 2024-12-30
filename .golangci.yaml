@@ -1,0 +1,9 @@
+linters:
+  enable:
+    - gofmt
+    - revive
+
+issues:
+  exclude-dirs:
+    - server/handler/openapi
+    - ".*/mock$"

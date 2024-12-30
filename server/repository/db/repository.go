@@ -33,7 +33,7 @@ func (r *Repository) Transaction(ctx context.Context, f func(ctx context.Context
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer tx.Rollback() //nolint errcheck
 
 	txRepo := newTxRepository(tx)
 

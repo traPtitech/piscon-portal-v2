@@ -95,7 +95,7 @@ func Login(t *testing.T, server *httptest.Server, client *http.Client, userID st
 	t.Helper()
 
 	// not following redirect for the first request
-	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+	client.CheckRedirect = func(*http.Request, []*http.Request) error {
 		return http.ErrUseLastResponse
 	}
 
@@ -254,12 +254,12 @@ func (s *oauth2MockServer) handleToken(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(res)
+	_ = json.NewEncoder(w).Encode(res)
 }
 
-func (s *oauth2MockServer) handleWellKnown(w http.ResponseWriter, r *http.Request) {
+func (s *oauth2MockServer) handleWellKnown(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]any{
+	_ = json.NewEncoder(w).Encode(map[string]any{
 		"issuer":                 s.rootURL,
 		"authorization_endpoint": s.rootURL + "/authorize",
 		"token_endpoint":         s.rootURL + "/token",
@@ -269,7 +269,7 @@ func (s *oauth2MockServer) handleWellKnown(w http.ResponseWriter, r *http.Reques
 
 func (s *oauth2MockServer) handleJWKS(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]any{
+	_ = json.NewEncoder(w).Encode(map[string]any{
 		"keys": []map[string]any{
 			{
 				"kty": "RSA",
