@@ -346,13 +346,15 @@ paths:
             schema:
               type: "object"
               properties:
-                status:
-                  $ref: "#/components/schemas/InstanceStatus"
+                operation:
+                  $ref: "#/components/schemas/InstanceOperation"
+              required:
+                - operation
       responses:
         200:
-          description: "インスタンスのステータス変更に成功"
+          description: "インスタンスの操作に成功"
         400:
-          description: "現在と同じステータスである、無効なステータスである。"
+          description: "操作後も現在と同じステータスである、無効な操作である。"
           content:
             application/json:
               schema:
@@ -645,6 +647,12 @@ components:
         - "running"
         - "stopped"
       example: "running"
+    InstanceOperation:
+      type: "string"
+      enum:
+        - "start"
+        - "stop"
+      example: "start"
     Instance:
       type: "object"
       description: "サーバーのインスタンス"
