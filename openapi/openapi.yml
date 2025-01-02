@@ -556,6 +556,28 @@ paths:
         500:
           $ref: "#/components/responses/InternalServerError"
 
+  /scores:
+    get:
+      tags: ["score"]
+      summary: "全てのスコア取得"
+      description: "全てのベンチマークのスコアをチームごとに取得します"
+      operationId: "getScores"
+      security:
+        - UserAuth: []
+      responses:
+        200:
+          description: "全てのスコアの取得に成功"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/TeamScores"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
   /scores/ranking:
     get:
       tags: ["score"]
@@ -923,6 +945,38 @@ components:
         - createdAt
         - startedAt
         - finishedAt
+
+    BenchScore:
+      type: "object"
+      description: "ベンチマークのスコア"
+      properties:
+        benchmarkId:
+          $ref: "#/components/schemas/BenchmarkId"
+        teamId:
+          $ref: "#/components/schemas/TeamId"
+        score:
+          $ref: "#/components/schemas/Score"
+        createdAt:
+          $ref: "#/components/schemas/CreatedAt"
+      required:
+        - teamId
+        - score
+        - createdAt
+
+    TeamScores:
+      type: "object"
+      description: "チームのスコア一覧。"
+      properties:
+        teamId:
+          $ref: "#/components/schemas/TeamId"
+        scores:
+          type: "array"
+          description: "createdAtの昇順"
+          items:
+            $ref: "#/components/schemas/BenchScore"
+      required:
+        - teamId
+        - scores
 
     RankingItem:
       type: "object"
