@@ -17,6 +17,10 @@ tags:
     description: "インスタンスに関するAPI"
   - name: "benchmark"
     description: "ベンチマークに関するAPI"
+  - name: "score"
+    description: "スコアに関するAPI"
+  - name: "docs"
+    description: "ドキュメントに関するAPI"
 
 paths:
   /oauth2/code:
@@ -642,6 +646,66 @@ paths:
         500:
           $ref: "#/components/responses/InternalServerError"
 
+  /docs:
+    get:
+      tags: ["docs"]
+      summary: "ドキュメント取得"
+      description: "Markdown形式のドキュメントを取得します"
+      operationId: "getDocs"
+      security:
+        - UserAuth: []
+      responses:
+        200:
+          description: "ドキュメントの取得に成功"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  body:
+                    $ref: "#/components/schemas/MarkdownDocument"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+    patch:
+      tags: ["docs"]
+      summary: "ドキュメント更新"
+      description: "Markdown形式のドキュメントを更新します"
+      operationId: "patchDocs"
+      security:
+        - AdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                body:
+                  $ref: "#/components/schemas/MarkdownDocument"
+              required:
+                - body
+      responses:
+        200:
+          description: "ドキュメントの更新に成功"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  body:
+                    $ref: "#/components/schemas/MarkdownDocument"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
 components:
   requestBodies:
     NewTeam:
@@ -1040,6 +1104,11 @@ components:
         - rank
         - teamId
         - score
+
+    MarkdownDocument:
+      type: "string"
+      example: "# Title\n\n## Subtitle\n\nContent"
+      description: "Markdown形式のドキュメント"
 
     ErrorBadRequest:
       type: "object"
