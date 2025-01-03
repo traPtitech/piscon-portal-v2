@@ -558,6 +558,54 @@ paths:
         500:
           $ref: "#/components/responses/InternalServerError"
 
+  /scores:
+    get:
+      tags: ["score"]
+      summary: "全てのスコア取得"
+      description: "全てのベンチマークのスコアをチームごとに取得します"
+      operationId: "getScores"
+      security:
+        - UserAuth: []
+      responses:
+        200:
+          description: "全てのスコアの取得に成功"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/TeamScores"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /scores/ranking:
+    get:
+      tags: ["score"]
+      summary: "ランキング取得"
+      description: |
+        ベンチマークのスコアランキングを取得します。1位から順に並んでいます。
+        同じスコアの場合は、ベンチマーク実行日時(createdAt)が早い順に並べます。
+      operationId: "getRanking"
+      security:
+        - UserAuth: []
+      parameters:
+        - $ref: "#/components/parameters/rankingOrderBy"
+      responses:
+        200:
+          description: "ランキングの取得に成功"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/RankingItem"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
 components:
   requestBodies:
     NewTeam:
@@ -634,6 +682,16 @@ components:
       required: false
       schema:
         $ref: "#/components/schemas/BenchmarkStatus"
+    rankingOrderBy:
+      name: "orderBy"
+      in: "query"
+      description: "ランキングにどのスコアを使用するか。latestは最新のスコア、highestは最高スコアを使用する"
+      required: true
+      schema:
+        type: "string"
+        enum:
+          - "latest"
+          - "highest"
 
   schemas:
     InstanceId:
@@ -895,6 +953,58 @@ components:
         - createdAt
         - startedAt
         - finishedAt
+
+    BenchScore:
+      type: "object"
+      description: "ベンチマークのスコア"
+      properties:
+        benchmarkId:
+          $ref: "#/components/schemas/BenchmarkId"
+        teamId:
+          $ref: "#/components/schemas/TeamId"
+        score:
+          $ref: "#/components/schemas/Score"
+        createdAt:
+          $ref: "#/components/schemas/CreatedAt"
+      required:
+        - teamId
+        - score
+        - createdAt
+
+    TeamScores:
+      type: "object"
+      description: "チームのスコア一覧。"
+      properties:
+        teamId:
+          $ref: "#/components/schemas/TeamId"
+        scores:
+          type: "array"
+          description: "createdAtの昇順"
+          items:
+            $ref: "#/components/schemas/BenchScore"
+      required:
+        - teamId
+        - scores
+
+    RankingItem:
+      type: "object"
+      description: "ランキングの順位。まだベンチマークを1回も実行していない場合、createdAtはnull"
+      properties:
+        rank:
+          type: "integer"
+          example: 1
+          description: "順位"
+        teamId:
+          $ref: "#/components/schemas/TeamId"
+        score:
+          $ref: "#/components/schemas/Score"
+        createdAt:
+          $ref: "#/components/schemas/CreatedAt"
+      required:
+        - rank
+        - teamId
+        - score
+
     ErrorBadRequest:
       type: "object"
       properties:
