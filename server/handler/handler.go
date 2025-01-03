@@ -7,12 +7,15 @@ import (
 	"github.com/traPtitech/piscon-portal-v2/server/handler/internal"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
 	"github.com/traPtitech/piscon-portal-v2/server/services/oauth2"
+	"github.com/traPtitech/piscon-portal-v2/server/usecase"
 )
 
 type Handler struct {
 	repo           repository.Repository
 	sessionManager SessionManager
 	oauth2Service  *oauth2.Service
+
+	teamUseCase *usecase.TeamUseCase
 }
 
 type Config struct {
@@ -44,6 +47,7 @@ func New(repo repository.Repository, config Config) (*Handler, error) {
 		repo:           repo,
 		sessionManager: sessionManager,
 		oauth2Service:  oauth2Service,
+		teamUseCase:    usecase.NewTeamUseCase(repo),
 	}, nil
 }
 
@@ -54,4 +58,10 @@ func (h *Handler) SetupRoutes(e *echo.Echo) {
 	api.GET("/oauth2/code", h.GetOauth2Code)
 	api.GET("/oauth2/callback", h.Oauth2Callback)
 	api.POST("/oauth2/logout", h.Logout, h.AuthMiddleware())
+
+	teams := api.Group("/teams", h.AuthMiddleware())
+	teams.GET("", h.GetTeams)
+	teams.POST("", h.CreateTeam)
+	teams.GET("/:teamID", h.GetTeam)
+	teams.PATCH("/:teamID", h.UpdateTeam, h.TeamAuthMiddleware())
 }
