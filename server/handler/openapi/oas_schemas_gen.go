@@ -24,6 +24,55 @@ func (s *AdminAuth) SetAPIKey(val string) {
 	s.APIKey = val
 }
 
+// ベンチマークのスコア.
+// Ref: #/components/schemas/BenchScore
+type BenchScore struct {
+	BenchmarkId OptBenchmarkId `json:"benchmarkId"`
+	TeamId      TeamId         `json:"teamId"`
+	Score       Score          `json:"score"`
+	CreatedAt   CreatedAt      `json:"createdAt"`
+}
+
+// GetBenchmarkId returns the value of BenchmarkId.
+func (s *BenchScore) GetBenchmarkId() OptBenchmarkId {
+	return s.BenchmarkId
+}
+
+// GetTeamId returns the value of TeamId.
+func (s *BenchScore) GetTeamId() TeamId {
+	return s.TeamId
+}
+
+// GetScore returns the value of Score.
+func (s *BenchScore) GetScore() Score {
+	return s.Score
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *BenchScore) GetCreatedAt() CreatedAt {
+	return s.CreatedAt
+}
+
+// SetBenchmarkId sets the value of BenchmarkId.
+func (s *BenchScore) SetBenchmarkId(val OptBenchmarkId) {
+	s.BenchmarkId = val
+}
+
+// SetTeamId sets the value of TeamId.
+func (s *BenchScore) SetTeamId(val TeamId) {
+	s.TeamId = val
+}
+
+// SetScore sets the value of Score.
+func (s *BenchScore) SetScore(val Score) {
+	s.Score = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *BenchScore) SetCreatedAt(val CreatedAt) {
+	s.CreatedAt = val
+}
+
 // ベンチマーク.
 // Ref: #/components/schemas/Benchmark
 type Benchmark struct {
@@ -452,10 +501,12 @@ func (s *ErrorBadRequest) SetMessage(val OptString) {
 }
 
 func (*ErrorBadRequest) createTeamInstanceRes() {}
+func (*ErrorBadRequest) patchDocsRes()          {}
 func (*ErrorBadRequest) patchTeamInstanceRes()  {}
 func (*ErrorBadRequest) patchTeamRes()          {}
 func (*ErrorBadRequest) postBenchmarkRes()      {}
 func (*ErrorBadRequest) postTeamRes()           {}
+func (*ErrorBadRequest) putAdminsRes()          {}
 
 type FinishedAt time.Time
 
@@ -481,9 +532,11 @@ func (*Forbidden) getInstancesRes()           {}
 func (*Forbidden) getTeamBenchmarkResultRes() {}
 func (*Forbidden) getTeamBenchmarksRes()      {}
 func (*Forbidden) getTeamInstancesRes()       {}
+func (*Forbidden) patchDocsRes()              {}
 func (*Forbidden) patchTeamInstanceRes()      {}
 func (*Forbidden) patchTeamRes()              {}
 func (*Forbidden) postBenchmarkRes()          {}
+func (*Forbidden) putAdminsRes()              {}
 
 type GetBenchmarkQueueOKApplicationJSON []Benchmark
 
@@ -492,6 +545,22 @@ func (*GetBenchmarkQueueOKApplicationJSON) getBenchmarkQueueRes() {}
 type GetBenchmarksOKApplicationJSON []Benchmark
 
 func (*GetBenchmarksOKApplicationJSON) getBenchmarksRes() {}
+
+type GetDocsOK struct {
+	Body OptMarkdownDocument `json:"body"`
+}
+
+// GetBody returns the value of Body.
+func (s *GetDocsOK) GetBody() OptMarkdownDocument {
+	return s.Body
+}
+
+// SetBody sets the value of Body.
+func (s *GetDocsOK) SetBody(val OptMarkdownDocument) {
+	s.Body = val
+}
+
+func (*GetDocsOK) getDocsRes() {}
 
 type GetInstancesOKApplicationJSON []Instance
 
@@ -547,6 +616,14 @@ func (s *GetOauth2CodeSeeOther) SetLocation(val OptURI) {
 
 func (*GetOauth2CodeSeeOther) getOauth2CodeRes() {}
 
+type GetRankingOKApplicationJSON []RankingItem
+
+func (*GetRankingOKApplicationJSON) getRankingRes() {}
+
+type GetScoresOKApplicationJSON []TeamScores
+
+func (*GetScoresOKApplicationJSON) getScoresRes() {}
+
 type GetTeamBenchmarksOKApplicationJSON []Benchmark
 
 func (*GetTeamBenchmarksOKApplicationJSON) getTeamBenchmarksRes() {}
@@ -562,6 +639,8 @@ func (*GetTeamsOKApplicationJSON) getTeamsRes() {}
 type GetUsersOKApplicationJSON []User
 
 func (*GetUsersOKApplicationJSON) getUsersRes() {}
+
+type GitHubId string
 
 type IPAddress string
 
@@ -654,6 +733,48 @@ func (*Instance) createTeamInstanceRes() {}
 
 type InstanceId uuid.UUID
 
+// Ref: #/components/schemas/InstanceOperation
+type InstanceOperation string
+
+const (
+	InstanceOperationStart InstanceOperation = "start"
+	InstanceOperationStop  InstanceOperation = "stop"
+)
+
+// AllValues returns all InstanceOperation values.
+func (InstanceOperation) AllValues() []InstanceOperation {
+	return []InstanceOperation{
+		InstanceOperationStart,
+		InstanceOperationStop,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s InstanceOperation) MarshalText() ([]byte, error) {
+	switch s {
+	case InstanceOperationStart:
+		return []byte(s), nil
+	case InstanceOperationStop:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *InstanceOperation) UnmarshalText(data []byte) error {
+	switch InstanceOperation(data) {
+	case InstanceOperationStart:
+		*s = InstanceOperationStart
+		return nil
+	case InstanceOperationStop:
+		*s = InstanceOperationStop
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/InstanceStatus
 type InstanceStatus string
 
@@ -722,21 +843,28 @@ func (*InternalServerError) deleteTeamInstanceRes()     {}
 func (*InternalServerError) getBenchmarkQueueRes()      {}
 func (*InternalServerError) getBenchmarkResultRes()     {}
 func (*InternalServerError) getBenchmarksRes()          {}
+func (*InternalServerError) getDocsRes()                {}
 func (*InternalServerError) getInstancesRes()           {}
 func (*InternalServerError) getMeRes()                  {}
 func (*InternalServerError) getOauth2CallbackRes()      {}
 func (*InternalServerError) getOauth2CodeRes()          {}
+func (*InternalServerError) getRankingRes()             {}
+func (*InternalServerError) getScoresRes()              {}
 func (*InternalServerError) getTeamBenchmarkResultRes() {}
 func (*InternalServerError) getTeamBenchmarksRes()      {}
 func (*InternalServerError) getTeamInstancesRes()       {}
 func (*InternalServerError) getTeamRes()                {}
 func (*InternalServerError) getTeamsRes()               {}
 func (*InternalServerError) getUsersRes()               {}
+func (*InternalServerError) patchDocsRes()              {}
 func (*InternalServerError) patchTeamInstanceRes()      {}
 func (*InternalServerError) patchTeamRes()              {}
 func (*InternalServerError) postBenchmarkRes()          {}
 func (*InternalServerError) postOauth2LogoutRes()       {}
 func (*InternalServerError) postTeamRes()               {}
+func (*InternalServerError) putAdminsRes()              {}
+
+type MarkdownDocument string
 
 type NotFound struct {
 	Message OptString `json:"message"`
@@ -761,6 +889,52 @@ func (*NotFound) getTeamInstancesRes()       {}
 func (*NotFound) getTeamRes()                {}
 func (*NotFound) patchTeamInstanceRes()      {}
 func (*NotFound) patchTeamRes()              {}
+
+// NewOptBenchmarkId returns new OptBenchmarkId with value set to v.
+func NewOptBenchmarkId(v BenchmarkId) OptBenchmarkId {
+	return OptBenchmarkId{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBenchmarkId is optional BenchmarkId.
+type OptBenchmarkId struct {
+	Value BenchmarkId
+	Set   bool
+}
+
+// IsSet returns true if OptBenchmarkId was set.
+func (o OptBenchmarkId) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBenchmarkId) Reset() {
+	var v BenchmarkId
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBenchmarkId) SetTo(v BenchmarkId) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBenchmarkId) Get() (v BenchmarkId, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBenchmarkId) Or(d BenchmarkId) BenchmarkId {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
 
 // NewOptBenchmarkStatus returns new OptBenchmarkStatus with value set to v.
 func NewOptBenchmarkStatus(v BenchmarkStatus) OptBenchmarkStatus {
@@ -802,6 +976,52 @@ func (o OptBenchmarkStatus) Get() (v BenchmarkStatus, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptBenchmarkStatus) Or(d BenchmarkStatus) BenchmarkStatus {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptCreatedAt returns new OptCreatedAt with value set to v.
+func NewOptCreatedAt(v CreatedAt) OptCreatedAt {
+	return OptCreatedAt{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptCreatedAt is optional CreatedAt.
+type OptCreatedAt struct {
+	Value CreatedAt
+	Set   bool
+}
+
+// IsSet returns true if OptCreatedAt was set.
+func (o OptCreatedAt) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptCreatedAt) Reset() {
+	var v CreatedAt
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptCreatedAt) SetTo(v CreatedAt) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptCreatedAt) Get() (v CreatedAt, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptCreatedAt) Or(d CreatedAt) CreatedAt {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -854,38 +1074,38 @@ func (o OptFinishedAt) Or(d FinishedAt) FinishedAt {
 	return d
 }
 
-// NewOptInstanceStatus returns new OptInstanceStatus with value set to v.
-func NewOptInstanceStatus(v InstanceStatus) OptInstanceStatus {
-	return OptInstanceStatus{
+// NewOptMarkdownDocument returns new OptMarkdownDocument with value set to v.
+func NewOptMarkdownDocument(v MarkdownDocument) OptMarkdownDocument {
+	return OptMarkdownDocument{
 		Value: v,
 		Set:   true,
 	}
 }
 
-// OptInstanceStatus is optional InstanceStatus.
-type OptInstanceStatus struct {
-	Value InstanceStatus
+// OptMarkdownDocument is optional MarkdownDocument.
+type OptMarkdownDocument struct {
+	Value MarkdownDocument
 	Set   bool
 }
 
-// IsSet returns true if OptInstanceStatus was set.
-func (o OptInstanceStatus) IsSet() bool { return o.Set }
+// IsSet returns true if OptMarkdownDocument was set.
+func (o OptMarkdownDocument) IsSet() bool { return o.Set }
 
 // Reset unsets value.
-func (o *OptInstanceStatus) Reset() {
-	var v InstanceStatus
+func (o *OptMarkdownDocument) Reset() {
+	var v MarkdownDocument
 	o.Value = v
 	o.Set = false
 }
 
 // SetTo sets value to v.
-func (o *OptInstanceStatus) SetTo(v InstanceStatus) {
+func (o *OptMarkdownDocument) SetTo(v MarkdownDocument) {
 	o.Set = true
 	o.Value = v
 }
 
 // Get returns value and boolean that denotes whether value was set.
-func (o OptInstanceStatus) Get() (v InstanceStatus, ok bool) {
+func (o OptMarkdownDocument) Get() (v MarkdownDocument, ok bool) {
 	if !o.Set {
 		return v, false
 	}
@@ -893,7 +1113,7 @@ func (o OptInstanceStatus) Get() (v InstanceStatus, ok bool) {
 }
 
 // Or returns value if set, or given parameter if does not.
-func (o OptInstanceStatus) Or(d InstanceStatus) InstanceStatus {
+func (o OptMarkdownDocument) Or(d MarkdownDocument) MarkdownDocument {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -1314,29 +1534,61 @@ func (o OptURI) Or(d url.URL) url.URL {
 	return d
 }
 
+type PatchDocsOK struct {
+	Body OptMarkdownDocument `json:"body"`
+}
+
+// GetBody returns the value of Body.
+func (s *PatchDocsOK) GetBody() OptMarkdownDocument {
+	return s.Body
+}
+
+// SetBody sets the value of Body.
+func (s *PatchDocsOK) SetBody(val OptMarkdownDocument) {
+	s.Body = val
+}
+
+func (*PatchDocsOK) patchDocsRes() {}
+
+type PatchDocsReq struct {
+	Body MarkdownDocument `json:"body"`
+}
+
+// GetBody returns the value of Body.
+func (s *PatchDocsReq) GetBody() MarkdownDocument {
+	return s.Body
+}
+
+// SetBody sets the value of Body.
+func (s *PatchDocsReq) SetBody(val MarkdownDocument) {
+	s.Body = val
+}
+
 // PatchTeamInstanceOK is response for PatchTeamInstance operation.
 type PatchTeamInstanceOK struct{}
 
 func (*PatchTeamInstanceOK) patchTeamInstanceRes() {}
 
 type PatchTeamInstanceReq struct {
-	Status OptInstanceStatus `json:"status"`
+	Operation InstanceOperation `json:"operation"`
 }
 
-// GetStatus returns the value of Status.
-func (s *PatchTeamInstanceReq) GetStatus() OptInstanceStatus {
-	return s.Status
+// GetOperation returns the value of Operation.
+func (s *PatchTeamInstanceReq) GetOperation() InstanceOperation {
+	return s.Operation
 }
 
-// SetStatus sets the value of Status.
-func (s *PatchTeamInstanceReq) SetStatus(val OptInstanceStatus) {
-	s.Status = val
+// SetOperation sets the value of Operation.
+func (s *PatchTeamInstanceReq) SetOperation(val InstanceOperation) {
+	s.Operation = val
 }
 
 type PatchTeamReq struct {
 	Name OptTeamName `json:"name"`
 	// チームに所属させる部員のID.
 	Members []UserId `json:"members"`
+	// チームに所属させる部員のGitHub ID.
+	GithubIds []GitHubId `json:"githubIds"`
 }
 
 // GetName returns the value of Name.
@@ -1349,6 +1601,11 @@ func (s *PatchTeamReq) GetMembers() []UserId {
 	return s.Members
 }
 
+// GetGithubIds returns the value of GithubIds.
+func (s *PatchTeamReq) GetGithubIds() []GitHubId {
+	return s.GithubIds
+}
+
 // SetName sets the value of Name.
 func (s *PatchTeamReq) SetName(val OptTeamName) {
 	s.Name = val
@@ -1357,6 +1614,11 @@ func (s *PatchTeamReq) SetName(val OptTeamName) {
 // SetMembers sets the value of Members.
 func (s *PatchTeamReq) SetMembers(val []UserId) {
 	s.Members = val
+}
+
+// SetGithubIds sets the value of GithubIds.
+func (s *PatchTeamReq) SetGithubIds(val []GitHubId) {
+	s.GithubIds = val
 }
 
 type PostBenchmarkReq struct {
@@ -1420,6 +1682,102 @@ func (s *PostTeamReq) SetMembers(val []UserId) {
 	s.Members = val
 }
 
+// PutAdminsOK is response for PutAdmins operation.
+type PutAdminsOK struct{}
+
+func (*PutAdminsOK) putAdminsRes() {}
+
+// ランキングの順位。まだベンチマークを1回も実行していない場合、createdAtはnull.
+// Ref: #/components/schemas/RankingItem
+type RankingItem struct {
+	// 順位.
+	Rank      int          `json:"rank"`
+	TeamId    TeamId       `json:"teamId"`
+	Score     Score        `json:"score"`
+	CreatedAt OptCreatedAt `json:"createdAt"`
+}
+
+// GetRank returns the value of Rank.
+func (s *RankingItem) GetRank() int {
+	return s.Rank
+}
+
+// GetTeamId returns the value of TeamId.
+func (s *RankingItem) GetTeamId() TeamId {
+	return s.TeamId
+}
+
+// GetScore returns the value of Score.
+func (s *RankingItem) GetScore() Score {
+	return s.Score
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *RankingItem) GetCreatedAt() OptCreatedAt {
+	return s.CreatedAt
+}
+
+// SetRank sets the value of Rank.
+func (s *RankingItem) SetRank(val int) {
+	s.Rank = val
+}
+
+// SetTeamId sets the value of TeamId.
+func (s *RankingItem) SetTeamId(val TeamId) {
+	s.TeamId = val
+}
+
+// SetScore sets the value of Score.
+func (s *RankingItem) SetScore(val Score) {
+	s.Score = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *RankingItem) SetCreatedAt(val OptCreatedAt) {
+	s.CreatedAt = val
+}
+
+type RankingOrderBy string
+
+const (
+	RankingOrderByLatest  RankingOrderBy = "latest"
+	RankingOrderByHighest RankingOrderBy = "highest"
+)
+
+// AllValues returns all RankingOrderBy values.
+func (RankingOrderBy) AllValues() []RankingOrderBy {
+	return []RankingOrderBy{
+		RankingOrderByLatest,
+		RankingOrderByHighest,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s RankingOrderBy) MarshalText() ([]byte, error) {
+	switch s {
+	case RankingOrderByLatest:
+		return []byte(s), nil
+	case RankingOrderByHighest:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *RankingOrderBy) UnmarshalText(data []byte) error {
+	switch RankingOrderBy(data) {
+	case RankingOrderByLatest:
+		*s = RankingOrderByLatest
+		return nil
+	case RankingOrderByHighest:
+		*s = RankingOrderByHighest
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 type Score float64
 
 type StartedAt time.Time
@@ -1430,8 +1788,10 @@ type Team struct {
 	ID   TeamId   `json:"id"`
 	Name TeamName `json:"name"`
 	// チームに所属している部員のID.
-	Members   []UserId  `json:"members"`
-	CreatedAt time.Time `json:"createdAt"`
+	Members []UserId `json:"members"`
+	// チームに所属している部員のGitHub ID.
+	GithubIds []GitHubId `json:"githubIds"`
+	CreatedAt time.Time  `json:"createdAt"`
 }
 
 // GetID returns the value of ID.
@@ -1447,6 +1807,11 @@ func (s *Team) GetName() TeamName {
 // GetMembers returns the value of Members.
 func (s *Team) GetMembers() []UserId {
 	return s.Members
+}
+
+// GetGithubIds returns the value of GithubIds.
+func (s *Team) GetGithubIds() []GitHubId {
+	return s.GithubIds
 }
 
 // GetCreatedAt returns the value of CreatedAt.
@@ -1467,6 +1832,11 @@ func (s *Team) SetName(val TeamName) {
 // SetMembers sets the value of Members.
 func (s *Team) SetMembers(val []UserId) {
 	s.Members = val
+}
+
+// SetGithubIds sets the value of GithubIds.
+func (s *Team) SetGithubIds(val []GitHubId) {
+	s.GithubIds = val
 }
 
 // SetCreatedAt sets the value of CreatedAt.
@@ -1496,6 +1866,34 @@ type TeamId uuid.UUID
 
 type TeamName string
 
+// チームのスコア一覧。.
+// Ref: #/components/schemas/TeamScores
+type TeamScores struct {
+	TeamId TeamId `json:"teamId"`
+	// CreatedAtの昇順.
+	Scores []BenchScore `json:"scores"`
+}
+
+// GetTeamId returns the value of TeamId.
+func (s *TeamScores) GetTeamId() TeamId {
+	return s.TeamId
+}
+
+// GetScores returns the value of Scores.
+func (s *TeamScores) GetScores() []BenchScore {
+	return s.Scores
+}
+
+// SetTeamId sets the value of TeamId.
+func (s *TeamScores) SetTeamId(val TeamId) {
+	s.TeamId = val
+}
+
+// SetScores sets the value of Scores.
+func (s *TeamScores) SetScores(val []BenchScore) {
+	s.Scores = val
+}
+
 type Unauthorized struct {
 	Message OptString `json:"message"`
 }
@@ -1515,19 +1913,24 @@ func (*Unauthorized) deleteTeamInstanceRes()     {}
 func (*Unauthorized) getBenchmarkQueueRes()      {}
 func (*Unauthorized) getBenchmarkResultRes()     {}
 func (*Unauthorized) getBenchmarksRes()          {}
+func (*Unauthorized) getDocsRes()                {}
 func (*Unauthorized) getInstancesRes()           {}
 func (*Unauthorized) getMeRes()                  {}
+func (*Unauthorized) getRankingRes()             {}
+func (*Unauthorized) getScoresRes()              {}
 func (*Unauthorized) getTeamBenchmarkResultRes() {}
 func (*Unauthorized) getTeamBenchmarksRes()      {}
 func (*Unauthorized) getTeamInstancesRes()       {}
 func (*Unauthorized) getTeamRes()                {}
 func (*Unauthorized) getTeamsRes()               {}
 func (*Unauthorized) getUsersRes()               {}
+func (*Unauthorized) patchDocsRes()              {}
 func (*Unauthorized) patchTeamInstanceRes()      {}
 func (*Unauthorized) patchTeamRes()              {}
 func (*Unauthorized) postBenchmarkRes()          {}
 func (*Unauthorized) postOauth2LogoutRes()       {}
 func (*Unauthorized) postTeamRes()               {}
+func (*Unauthorized) putAdminsRes()              {}
 
 // 部員.
 // Ref: #/components/schemas/User
