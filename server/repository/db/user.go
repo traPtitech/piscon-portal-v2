@@ -54,7 +54,8 @@ func createUser(ctx context.Context, executor bob.Executor, user domain.User) er
 
 func toDomainUser(user *models.User) domain.User {
 	return domain.User{
-		ID:   user.ID,
-		Name: user.Name,
+		ID:     user.ID,
+		Name:   user.Name,
+		TeamID: user.TeamID.Ptr(),
 	}
 }

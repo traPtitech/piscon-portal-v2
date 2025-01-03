@@ -24,6 +24,15 @@ type Repository interface {
 	CreateSession(ctx context.Context, session domain.Session) error
 	// DeleteSession deletes a session by id.
 	DeleteSession(ctx context.Context, id string) error
+
+	// FindTeam finds a team by id. If the team is not found, it returns [ErrNotFound].
+	FindTeam(ctx context.Context, id string) (domain.Team, error)
+	// GetTeams returns all teams.
+	GetTeams(ctx context.Context) ([]domain.Team, error)
+	// CreateTeam creates a team.
+	CreateTeam(ctx context.Context, team domain.Team) error
+	// UpdateTeam updates a team.
+	UpdateTeam(ctx context.Context, team domain.Team) error
 }
 
 var (
