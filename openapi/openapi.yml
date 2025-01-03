@@ -606,6 +606,42 @@ paths:
         500:
           $ref: "#/components/responses/InternalServerError"
 
+  /admins:
+    put:
+      tags: ["admin"]
+      summary: "管理者権限設定"
+      description: "管理者一覧を設定します。"
+      operationId: "putAdmins"
+      security:
+        - AdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/UserId"
+              minItems: 1
+      responses:
+        200:
+          description: "管理者権限の設定に成功"
+        400:
+          description: |
+            - 指定された部員が存在しない。
+            - 配列の長さが0。
+            - 自分が含まれていない。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
 components:
   requestBodies:
     NewTeam:
