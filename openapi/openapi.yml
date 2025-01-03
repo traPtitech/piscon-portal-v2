@@ -633,6 +633,43 @@ paths:
         500:
           $ref: "#/components/responses/InternalServerError"
 
+    patch:
+      tags: ["docs"]
+      summary: "ドキュメント更新"
+      description: "Markdown形式のドキュメントを更新します"
+      operationId: "patchDocs"
+      security:
+        - AdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                body:
+                  $ref: "#/components/schemas/MarkdownDocument"
+              required:
+                - body
+      responses:
+        200:
+          description: "ドキュメントの更新に成功"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  body:
+                    $ref: "#/components/schemas/MarkdownDocument"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
 components:
   requestBodies:
     NewTeam:
