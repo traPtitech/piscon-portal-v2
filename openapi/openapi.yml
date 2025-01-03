@@ -683,7 +683,7 @@ components:
     rankingOrderBy:
       name: "orderBy"
       in: "query"
-      description: "ランキングをどのスコア順に並べるか。latestは最新のスコア順、highestは最高スコア順"
+      description: "ランキングにどのスコアを使用するか。latestは最新のスコア、highestは最高スコアを使用する"
       required: true
       schema:
         type: "string"
