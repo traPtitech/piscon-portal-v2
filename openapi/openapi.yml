@@ -216,7 +216,8 @@ paths:
     patch:
       tags: ["teams"]
       summary: "チーム情報更新"
-      description: "チーム情報やメンバーを更新します"
+      description: |
+        チーム情報やメンバー、GitHub IDを更新します、指定されたフィールドのみを変更します。
       operationId: "patchTeam"
       security:
         - TeamAuth: []
@@ -641,6 +642,12 @@ components:
                 type: "array"
                 items:
                   $ref: "#/components/schemas/UserId"
+              githubIds:
+                description: "チームに所属させる部員のGitHub ID"
+                maxItems: 3
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/GitHubId"
 
     NewBenchmark:
       content:
@@ -786,6 +793,10 @@ components:
       type: "string"
       example: "team1"
       description: "チーム名"
+    GitHubId:
+      type: "string"
+      example: "ikura-hamu"
+      description: "GitHubのID"
     Team:
       type: "object"
       description: "チーム"
@@ -800,6 +811,12 @@ components:
           type: "array"
           items:
             $ref: "#/components/schemas/UserId"
+        githubIds:
+          description: "チームに所属している部員のGitHub ID"
+          maxItems: 3
+          type: "array"
+          items:
+            $ref: "#/components/schemas/GitHubId"
         createdAt:
           type: "string"
           format: "date-time"
