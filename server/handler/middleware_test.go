@@ -79,3 +79,67 @@ func TestAuthMiddleware(t *testing.T) {
 		})
 	}
 }
+
+func TestTeamAuthMiddleware(t *testing.T) {
+	t.Parallel()
+
+	ctrl := gomock.NewController(t)
+
+	mockRepo := repomock.NewMockRepository(ctrl)
+	mockSessManager := sessmock.NewMockSessionManager(ctrl)
+	handler := NewHandler(mockRepo, mockSessManager)
+
+	const userID = "test-user-id"
+
+	needAuthorize := handler.TeamAuthMiddleware()(func(c echo.Context) error {
+		return c.NoContent(http.StatusOK)
+	})
+
+	tests := []struct {
+		name         string
+		setup        func()
+		expectStatus int
+	}{
+		{
+			name: "ok",
+			setup: func() {
+				mockRepo.EXPECT().FindTeam(gomock.Any(), "test-team-id").Return(domain.Team{
+					ID: "test-team-id",
+					Members: []domain.User{
+						{ID: userID},
+					},
+				}, nil)
+			},
+			expectStatus: http.StatusOK,
+		},
+		{
+			name: "user is not a member of the team",
+			setup: func() {
+				mockRepo.EXPECT().FindTeam(gomock.Any(), "test-team-id").Return(domain.Team{
+					ID:      "test-team-id",
+					Members: []domain.User{{ID: "another-user-id"}},
+				}, nil)
+			},
+			expectStatus: http.StatusForbidden,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, "/", nil)
+			rec := httptest.NewRecorder()
+
+			c := echo.New().NewContext(req, rec)
+			c.SetParamNames("teamID")
+			c.SetParamValues("test-team-id")
+			c.Set("userID", userID)
+
+			tt.setup()
+
+			_ = needAuthorize(c)
+			if rec.Code != tt.expectStatus {
+				t.Errorf("unexpected status code: expected=%d, got=%d", tt.expectStatus, rec.Code)
+			}
+		})
+	}
+}
