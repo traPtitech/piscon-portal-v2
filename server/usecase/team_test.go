@@ -20,7 +20,7 @@ func TestCreateTeam(t *testing.T) {
 	teamUseCase := usecase.NewTeamUseCase(mockRepo)
 
 	mockRepo.EXPECT().FindUser(gomock.Any(), gomock.Any()).
-		DoAndReturn(func(ctx context.Context, id string) (domain.User, error) {
+		DoAndReturn(func(_ context.Context, id string) (domain.User, error) {
 			return domain.User{ID: id}, nil
 		}).
 		AnyTimes()
@@ -83,12 +83,12 @@ func TestUpdateTeam(t *testing.T) {
 	teamUseCase := usecase.NewTeamUseCase(mockRepo)
 
 	mockRepo.EXPECT().FindTeam(gomock.Any(), gomock.Any()).
-		DoAndReturn(func(ctx context.Context, id string) (domain.Team, error) {
+		DoAndReturn(func(_ context.Context, id string) (domain.Team, error) {
 			return domain.Team{ID: id}, nil
 		}).
 		AnyTimes()
 	mockRepo.EXPECT().FindUser(gomock.Any(), gomock.Any()).
-		DoAndReturn(func(ctx context.Context, id string) (domain.User, error) {
+		DoAndReturn(func(_ context.Context, id string) (domain.User, error) {
 			return domain.User{ID: id}, nil
 		}).
 		AnyTimes()
