@@ -29,9 +29,9 @@ func TestCreateTeam(t *testing.T) {
 	userID := uuid.New()
 
 	tests := []struct {
-		name    string
-		input   usecase.CreateTeamInput
-		wantErr bool
+		name        string
+		input       usecase.CreateTeamInput
+		expectError bool
 	}{
 		{
 			name: "valid",
@@ -40,7 +40,7 @@ func TestCreateTeam(t *testing.T) {
 				MemberIDs: []uuid.UUID{userID},
 				CreatorID: userID,
 			},
-			wantErr: false,
+			expectError: false,
 		},
 		{
 			name: "multiple members",
@@ -49,7 +49,7 @@ func TestCreateTeam(t *testing.T) {
 				MemberIDs: []uuid.UUID{userID, uuid.New()},
 				CreatorID: userID,
 			},
-			wantErr: false,
+			expectError: false,
 		},
 		{
 			name: "4 members",
@@ -58,16 +58,16 @@ func TestCreateTeam(t *testing.T) {
 				MemberIDs: []uuid.UUID{userID, uuid.New(), uuid.New(), uuid.New()},
 				CreatorID: userID,
 			},
-			wantErr: true,
+			expectError: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			_, err := teamUseCase.CreateTeam(context.TODO(), tt.input)
-			if err != nil && !tt.wantErr {
+			if err != nil && !tt.expectError {
 				t.Errorf("unexpected error: %v", err)
-			} else if err == nil && tt.wantErr {
+			} else if err == nil && tt.expectError {
 				t.Error("expected error, but got nil")
 			}
 		})
