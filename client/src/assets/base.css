@@ -1,15 +1,47 @@
+:root {
+  --ct-white: #ffffff;
+  --ct-black: #000000;
+
+  --ct-slate-50: #f8fafc;
+  --ct-slate-50-rgb: 248, 250, 252;
+  --ct-slate-100: #f1f5f9;
+  --ct-slate-100-rgb: 241, 245, 249;
+  --ct-slate-200: #e2e8f0;
+  --ct-slate-200-rgb: 226, 232, 240;
+  --ct-slate-300: #cbd5e1;
+  --ct-slate-300-rgb: 203, 213, 225;
+  --ct-slate-400: #94a3b8;
+  --ct-slate-400-rgb: 148, 163, 184;
+  --ct-slate-500: #64748b;
+  --ct-slate-500-rgb: 100, 116, 139;
+  --ct-slate-600: #475569;
+  --ct-slate-600-rgb: 71, 85, 105;
+  --ct-slate-700: #334155;
+  --ct-slate-700-rgb: 51, 65, 85;
+  --ct-slate-800: #1e293b;
+  --ct-slate-800-rgb: 30, 41, 59;
+  --ct-slate-900: #0f172a;
+  --ct-slate-900-rgb: 15, 23, 42;
+  --ct-slate-950: #020617;
+  --ct-slate-950-rgb: 2, 6, 23;
+
+  --color-primary: #005BAC;
+  --color-primary-background: var(--ct-slate-200);
+}
+
 *,
 *::before,
 *::after {
   box-sizing: border-box;
   margin: 0;
-  font-weight: normal;
 }
 
 body {
+  font-family: 'Noto Sans JP', sans-serif;
   min-height: 100vh;
   font-size: 16px;
   text-rendering: optimizeLegibility;
+  font-optical-sizing: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
