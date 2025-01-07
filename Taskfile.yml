@@ -1,0 +1,35 @@
+version: "3"
+
+tasks:
+  run-server:
+    dotenv:
+      - .env
+    deps:
+      - up-db
+    cmds:
+      - go run cmd/server/main.go
+
+  test:
+    cmds:
+      - go test -cover -race ./...
+
+  gen:
+    cmds:
+      - task: up-db
+      - go generate ./...
+    sources:
+      - openapi/openapi.yml
+      - server/bobgen.yaml
+      - server/ogen.yaml
+      - server/schema.sql
+    generates:
+      - server/openapi/*.go
+      - server/models/**/*.go
+
+  up-db:
+    cmds:
+      - docker compose up -d --wait db
+
+  down-db:
+    cmds:
+      - docker compose down db

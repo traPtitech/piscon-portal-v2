@@ -1,0 +1,1200 @@
+openapi: 3.0.3
+info:
+  title: "piscon-portal-v2"
+  version: "v0.0.0"
+servers:
+  - url: "http://localhost:8080/api"
+    description: "Local server"
+
+tags:
+  - name: "oauth2"
+    description: "OAuth2を使った部員の認証"
+  - name: "users"
+    description: "部員に関するAPI"
+  - name: "teams"
+    description: "チームに関するAPI"
+  - name: "instance"
+    description: "インスタンスに関するAPI"
+  - name: "benchmark"
+    description: "ベンチマークに関するAPI"
+  - name: "score"
+    description: "スコアに関するAPI"
+  - name: "docs"
+    description: "ドキュメントに関するAPI"
+
+paths:
+  /oauth2/code:
+    get:
+      operationId: "getOauth2Code"
+      tags:
+        - "oauth2"
+      summary: "OAuth2認証コードの取得・traQの認可ページにリダイレクト"
+      description: "OAuth2の認証に必要なCode Verifierを生成し、traQの認可ページにリダイレクトします。"
+      responses:
+        303:
+          description: "traQの認可ページにリダイレクトします。"
+          headers:
+            Location:
+              schema:
+                type: "string"
+                format: "uri"
+                example: "https://q.trap.jp/oauth2/authorize?response_type=code&client_id=client_id&redirect_uri=http://localhost:8080/api/oauth2/callback&state=state&code_challenge=code_challenge&code_challenge_method=S256"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /oauth2/callback:
+    get:
+      operationId: "getOauth2Callback"
+      tags:
+        - "oauth2"
+      summary: "traQからのリダイレクト"
+      description: "traQ上での認証後にtraQから Authorization Codeがクエリパラメーターにつけられて、 リダイレクトされます。"
+      parameters:
+        - name: "code"
+          in: "query"
+          description: "traQからのAuthorization Code"
+          required: true
+          schema:
+            type: "string"
+            example: "authorization_code"
+      responses:
+        303:
+          description: "認証に成功し、トップページにリダイレクトします。"
+          headers:
+            Location:
+              schema:
+                type: "string"
+                format: "uri"
+                example: "http://localhost:8080/"
+        400:
+          description: "セッションやAuthorization Codeに誤りがあり、認証に失敗しました"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+                    example: "認証に失敗しました。"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /oauth2/logout:
+    post:
+      summary: "ログアウト"
+      description: "ログアウトし、セッションを削除します"
+      tags:
+        - "oauth2"
+      security:
+        - UserAuth: []
+      operationId: "postOauth2Logout"
+      responses:
+        200:
+          description: "ログアウトしました。"
+        400:
+          description: "セッションに誤りがあり、認証に失敗しました"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+                    example: "誤りの内容"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /users:
+    get:
+      tags: ["users"]
+      summary: "部員一覧取得"
+      description: "凍結されていない部員一覧を取得します"
+      operationId: "getUsers"
+      security:
+        - UserAuth: []
+      responses:
+        200:
+          description: "部員一覧の取得に成功"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/User"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /users/me:
+    get:
+      tags: ["users"]
+      summary: "自分の情報取得"
+      description: "自分の情報を取得します"
+      operationId: "getMe"
+      security:
+        - UserAuth: []
+      responses:
+        200:
+          description: "自分の情報の取得に成功"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /teams:
+    get:
+      tags: ["teams"]
+      summary: "チーム一覧取得"
+      description: "チーム一覧を取得します"
+      operationId: "getTeams"
+      security:
+        - UserAuth: []
+      responses:
+        200:
+          description: "チーム一覧の取得に成功"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Team"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+    post:
+      tags: ["teams"]
+      summary: "チーム作成"
+      description: "チームを作成します"
+      operationId: "postTeam"
+      security:
+        - UserAuth: []
+      requestBody:
+        required: true
+        $ref: "#/components/requestBodies/NewTeam"
+      responses:
+        201:
+          description: "チームの作成に成功"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Team"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /teams/{teamId}:
+    get:
+      tags: ["teams"]
+      summary: "チーム情報取得"
+      description: "チーム情報を取得します"
+      operationId: "getTeam"
+      security:
+        - UserAuth: []
+      parameters:
+        - $ref: "#/components/parameters/teamId"
+      responses:
+        200:
+          description: "チーム情報の取得に成功"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Team"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+    patch:
+      tags: ["teams"]
+      summary: "チーム情報更新"
+      description: |
+        チーム情報やメンバー、GitHub IDを更新します、指定されたフィールドのみを変更します。
+      operationId: "patchTeam"
+      security:
+        - TeamAuth: []
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/teamId"
+      requestBody:
+        required: true
+        $ref: "#/components/requestBodies/PatchTeam"
+      responses:
+        200:
+          description: "チーム情報の更新に成功"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Team"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /teams/{teamId}/instances:
+    get:
+      tags: ["instance"]
+      summary: "インスタンス一覧取得"
+      description: "チームに所属しているインスタンス一覧を取得します"
+      operationId: "getTeamInstances"
+      security:
+        - TeamAuth: []
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/teamId"
+      responses:
+        200:
+          description: "インスタンス一覧の取得に成功"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Instance"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+    post:
+      tags: ["instance"]
+      summary: "インスタンス起動"
+      description: "インスタンスを起動してチームに追加します"
+      operationId: "createTeamInstance"
+      security:
+        - TeamAuth: []
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/teamId"
+      responses:
+        201:
+          description: "インスタンスの起動に成功"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Instance"
+        400:
+          description: "インスタンス数の上限に達しているなど"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /teams/{teamId}/instances/{instanceId}:
+    delete:
+      tags: ["instance"]
+      summary: "インスタンス削除"
+      description: "インスタンスを削除します"
+      operationId: "deleteTeamInstance"
+      security:
+        - TeamAuth: []
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/teamId"
+        - $ref: "#/components/parameters/instanceId"
+      responses:
+        200:
+          description: "インスタンスの削除に成功"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+    patch:
+      tags: ["instance"]
+      summary: "インスタンス状態変更"
+      description: "インスタンスの状態を変更します"
+      operationId: "patchTeamInstance"
+      security:
+        - TeamAuth: []
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/teamId"
+        - $ref: "#/components/parameters/instanceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                operation:
+                  $ref: "#/components/schemas/InstanceOperation"
+              required:
+                - operation
+      responses:
+        200:
+          description: "インスタンスの操作に成功"
+        400:
+          description: "操作後も現在と同じステータスである、無効な操作である。"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /instances:
+    get:
+      tags: ["instance"]
+      summary: "インスタンス一覧取得"
+      description: "全インスタンス一覧を取得します"
+      operationId: "getInstances"
+      security:
+        - AdminAuth: []
+      responses:
+        200:
+          description: "インスタンス一覧の取得に成功。チームIDの昇順で返す"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Instance"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /benchmarks:
+    post:
+      tags: ["benchmark"]
+      summary: "ベンチマーク実行"
+      description: "指定したインスタンスに向けてベンチマークを実行します"
+      operationId: "postBenchmark"
+      security:
+        - UserAuth: []
+      requestBody:
+        required: true
+        $ref: "#/components/requestBodies/NewBenchmark"
+      responses:
+        201:
+          description: "ベンチマークの実行(enqueue)に成功"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Benchmark"
+        400:
+          description: "インスタンスが存在しない、チームに所属していない、すでにそのチームのベンチマークがキューに入っているなど"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+    get:
+      tags: ["benchmark"]
+      summary: "ベンチマーク一覧取得"
+      description: "全チームのベンチマーク一覧を取得します"
+      operationId: "getBenchmarks"
+      security:
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/benchmarkStatus"
+      responses:
+        200:
+          description: "ベンチマーク一覧の取得に成功"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Benchmark"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /benchmarks/queue:
+    get:
+      tags: ["benchmark"]
+      summary: "ベンチマーク待ち行列取得"
+      description: |
+        ベンチマーク待ちのキューを取得します。
+        createdAtの昇順になっており、現在実行中のベンチマークと、実行待ちのベンチマークが含まれます。
+      operationId: "getBenchmarkQueue"
+      security:
+        - UserAuth: []
+      responses:
+        200:
+          description: "ベンチマーク待ち行列の取得に成功"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Benchmark"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /teams/{teamId}/benchmarks:
+    get:
+      tags: ["benchmark"]
+      summary: "チームのベンチマーク一覧取得"
+      description: "チームのベンチマーク一覧を取得します"
+      operationId: "getTeamBenchmarks"
+      security:
+        - TeamAuth: []
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/teamId"
+        - $ref: "#/components/parameters/benchmarkStatus"
+      responses:
+        200:
+          description: "チームのベンチマーク一覧の取得に成功"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Benchmark"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /teams/{teamId}/benchmarks/{benchmarkId}:
+    get:
+      tags: ["benchmark"]
+      summary: "ベンチマーク結果取得"
+      description: "ベンチマークの結果を取得します"
+      operationId: "getTeamBenchmarkResult"
+      security:
+        - TeamAuth: []
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/teamId"
+        - $ref: "#/components/parameters/benchmarkId"
+      responses:
+        200:
+          description: "ベンチマーク結果の取得に成功"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BenchmarkResult"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /benchmarks/{benchmarkId}:
+    get:
+      tags: ["benchmark"]
+      summary: "ベンチマーク結果取得"
+      description: |
+        ベンチマークの結果を取得します。
+        管理者のみがアクセス可能で、競技者用ログとは別に管理者用ログも含まれます。
+      operationId: "getBenchmarkResult"
+      security:
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/benchmarkId"
+      responses:
+        200:
+          description: "ベンチマーク結果の取得に成功"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BenchmarkAdminResult"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /scores:
+    get:
+      tags: ["score"]
+      summary: "全てのスコア取得"
+      description: "全てのベンチマークのスコアをチームごとに取得します"
+      operationId: "getScores"
+      security:
+        - UserAuth: []
+      responses:
+        200:
+          description: "全てのスコアの取得に成功"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/TeamScores"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /scores/ranking:
+    get:
+      tags: ["score"]
+      summary: "ランキング取得"
+      description: |
+        ベンチマークのスコアランキングを取得します。1位から順に並んでいます。
+        同じスコアの場合は、ベンチマーク実行日時(createdAt)が早い順に並べます。
+      operationId: "getRanking"
+      security:
+        - UserAuth: []
+      parameters:
+        - $ref: "#/components/parameters/rankingOrderBy"
+      responses:
+        200:
+          description: "ランキングの取得に成功"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/RankingItem"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /admins:
+    put:
+      tags: ["admin"]
+      summary: "管理者権限設定"
+      description: "管理者一覧を設定します。"
+      operationId: "putAdmins"
+      security:
+        - AdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/UserId"
+              minItems: 1
+      responses:
+        200:
+          description: "管理者権限の設定に成功"
+        400:
+          description: |
+            - 指定された部員が存在しない。
+            - 配列の長さが0。
+            - 自分が含まれていない。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /docs:
+    get:
+      tags: ["docs"]
+      summary: "ドキュメント取得"
+      description: "Markdown形式のドキュメントを取得します"
+      operationId: "getDocs"
+      security:
+        - UserAuth: []
+      responses:
+        200:
+          description: "ドキュメントの取得に成功"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  body:
+                    $ref: "#/components/schemas/MarkdownDocument"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+    patch:
+      tags: ["docs"]
+      summary: "ドキュメント更新"
+      description: "Markdown形式のドキュメントを更新します"
+      operationId: "patchDocs"
+      security:
+        - AdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                body:
+                  $ref: "#/components/schemas/MarkdownDocument"
+              required:
+                - body
+      responses:
+        200:
+          description: "ドキュメントの更新に成功"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  body:
+                    $ref: "#/components/schemas/MarkdownDocument"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+components:
+  requestBodies:
+    NewTeam:
+      content:
+        application/json:
+          schema:
+            type: "object"
+            properties:
+              name:
+                $ref: "#/components/schemas/TeamName"
+              members:
+                description: "チームに所属させる部員のID"
+                maxItems: 3
+                minItems: 1
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/UserId"
+            required:
+              - name
+              - members
+    PatchTeam:
+      content:
+        application/json:
+          schema:
+            type: "object"
+            properties:
+              name:
+                $ref: "#/components/schemas/TeamName"
+              members:
+                description: "チームに所属させる部員のID"
+                minItems: 1
+                maxItems: 3
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/UserId"
+              githubIds:
+                description: "チームに所属させる部員のGitHub ID"
+                maxItems: 3
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/GitHubId"
+
+    NewBenchmark:
+      content:
+        application/json:
+          schema:
+            type: "object"
+            properties:
+              instanceId:
+                $ref: "#/components/schemas/InstanceId"
+            required:
+              - instanceId
+
+  parameters:
+    teamId:
+      name: "teamId"
+      in: "path"
+      description: "チームID"
+      required: true
+      schema:
+        $ref: "#/components/schemas/TeamId"
+    instanceId:
+      name: "instanceId"
+      in: "path"
+      description: "インスタンスID"
+      required: true
+      schema:
+        $ref: "#/components/schemas/InstanceId"
+    benchmarkId:
+      name: "benchmarkId"
+      in: "path"
+      description: "ベンチマークID"
+      required: true
+      schema:
+        $ref: "#/components/schemas/BenchmarkId"
+    benchmarkStatus:
+      name: "status"
+      in: "query"
+      description: "ベンチマークのステータス。指定が無い場合は全て"
+      required: false
+      schema:
+        $ref: "#/components/schemas/BenchmarkStatus"
+    rankingOrderBy:
+      name: "orderBy"
+      in: "query"
+      description: "ランキングにどのスコアを使用するか。latestは最新のスコア、highestは最高スコアを使用する"
+      required: true
+      schema:
+        type: "string"
+        enum:
+          - "latest"
+          - "highest"
+
+  schemas:
+    InstanceId:
+      type: "string"
+      format: "uuid"
+      example: "00000000-0000-0000-0000-000000000000"
+    InstanceStatus:
+      type: "string"
+      enum:
+        - "building"
+        - "running"
+        - "stopped"
+      example: "running"
+    InstanceOperation:
+      type: "string"
+      enum:
+        - "start"
+        - "stop"
+      example: "start"
+    Instance:
+      type: "object"
+      description: "サーバーのインスタンス"
+      properties:
+        id:
+          $ref: "#/components/schemas/InstanceId"
+        teamId:
+          $ref: "#/components/schemas/TeamId"
+        serverId:
+          type: "integer"
+          example: 1
+          minimum: 1
+          description: |
+            サーバーのID。チームごとに1から始まる。表示用。
+            新しくインスタンスを起動する場合は、1以上の現在使われていない整数が採用される。
+            インスタンスを削除したら、そのIDは使用されていないものとし、再利用できる。
+        publicIPAddress:
+          $ref: "#/components/schemas/IPAddress"
+        privateIPAddress:
+          $ref: "#/components/schemas/IPAddress"
+        status:
+          $ref: "#/components/schemas/InstanceStatus"
+        createdAt:
+          type: "string"
+          format: "date-time"
+          example: "2021-01-01T00:00:00Z"
+      required:
+        - id
+        - teamId
+        - serverId
+        - publicIPAddress
+        - privateIPAddress
+        - status
+        - createdAt
+
+    IPAddress:
+      type: "string"
+      example: "192.0.2.0"
+
+    UserId:
+      type: "string"
+      format: "uuid"
+      example: "00000000-0000-0000-0000-000000000000"
+      description: "traQのUUID"
+    UserName:
+      type: "string"
+      example: "ikura-hamu"
+      description: "traQのID"
+    User:
+      type: "object"
+      description: "部員"
+      properties:
+        id:
+          $ref: "#/components/schemas/UserId"
+        name:
+          $ref: "#/components/schemas/UserName"
+        teamId:
+          $ref: "#/components/schemas/TeamId"
+        isAdmin:
+          type: "boolean"
+          example: false
+          description: "管理者権限を持っているかどうか"
+      required:
+        - id
+        - name
+        - isAdmin
+
+    TeamId:
+      type: "string"
+      format: "uuid"
+      example: "00000000-0000-0000-0000-000000000000"
+    TeamName:
+      type: "string"
+      example: "team1"
+      description: "チーム名"
+    GitHubId:
+      type: "string"
+      example: "ikura-hamu"
+      description: "GitHubのID"
+    Team:
+      type: "object"
+      description: "チーム"
+      properties:
+        id:
+          $ref: "#/components/schemas/TeamId"
+        name:
+          $ref: "#/components/schemas/TeamName"
+        members:
+          description: "チームに所属している部員のID"
+          maxItems: 3
+          type: "array"
+          items:
+            $ref: "#/components/schemas/UserId"
+        githubIds:
+          description: "チームに所属している部員のGitHub ID"
+          maxItems: 3
+          type: "array"
+          items:
+            $ref: "#/components/schemas/GitHubId"
+        createdAt:
+          type: "string"
+          format: "date-time"
+          example: "2021-01-01T00:00:00Z"
+      required:
+        - id
+        - name
+        - members
+        - createdAt
+
+    BenchmarkId:
+      type: "string"
+      format: "uuid"
+      example: "00000000-0000-0000-0000-000000000000"
+    BenchmarkStatus:
+      type: "string"
+      enum:
+        - "waiting"
+        - "running"
+        - "finished"
+      example: "running"
+
+    CreatedAt:
+      type: "string"
+      format: "date-time"
+      description: "ベンチマークの実行リクエスト日時"
+      example: "2021-01-01T00:00:00Z"
+    StartedAt:
+      type: "string"
+      format: "date-time"
+      description: "ベンチマークの実行開始日時"
+      example: "2021-01-01T00:00:30Z"
+    FinishedAt:
+      type: "string"
+      format: "date-time"
+      description: "ベンチマークの実行終了日時"
+      example: "2021-01-01T00:01:00Z"
+
+    Score:
+      type: "number"
+      example: 100
+      description: "ベンチマークのスコア"
+
+    Benchmark:
+      type: "object"
+      description: "ベンチマーク"
+      properties:
+        id:
+          $ref: "#/components/schemas/BenchmarkId"
+        instanceId:
+          $ref: "#/components/schemas/InstanceId"
+        teamId:
+          $ref: "#/components/schemas/TeamId"
+        userId:
+          $ref: "#/components/schemas/UserId"
+        status:
+          $ref: "#/components/schemas/BenchmarkStatus"
+        score:
+          $ref: "#/components/schemas/Score"
+        createdAt:
+          $ref: "#/components/schemas/CreatedAt"
+        startedAt:
+          $ref: "#/components/schemas/StartedAt"
+        finishedAt:
+          $ref: "#/components/schemas/FinishedAt"
+      required:
+        - id
+        - instanceId
+        - teamId
+        - userId
+        - status
+        - createdAt
+
+    BenchmarkResult:
+      type: "object"
+      description: "ベンチマーク結果"
+      properties:
+        id:
+          $ref: "#/components/schemas/BenchmarkId"
+        instanceId:
+          $ref: "#/components/schemas/InstanceId"
+        teamId:
+          $ref: "#/components/schemas/TeamId"
+        userId:
+          $ref: "#/components/schemas/UserId"
+        status:
+          $ref: "#/components/schemas/BenchmarkStatus"
+        log:
+          type: "string"
+          example: "log"
+          description: "ベンチマークの競技者用ログ（標準出力）"
+        score:
+          $ref: "#/components/schemas/Score"
+        createdAt:
+          $ref: "#/components/schemas/CreatedAt"
+        startedAt:
+          $ref: "#/components/schemas/StartedAt"
+        finishedAt:
+          $ref: "#/components/schemas/FinishedAt"
+      required:
+        - id
+        - instanceId
+        - teamId
+        - userId
+        - status
+        - log
+        - score
+        - createdAt
+        - startedAt
+        - finishedAt
+
+    BenchmarkAdminResult:
+      type: "object"
+      description: "Adminが見ることができるベンチマーク結果"
+      properties:
+        id:
+          $ref: "#/components/schemas/BenchmarkId"
+        instanceId:
+          $ref: "#/components/schemas/InstanceId"
+        teamId:
+          $ref: "#/components/schemas/TeamId"
+        userId:
+          $ref: "#/components/schemas/UserId"
+        status:
+          $ref: "#/components/schemas/BenchmarkStatus"
+        log:
+          type: "string"
+          example: "log"
+          description: "ベンチマークの競技者用ログ（標準出力）"
+        adminLog:
+          type: "string"
+          example: "admin log"
+          description: "ベンチマークの管理者用ログ（標準エラー出力）"
+        score:
+          $ref: "#/components/schemas/Score"
+        createdAt:
+          $ref: "#/components/schemas/CreatedAt"
+        startedAt:
+          $ref: "#/components/schemas/StartedAt"
+        finishedAt:
+          $ref: "#/components/schemas/FinishedAt"
+      required:
+        - id
+        - instanceId
+        - teamId
+        - userId
+        - status
+        - log
+        - adminLog
+        - score
+        - createdAt
+        - startedAt
+        - finishedAt
+
+    BenchScore:
+      type: "object"
+      description: "ベンチマークのスコア"
+      properties:
+        benchmarkId:
+          $ref: "#/components/schemas/BenchmarkId"
+        teamId:
+          $ref: "#/components/schemas/TeamId"
+        score:
+          $ref: "#/components/schemas/Score"
+        createdAt:
+          $ref: "#/components/schemas/CreatedAt"
+      required:
+        - teamId
+        - score
+        - createdAt
+
+    TeamScores:
+      type: "object"
+      description: "チームのスコア一覧。"
+      properties:
+        teamId:
+          $ref: "#/components/schemas/TeamId"
+        scores:
+          type: "array"
+          description: "createdAtの昇順"
+          items:
+            $ref: "#/components/schemas/BenchScore"
+      required:
+        - teamId
+        - scores
+
+    RankingItem:
+      type: "object"
+      description: "ランキングの順位。まだベンチマークを1回も実行していない場合、createdAtはnull"
+      properties:
+        rank:
+          type: "integer"
+          example: 1
+          description: "順位"
+        teamId:
+          $ref: "#/components/schemas/TeamId"
+        score:
+          $ref: "#/components/schemas/Score"
+        createdAt:
+          $ref: "#/components/schemas/CreatedAt"
+      required:
+        - rank
+        - teamId
+        - score
+
+    MarkdownDocument:
+      type: "string"
+      example: "# Title\n\n## Subtitle\n\nContent"
+      description: "Markdown形式のドキュメント"
+
+    ErrorBadRequest:
+      type: "object"
+      properties:
+        message:
+          type: "string"
+          example: "Invalid xxx"
+
+  responses:
+    BadRequest:
+      description: "Bad Request. リクエストが不正です"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorBadRequest"
+    Unauthorized:
+      description: "Unauthorized. 認証に失敗しました"
+      content:
+        application/json:
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+                example: "Unauthorized"
+    Forbidden:
+      description: "Forbidden. 権限がありません"
+      content:
+        application/json:
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+                example: "Forbidden"
+    NotFound:
+      description: "Not Found. リソースが見つかりません"
+      content:
+        application/json:
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+                example: "xxx not found"
+    InternalServerError:
+      description: "Internal Server Error"
+      content:
+        application/json:
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+                example: "Internal Server Error"
+
+  securitySchemes:
+    UserAuth:
+      type: apiKey
+      in: cookie
+      name: piscon_session
+      description: "部員である場合にアクセスできる"
+    AdminAuth:
+      type: apiKey
+      in: cookie
+      name: piscon_session
+      description: "管理者である場合にアクセスできる"
+    TeamAuth:
+      type: apiKey
+      in: cookie
+      name: piscon_session
+      description: "該当するチームのメンバーである場合にアクセスできる"
