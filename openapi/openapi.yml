@@ -152,7 +152,7 @@ paths:
     get:
       tags: ["teams"]
       summary: "チーム一覧取得"
-      description: "チーム一覧を取得します"
+      description: "チーム一覧を取得します (0件の場合も200で空配列が返ります)"
       operationId: "getTeams"
       security:
         - UserAuth: []
@@ -253,7 +253,7 @@ paths:
     get:
       tags: ["instance"]
       summary: "インスタンス一覧取得"
-      description: "チームに所属しているインスタンス一覧を取得します"
+      description: "チームに所属しているインスタンス一覧を取得します (0件の場合も200で空配列が返ります)"
       operationId: "getTeamInstances"
       security:
         - TeamAuth: []
@@ -377,7 +377,7 @@ paths:
     get:
       tags: ["instance"]
       summary: "インスタンス一覧取得"
-      description: "全インスタンス一覧を取得します"
+      description: "全インスタンス一覧を取得します (0件の場合も200で空配列が返ります)"
       operationId: "getInstances"
       security:
         - AdminAuth: []
@@ -431,7 +431,7 @@ paths:
     get:
       tags: ["benchmark"]
       summary: "ベンチマーク一覧取得"
-      description: "全チームのベンチマーク一覧を取得します"
+      description: "全チームのベンチマーク一覧を取得します (0件の場合も200で空配列が返ります)"
       operationId: "getBenchmarks"
       security:
         - AdminAuth: []
@@ -460,6 +460,7 @@ paths:
       description: |
         ベンチマーク待ちのキューを取得します。
         createdAtの昇順になっており、現在実行中のベンチマークと、実行待ちのベンチマークが含まれます。
+        0件の場合も200で空配列が返ります。
       operationId: "getBenchmarkQueue"
       security:
         - UserAuth: []
@@ -481,7 +482,7 @@ paths:
     get:
       tags: ["benchmark"]
       summary: "チームのベンチマーク一覧取得"
-      description: "チームのベンチマーク一覧を取得します"
+      description: "チームのベンチマーク一覧を取得します (0件の場合も200で空配列が返ります)"
       operationId: "getTeamBenchmarks"
       security:
         - TeamAuth: []
@@ -567,7 +568,7 @@ paths:
     get:
       tags: ["score"]
       summary: "全てのスコア取得"
-      description: "全てのベンチマークのスコアをチームごとに取得します"
+      description: "全てのベンチマークのスコアをチームごとに取得します (0件の場合も200で空配列が返ります)"
       operationId: "getScores"
       security:
         - UserAuth: []
@@ -592,6 +593,7 @@ paths:
       description: |
         ベンチマークのスコアランキングを取得します。1位から順に並んでいます。
         同じスコアの場合は、ベンチマーク実行日時(createdAt)が早い順に並べます。
+         0件の場合も200で空配列が返ります
       operationId: "getRanking"
       security:
         - UserAuth: []
