@@ -91,7 +91,7 @@ func NewClient(server *httptest.Server) *http.Client {
 	return client
 }
 
-func Login(t *testing.T, server *httptest.Server, client *http.Client, userID string) error {
+func Login(t *testing.T, server *httptest.Server, client *http.Client, userID uuid.UUID) error {
 	t.Helper()
 
 	// not following redirect for the first request
@@ -117,7 +117,7 @@ func Login(t *testing.T, server *httptest.Server, client *http.Client, userID st
 		return err
 	}
 	q := authURL.Query()
-	q.Add("user", userID)
+	q.Add("user", userID.String())
 	authURL.RawQuery = q.Encode()
 
 	// from here, follow redirect

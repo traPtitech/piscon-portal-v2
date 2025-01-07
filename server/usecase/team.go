@@ -5,6 +5,7 @@ import (
 	"errors"
 	"slices"
 
+	"github.com/google/uuid"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
 )
@@ -23,7 +24,7 @@ func (u *TeamUseCase) GetTeams(ctx context.Context) ([]domain.Team, error) {
 	return u.repo.GetTeams(ctx)
 }
 
-func (u *TeamUseCase) GetTeam(ctx context.Context, id string) (domain.Team, error) {
+func (u *TeamUseCase) GetTeam(ctx context.Context, id uuid.UUID) (domain.Team, error) {
 	team, err := u.repo.FindTeam(ctx, id)
 	if err != nil {
 		if errors.Is(err, repository.ErrNotFound) {
@@ -36,9 +37,9 @@ func (u *TeamUseCase) GetTeam(ctx context.Context, id string) (domain.Team, erro
 
 type CreateTeamInput struct {
 	Name      string
-	MemberIDs []string
+	MemberIDs []uuid.UUID
 	// CreatorID is the ID of the user who creates the team
-	CreatorID string
+	CreatorID uuid.UUID
 }
 
 func (u *TeamUseCase) CreateTeam(ctx context.Context, input CreateTeamInput) (domain.Team, error) {
@@ -48,9 +49,8 @@ func (u *TeamUseCase) CreateTeam(ctx context.Context, input CreateTeamInput) (do
 		return domain.Team{}, NewErrBadRequest("creator must be a member of the team")
 	}
 
-	// the number of members must be less than or equal to 3
-	if len(input.MemberIDs) > 3 {
-		return domain.Team{}, NewErrBadRequest("the number of members must be less than or equal to 3")
+	if len(input.MemberIDs) > domain.MaxTeamMembers {
+		return domain.Team{}, NewErrBadRequest("too many members")
 	}
 
 	team := domain.NewTeam(input.Name)
@@ -75,9 +75,9 @@ func (u *TeamUseCase) CreateTeam(ctx context.Context, input CreateTeamInput) (do
 }
 
 type UpdateTeamInput struct {
-	ID        string
+	ID        uuid.UUID
 	Name      string
-	MemberIDs []string
+	MemberIDs []uuid.UUID
 }
 
 func (u *TeamUseCase) UpdateTeam(ctx context.Context, input UpdateTeamInput) (domain.Team, error) {

@@ -6,6 +6,7 @@ import (
 	"slices"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
@@ -13,8 +14,8 @@ import (
 
 const userIDKey = "userID"
 
-func getUserID(c echo.Context) string {
-	return c.Get(userIDKey).(string)
+func getUserIDFromSession(c echo.Context) uuid.UUID {
+	return c.Get(userIDKey).(uuid.UUID)
 }
 
 func (h *Handler) AuthMiddleware() echo.MiddlewareFunc {
@@ -59,9 +60,9 @@ func (h *Handler) TeamAuthMiddleware() echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			ctx := c.Request().Context()
 
-			userID := getUserID(c)
-			teamID := c.Param("teamID")
-			if teamID == "" {
+			userID := getUserIDFromSession(c)
+			teamID, err := uuid.Parse(c.Param("teamID"))
+			if err != nil {
 				return c.NoContent(http.StatusBadRequest)
 			}
 

@@ -13,6 +13,7 @@ import (
 	context "context"
 	reflect "reflect"
 
+	uuid "github.com/google/uuid"
 	domain "github.com/traPtitech/piscon-portal-v2/server/domain"
 	repository "github.com/traPtitech/piscon-portal-v2/server/repository"
 	gomock "go.uber.org/mock/gomock"
@@ -234,7 +235,7 @@ func (c *MockRepositoryFindSessionCall) DoAndReturn(f func(context.Context, stri
 }
 
 // FindTeam mocks base method.
-func (m *MockRepository) FindTeam(ctx context.Context, id string) (domain.Team, error) {
+func (m *MockRepository) FindTeam(ctx context.Context, id uuid.UUID) (domain.Team, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindTeam", ctx, id)
 	ret0, _ := ret[0].(domain.Team)
@@ -261,19 +262,19 @@ func (c *MockRepositoryFindTeamCall) Return(arg0 domain.Team, arg1 error) *MockR
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockRepositoryFindTeamCall) Do(f func(context.Context, string) (domain.Team, error)) *MockRepositoryFindTeamCall {
+func (c *MockRepositoryFindTeamCall) Do(f func(context.Context, uuid.UUID) (domain.Team, error)) *MockRepositoryFindTeamCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockRepositoryFindTeamCall) DoAndReturn(f func(context.Context, string) (domain.Team, error)) *MockRepositoryFindTeamCall {
+func (c *MockRepositoryFindTeamCall) DoAndReturn(f func(context.Context, uuid.UUID) (domain.Team, error)) *MockRepositoryFindTeamCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
 
 // FindUser mocks base method.
-func (m *MockRepository) FindUser(ctx context.Context, id string) (domain.User, error) {
+func (m *MockRepository) FindUser(ctx context.Context, id uuid.UUID) (domain.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindUser", ctx, id)
 	ret0, _ := ret[0].(domain.User)
@@ -300,13 +301,13 @@ func (c *MockRepositoryFindUserCall) Return(arg0 domain.User, arg1 error) *MockR
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockRepositoryFindUserCall) Do(f func(context.Context, string) (domain.User, error)) *MockRepositoryFindUserCall {
+func (c *MockRepositoryFindUserCall) Do(f func(context.Context, uuid.UUID) (domain.User, error)) *MockRepositoryFindUserCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockRepositoryFindUserCall) DoAndReturn(f func(context.Context, string) (domain.User, error)) *MockRepositoryFindUserCall {
+func (c *MockRepositoryFindUserCall) DoAndReturn(f func(context.Context, uuid.UUID) (domain.User, error)) *MockRepositoryFindUserCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

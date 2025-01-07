@@ -23,10 +23,10 @@ func (h *Handler) GetTeams(c echo.Context) error {
 	res := make(openapi.GetTeamsOKApplicationJSON, 0, len(teams))
 	for _, team := range teams {
 		members := lo.Map(team.Members, func(u domain.User, _ int) openapi.UserId {
-			return openapi.UserId(uuid.MustParse(u.ID))
+			return openapi.UserId(u.ID)
 		})
 		res = append(res, openapi.Team{
-			ID:        openapi.TeamId(uuid.MustParse(team.ID)),
+			ID:        openapi.TeamId(team.ID),
 			Name:      openapi.TeamName(team.Name),
 			Members:   members,
 			CreatedAt: team.CreatedAt,
@@ -43,13 +43,11 @@ func (h *Handler) CreateTeam(c echo.Context) error {
 	if err := c.Bind(&req); err != nil {
 		return badRequestResponse(c, err.Error())
 	}
-	userID := getUserID(c)
+	userID := getUserIDFromSession(c)
 
 	team, err := h.teamUseCase.CreateTeam(ctx, usecase.CreateTeamInput{
-		Name: string(req.Name),
-		MemberIDs: lo.Map(req.Members, func(id openapi.UserId, _ int) string {
-			return uuid.UUID(id).String()
-		}),
+		Name:      string(req.Name),
+		MemberIDs: lo.Map(req.Members, func(id openapi.UserId, _ int) uuid.UUID { return uuid.UUID(id) }),
 		CreatorID: userID,
 	})
 	if err != nil {
@@ -65,7 +63,10 @@ func (h *Handler) CreateTeam(c echo.Context) error {
 func (h *Handler) GetTeam(c echo.Context) error {
 	ctx := c.Request().Context()
 
-	teamID := c.Param("teamID")
+	teamID, err := uuid.Parse(c.Param("teamID"))
+	if err != nil {
+		return badRequestResponse(c, err.Error())
+	}
 
 	team, err := h.repo.FindTeam(ctx, teamID)
 	if err != nil {
@@ -85,12 +86,15 @@ func (h *Handler) UpdateTeam(c echo.Context) error {
 	if err := c.Bind(&req); err != nil {
 		return badRequestResponse(c, err.Error())
 	}
-	teamID := c.Param("teamID")
+	teamID, err := uuid.Parse(c.Param("teamID"))
+	if err != nil {
+		return badRequestResponse(c, err.Error())
+	}
 
 	team, err := h.teamUseCase.UpdateTeam(ctx, usecase.UpdateTeamInput{
 		ID:        teamID,
 		Name:      string(req.Name.Value),
-		MemberIDs: lo.Map(req.Members, func(id openapi.UserId, _ int) string { return uuid.UUID(id).String() }),
+		MemberIDs: lo.Map(req.Members, func(id openapi.UserId, _ int) uuid.UUID { return uuid.UUID(id) }),
 	})
 	if err != nil {
 		if usecase.IsErrBadRequest(err) {
@@ -104,9 +108,9 @@ func (h *Handler) UpdateTeam(c echo.Context) error {
 
 func toOpenAPITeam(team domain.Team) openapi.Team {
 	return openapi.Team{
-		ID:        openapi.TeamId(uuid.MustParse(team.ID)),
+		ID:        openapi.TeamId(team.ID),
 		Name:      openapi.TeamName(team.Name),
-		Members:   lo.Map(team.Members, func(m domain.User, _ int) openapi.UserId { return openapi.UserId(uuid.MustParse(m.ID)) }),
+		Members:   lo.Map(team.Members, func(m domain.User, _ int) openapi.UserId { return openapi.UserId(m.ID) }),
 		CreatedAt: team.CreatedAt,
 	}
 }

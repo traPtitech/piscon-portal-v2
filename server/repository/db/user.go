@@ -7,22 +7,23 @@ import (
 	"fmt"
 
 	"github.com/aarondl/opt/omit"
+	"github.com/google/uuid"
 	"github.com/stephenafamo/bob"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
 	"github.com/traPtitech/piscon-portal-v2/server/repository/db/models"
 )
 
-func (r *Repository) FindUser(ctx context.Context, id string) (domain.User, error) {
-	return findUser(ctx, r.db, id)
+func (r *Repository) FindUser(ctx context.Context, id uuid.UUID) (domain.User, error) {
+	return findUser(ctx, r.db, id.String())
 }
 
 func (r *Repository) CreateUser(ctx context.Context, user domain.User) error {
 	return createUser(ctx, r.db, user)
 }
 
-func (t *txRepository) FindUser(ctx context.Context, id string) (domain.User, error) {
-	return findUser(ctx, t.tx, id)
+func (t *txRepository) FindUser(ctx context.Context, id uuid.UUID) (domain.User, error) {
+	return findUser(ctx, t.tx, id.String())
 }
 
 func (t *txRepository) CreateUser(ctx context.Context, user domain.User) error {
@@ -38,12 +39,12 @@ func findUser(ctx context.Context, executor bob.Executor, id string) (domain.Use
 		return domain.User{}, fmt.Errorf("find user: %w", err)
 	}
 
-	return toDomainUser(user), nil
+	return toDomainUser(user)
 }
 
 func createUser(ctx context.Context, executor bob.Executor, user domain.User) error {
 	_, err := models.Users.Insert(&models.UserSetter{
-		ID:   omit.From(user.ID),
+		ID:   omit.From(user.ID.String()),
 		Name: omit.From(user.Name),
 	}).Exec(ctx, executor)
 	if err != nil {
@@ -52,10 +53,27 @@ func createUser(ctx context.Context, executor bob.Executor, user domain.User) er
 	return nil
 }
 
-func toDomainUser(user *models.User) domain.User {
-	return domain.User{
-		ID:     user.ID,
-		Name:   user.Name,
-		TeamID: user.TeamID.Ptr(),
+func toDomainUser(user *models.User) (domain.User, error) {
+	userID, err := uuid.Parse(user.ID)
+	if err != nil {
+		return domain.User{}, fmt.Errorf("parse user ID: %w", err)
 	}
+
+	var teamID uuid.NullUUID
+	if id, ok := user.TeamID.Get(); ok {
+		parsedID, err := uuid.Parse(id)
+		if err != nil {
+			return domain.User{}, fmt.Errorf("parse team ID: %w", err)
+		}
+		teamID = uuid.NullUUID{
+			UUID:  parsedID,
+			Valid: true,
+		}
+	}
+
+	return domain.User{
+		ID:     userID,
+		Name:   user.Name,
+		TeamID: teamID,
+	}, nil
 }

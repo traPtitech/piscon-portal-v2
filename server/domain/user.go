@@ -1,13 +1,15 @@
 package domain
 
+import "github.com/google/uuid"
+
 type User struct {
-	ID   string
+	ID   uuid.UUID
 	Name string
 
-	TeamID *string
+	TeamID uuid.NullUUID
 }
 
-func NewUser(id, name string) User {
+func NewUser(id uuid.UUID, name string) User {
 	return User{
 		ID:   id,
 		Name: name,

@@ -20,13 +20,13 @@ func TestCreateTeam(t *testing.T) {
 	teamUseCase := usecase.NewTeamUseCase(mockRepo)
 
 	mockRepo.EXPECT().FindUser(gomock.Any(), gomock.Any()).
-		DoAndReturn(func(_ context.Context, id string) (domain.User, error) {
+		DoAndReturn(func(_ context.Context, id uuid.UUID) (domain.User, error) {
 			return domain.User{ID: id}, nil
 		}).
 		AnyTimes()
 	mockRepo.EXPECT().CreateTeam(gomock.Any(), gomock.Any()).AnyTimes()
 
-	userID := uuid.NewString()
+	userID := uuid.New()
 
 	tests := []struct {
 		name    string
@@ -37,7 +37,7 @@ func TestCreateTeam(t *testing.T) {
 			name: "valid",
 			input: usecase.CreateTeamInput{
 				Name:      "valid-test-team",
-				MemberIDs: []string{userID},
+				MemberIDs: []uuid.UUID{userID},
 				CreatorID: userID,
 			},
 			wantErr: false,
@@ -46,7 +46,7 @@ func TestCreateTeam(t *testing.T) {
 			name: "multiple members",
 			input: usecase.CreateTeamInput{
 				Name:      "multiple-members-test-team",
-				MemberIDs: []string{userID, uuid.NewString()},
+				MemberIDs: []uuid.UUID{userID, uuid.New()},
 				CreatorID: userID,
 			},
 			wantErr: false,
@@ -55,7 +55,7 @@ func TestCreateTeam(t *testing.T) {
 			name: "4 members",
 			input: usecase.CreateTeamInput{
 				Name:      "4-members-test-team",
-				MemberIDs: []string{userID, uuid.NewString(), uuid.NewString(), uuid.NewString()},
+				MemberIDs: []uuid.UUID{userID, uuid.New(), uuid.New(), uuid.New()},
 				CreatorID: userID,
 			},
 			wantErr: true,
@@ -83,18 +83,18 @@ func TestUpdateTeam(t *testing.T) {
 	teamUseCase := usecase.NewTeamUseCase(mockRepo)
 
 	mockRepo.EXPECT().FindTeam(gomock.Any(), gomock.Any()).
-		DoAndReturn(func(_ context.Context, id string) (domain.Team, error) {
+		DoAndReturn(func(_ context.Context, id uuid.UUID) (domain.Team, error) {
 			return domain.Team{ID: id}, nil
 		}).
 		AnyTimes()
 	mockRepo.EXPECT().FindUser(gomock.Any(), gomock.Any()).
-		DoAndReturn(func(_ context.Context, id string) (domain.User, error) {
+		DoAndReturn(func(_ context.Context, id uuid.UUID) (domain.User, error) {
 			return domain.User{ID: id}, nil
 		}).
 		AnyTimes()
 	mockRepo.EXPECT().UpdateTeam(gomock.Any(), gomock.Any()).AnyTimes()
 
-	userID := uuid.NewString()
+	userID := uuid.New()
 
 	tests := []struct {
 		name    string
@@ -104,18 +104,18 @@ func TestUpdateTeam(t *testing.T) {
 		{
 			name: "valid",
 			input: usecase.UpdateTeamInput{
-				ID:        uuid.NewString(),
+				ID:        uuid.New(),
 				Name:      "valid-test-team",
-				MemberIDs: []string{userID},
+				MemberIDs: []uuid.UUID{userID},
 			},
 			wantErr: false,
 		},
 		{
 			name: "4 members",
 			input: usecase.UpdateTeamInput{
-				ID:        uuid.NewString(),
+				ID:        uuid.New(),
 				Name:      "4-members-test-team",
-				MemberIDs: []string{userID, uuid.NewString(), uuid.NewString(), uuid.NewString()},
+				MemberIDs: []uuid.UUID{userID, uuid.New(), uuid.New(), uuid.New()},
 			},
 			wantErr: true,
 		},

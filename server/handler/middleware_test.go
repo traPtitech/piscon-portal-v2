@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	sessmock "github.com/traPtitech/piscon-portal-v2/server/handler/internal/mock"
@@ -37,7 +38,7 @@ func TestAuthMiddleware(t *testing.T) {
 				mockSessManager.EXPECT().GetSessionID(gomock.Any()).Return("sessionID", nil)
 				mockRepo.EXPECT().FindSession(gomock.Any(), "sessionID").Return(domain.Session{
 					ID:        "sessionID",
-					UserID:    "test-user-id",
+					UserID:    uuid.New(),
 					ExpiresAt: time.Now().Add(time.Hour),
 				}, nil)
 			},
@@ -56,7 +57,7 @@ func TestAuthMiddleware(t *testing.T) {
 				mockSessManager.EXPECT().GetSessionID(gomock.Any()).Return("sessionID", nil)
 				mockRepo.EXPECT().FindSession(gomock.Any(), "sessionID").Return(domain.Session{
 					ID:        "sessionID",
-					UserID:    "test-user-id",
+					UserID:    uuid.New(),
 					ExpiresAt: time.Now().Add(-time.Hour),
 				}, nil)
 				// expired session should be deleted
@@ -89,7 +90,8 @@ func TestTeamAuthMiddleware(t *testing.T) {
 	mockSessManager := sessmock.NewMockSessionManager(ctrl)
 	handler := NewHandler(mockRepo, mockSessManager)
 
-	const userID = "test-user-id"
+	userID := uuid.New()
+	teamID := uuid.New()
 
 	needAuthorize := handler.TeamAuthMiddleware()(func(c echo.Context) error {
 		return c.NoContent(http.StatusOK)
@@ -103,8 +105,8 @@ func TestTeamAuthMiddleware(t *testing.T) {
 		{
 			name: "ok",
 			setup: func() {
-				mockRepo.EXPECT().FindTeam(gomock.Any(), "test-team-id").Return(domain.Team{
-					ID: "test-team-id",
+				mockRepo.EXPECT().FindTeam(gomock.Any(), teamID).Return(domain.Team{
+					ID: teamID,
 					Members: []domain.User{
 						{ID: userID},
 					},
@@ -115,9 +117,9 @@ func TestTeamAuthMiddleware(t *testing.T) {
 		{
 			name: "user is not a member of the team",
 			setup: func() {
-				mockRepo.EXPECT().FindTeam(gomock.Any(), "test-team-id").Return(domain.Team{
-					ID:      "test-team-id",
-					Members: []domain.User{{ID: "another-user-id"}},
+				mockRepo.EXPECT().FindTeam(gomock.Any(), teamID).Return(domain.Team{
+					ID:      uuid.New(),
+					Members: []domain.User{{ID: uuid.New()}},
 				}, nil)
 			},
 			expectStatus: http.StatusForbidden,
@@ -131,7 +133,7 @@ func TestTeamAuthMiddleware(t *testing.T) {
 
 			c := echo.New().NewContext(req, rec)
 			c.SetParamNames("teamID")
-			c.SetParamValues("test-team-id")
+			c.SetParamValues(teamID.String())
 			c.Set("userID", userID)
 
 			tt.setup()

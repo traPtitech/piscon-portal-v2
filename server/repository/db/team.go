@@ -8,6 +8,7 @@ import (
 
 	"github.com/aarondl/opt/omit"
 	"github.com/aarondl/opt/omitnull"
+	"github.com/google/uuid"
 	"github.com/samber/lo"
 	"github.com/stephenafamo/bob"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
@@ -15,12 +16,12 @@ import (
 	"github.com/traPtitech/piscon-portal-v2/server/repository/db/models"
 )
 
-func (r *Repository) FindTeam(ctx context.Context, id string) (domain.Team, error) {
-	return findTeam(ctx, r.db, id)
+func (r *Repository) FindTeam(ctx context.Context, id uuid.UUID) (domain.Team, error) {
+	return findTeam(ctx, r.db, id.String())
 }
 
-func (t *txRepository) FindTeam(ctx context.Context, id string) (domain.Team, error) {
-	return findTeam(ctx, t.tx, id)
+func (t *txRepository) FindTeam(ctx context.Context, id uuid.UUID) (domain.Team, error) {
+	return findTeam(ctx, t.tx, id.String())
 }
 
 func (r *Repository) GetTeams(ctx context.Context) ([]domain.Team, error) {
@@ -74,7 +75,7 @@ func findTeam(ctx context.Context, executor bob.Executor, id string) (domain.Tea
 			return domain.Team{}, repository.ErrNotFound
 		}
 	}
-	return toDomainTeam(team), nil
+	return toDomainTeam(team)
 }
 
 func getTeams(ctx context.Context, executor bob.Executor) ([]domain.Team, error) {
@@ -84,14 +85,18 @@ func getTeams(ctx context.Context, executor bob.Executor) ([]domain.Team, error)
 	}
 	res := make([]domain.Team, 0, len(teams))
 	for _, team := range teams {
-		res = append(res, toDomainTeam(team))
+		domainTeam, err := toDomainTeam(team)
+		if err != nil {
+			return nil, fmt.Errorf("to domain team: %w", err)
+		}
+		res = append(res, domainTeam)
 	}
 	return res, nil
 }
 
 func createTeam(ctx context.Context, tx bob.Tx, team domain.Team) error {
 	_, err := models.Teams.Insert(&models.TeamSetter{
-		ID:        omit.From(team.ID),
+		ID:        omit.From(team.ID.String()),
 		Name:      omit.From(team.Name),
 		CreatedAt: omit.From(team.CreatedAt),
 	}).Exec(ctx, tx)
@@ -99,11 +104,11 @@ func createTeam(ctx context.Context, tx bob.Tx, team domain.Team) error {
 		return fmt.Errorf("create team: %w", err)
 	}
 
-	memberIDs := lo.Map(team.Members, func(m domain.User, _ int) string { return m.ID })
+	memberIDs := lo.Map(team.Members, func(m domain.User, _ int) string { return m.ID.String() })
 	_, err = models.Users.Update(
 		models.UpdateWhere.Users.ID.In(memberIDs...),
 		models.UserSetter{
-			TeamID: omitnull.From(team.ID),
+			TeamID: omitnull.From(team.ID.String()),
 		}.UpdateMod(),
 	).Exec(ctx, tx)
 
@@ -112,7 +117,7 @@ func createTeam(ctx context.Context, tx bob.Tx, team domain.Team) error {
 
 func updateTeam(ctx context.Context, tx bob.Tx, team domain.Team) error {
 	_, err := models.Teams.Update(
-		models.UpdateWhere.Teams.ID.EQ(team.ID),
+		models.UpdateWhere.Teams.ID.EQ(team.ID.String()),
 		models.TeamSetter{
 			Name: omit.From(team.Name),
 		}.UpdateMod(),
@@ -121,26 +126,34 @@ func updateTeam(ctx context.Context, tx bob.Tx, team domain.Team) error {
 		return fmt.Errorf("update team: %w", err)
 	}
 
-	memberIDs := lo.Map(team.Members, func(m domain.User, _ int) string { return m.ID })
+	memberIDs := lo.Map(team.Members, func(m domain.User, _ int) string { return m.ID.String() })
 	_, err = models.Users.Update(
 		models.UpdateWhere.Users.ID.In(memberIDs...),
 		models.UserSetter{
-			TeamID: omitnull.From(team.ID),
+			TeamID: omitnull.From(team.ID.String()),
 		}.UpdateMod(),
 	).Exec(ctx, tx)
 
 	return err
 }
 
-func toDomainTeam(team *models.Team) domain.Team {
+func toDomainTeam(team *models.Team) (domain.Team, error) {
 	members := make([]domain.User, 0, len(team.R.Users))
 	for _, user := range team.R.Users {
-		members = append(members, toDomainUser(user))
+		domainUser, err := toDomainUser(user)
+		if err != nil {
+			return domain.Team{}, fmt.Errorf("to domain user: %w", err)
+		}
+		members = append(members, domainUser)
+	}
+	teamID, err := uuid.Parse(team.ID)
+	if err != nil {
+		return domain.Team{}, fmt.Errorf("parse team ID: %w", err)
 	}
 	return domain.Team{
-		ID:        team.ID,
+		ID:        teamID,
 		Name:      team.Name,
 		Members:   members,
 		CreatedAt: team.CreatedAt,
-	}
+	}, nil
 }
