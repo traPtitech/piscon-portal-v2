@@ -2,6 +2,6 @@
 
 <template>
   <main>
-    <h1></h1>
+    <h1>Here is BenchesView</h1>
   </main>
 </template>
