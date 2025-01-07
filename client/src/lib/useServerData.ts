@@ -20,30 +20,15 @@ export const useTeamBenches = (teamId: string) =>
       api.GET('/teams/{teamId}/benchmarks', { params: { path: { teamId } } }).then((r) => r.data),
   })
 
-export const useMyTeamBenches = () =>
+export const useTeamBench = (teamId: string, benchmarkId: string) =>
   useQuery({
-    queryKey: ['my-benches'],
-    queryFn: async () => {
-      const me = await api.GET('/users/me').then((r) => r.data)
-      if (me?.teamId === undefined) return []
-      const benches = await api
-        .GET('/teams/{teamId}/benchmarks', { params: { path: { teamId: me?.teamId } } })
-        .then((r) => r.data)
-      return benches
-    },
-  })
-
-export const useMyTeamInstances = () =>
-  useQuery({
-    queryKey: ['my-instances'],
-    queryFn: async () => {
-      const me = await api.GET('/users/me').then((r) => r.data)
-      if (me?.teamId === undefined) return []
-      const instances = await api
-        .GET('/teams/{teamId}/instances', { params: { path: { teamId: me?.teamId } } })
-        .then((r) => r.data)
-      return instances
-    },
+    queryKey: ['team-bench', teamId, benchmarkId],
+    queryFn: () =>
+      api
+        .GET('/teams/{teamId}/benchmarks/{benchmarkId}', {
+          params: { path: { teamId, benchmarkId } },
+        })
+        .then((r) => r.data),
   })
 
 export const useTeamInstances = (teamId: string) =>
@@ -51,19 +36,6 @@ export const useTeamInstances = (teamId: string) =>
     queryKey: ['team-instances', teamId],
     queryFn: () =>
       api.GET('/teams/{teamId}/instances', { params: { path: { teamId } } }).then((r) => r.data),
-  })
-
-export const useMyTeam = () =>
-  useQuery({
-    queryKey: ['my-team'],
-    queryFn: async () => {
-      const me = await api.GET('/users/me').then((r) => r.data)
-      if (me?.teamId === undefined) return undefined
-      const team = await api
-        .GET('/teams/{teamId}', { params: { path: { teamId: me?.teamId } } })
-        .then((r) => r.data)
-      return team
-    },
   })
 
 export const useTeam = (teamId: string) =>

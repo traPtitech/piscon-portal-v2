@@ -4,6 +4,8 @@ import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { formatDate } from '@/lib/formatDate'
 import { Icon } from '@iconify/vue'
+import ErrorMessage from '@/components/ErrorMessage.vue'
+import BenchmarkStatusChip from '@/components/BenchmarkStatusChip.vue'
 
 const { teamId } = defineProps<{ teamId: string }>()
 
@@ -29,11 +31,11 @@ const { data: users } = useUsers()
     </div>
     <div class="list-label">
       <Icon icon="mdi:server-network" width="24" height="24" />
-      <span>サーバー</span>
+      <span>対象サーバー</span>
     </div>
     <div class="list-label">
       <Icon icon="mdi:account" width="24" height="24" />
-      <span>ユーザー</span>
+      <span>実行ユーザー</span>
     </div>
     <div class="list-label">
       <Icon icon="mdi:progress-clock" width="24" height="24" />
@@ -61,9 +63,7 @@ const { data: users } = useUsers()
         <span>@{{ users?.find((u) => u.id === bench.userId)?.name }}</span>
       </div>
       <div>
-        <span v-if="bench.status === 'waiting'" class="bench-status waiting">WAITING</span>
-        <span v-if="bench.status === 'running'" class="bench-status running">RUNNING</span>
-        <span v-if="bench.status === 'finished'" class="bench-status finished">FINISHED</span>
+        <BenchmarkStatusChip :status="bench.status" />
       </div>
       <div>
         <RouterLink :to="`/benches/${bench.id}`" class="bench-link">
@@ -73,10 +73,7 @@ const { data: users } = useUsers()
       </div>
     </template>
   </div>
-  <div v-if="benchesError" class="error-message">
-    <Icon icon="mdi:alert-octagon" width="48" height="48" />
-    <span>エラーが発生しました</span>
-  </div>
+  <ErrorMessage v-if="benchesError" />
 </template>
 
 <style scoped>
@@ -120,28 +117,6 @@ const { data: users } = useUsers()
   gap: 0.25rem;
 }
 
-.bench-status {
-  line-height: 2;
-  border-radius: 2px;
-  width: 72px;
-  color: white;
-  font-weight: 600;
-  font-size: 0.7rem;
-  text-align: center;
-}
-.bench-status.waiting {
-  background-color: #f0ad4e33;
-  color: #f0ad4e;
-}
-.bench-status.running {
-  background-color: #5bc0de33;
-  color: #5bc0de;
-}
-.bench-status.finished {
-  background-color: #5cb85c33;
-  color: #5cb85c;
-}
-
 .bench-link {
   display: flex;
   width: fit-content;
@@ -152,15 +127,7 @@ const { data: users } = useUsers()
   font-weight: 700;
 }
 
-.error-message {
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1.2rem;
-  color: var(--ct-red-500);
-  font-weight: 700;
-  text-align: center;
+.bench-link svg {
+  margin-top: 0.15rem;
 }
 </style>

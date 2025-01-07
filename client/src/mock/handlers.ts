@@ -210,7 +210,7 @@ export const handlers = [
     const res = benchmarks.filter((b) => b.status === 'waiting' || b.status === 'running')
     return HttpResponse.json(res)
   }),
-  http.get(new RegExp(`${apiBaseUrl}/teams/([^/]+)/benchmarks`), (c) => {
+  http.get(new RegExp(`${apiBaseUrl}/teams/([^/]+)/benchmarks$`), (c) => {
     const teamId = c.params[0] as string
     const team = teams.find((t) => t.id === teamId)
     if (team === undefined) return HttpResponse.json({ message: 'Not found' }, { status: 404 })
@@ -222,7 +222,7 @@ export const handlers = [
     const team = teams.find((t) => t.id === teamId)
     if (team === undefined) return HttpResponse.json({ message: 'Not found' }, { status: 404 })
     const benchmarkId = c.params[1] as string
-    const benchmark = benchmarks.find((b) => b.id === benchmarkId)
+    const benchmark = benchmarks.find((b) => b.teamId === teamId && b.id === benchmarkId)
     if (benchmark === undefined) return HttpResponse.json({ message: 'Not found' }, { status: 404 })
     return HttpResponse.json(benchmark)
   }),
