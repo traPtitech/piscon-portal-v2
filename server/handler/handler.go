@@ -63,5 +63,6 @@ func (h *Handler) SetupRoutes(e *echo.Echo) {
 	teams.GET("", h.GetTeams)
 	teams.POST("", h.CreateTeam)
 	teams.GET("/:teamID", h.GetTeam)
+	// TODO: Admins can access even if they are not members of the team.
 	teams.PATCH("/:teamID", h.UpdateTeam, h.TeamAuthMiddleware())
 }

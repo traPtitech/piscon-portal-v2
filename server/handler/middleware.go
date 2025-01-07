@@ -14,7 +14,7 @@ import (
 const userIDKey = "userID"
 
 func getUserID(c echo.Context) string {
-	return c.Get("userID").(string)
+	return c.Get(userIDKey).(string)
 }
 
 func (h *Handler) AuthMiddleware() echo.MiddlewareFunc {

@@ -8,6 +8,8 @@ import (
 	"github.com/google/uuid"
 )
 
+const MaxTeamMembers = 3
+
 type Team struct {
 	ID        string
 	Name      string
@@ -30,7 +32,7 @@ func (t *Team) AddMember(user User) error {
 	if user.TeamID != nil && *user.TeamID != t.ID {
 		return errors.New("user is already in another team")
 	}
-	if len(t.Members) >= 3 {
+	if len(t.Members) >= MaxTeamMembers {
 		return errors.New("team is full")
 	}
 	t.Members = append(t.Members, user)
