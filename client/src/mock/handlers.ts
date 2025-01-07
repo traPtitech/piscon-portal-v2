@@ -178,7 +178,7 @@ export const handlers = [
   http.post(`${apiBaseUrl}/teams`, () => {
     // TODO
   }),
-  http.get(new RegExp(`${apiBaseUrl}/teams/([^/]+)`), (c) => {
+  http.get(new RegExp(`${apiBaseUrl}/teams/([^/]+)$`), (c) => {
     // TODO
     const teamId = c.params[0] as string
     const team = teams.find((t) => t.id === teamId)
@@ -187,6 +187,8 @@ export const handlers = [
   }),
   http.get(new RegExp(`${apiBaseUrl}/teams/([^/]+)/instances`), (c) => {
     const teamId = c.params[0] as string
+    const team = teams.find((t) => t.id === teamId)
+    if (team === undefined) return HttpResponse.json({ message: 'Not found' }, { status: 404 })
     const res = instances.filter((i) => i.teamId === teamId)
     return HttpResponse.json(res)
   }),
@@ -208,13 +210,21 @@ export const handlers = [
     const res = benchmarks.filter((b) => b.status === 'waiting' || b.status === 'running')
     return HttpResponse.json(res)
   }),
-  http.patch(new RegExp(`${apiBaseUrl}/teams/([^/]+)/benchmarks`), (c) => {
+  http.get(new RegExp(`${apiBaseUrl}/teams/([^/]+)/benchmarks`), (c) => {
     const teamId = c.params[0] as string
+    const team = teams.find((t) => t.id === teamId)
+    if (team === undefined) return HttpResponse.json({ message: 'Not found' }, { status: 404 })
     const res = benchmarks.filter((b) => b.teamId === teamId)
     return HttpResponse.json(res)
   }),
-  http.patch(new RegExp(`${apiBaseUrl}/teams/([^/]+)/benchmarks/([^/]+)`), () => {
-    // TODO
+  http.get(new RegExp(`${apiBaseUrl}/teams/([^/]+)/benchmarks/([^/]+)`), (c) => {
+    const teamId = c.params[0] as string
+    const team = teams.find((t) => t.id === teamId)
+    if (team === undefined) return HttpResponse.json({ message: 'Not found' }, { status: 404 })
+    const benchmarkId = c.params[1] as string
+    const benchmark = benchmarks.find((b) => b.id === benchmarkId)
+    if (benchmark === undefined) return HttpResponse.json({ message: 'Not found' }, { status: 404 })
+    return HttpResponse.json(benchmark)
   }),
   http.patch(new RegExp(`${apiBaseUrl}/benchmarks/([^/]+)`), () => {
     // TODO

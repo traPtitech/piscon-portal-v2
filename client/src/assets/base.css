@@ -25,6 +25,29 @@
   --ct-slate-950: #020617;
   --ct-slate-950-rgb: 2, 6, 23;
 
+  --ct-red-50: #fff5f5;
+  --ct-red-50-rgb: 255, 245, 245;
+  --ct-red-100: #fee2e2;
+  --ct-red-100-rgb: 254, 226, 226;
+  --ct-red-200: #fecaca;
+  --ct-red-200-rgb: 254, 202, 202;
+  --ct-red-300: #fca5a5;
+  --ct-red-300-rgb: 252, 165, 165;
+  --ct-red-400: #f87171;
+  --ct-red-400-rgb: 248, 113, 113;
+  --ct-red-500: #ef4444;
+  --ct-red-500-rgb: 239, 68, 68;
+  --ct-red-600: #dc2626;
+  --ct-red-600-rgb: 220, 38, 38;
+  --ct-red-700: #b91c1c;
+  --ct-red-700-rgb: 185, 28, 28;
+  --ct-red-800: #991b1b;
+  --ct-red-800-rgb: 153, 27, 27;
+  --ct-red-900: #7f1d1d;
+  --ct-red-900-rgb: 127, 29, 29;
+  --ct-red-950: #450a0a;
+  --ct-red-950-rgb: 69, 10, 10;
+
   --color-primary: #005bac;
   --color-primary-background: var(--ct-slate-200);
 }
@@ -37,6 +60,7 @@
 }
 
 body {
+  color: var(--ct-slate-800);
   font-family: 'Noto Sans JP', sans-serif;
   min-height: 100vh;
   font-size: 16px;

@@ -39,7 +39,8 @@ const links = [
 
 <style scoped>
 .main-layout-container {
-  display: flex;
+  display: grid;
+  grid-template-columns: 200px 1fr;
   height: 100vh;
 }
 
