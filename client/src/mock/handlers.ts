@@ -1,6 +1,7 @@
 import { apiBaseUrl } from '@/api'
 import { http, HttpResponse } from 'msw'
 import type { components, paths } from '@/api/openapi'
+import { uuidv7 } from 'uuidv7'
 
 const userIds = {
   cp20: '01943f2e-0dca-7599-9f79-901de49660fd',
@@ -98,69 +99,82 @@ const instances: paths['/teams/{teamId}/instances']['get']['responses']['200']['
     },
   ]
 
-const benchmarks: paths['/benchmarks']['get']['responses']['200']['content']['application/json'] = [
-  {
-    id: '01943f67-d9ed-7bbb-81eb-20f81391ffea',
-    instanceId: instanceIds['ikura-cp-1'],
-    teamId: teamIds['ikura-cp'],
-    userId: userIds.cp20,
-    status: 'finished',
-    createdAt: '2025-01-01T01:00:00Z',
-    startedAt: '2025-01-01T01:00:01Z',
-    finishedAt: '2025-01-01T01:01:00Z',
-    score: 2000,
-  },
-  {
-    id: '01943f68-7d22-7abb-8b13-0b727cd4597e',
-    instanceId: instanceIds['ikura-cp-1'],
-    teamId: teamIds['ikura-cp'],
-    userId: userIds.cp20,
-    status: 'running',
-    createdAt: '2025-01-01T02:00:00Z',
-    startedAt: '2025-01-01T02:00:01Z',
-  },
-  {
-    id: '01943f69-3aec-7702-8d1e-8642d9c5b47b',
-    instanceId: instanceIds['ikura-cp-1'],
-    teamId: teamIds['ikura-cp'],
-    userId: userIds.cp20,
-    status: 'waiting',
-    createdAt: '2025-01-01T03:00:00Z',
-  },
-  {
-    id: '01943f6b-7276-79a9-9bd3-69d1d5a9cb3d',
-    instanceId: instanceIds['piropiro-1'],
-    teamId: teamIds['piropiro'],
-    userId: userIds.pirosiki,
-    status: 'finished',
-    createdAt: '2025-01-02T01:00:00Z',
-    startedAt: '2025-01-02T01:00:01Z',
-    finishedAt: '2025-01-02T01:01:00Z',
-    score: 100,
-  },
-  {
-    id: '01943f6e-69dd-7167-84b3-478cf9c3253d',
-    instanceId: instanceIds['piropiro-1'],
-    teamId: teamIds['piropiro'],
-    userId: userIds.pirosiki,
-    status: 'finished',
-    createdAt: '2025-01-02T02:00:00Z',
-    startedAt: '2025-01-02T02:00:01Z',
-    finishedAt: '2025-01-02T02:01:00Z',
-    score: 1000,
-  },
-  {
-    id: '01943f6e-8b29-79af-8430-7b06ae9307e5',
-    instanceId: instanceIds['piropiro-1'],
-    teamId: teamIds['piropiro'],
-    userId: userIds.pirosiki,
-    status: 'finished',
-    createdAt: '2025-01-02T03:00:00Z',
-    startedAt: '2025-01-02T03:00:01Z',
-    finishedAt: '2025-01-02T03:01:00Z',
-    score: 1000,
-  },
-]
+const benchmarks: paths['/benchmarks/{benchmarkId}']['get']['responses']['200']['content']['application/json'][] =
+  [
+    {
+      id: '01943f67-d9ed-7bbb-81eb-20f81391ffea',
+      instanceId: instanceIds['ikura-cp-1'],
+      teamId: teamIds['ikura-cp'],
+      userId: userIds.cp20,
+      status: 'finished',
+      createdAt: '2025-01-01T01:00:00Z',
+      startedAt: '2025-01-01T01:00:01Z',
+      finishedAt: '2025-01-01T01:01:00Z',
+      score: 2000,
+      log: '',
+      adminLog: '',
+    },
+    {
+      id: '01943f68-7d22-7abb-8b13-0b727cd4597e',
+      instanceId: instanceIds['ikura-cp-1'],
+      teamId: teamIds['ikura-cp'],
+      userId: userIds.cp20,
+      status: 'running',
+      createdAt: '2025-01-01T02:00:00Z',
+      startedAt: '2025-01-01T02:00:01Z',
+      log: '',
+      adminLog: '',
+    },
+    {
+      id: '01943f69-3aec-7702-8d1e-8642d9c5b47b',
+      instanceId: instanceIds['ikura-cp-1'],
+      teamId: teamIds['ikura-cp'],
+      userId: userIds.cp20,
+      status: 'waiting',
+      createdAt: '2025-01-01T03:00:00Z',
+      log: '',
+      adminLog: '',
+    },
+    {
+      id: '01943f6b-7276-79a9-9bd3-69d1d5a9cb3d',
+      instanceId: instanceIds['piropiro-1'],
+      teamId: teamIds['piropiro'],
+      userId: userIds.pirosiki,
+      status: 'finished',
+      createdAt: '2025-01-02T01:00:00Z',
+      startedAt: '2025-01-02T01:00:01Z',
+      finishedAt: '2025-01-02T01:01:00Z',
+      score: 100,
+      log: '',
+      adminLog: '',
+    },
+    {
+      id: '01943f6e-69dd-7167-84b3-478cf9c3253d',
+      instanceId: instanceIds['piropiro-1'],
+      teamId: teamIds['piropiro'],
+      userId: userIds.pirosiki,
+      status: 'finished',
+      createdAt: '2025-01-02T02:00:00Z',
+      startedAt: '2025-01-02T02:00:01Z',
+      finishedAt: '2025-01-02T02:01:00Z',
+      score: 1000,
+      log: '',
+      adminLog: '',
+    },
+    {
+      id: '01943f6e-8b29-79af-8430-7b06ae9307e5',
+      instanceId: instanceIds['piropiro-1'],
+      teamId: teamIds['piropiro'],
+      userId: userIds.pirosiki,
+      status: 'finished',
+      createdAt: '2025-01-02T03:00:00Z',
+      startedAt: '2025-01-02T03:00:01Z',
+      finishedAt: '2025-01-02T03:01:00Z',
+      score: 1000,
+      log: '',
+      adminLog: '',
+    },
+  ]
 
 export const handlers = [
   http.get(`${apiBaseUrl}/oauth2/code`, () => {
@@ -289,3 +303,60 @@ export const handlers = [
     // TODO
   }),
 ]
+
+// ベンチマークの状態を定期的に更新する
+setInterval(() => {
+  const waitingBenchmarks = benchmarks.filter((b) => b.status === 'waiting')
+  const runningBenchmarks = benchmarks.filter((b) => b.status === 'running')
+
+  // running のベンチマークにログを出力する
+  for (const b of runningBenchmarks) {
+    if (Math.random() < 0.1) {
+      b.log += `${new Date().toISOString()} [INFO] Benchmark is running...\n`
+    }
+    if (Math.random() < 0.1) {
+      b.adminLog += `${new Date().toISOString()} [ERROR] Admin log...\n`
+    }
+  }
+
+  // running のまま 60 秒経過したら finished にする
+  for (const b of runningBenchmarks) {
+    if (new Date(b.startedAt).getTime() + 60 * 1000 < Date.now()) {
+      b.status = 'finished'
+      b.finishedAt = new Date().toISOString()
+      b.score = Math.floor(Math.random() * 10000)
+    }
+  }
+
+  // 実行中のベンチマークがなくなったら、waiting のベンチマークを1つ running にする
+  if (runningBenchmarks.length === 0) {
+    const waitingBenchmark = benchmarks.find((b) => b.status === 'waiting')
+    if (waitingBenchmark !== undefined) {
+      waitingBenchmark.status = 'running'
+      waitingBenchmark.startedAt = new Date().toISOString()
+    }
+  }
+
+  // waiting のベンチマークがなくなったら、新しいベンチマークを enqueue する
+  const queueBenchmark = waitingBenchmarks.find((b) => b.teamId === teamIds['ikura-cp'])
+  if (queueBenchmark === undefined) {
+    const instanceId = [
+      instanceIds['ikura-cp-1'],
+      instanceIds['ikura-cp-2'],
+      instanceIds['ikura-cp-3'],
+    ][Math.floor(Math.random() * 3)]
+
+    const userId = [userIds.cp20, userIds['ikura-hamu']][Math.floor(Math.random() * 2)]
+
+    benchmarks.push({
+      id: uuidv7(),
+      instanceId,
+      teamId: teamIds['ikura-cp'],
+      userId,
+      status: 'waiting',
+      createdAt: new Date().toISOString(),
+      log: '',
+      adminLog: '',
+    })
+  }
+}, 100)
