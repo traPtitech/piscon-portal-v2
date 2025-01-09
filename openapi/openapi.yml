@@ -1025,10 +1025,7 @@ components:
         - userId
         - status
         - log
-        - score
         - createdAt
-        - startedAt
-        - finishedAt
 
     BenchmarkAdminResult:
       type: "object"
@@ -1068,10 +1065,7 @@ components:
         - status
         - log
         - adminLog
-        - score
         - createdAt
-        - startedAt
-        - finishedAt
 
     BenchScore:
       type: "object"
