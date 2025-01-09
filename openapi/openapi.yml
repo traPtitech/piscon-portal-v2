@@ -965,6 +965,8 @@ components:
     BenchmarkListItem:
       type: "object"
       description: "ベンチマーク"
+      discriminator:
+        propertyName: status
       oneOf:
         - $ref: "#/components/schemas/WaitingBenchmark"
         - $ref: "#/components/schemas/RunningBenchmark"
@@ -974,7 +976,9 @@ components:
       type: "object"
       description: "ベンチマーク結果"
       allOf:
-        - oneOf:
+        - discriminator:
+            propertyName: status
+          oneOf:
           - $ref: "#/components/schemas/WaitingBenchmark"
           - $ref: "#/components/schemas/RunningBenchmark"
           - $ref: "#/components/schemas/FinishedBenchmark"
@@ -990,7 +994,9 @@ components:
       type: "object"
       description: "Adminが見ることができるベンチマーク結果"
       allOf:
-        - oneOf:
+        - discriminator:
+            propertyName: status
+          oneOf:
           - $ref: "#/components/schemas/WaitingBenchmark"
           - $ref: "#/components/schemas/RunningBenchmark"
           - $ref: "#/components/schemas/FinishedBenchmark"
