@@ -122,6 +122,7 @@ const benchmarks: paths['/benchmarks/{benchmarkId}']['get']['responses']['200'][
       status: 'running',
       createdAt: '2025-01-01T02:00:00Z',
       startedAt: '2025-01-01T02:00:01Z',
+      score: 0,
       log: '',
       adminLog: '',
     },
@@ -317,6 +318,9 @@ setInterval(() => {
     if (Math.random() < 0.1) {
       b.adminLog += `${new Date().toISOString()} [ERROR] Admin log...\n`
     }
+    if (Math.random() < 0.05) {
+      b.score += Math.floor(Math.random() * (100 + b.score))
+    }
   }
 
   // running のまま 60 秒経過したら finished にする
@@ -324,7 +328,6 @@ setInterval(() => {
     if (new Date(b.startedAt).getTime() + 60 * 1000 < Date.now()) {
       b.status = 'finished'
       b.finishedAt = new Date().toISOString()
-      b.score = Math.floor(Math.random() * 10000)
     }
   }
 
@@ -334,6 +337,7 @@ setInterval(() => {
     if (waitingBenchmark !== undefined) {
       waitingBenchmark.status = 'running'
       waitingBenchmark.startedAt = new Date().toISOString()
+      waitingBenchmark.score = 0
     }
   }
 
