@@ -20,7 +20,7 @@ const user = computed(() => users.value?.find((u) => u.id === bench.value?.userI
 watch(
   bench,
   () => {
-    if (bench.value?.status === 'running') {
+    if (bench.value?.status === 'running' || bench.value?.status === 'waiting') {
       const interval = setInterval(() => {
         refetch()
       }, 1000)
