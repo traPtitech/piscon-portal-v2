@@ -6,6 +6,7 @@ import { formatDate } from '@/lib/formatDate'
 import { Icon } from '@iconify/vue'
 import ErrorMessage from '@/components/ErrorMessage.vue'
 import BenchmarkStatusChip from '@/components/BenchmarkStatusChip.vue'
+import { formatScore } from '@/lib/formatScore'
 
 const { teamId } = defineProps<{ teamId: string }>()
 
@@ -44,7 +45,7 @@ const { data: users } = useUsers()
     <div class="list-label"></div>
     <template v-for="bench in sortedBenches" :key="bench.id">
       <div v-if="bench.score !== undefined" class="bench-score">
-        {{ bench.score }}
+        {{ formatScore(bench.score) }}
       </div>
       <div v-else class="bench-score-loading">計測中</div>
       <div>
