@@ -32,17 +32,17 @@ func TestCreateTeam(t *testing.T) {
 		CreatedAt: time.Now(),
 	}
 	for _, member := range members {
-		if err := repo.CreateUser(context.TODO(), member); err != nil {
+		if err := repo.CreateUser(context.Background(), member); err != nil {
 			require.Nil(t, err)
 		}
 	}
 
-	err := repo.CreateTeam(context.TODO(), team)
+	err := repo.CreateTeam(context.Background(), team)
 	if err != nil {
 		require.Nil(t, err)
 	}
 
-	got, err := repo.FindTeam(context.TODO(), team.ID)
+	got, err := repo.FindTeam(context.Background(), team.ID)
 	if err != nil {
 		require.Nil(t, err)
 	}
@@ -75,12 +75,12 @@ func TestUpdateTeam(t *testing.T) {
 	}
 
 	for _, member := range members {
-		if err := repo.CreateUser(context.TODO(), member); err != nil {
+		if err := repo.CreateUser(context.Background(), member); err != nil {
 			require.Nil(t, err)
 		}
 	}
 
-	err := repo.CreateTeam(context.TODO(), team)
+	err := repo.CreateTeam(context.Background(), team)
 	if err != nil {
 		require.Nil(t, err)
 	}
@@ -91,12 +91,12 @@ func TestUpdateTeam(t *testing.T) {
 		ID:   uuid.New(),
 		Name: "user3",
 	})
-	err = repo.UpdateTeam(context.TODO(), team)
+	err = repo.UpdateTeam(context.Background(), team)
 	if err != nil {
 		require.Nil(t, err)
 	}
 
-	got, err := repo.FindTeam(context.TODO(), team.ID)
+	got, err := repo.FindTeam(context.Background(), team.ID)
 	if err != nil {
 		require.Nil(t, err)
 	}
