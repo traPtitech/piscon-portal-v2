@@ -414,7 +414,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Benchmark"
+                $ref: "#/components/schemas/BenchmarkListItem"
         400:
           description: "インスタンスが存在しない、チームに所属していない、すでにそのチームのベンチマークがキューに入っているなど"
           content:
@@ -445,7 +445,7 @@ paths:
               schema:
                 type: "array"
                 items:
-                  $ref: "#/components/schemas/Benchmark"
+                  $ref: "#/components/schemas/BenchmarkListItem"
         401:
           $ref: "#/components/responses/Unauthorized"
         403:
@@ -472,7 +472,7 @@ paths:
               schema:
                 type: "array"
                 items:
-                  $ref: "#/components/schemas/Benchmark"
+                  $ref: "#/components/schemas/BenchmarkListItem"
         401:
           $ref: "#/components/responses/Unauthorized"
         500:
@@ -498,7 +498,7 @@ paths:
               schema:
                 type: "array"
                 items:
-                  $ref: "#/components/schemas/Benchmark"
+                  $ref: "#/components/schemas/BenchmarkListItem"
         401:
           $ref: "#/components/responses/Unauthorized"
         403:
@@ -526,7 +526,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BenchmarkResult"
+                $ref: "#/components/schemas/Benchmark"
         401:
           $ref: "#/components/responses/Unauthorized"
         403:
@@ -962,22 +962,22 @@ components:
       example: 100
       description: "ベンチマークのスコア"
 
-    Benchmark:
+    BenchmarkListItem:
       type: "object"
       description: "ベンチマーク"
       oneOf:
-        - $ref: "#/components/schemas/WaitingBenchmarkResult"
-        - $ref: "#/components/schemas/RunningBenchmarkResult"
-        - $ref: "#/components/schemas/FinishedBenchmarkResult"
+        - $ref: "#/components/schemas/WaitingBenchmark"
+        - $ref: "#/components/schemas/RunningBenchmark"
+        - $ref: "#/components/schemas/FinishedBenchmark"
 
-    BenchmarkResult:
+    Benchmark:
       type: "object"
       description: "ベンチマーク結果"
       allOf:
         - oneOf:
-          - $ref: "#/components/schemas/WaitingBenchmarkResult"
-          - $ref: "#/components/schemas/RunningBenchmarkResult"
-          - $ref: "#/components/schemas/FinishedBenchmarkResult"
+          - $ref: "#/components/schemas/WaitingBenchmark"
+          - $ref: "#/components/schemas/RunningBenchmark"
+          - $ref: "#/components/schemas/FinishedBenchmark"
         - properties:
             log:
               type: "string"
@@ -991,9 +991,9 @@ components:
       description: "Adminが見ることができるベンチマーク結果"
       allOf:
         - oneOf:
-          - $ref: "#/components/schemas/WaitingBenchmarkResult"
-          - $ref: "#/components/schemas/RunningBenchmarkResult"
-          - $ref: "#/components/schemas/FinishedBenchmarkResult"
+          - $ref: "#/components/schemas/WaitingBenchmark"
+          - $ref: "#/components/schemas/RunningBenchmark"
+          - $ref: "#/components/schemas/FinishedBenchmark"
         - properties:
             log:
               type: "string"
@@ -1007,7 +1007,7 @@ components:
             - log
             - adminLog
     
-    WaitingBenchmarkResult:
+    WaitingBenchmark:
       type: "object"
       description: "status=waiting のベンチマーク結果"
       properties:
@@ -1033,7 +1033,7 @@ components:
         - status
         - createdAt
 
-    RunningBenchmarkResult:
+    RunningBenchmark:
       type: "object"
       description: "status=running のベンチマーク結果"
       properties:
@@ -1065,7 +1065,7 @@ components:
         - createdAt
         - startedAt
 
-    FinishedBenchmarkResult:
+    FinishedBenchmark:
       type: "object"
       description: "status=finished のベンチマーク結果"
       properties:
