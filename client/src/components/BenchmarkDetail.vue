@@ -36,7 +36,7 @@ watch(
   <div v-if="bench" class="bench-detail-container">
     <div class="bench-score-container">
       <div class="bench-score-label">スコア</div>
-      <div v-if="bench.score" class="bench-score-content">{{ bench.score }}</div>
+      <div v-if="bench.score !== undefined" class="bench-score-content">{{ bench.score }}</div>
       <div v-else class="bench-score-content-dimmed">未計測</div>
     </div>
     <div class="bench-detail-element-container">
