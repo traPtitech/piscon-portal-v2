@@ -4,13 +4,13 @@ import (
 	"context"
 	"database/sql"
 	_ "embed"
+	"math/rand/v2"
 	"os"
 	"testing"
 	"time"
 
 	"github.com/testcontainers/testcontainers-go/modules/mysql"
 	dbrepo "github.com/traPtitech/piscon-portal-v2/server/repository/db"
-	"github.com/traPtitech/piscon-portal-v2/server/utils/random"
 )
 
 var mysqlContainer *mysql.MySQLContainer
@@ -46,7 +46,7 @@ func setupRepository(t *testing.T) *dbrepo.Repository {
 
 	ctx := context.Background()
 
-	dbName := "test_" + random.String(10)
+	dbName := randomDBName()
 	if err := createDatabase(dbName); err != nil {
 		t.Fatal(err)
 	}
@@ -97,4 +97,13 @@ func retry(max int, f func() error) {
 		time.Sleep(1 * time.Second)
 	}
 	panic(err)
+}
+
+func randomDBName() string {
+	const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	var buf [10]byte
+	for i := range buf {
+		buf[i] = charset[rand.IntN(len(charset))]
+	}
+	return "test_" + string(buf[:])
 }
