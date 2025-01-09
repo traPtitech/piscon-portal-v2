@@ -3,22 +3,31 @@ import BenchmarkStatusChip from '@/components/BenchmarkStatusChip.vue'
 import ErrorMessage from '@/components/ErrorMessage.vue'
 import { formatDate } from '@/lib/formatDate'
 import { useTeamBench, useTeamInstances, useUsers } from '@/lib/useServerData'
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 
 const { teamId, benchId } = defineProps<{
   teamId: string
   benchId: string
 }>()
 
-const { data: bench, error: benchError } = useTeamBench(teamId, benchId)
+const { data: bench, error: benchError, refetch } = useTeamBench(teamId, benchId)
 const { data: instances } = useTeamInstances(teamId)
 const { data: users } = useUsers()
 
 const instance = computed(() => instances.value?.find((i) => i.id === bench.value?.instanceId))
 const user = computed(() => users.value?.find((u) => u.id === bench.value?.userId))
 
-const log = computed(() =>
-  [...new Array(30)].map((_, i) => i.toString().padStart(2, ' ') + ': Sample Logs').join('\n'),
+watch(
+  bench,
+  () => {
+    if (bench.value?.status === 'running') {
+      const interval = setInterval(() => {
+        refetch()
+      }, 1000)
+      return () => clearInterval(interval)
+    }
+  },
+  { immediate: true },
 )
 </script>
 
@@ -65,7 +74,7 @@ const log = computed(() =>
       </div>
     </div>
     <div class="bench-log-container">
-      <pre><code>{{ log }}</code></pre>
+      <pre><code>{{ bench.log }}</code></pre>
     </div>
   </div>
 </template>
