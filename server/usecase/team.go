@@ -49,10 +49,6 @@ func (u *TeamUseCase) CreateTeam(ctx context.Context, input CreateTeamInput) (do
 		return domain.Team{}, NewErrBadRequest("creator must be a member of the team")
 	}
 
-	if len(input.MemberIDs) > domain.MaxTeamMembers {
-		return domain.Team{}, NewErrBadRequest("too many members")
-	}
-
 	team := domain.NewTeam(input.Name)
 	for _, memberID := range input.MemberIDs {
 		user, err := u.repo.FindUser(ctx, memberID)
