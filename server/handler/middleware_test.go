@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	sessmock "github.com/traPtitech/piscon-portal-v2/server/handler/internal/mock"
@@ -37,7 +38,7 @@ func TestAuthMiddleware(t *testing.T) {
 				mockSessManager.EXPECT().GetSessionID(gomock.Any()).Return("sessionID", nil)
 				mockRepo.EXPECT().FindSession(gomock.Any(), "sessionID").Return(domain.Session{
 					ID:        "sessionID",
-					UserID:    "test-user-id",
+					UserID:    uuid.New(),
 					ExpiresAt: time.Now().Add(time.Hour),
 				}, nil)
 			},
@@ -56,7 +57,7 @@ func TestAuthMiddleware(t *testing.T) {
 				mockSessManager.EXPECT().GetSessionID(gomock.Any()).Return("sessionID", nil)
 				mockRepo.EXPECT().FindSession(gomock.Any(), "sessionID").Return(domain.Session{
 					ID:        "sessionID",
-					UserID:    "test-user-id",
+					UserID:    uuid.New(),
 					ExpiresAt: time.Now().Add(-time.Hour),
 				}, nil)
 				// expired session should be deleted
@@ -73,6 +74,71 @@ func TestAuthMiddleware(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, "/", nil)
 			rec := httptest.NewRecorder()
 			_ = needAuthorize(echo.New().NewContext(req, rec))
+			if rec.Code != tt.expectStatus {
+				t.Errorf("unexpected status code: expected=%d, got=%d", tt.expectStatus, rec.Code)
+			}
+		})
+	}
+}
+
+func TestTeamAuthMiddleware(t *testing.T) {
+	t.Parallel()
+
+	ctrl := gomock.NewController(t)
+
+	mockRepo := repomock.NewMockRepository(ctrl)
+	mockSessManager := sessmock.NewMockSessionManager(ctrl)
+	handler := NewHandler(mockRepo, mockSessManager)
+
+	userID := uuid.New()
+	teamID := uuid.New()
+
+	needAuthorize := handler.TeamAuthMiddleware()(func(c echo.Context) error {
+		return c.NoContent(http.StatusOK)
+	})
+
+	tests := []struct {
+		name         string
+		setup        func()
+		expectStatus int
+	}{
+		{
+			name: "ok",
+			setup: func() {
+				mockRepo.EXPECT().FindTeam(gomock.Any(), teamID).Return(domain.Team{
+					ID: teamID,
+					Members: []domain.User{
+						{ID: userID},
+					},
+				}, nil)
+			},
+			expectStatus: http.StatusOK,
+		},
+		{
+			name: "user is not a member of the team",
+			setup: func() {
+				mockRepo.EXPECT().FindTeam(gomock.Any(), teamID).Return(domain.Team{
+					ID:      uuid.New(),
+					Members: []domain.User{{ID: uuid.New()}},
+				}, nil)
+			},
+			expectStatus: http.StatusForbidden,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, "/", nil)
+			rec := httptest.NewRecorder()
+
+			c := echo.New().NewContext(req, rec)
+			c.SetParamNames("teamID")
+			c.SetParamValues(teamID.String())
+			c.Set("userID", userID)
+
+			tt.setup()
+
+			_ = needAuthorize(c)
 			if rec.Code != tt.expectStatus {
 				t.Errorf("unexpected status code: expected=%d, got=%d", tt.expectStatus, rec.Code)
 			}

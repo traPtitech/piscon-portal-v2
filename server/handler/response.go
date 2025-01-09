@@ -14,8 +14,20 @@ func internalServerErrorResponse(c echo.Context, err error) error {
 	})
 }
 
+func badRequestResponse(c echo.Context, msg string) error {
+	return c.JSON(http.StatusBadRequest, openapi.ErrorBadRequest{
+		Message: openapi.NewOptString(msg),
+	})
+}
+
 func unauthorizedResponse(c echo.Context, msg string) error {
 	return c.JSON(http.StatusUnauthorized, openapi.Unauthorized{
 		Message: openapi.NewOptString(msg),
+	})
+}
+
+func notFoundResponse(c echo.Context) error {
+	return c.JSON(http.StatusNotFound, openapi.NotFound{
+		Message: openapi.NewOptString("Not Found"),
 	})
 }

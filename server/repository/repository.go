@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/google/uuid"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 )
 
@@ -14,7 +15,7 @@ type Repository interface {
 	Transaction(ctx context.Context, f func(ctx context.Context, r Repository) error) error
 
 	// FindUser finds a user by id. If the user is not found, it returns [ErrNotFound].
-	FindUser(ctx context.Context, id string) (domain.User, error)
+	FindUser(ctx context.Context, id uuid.UUID) (domain.User, error)
 	// CreateUser creates a user.
 	CreateUser(ctx context.Context, user domain.User) error
 
@@ -24,6 +25,15 @@ type Repository interface {
 	CreateSession(ctx context.Context, session domain.Session) error
 	// DeleteSession deletes a session by id.
 	DeleteSession(ctx context.Context, id string) error
+
+	// FindTeam finds a team by id. If the team is not found, it returns [ErrNotFound].
+	FindTeam(ctx context.Context, id uuid.UUID) (domain.Team, error)
+	// GetTeams returns all teams.
+	GetTeams(ctx context.Context) ([]domain.Team, error)
+	// CreateTeam creates a team.
+	CreateTeam(ctx context.Context, team domain.Team) error
+	// UpdateTeam updates a team.
+	UpdateTeam(ctx context.Context, team domain.Team) error
 }
 
 var (

@@ -22,7 +22,7 @@ func TestLogin(t *testing.T) {
 
 	server := NewPortalServer(mockRepo)
 	client := NewClient(server)
-	userID := uuid.NewString()
+	userID := uuid.New()
 
 	testFirstLogin(t, mockRepo, server, client, userID)
 }
@@ -34,7 +34,7 @@ func TestLoginAsExistingUser(t *testing.T) {
 
 	server := NewPortalServer(mockRepo)
 	client := NewClient(server)
-	userID := uuid.NewString()
+	userID := uuid.New()
 
 	// user already exists, so only create session
 	mockRepo.EXPECT().Transaction(gomock.Any(), gomock.Any()).
@@ -58,7 +58,7 @@ func TestLogout(t *testing.T) {
 
 	server := NewPortalServer(mockRepo)
 	client := NewClient(server)
-	userID := uuid.NewString()
+	userID := uuid.New()
 
 	testFirstLogin(t, mockRepo, server, client, userID)
 
@@ -84,7 +84,7 @@ func TestLogout(t *testing.T) {
 	}
 }
 
-func testFirstLogin(t *testing.T, mockRepo *mock.MockRepository, server *httptest.Server, client *http.Client, userID string) {
+func testFirstLogin(t *testing.T, mockRepo *mock.MockRepository, server *httptest.Server, client *http.Client, userID uuid.UUID) {
 	// create user and session
 	mockRepo.EXPECT().Transaction(gomock.Any(), gomock.Any()).
 		DoAndReturn(func(ctx context.Context, f func(context.Context, repository.Repository) error) error {

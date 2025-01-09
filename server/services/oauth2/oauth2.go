@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/google/uuid"
 	"github.com/jellydator/ttlcache/v3"
 	"golang.org/x/oauth2"
 )
@@ -88,8 +89,8 @@ func (s *Service) Exchange(ctx context.Context, sessionID, code string) (*oauth2
 }
 
 type TraQUserInfo struct {
-	ID   string `json:"sub"`
-	Name string `json:"name"`
+	ID   uuid.UUID `json:"sub"`
+	Name string    `json:"name"`
 }
 
 func (s *Service) GetUserInfo(ctx context.Context, token *oauth2.Token) (*TraQUserInfo, error) {

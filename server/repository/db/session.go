@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/aarondl/opt/omit"
+	"github.com/google/uuid"
 	"github.com/stephenafamo/bob"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
@@ -46,13 +47,13 @@ func findSession(ctx context.Context, executor bob.Executor, id string) (domain.
 		return domain.Session{}, fmt.Errorf("find session: %w", err)
 	}
 
-	return toDomainSession(session), nil
+	return toDomainSession(session)
 }
 
 func createSession(ctx context.Context, executor bob.Executor, session domain.Session) error {
 	_, err := models.Sessions.Insert(&models.SessionSetter{
 		ID:        omit.From(session.ID),
-		UserID:    omit.From(session.UserID),
+		UserID:    omit.From(session.UserID.String()),
 		ExpiredAt: omit.From(session.ExpiresAt),
 	}).Exec(ctx, executor)
 	if err != nil {
@@ -69,10 +70,14 @@ func deleteSession(ctx context.Context, executor bob.Executor, id string) error 
 	return nil
 }
 
-func toDomainSession(session *models.Session) domain.Session {
+func toDomainSession(session *models.Session) (domain.Session, error) {
+	userID, err := uuid.Parse(session.UserID)
+	if err != nil {
+		return domain.Session{}, err
+	}
 	return domain.Session{
 		ID:        session.ID,
-		UserID:    session.UserID,
+		UserID:    userID,
 		ExpiresAt: session.ExpiredAt,
-	}
+	}, nil
 }

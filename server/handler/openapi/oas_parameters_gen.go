@@ -34,6 +34,12 @@ type GetOauth2CallbackParams struct {
 	Code string
 }
 
+// GetRankingParams is parameters of getRanking operation.
+type GetRankingParams struct {
+	// ランキングにどのスコアを使用するか。latestは最新のスコア、highestは最高スコアを使用する.
+	OrderBy RankingOrderBy
+}
+
 // GetTeamParams is parameters of getTeam operation.
 type GetTeamParams struct {
 	// チームID.
