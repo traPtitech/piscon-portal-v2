@@ -74,6 +74,7 @@ func findTeam(ctx context.Context, executor bob.Executor, id string) (domain.Tea
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Team{}, repository.ErrNotFound
 		}
+		return domain.Team{}, fmt.Errorf("find team: %w", err)
 	}
 	return toDomainTeam(team)
 }
