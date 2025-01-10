@@ -113,7 +113,7 @@ export interface paths {
     }
     /**
      * チーム一覧取得
-     * @description チーム一覧を取得します
+     * @description チーム一覧を取得します (0件の場合も200で空配列が返ります)
      */
     get: operations['getTeams']
     put?: never
@@ -162,7 +162,7 @@ export interface paths {
     }
     /**
      * インスタンス一覧取得
-     * @description チームに所属しているインスタンス一覧を取得します
+     * @description チームに所属しているインスタンス一覧を取得します (0件の場合も200で空配列が返ります)
      */
     get: operations['getTeamInstances']
     put?: never
@@ -210,7 +210,7 @@ export interface paths {
     }
     /**
      * インスタンス一覧取得
-     * @description 全インスタンス一覧を取得します
+     * @description 全インスタンス一覧を取得します (0件の場合も200で空配列が返ります)
      */
     get: operations['getInstances']
     put?: never
@@ -230,7 +230,7 @@ export interface paths {
     }
     /**
      * ベンチマーク一覧取得
-     * @description 全チームのベンチマーク一覧を取得します
+     * @description 全チームのベンチマーク一覧を取得します (0件の場合も200で空配列が返ります)
      */
     get: operations['getBenchmarks']
     put?: never
@@ -256,6 +256,7 @@ export interface paths {
      * ベンチマーク待ち行列取得
      * @description ベンチマーク待ちのキューを取得します。
      *     createdAtの昇順になっており、現在実行中のベンチマークと、実行待ちのベンチマークが含まれます。
+     *     0件の場合も200で空配列が返ります。
      *
      */
     get: operations['getBenchmarkQueue']
@@ -276,7 +277,7 @@ export interface paths {
     }
     /**
      * チームのベンチマーク一覧取得
-     * @description チームのベンチマーク一覧を取得します
+     * @description チームのベンチマーク一覧を取得します (0件の場合も200で空配列が返ります)
      */
     get: operations['getTeamBenchmarks']
     put?: never
@@ -338,7 +339,7 @@ export interface paths {
     }
     /**
      * 全てのスコア取得
-     * @description 全てのベンチマークのスコアをチームごとに取得します
+     * @description 全てのベンチマークのスコアをチームごとに取得します (0件の場合も200で空配列が返ります)
      */
     get: operations['getScores']
     put?: never
@@ -360,6 +361,7 @@ export interface paths {
      * ランキング取得
      * @description ベンチマークのスコアランキングを取得します。1位から順に並んでいます。
      *     同じスコアの場合は、ベンチマーク実行日時(createdAt)が早い順に並べます。
+     *      0件の場合も200で空配列が返ります
      *
      */
     get: operations['getRanking']
@@ -542,41 +544,28 @@ export interface components {
      */
     Score: number
     /** @description ベンチマーク */
-    Benchmark: {
-      id: components['schemas']['BenchmarkId']
-      instanceId: components['schemas']['InstanceId']
-      teamId: components['schemas']['TeamId']
-      userId: components['schemas']['UserId']
-      status: components['schemas']['BenchmarkStatus']
-      score?: components['schemas']['Score']
-      createdAt: components['schemas']['CreatedAt']
-      startedAt?: components['schemas']['StartedAt']
-      finishedAt?: components['schemas']['FinishedAt']
-    }
+    BenchmarkListItem:
+      | components['schemas']['WaitingBenchmark']
+      | components['schemas']['RunningBenchmark']
+      | components['schemas']['FinishedBenchmark']
     /** @description ベンチマーク結果 */
-    BenchmarkResult: {
-      id: components['schemas']['BenchmarkId']
-      instanceId: components['schemas']['InstanceId']
-      teamId: components['schemas']['TeamId']
-      userId: components['schemas']['UserId']
-      status: components['schemas']['BenchmarkStatus']
+    Benchmark: (
+      | components['schemas']['WaitingBenchmark']
+      | components['schemas']['RunningBenchmark']
+      | components['schemas']['FinishedBenchmark']
+    ) & {
       /**
        * @description ベンチマークの競技者用ログ（標準出力）
        * @example log
        */
       log: string
-      score: components['schemas']['Score']
-      createdAt: components['schemas']['CreatedAt']
-      startedAt: components['schemas']['StartedAt']
-      finishedAt: components['schemas']['FinishedAt']
     }
     /** @description Adminが見ることができるベンチマーク結果 */
-    BenchmarkAdminResult: {
-      id: components['schemas']['BenchmarkId']
-      instanceId: components['schemas']['InstanceId']
-      teamId: components['schemas']['TeamId']
-      userId: components['schemas']['UserId']
-      status: components['schemas']['BenchmarkStatus']
+    BenchmarkAdminResult: (
+      | components['schemas']['WaitingBenchmark']
+      | components['schemas']['RunningBenchmark']
+      | components['schemas']['FinishedBenchmark']
+    ) & {
       /**
        * @description ベンチマークの競技者用ログ（標準出力）
        * @example log
@@ -587,6 +576,37 @@ export interface components {
        * @example admin log
        */
       adminLog: string
+    }
+    /** @description status=waiting のベンチマーク結果 */
+    WaitingBenchmark: {
+      id: components['schemas']['BenchmarkId']
+      instanceId: components['schemas']['InstanceId']
+      teamId: components['schemas']['TeamId']
+      userId: components['schemas']['UserId']
+      /** @enum {string} */
+      status: 'waiting'
+      createdAt: components['schemas']['CreatedAt']
+    }
+    /** @description status=running のベンチマーク結果 */
+    RunningBenchmark: {
+      id: components['schemas']['BenchmarkId']
+      instanceId: components['schemas']['InstanceId']
+      teamId: components['schemas']['TeamId']
+      userId: components['schemas']['UserId']
+      /** @enum {string} */
+      status: 'running'
+      score: components['schemas']['Score']
+      createdAt: components['schemas']['CreatedAt']
+      startedAt: components['schemas']['StartedAt']
+    }
+    /** @description status=finished のベンチマーク結果 */
+    FinishedBenchmark: {
+      id: components['schemas']['BenchmarkId']
+      instanceId: components['schemas']['InstanceId']
+      teamId: components['schemas']['TeamId']
+      userId: components['schemas']['UserId']
+      /** @enum {string} */
+      status: 'finished'
       score: components['schemas']['Score']
       createdAt: components['schemas']['CreatedAt']
       startedAt: components['schemas']['StartedAt']
@@ -1138,7 +1158,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['Benchmark'][]
+          'application/json': components['schemas']['BenchmarkListItem'][]
         }
       }
       401: components['responses']['Unauthorized']
@@ -1161,7 +1181,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['Benchmark']
+          'application/json': components['schemas']['BenchmarkListItem']
         }
       }
       /** @description インスタンスが存在しない、チームに所属していない、すでにそのチームのベンチマークがキューに入っているなど */
@@ -1193,7 +1213,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['Benchmark'][]
+          'application/json': components['schemas']['BenchmarkListItem'][]
         }
       }
       401: components['responses']['Unauthorized']
@@ -1221,7 +1241,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['Benchmark'][]
+          'application/json': components['schemas']['BenchmarkListItem'][]
         }
       }
       401: components['responses']['Unauthorized']
@@ -1250,7 +1270,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['BenchmarkResult']
+          'application/json': components['schemas']['Benchmark']
         }
       }
       401: components['responses']['Unauthorized']

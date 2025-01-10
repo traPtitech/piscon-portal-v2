@@ -118,6 +118,7 @@ const benchmarks: paths['/benchmarks']['get']['responses']['200']['content']['ap
     status: 'running',
     createdAt: '2025-01-01T02:00:00Z',
     startedAt: '2025-01-01T02:00:01Z',
+    score: 0,
   },
   {
     id: '01943f69-3aec-7702-8d1e-8642d9c5b47b',
@@ -224,11 +225,12 @@ export const handlers = [
       teams.map((team) => ({
         teamId: team.id,
         scores: benchmarks
-          .filter((b) => b.teamId === team.id && b.status === 'finished')
+          .filter((b) => b.teamId === team.id)
+          .filter((b) => b.status === 'finished')
           .map((b) => ({
             benchmarkId: b.id,
             teamId: team.id,
-            score: b.score!,
+            score: b.score,
             createdAt: b.createdAt,
           })),
       }))
@@ -237,8 +239,8 @@ export const handlers = [
   }),
   http.get(`${apiBaseUrl}/scores/ranking`, () => {
     const sortFn = (
-      a: components['schemas']['Benchmark'],
-      b: components['schemas']['Benchmark'],
+      a: components['schemas']['FinishedBenchmark'],
+      b: components['schemas']['FinishedBenchmark'],
     ) => {
       // スコアの降順
       if (a.score! < b.score!) return 1
@@ -252,14 +254,15 @@ export const handlers = [
         .map(
           (team) =>
             benchmarks
-              .filter((b) => b.teamId === team.id && b.status === 'finished')
+              .filter((b) => b.teamId === team.id)
+              .filter((b) => b.status === 'finished')
               .sort(sortFn)[0],
         )
         .sort(sortFn)
         .map((b, i) => ({
           rank: i + 1,
           teamId: b.teamId,
-          score: b.score!,
+          score: b.score,
           createdAt: b.createdAt,
         }))
 

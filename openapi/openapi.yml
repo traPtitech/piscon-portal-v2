@@ -414,7 +414,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Benchmark"
+                $ref: "#/components/schemas/BenchmarkListItem"
         400:
           description: "インスタンスが存在しない、チームに所属していない、すでにそのチームのベンチマークがキューに入っているなど"
           content:
@@ -445,7 +445,7 @@ paths:
               schema:
                 type: "array"
                 items:
-                  $ref: "#/components/schemas/Benchmark"
+                  $ref: "#/components/schemas/BenchmarkListItem"
         401:
           $ref: "#/components/responses/Unauthorized"
         403:
@@ -472,7 +472,7 @@ paths:
               schema:
                 type: "array"
                 items:
-                  $ref: "#/components/schemas/Benchmark"
+                  $ref: "#/components/schemas/BenchmarkListItem"
         401:
           $ref: "#/components/responses/Unauthorized"
         500:
@@ -498,7 +498,7 @@ paths:
               schema:
                 type: "array"
                 items:
-                  $ref: "#/components/schemas/Benchmark"
+                  $ref: "#/components/schemas/BenchmarkListItem"
         401:
           $ref: "#/components/responses/Unauthorized"
         403:
@@ -526,7 +526,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BenchmarkResult"
+                $ref: "#/components/schemas/Benchmark"
         401:
           $ref: "#/components/responses/Unauthorized"
         403:
@@ -962,77 +962,60 @@ components:
       example: 100
       description: "ベンチマークのスコア"
 
-    Benchmark:
+    BenchmarkListItem:
       type: "object"
       description: "ベンチマーク"
-      properties:
-        id:
-          $ref: "#/components/schemas/BenchmarkId"
-        instanceId:
-          $ref: "#/components/schemas/InstanceId"
-        teamId:
-          $ref: "#/components/schemas/TeamId"
-        userId:
-          $ref: "#/components/schemas/UserId"
-        status:
-          $ref: "#/components/schemas/BenchmarkStatus"
-        score:
-          $ref: "#/components/schemas/Score"
-        createdAt:
-          $ref: "#/components/schemas/CreatedAt"
-        startedAt:
-          $ref: "#/components/schemas/StartedAt"
-        finishedAt:
-          $ref: "#/components/schemas/FinishedAt"
-      required:
-        - id
-        - instanceId
-        - teamId
-        - userId
-        - status
-        - createdAt
+      discriminator:
+        propertyName: status
+      oneOf:
+        - $ref: "#/components/schemas/WaitingBenchmark"
+        - $ref: "#/components/schemas/RunningBenchmark"
+        - $ref: "#/components/schemas/FinishedBenchmark"
 
-    BenchmarkResult:
+    Benchmark:
       type: "object"
       description: "ベンチマーク結果"
-      properties:
-        id:
-          $ref: "#/components/schemas/BenchmarkId"
-        instanceId:
-          $ref: "#/components/schemas/InstanceId"
-        teamId:
-          $ref: "#/components/schemas/TeamId"
-        userId:
-          $ref: "#/components/schemas/UserId"
-        status:
-          $ref: "#/components/schemas/BenchmarkStatus"
-        log:
-          type: "string"
-          example: "log"
-          description: "ベンチマークの競技者用ログ（標準出力）"
-        score:
-          $ref: "#/components/schemas/Score"
-        createdAt:
-          $ref: "#/components/schemas/CreatedAt"
-        startedAt:
-          $ref: "#/components/schemas/StartedAt"
-        finishedAt:
-          $ref: "#/components/schemas/FinishedAt"
-      required:
-        - id
-        - instanceId
-        - teamId
-        - userId
-        - status
-        - log
-        - score
-        - createdAt
-        - startedAt
-        - finishedAt
+      allOf:
+        - discriminator:
+            propertyName: status
+          oneOf:
+          - $ref: "#/components/schemas/WaitingBenchmark"
+          - $ref: "#/components/schemas/RunningBenchmark"
+          - $ref: "#/components/schemas/FinishedBenchmark"
+        - properties:
+            log:
+              type: "string"
+              example: "log"
+              description: "ベンチマークの競技者用ログ（標準出力）"
+          required:
+            - log
 
     BenchmarkAdminResult:
       type: "object"
       description: "Adminが見ることができるベンチマーク結果"
+      allOf:
+        - discriminator:
+            propertyName: status
+          oneOf:
+          - $ref: "#/components/schemas/WaitingBenchmark"
+          - $ref: "#/components/schemas/RunningBenchmark"
+          - $ref: "#/components/schemas/FinishedBenchmark"
+        - properties:
+            log:
+              type: "string"
+              example: "log"
+              description: "ベンチマークの競技者用ログ（標準出力）"
+            adminLog:
+              type: "string"
+              example: "admin log"
+              description: "ベンチマークの管理者用ログ（標準エラー出力）"
+          required:
+            - log
+            - adminLog
+    
+    WaitingBenchmark:
+      type: "object"
+      description: "status=waiting のベンチマーク結果"
       properties:
         id:
           $ref: "#/components/schemas/BenchmarkId"
@@ -1043,15 +1026,67 @@ components:
         userId:
           $ref: "#/components/schemas/UserId"
         status:
-          $ref: "#/components/schemas/BenchmarkStatus"
-        log:
           type: "string"
-          example: "log"
-          description: "ベンチマークの競技者用ログ（標準出力）"
-        adminLog:
+          enum:
+            - "waiting"
+        createdAt:
+          $ref: "#/components/schemas/CreatedAt"
+      required:
+        - id
+        - instanceId
+        - teamId
+        - userId
+        - status
+        - createdAt
+
+    RunningBenchmark:
+      type: "object"
+      description: "status=running のベンチマーク結果"
+      properties:
+        id:
+          $ref: "#/components/schemas/BenchmarkId"
+        instanceId:
+          $ref: "#/components/schemas/InstanceId"
+        teamId:
+          $ref: "#/components/schemas/TeamId"
+        userId:
+          $ref: "#/components/schemas/UserId"
+        status:
           type: "string"
-          example: "admin log"
-          description: "ベンチマークの管理者用ログ（標準エラー出力）"
+          enum:
+            - "running"
+        score:
+          $ref: "#/components/schemas/Score"
+        createdAt:
+          $ref: "#/components/schemas/CreatedAt"
+        startedAt:
+          $ref: "#/components/schemas/StartedAt"
+      required:
+        - id
+        - instanceId
+        - teamId
+        - userId
+        - status
+        - score
+        - createdAt
+        - startedAt
+
+    FinishedBenchmark:
+      type: "object"
+      description: "status=finished のベンチマーク結果"
+      properties:
+        id:
+          $ref: "#/components/schemas/BenchmarkId"
+        instanceId:
+          $ref: "#/components/schemas/InstanceId"
+        teamId:
+          $ref: "#/components/schemas/TeamId"
+        userId:
+          $ref: "#/components/schemas/UserId"
+        status:
+          type: "string"
+          enum:
+            - "finished"
         score:
           $ref: "#/components/schemas/Score"
         createdAt:
@@ -1066,8 +1101,6 @@ components:
         - teamId
         - userId
         - status
-        - log
-        - adminLog
         - score
         - createdAt
         - startedAt
