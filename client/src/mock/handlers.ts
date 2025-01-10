@@ -249,11 +249,12 @@ export const handlers = [
       teams.map((team) => ({
         teamId: team.id,
         scores: benchmarks
-          .filter((b) => b.teamId === team.id && b.status === 'finished')
+          .filter((b) => b.teamId === team.id)
+          .filter((b) => b.status === 'finished')
           .map((b) => ({
             benchmarkId: b.id,
             teamId: team.id,
-            score: b.score!,
+            score: b.score,
             createdAt: b.createdAt,
           })),
       }))
@@ -262,8 +263,8 @@ export const handlers = [
   }),
   http.get(`${apiBaseUrl}/scores/ranking`, () => {
     const sortFn = (
-      a: components['schemas']['Benchmark'],
-      b: components['schemas']['Benchmark'],
+      a: components['schemas']['FinishedBenchmark'],
+      b: components['schemas']['FinishedBenchmark'],
     ) => {
       // スコアの降順
       if (a.score! < b.score!) return 1
@@ -277,14 +278,15 @@ export const handlers = [
         .map(
           (team) =>
             benchmarks
-              .filter((b) => b.teamId === team.id && b.status === 'finished')
+              .filter((b) => b.teamId === team.id)
+              .filter((b) => b.status === 'finished')
               .sort(sortFn)[0],
         )
         .sort(sortFn)
         .map((b, i) => ({
           rank: i + 1,
           teamId: b.teamId,
-          score: b.score!,
+          score: b.score,
           createdAt: b.createdAt,
         }))
 
@@ -326,7 +328,9 @@ setInterval(() => {
   // running のまま 60 秒経過したら finished にする
   for (const b of runningBenchmarks) {
     if (new Date(b.startedAt).getTime() + 60 * 1000 < Date.now()) {
+      // @ts-expect-error running -> finished で型の変換を行う必要があるが無視
       b.status = 'finished'
+      // @ts-expect-error running -> finished で型の変換を行う必要があるが無視
       b.finishedAt = new Date().toISOString()
     }
   }
@@ -335,8 +339,11 @@ setInterval(() => {
   if (runningBenchmarks.length === 0) {
     const waitingBenchmark = benchmarks.find((b) => b.status === 'waiting')
     if (waitingBenchmark !== undefined) {
+      // @ts-expect-error waiting -> running で型の変換を行う必要があるが無視
       waitingBenchmark.status = 'running'
+      // @ts-expect-error waiting -> running で型の変換を行う必要があるが無視
       waitingBenchmark.startedAt = new Date().toISOString()
+      // @ts-expect-error waiting -> running で型の変換を行う必要があるが無視
       waitingBenchmark.score = 0
     }
   }

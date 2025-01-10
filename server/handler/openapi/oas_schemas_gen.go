@@ -24,361 +24,364 @@ func (s *AdminAuth) SetAPIKey(val string) {
 	s.APIKey = val
 }
 
-// ベンチマーク.
+// ベンチマークのスコア.
+// Ref: #/components/schemas/BenchScore
+type BenchScore struct {
+	BenchmarkId OptBenchmarkId `json:"benchmarkId"`
+	TeamId      TeamId         `json:"teamId"`
+	Score       Score          `json:"score"`
+	CreatedAt   CreatedAt      `json:"createdAt"`
+}
+
+// GetBenchmarkId returns the value of BenchmarkId.
+func (s *BenchScore) GetBenchmarkId() OptBenchmarkId {
+	return s.BenchmarkId
+}
+
+// GetTeamId returns the value of TeamId.
+func (s *BenchScore) GetTeamId() TeamId {
+	return s.TeamId
+}
+
+// GetScore returns the value of Score.
+func (s *BenchScore) GetScore() Score {
+	return s.Score
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *BenchScore) GetCreatedAt() CreatedAt {
+	return s.CreatedAt
+}
+
+// SetBenchmarkId sets the value of BenchmarkId.
+func (s *BenchScore) SetBenchmarkId(val OptBenchmarkId) {
+	s.BenchmarkId = val
+}
+
+// SetTeamId sets the value of TeamId.
+func (s *BenchScore) SetTeamId(val TeamId) {
+	s.TeamId = val
+}
+
+// SetScore sets the value of Score.
+func (s *BenchScore) SetScore(val Score) {
+	s.Score = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *BenchScore) SetCreatedAt(val CreatedAt) {
+	s.CreatedAt = val
+}
+
+// Merged schema.
 // Ref: #/components/schemas/Benchmark
+// Benchmark represents sum type.
 type Benchmark struct {
-	ID         BenchmarkId     `json:"id"`
-	InstanceId InstanceId      `json:"instanceId"`
-	TeamId     TeamId          `json:"teamId"`
-	UserId     UserId          `json:"userId"`
-	Status     BenchmarkStatus `json:"status"`
-	Score      OptScore        `json:"score"`
-	CreatedAt  CreatedAt       `json:"createdAt"`
-	StartedAt  OptStartedAt    `json:"startedAt"`
-	FinishedAt OptFinishedAt   `json:"finishedAt"`
+	Type              BenchmarkType // switch on this field
+	WaitingBenchmark  WaitingBenchmark
+	RunningBenchmark  RunningBenchmark
+	FinishedBenchmark FinishedBenchmark
 }
 
-// GetID returns the value of ID.
-func (s *Benchmark) GetID() BenchmarkId {
-	return s.ID
+// BenchmarkType is oneOf type of Benchmark.
+type BenchmarkType string
+
+// Possible values for BenchmarkType.
+const (
+	WaitingBenchmarkBenchmark  BenchmarkType = "WaitingBenchmark"
+	RunningBenchmarkBenchmark  BenchmarkType = "RunningBenchmark"
+	FinishedBenchmarkBenchmark BenchmarkType = "FinishedBenchmark"
+)
+
+// IsWaitingBenchmark reports whether Benchmark is WaitingBenchmark.
+func (s Benchmark) IsWaitingBenchmark() bool { return s.Type == WaitingBenchmarkBenchmark }
+
+// IsRunningBenchmark reports whether Benchmark is RunningBenchmark.
+func (s Benchmark) IsRunningBenchmark() bool { return s.Type == RunningBenchmarkBenchmark }
+
+// IsFinishedBenchmark reports whether Benchmark is FinishedBenchmark.
+func (s Benchmark) IsFinishedBenchmark() bool { return s.Type == FinishedBenchmarkBenchmark }
+
+// SetWaitingBenchmark sets Benchmark to WaitingBenchmark.
+func (s *Benchmark) SetWaitingBenchmark(v WaitingBenchmark) {
+	s.Type = WaitingBenchmarkBenchmark
+	s.WaitingBenchmark = v
 }
 
-// GetInstanceId returns the value of InstanceId.
-func (s *Benchmark) GetInstanceId() InstanceId {
-	return s.InstanceId
+// GetWaitingBenchmark returns WaitingBenchmark and true boolean if Benchmark is WaitingBenchmark.
+func (s Benchmark) GetWaitingBenchmark() (v WaitingBenchmark, ok bool) {
+	if !s.IsWaitingBenchmark() {
+		return v, false
+	}
+	return s.WaitingBenchmark, true
 }
 
-// GetTeamId returns the value of TeamId.
-func (s *Benchmark) GetTeamId() TeamId {
-	return s.TeamId
+// NewWaitingBenchmarkBenchmark returns new Benchmark from WaitingBenchmark.
+func NewWaitingBenchmarkBenchmark(v WaitingBenchmark) Benchmark {
+	var s Benchmark
+	s.SetWaitingBenchmark(v)
+	return s
 }
 
-// GetUserId returns the value of UserId.
-func (s *Benchmark) GetUserId() UserId {
-	return s.UserId
+// SetRunningBenchmark sets Benchmark to RunningBenchmark.
+func (s *Benchmark) SetRunningBenchmark(v RunningBenchmark) {
+	s.Type = RunningBenchmarkBenchmark
+	s.RunningBenchmark = v
 }
 
-// GetStatus returns the value of Status.
-func (s *Benchmark) GetStatus() BenchmarkStatus {
-	return s.Status
+// GetRunningBenchmark returns RunningBenchmark and true boolean if Benchmark is RunningBenchmark.
+func (s Benchmark) GetRunningBenchmark() (v RunningBenchmark, ok bool) {
+	if !s.IsRunningBenchmark() {
+		return v, false
+	}
+	return s.RunningBenchmark, true
 }
 
-// GetScore returns the value of Score.
-func (s *Benchmark) GetScore() OptScore {
-	return s.Score
+// NewRunningBenchmarkBenchmark returns new Benchmark from RunningBenchmark.
+func NewRunningBenchmarkBenchmark(v RunningBenchmark) Benchmark {
+	var s Benchmark
+	s.SetRunningBenchmark(v)
+	return s
 }
 
-// GetCreatedAt returns the value of CreatedAt.
-func (s *Benchmark) GetCreatedAt() CreatedAt {
-	return s.CreatedAt
+// SetFinishedBenchmark sets Benchmark to FinishedBenchmark.
+func (s *Benchmark) SetFinishedBenchmark(v FinishedBenchmark) {
+	s.Type = FinishedBenchmarkBenchmark
+	s.FinishedBenchmark = v
 }
 
-// GetStartedAt returns the value of StartedAt.
-func (s *Benchmark) GetStartedAt() OptStartedAt {
-	return s.StartedAt
+// GetFinishedBenchmark returns FinishedBenchmark and true boolean if Benchmark is FinishedBenchmark.
+func (s Benchmark) GetFinishedBenchmark() (v FinishedBenchmark, ok bool) {
+	if !s.IsFinishedBenchmark() {
+		return v, false
+	}
+	return s.FinishedBenchmark, true
 }
 
-// GetFinishedAt returns the value of FinishedAt.
-func (s *Benchmark) GetFinishedAt() OptFinishedAt {
-	return s.FinishedAt
+// NewFinishedBenchmarkBenchmark returns new Benchmark from FinishedBenchmark.
+func NewFinishedBenchmarkBenchmark(v FinishedBenchmark) Benchmark {
+	var s Benchmark
+	s.SetFinishedBenchmark(v)
+	return s
 }
 
-// SetID sets the value of ID.
-func (s *Benchmark) SetID(val BenchmarkId) {
-	s.ID = val
-}
+func (*Benchmark) getTeamBenchmarkResultRes() {}
 
-// SetInstanceId sets the value of InstanceId.
-func (s *Benchmark) SetInstanceId(val InstanceId) {
-	s.InstanceId = val
-}
-
-// SetTeamId sets the value of TeamId.
-func (s *Benchmark) SetTeamId(val TeamId) {
-	s.TeamId = val
-}
-
-// SetUserId sets the value of UserId.
-func (s *Benchmark) SetUserId(val UserId) {
-	s.UserId = val
-}
-
-// SetStatus sets the value of Status.
-func (s *Benchmark) SetStatus(val BenchmarkStatus) {
-	s.Status = val
-}
-
-// SetScore sets the value of Score.
-func (s *Benchmark) SetScore(val OptScore) {
-	s.Score = val
-}
-
-// SetCreatedAt sets the value of CreatedAt.
-func (s *Benchmark) SetCreatedAt(val CreatedAt) {
-	s.CreatedAt = val
-}
-
-// SetStartedAt sets the value of StartedAt.
-func (s *Benchmark) SetStartedAt(val OptStartedAt) {
-	s.StartedAt = val
-}
-
-// SetFinishedAt sets the value of FinishedAt.
-func (s *Benchmark) SetFinishedAt(val OptFinishedAt) {
-	s.FinishedAt = val
-}
-
-func (*Benchmark) postBenchmarkRes() {}
-
-// Adminが見ることができるベンチマーク結果.
+// Merged schema.
 // Ref: #/components/schemas/BenchmarkAdminResult
+// BenchmarkAdminResult represents sum type.
 type BenchmarkAdminResult struct {
-	ID         BenchmarkId     `json:"id"`
-	InstanceId InstanceId      `json:"instanceId"`
-	TeamId     TeamId          `json:"teamId"`
-	UserId     UserId          `json:"userId"`
-	Status     BenchmarkStatus `json:"status"`
-	// ベンチマークの競技者用ログ（標準出力）.
-	Log string `json:"log"`
-	// ベンチマークの管理者用ログ（標準エラー出力）.
-	AdminLog   string     `json:"adminLog"`
-	Score      Score      `json:"score"`
-	CreatedAt  CreatedAt  `json:"createdAt"`
-	StartedAt  StartedAt  `json:"startedAt"`
-	FinishedAt FinishedAt `json:"finishedAt"`
+	Type              BenchmarkAdminResultType // switch on this field
+	WaitingBenchmark  WaitingBenchmark
+	RunningBenchmark  RunningBenchmark
+	FinishedBenchmark FinishedBenchmark
 }
 
-// GetID returns the value of ID.
-func (s *BenchmarkAdminResult) GetID() BenchmarkId {
-	return s.ID
+// BenchmarkAdminResultType is oneOf type of BenchmarkAdminResult.
+type BenchmarkAdminResultType string
+
+// Possible values for BenchmarkAdminResultType.
+const (
+	WaitingBenchmarkBenchmarkAdminResult  BenchmarkAdminResultType = "WaitingBenchmark"
+	RunningBenchmarkBenchmarkAdminResult  BenchmarkAdminResultType = "RunningBenchmark"
+	FinishedBenchmarkBenchmarkAdminResult BenchmarkAdminResultType = "FinishedBenchmark"
+)
+
+// IsWaitingBenchmark reports whether BenchmarkAdminResult is WaitingBenchmark.
+func (s BenchmarkAdminResult) IsWaitingBenchmark() bool {
+	return s.Type == WaitingBenchmarkBenchmarkAdminResult
 }
 
-// GetInstanceId returns the value of InstanceId.
-func (s *BenchmarkAdminResult) GetInstanceId() InstanceId {
-	return s.InstanceId
+// IsRunningBenchmark reports whether BenchmarkAdminResult is RunningBenchmark.
+func (s BenchmarkAdminResult) IsRunningBenchmark() bool {
+	return s.Type == RunningBenchmarkBenchmarkAdminResult
 }
 
-// GetTeamId returns the value of TeamId.
-func (s *BenchmarkAdminResult) GetTeamId() TeamId {
-	return s.TeamId
+// IsFinishedBenchmark reports whether BenchmarkAdminResult is FinishedBenchmark.
+func (s BenchmarkAdminResult) IsFinishedBenchmark() bool {
+	return s.Type == FinishedBenchmarkBenchmarkAdminResult
 }
 
-// GetUserId returns the value of UserId.
-func (s *BenchmarkAdminResult) GetUserId() UserId {
-	return s.UserId
+// SetWaitingBenchmark sets BenchmarkAdminResult to WaitingBenchmark.
+func (s *BenchmarkAdminResult) SetWaitingBenchmark(v WaitingBenchmark) {
+	s.Type = WaitingBenchmarkBenchmarkAdminResult
+	s.WaitingBenchmark = v
 }
 
-// GetStatus returns the value of Status.
-func (s *BenchmarkAdminResult) GetStatus() BenchmarkStatus {
-	return s.Status
+// GetWaitingBenchmark returns WaitingBenchmark and true boolean if BenchmarkAdminResult is WaitingBenchmark.
+func (s BenchmarkAdminResult) GetWaitingBenchmark() (v WaitingBenchmark, ok bool) {
+	if !s.IsWaitingBenchmark() {
+		return v, false
+	}
+	return s.WaitingBenchmark, true
 }
 
-// GetLog returns the value of Log.
-func (s *BenchmarkAdminResult) GetLog() string {
-	return s.Log
+// NewWaitingBenchmarkBenchmarkAdminResult returns new BenchmarkAdminResult from WaitingBenchmark.
+func NewWaitingBenchmarkBenchmarkAdminResult(v WaitingBenchmark) BenchmarkAdminResult {
+	var s BenchmarkAdminResult
+	s.SetWaitingBenchmark(v)
+	return s
 }
 
-// GetAdminLog returns the value of AdminLog.
-func (s *BenchmarkAdminResult) GetAdminLog() string {
-	return s.AdminLog
+// SetRunningBenchmark sets BenchmarkAdminResult to RunningBenchmark.
+func (s *BenchmarkAdminResult) SetRunningBenchmark(v RunningBenchmark) {
+	s.Type = RunningBenchmarkBenchmarkAdminResult
+	s.RunningBenchmark = v
 }
 
-// GetScore returns the value of Score.
-func (s *BenchmarkAdminResult) GetScore() Score {
-	return s.Score
+// GetRunningBenchmark returns RunningBenchmark and true boolean if BenchmarkAdminResult is RunningBenchmark.
+func (s BenchmarkAdminResult) GetRunningBenchmark() (v RunningBenchmark, ok bool) {
+	if !s.IsRunningBenchmark() {
+		return v, false
+	}
+	return s.RunningBenchmark, true
 }
 
-// GetCreatedAt returns the value of CreatedAt.
-func (s *BenchmarkAdminResult) GetCreatedAt() CreatedAt {
-	return s.CreatedAt
+// NewRunningBenchmarkBenchmarkAdminResult returns new BenchmarkAdminResult from RunningBenchmark.
+func NewRunningBenchmarkBenchmarkAdminResult(v RunningBenchmark) BenchmarkAdminResult {
+	var s BenchmarkAdminResult
+	s.SetRunningBenchmark(v)
+	return s
 }
 
-// GetStartedAt returns the value of StartedAt.
-func (s *BenchmarkAdminResult) GetStartedAt() StartedAt {
-	return s.StartedAt
+// SetFinishedBenchmark sets BenchmarkAdminResult to FinishedBenchmark.
+func (s *BenchmarkAdminResult) SetFinishedBenchmark(v FinishedBenchmark) {
+	s.Type = FinishedBenchmarkBenchmarkAdminResult
+	s.FinishedBenchmark = v
 }
 
-// GetFinishedAt returns the value of FinishedAt.
-func (s *BenchmarkAdminResult) GetFinishedAt() FinishedAt {
-	return s.FinishedAt
+// GetFinishedBenchmark returns FinishedBenchmark and true boolean if BenchmarkAdminResult is FinishedBenchmark.
+func (s BenchmarkAdminResult) GetFinishedBenchmark() (v FinishedBenchmark, ok bool) {
+	if !s.IsFinishedBenchmark() {
+		return v, false
+	}
+	return s.FinishedBenchmark, true
 }
 
-// SetID sets the value of ID.
-func (s *BenchmarkAdminResult) SetID(val BenchmarkId) {
-	s.ID = val
-}
-
-// SetInstanceId sets the value of InstanceId.
-func (s *BenchmarkAdminResult) SetInstanceId(val InstanceId) {
-	s.InstanceId = val
-}
-
-// SetTeamId sets the value of TeamId.
-func (s *BenchmarkAdminResult) SetTeamId(val TeamId) {
-	s.TeamId = val
-}
-
-// SetUserId sets the value of UserId.
-func (s *BenchmarkAdminResult) SetUserId(val UserId) {
-	s.UserId = val
-}
-
-// SetStatus sets the value of Status.
-func (s *BenchmarkAdminResult) SetStatus(val BenchmarkStatus) {
-	s.Status = val
-}
-
-// SetLog sets the value of Log.
-func (s *BenchmarkAdminResult) SetLog(val string) {
-	s.Log = val
-}
-
-// SetAdminLog sets the value of AdminLog.
-func (s *BenchmarkAdminResult) SetAdminLog(val string) {
-	s.AdminLog = val
-}
-
-// SetScore sets the value of Score.
-func (s *BenchmarkAdminResult) SetScore(val Score) {
-	s.Score = val
-}
-
-// SetCreatedAt sets the value of CreatedAt.
-func (s *BenchmarkAdminResult) SetCreatedAt(val CreatedAt) {
-	s.CreatedAt = val
-}
-
-// SetStartedAt sets the value of StartedAt.
-func (s *BenchmarkAdminResult) SetStartedAt(val StartedAt) {
-	s.StartedAt = val
-}
-
-// SetFinishedAt sets the value of FinishedAt.
-func (s *BenchmarkAdminResult) SetFinishedAt(val FinishedAt) {
-	s.FinishedAt = val
+// NewFinishedBenchmarkBenchmarkAdminResult returns new BenchmarkAdminResult from FinishedBenchmark.
+func NewFinishedBenchmarkBenchmarkAdminResult(v FinishedBenchmark) BenchmarkAdminResult {
+	var s BenchmarkAdminResult
+	s.SetFinishedBenchmark(v)
+	return s
 }
 
 func (*BenchmarkAdminResult) getBenchmarkResultRes() {}
 
 type BenchmarkId uuid.UUID
 
-// ベンチマーク結果.
-// Ref: #/components/schemas/BenchmarkResult
-type BenchmarkResult struct {
-	ID         BenchmarkId     `json:"id"`
-	InstanceId InstanceId      `json:"instanceId"`
-	TeamId     TeamId          `json:"teamId"`
-	UserId     UserId          `json:"userId"`
-	Status     BenchmarkStatus `json:"status"`
-	// ベンチマークの競技者用ログ（標準出力）.
-	Log        string     `json:"log"`
-	Score      Score      `json:"score"`
-	CreatedAt  CreatedAt  `json:"createdAt"`
-	StartedAt  StartedAt  `json:"startedAt"`
-	FinishedAt FinishedAt `json:"finishedAt"`
+// ベンチマーク.
+// Ref: #/components/schemas/BenchmarkListItem
+type BenchmarkListItem struct {
+	OneOf BenchmarkListItemSum
 }
 
-// GetID returns the value of ID.
-func (s *BenchmarkResult) GetID() BenchmarkId {
-	return s.ID
+// GetOneOf returns the value of OneOf.
+func (s *BenchmarkListItem) GetOneOf() BenchmarkListItemSum {
+	return s.OneOf
 }
 
-// GetInstanceId returns the value of InstanceId.
-func (s *BenchmarkResult) GetInstanceId() InstanceId {
-	return s.InstanceId
+// SetOneOf sets the value of OneOf.
+func (s *BenchmarkListItem) SetOneOf(val BenchmarkListItemSum) {
+	s.OneOf = val
 }
 
-// GetTeamId returns the value of TeamId.
-func (s *BenchmarkResult) GetTeamId() TeamId {
-	return s.TeamId
+func (*BenchmarkListItem) postBenchmarkRes() {}
+
+// BenchmarkListItemSum represents sum type.
+type BenchmarkListItemSum struct {
+	Type              BenchmarkListItemSumType // switch on this field
+	WaitingBenchmark  WaitingBenchmark
+	RunningBenchmark  RunningBenchmark
+	FinishedBenchmark FinishedBenchmark
 }
 
-// GetUserId returns the value of UserId.
-func (s *BenchmarkResult) GetUserId() UserId {
-	return s.UserId
+// BenchmarkListItemSumType is oneOf type of BenchmarkListItemSum.
+type BenchmarkListItemSumType string
+
+// Possible values for BenchmarkListItemSumType.
+const (
+	WaitingBenchmarkBenchmarkListItemSum  BenchmarkListItemSumType = "WaitingBenchmark"
+	RunningBenchmarkBenchmarkListItemSum  BenchmarkListItemSumType = "RunningBenchmark"
+	FinishedBenchmarkBenchmarkListItemSum BenchmarkListItemSumType = "FinishedBenchmark"
+)
+
+// IsWaitingBenchmark reports whether BenchmarkListItemSum is WaitingBenchmark.
+func (s BenchmarkListItemSum) IsWaitingBenchmark() bool {
+	return s.Type == WaitingBenchmarkBenchmarkListItemSum
 }
 
-// GetStatus returns the value of Status.
-func (s *BenchmarkResult) GetStatus() BenchmarkStatus {
-	return s.Status
+// IsRunningBenchmark reports whether BenchmarkListItemSum is RunningBenchmark.
+func (s BenchmarkListItemSum) IsRunningBenchmark() bool {
+	return s.Type == RunningBenchmarkBenchmarkListItemSum
 }
 
-// GetLog returns the value of Log.
-func (s *BenchmarkResult) GetLog() string {
-	return s.Log
+// IsFinishedBenchmark reports whether BenchmarkListItemSum is FinishedBenchmark.
+func (s BenchmarkListItemSum) IsFinishedBenchmark() bool {
+	return s.Type == FinishedBenchmarkBenchmarkListItemSum
 }
 
-// GetScore returns the value of Score.
-func (s *BenchmarkResult) GetScore() Score {
-	return s.Score
+// SetWaitingBenchmark sets BenchmarkListItemSum to WaitingBenchmark.
+func (s *BenchmarkListItemSum) SetWaitingBenchmark(v WaitingBenchmark) {
+	s.Type = WaitingBenchmarkBenchmarkListItemSum
+	s.WaitingBenchmark = v
 }
 
-// GetCreatedAt returns the value of CreatedAt.
-func (s *BenchmarkResult) GetCreatedAt() CreatedAt {
-	return s.CreatedAt
+// GetWaitingBenchmark returns WaitingBenchmark and true boolean if BenchmarkListItemSum is WaitingBenchmark.
+func (s BenchmarkListItemSum) GetWaitingBenchmark() (v WaitingBenchmark, ok bool) {
+	if !s.IsWaitingBenchmark() {
+		return v, false
+	}
+	return s.WaitingBenchmark, true
 }
 
-// GetStartedAt returns the value of StartedAt.
-func (s *BenchmarkResult) GetStartedAt() StartedAt {
-	return s.StartedAt
+// NewWaitingBenchmarkBenchmarkListItemSum returns new BenchmarkListItemSum from WaitingBenchmark.
+func NewWaitingBenchmarkBenchmarkListItemSum(v WaitingBenchmark) BenchmarkListItemSum {
+	var s BenchmarkListItemSum
+	s.SetWaitingBenchmark(v)
+	return s
 }
 
-// GetFinishedAt returns the value of FinishedAt.
-func (s *BenchmarkResult) GetFinishedAt() FinishedAt {
-	return s.FinishedAt
+// SetRunningBenchmark sets BenchmarkListItemSum to RunningBenchmark.
+func (s *BenchmarkListItemSum) SetRunningBenchmark(v RunningBenchmark) {
+	s.Type = RunningBenchmarkBenchmarkListItemSum
+	s.RunningBenchmark = v
 }
 
-// SetID sets the value of ID.
-func (s *BenchmarkResult) SetID(val BenchmarkId) {
-	s.ID = val
+// GetRunningBenchmark returns RunningBenchmark and true boolean if BenchmarkListItemSum is RunningBenchmark.
+func (s BenchmarkListItemSum) GetRunningBenchmark() (v RunningBenchmark, ok bool) {
+	if !s.IsRunningBenchmark() {
+		return v, false
+	}
+	return s.RunningBenchmark, true
 }
 
-// SetInstanceId sets the value of InstanceId.
-func (s *BenchmarkResult) SetInstanceId(val InstanceId) {
-	s.InstanceId = val
+// NewRunningBenchmarkBenchmarkListItemSum returns new BenchmarkListItemSum from RunningBenchmark.
+func NewRunningBenchmarkBenchmarkListItemSum(v RunningBenchmark) BenchmarkListItemSum {
+	var s BenchmarkListItemSum
+	s.SetRunningBenchmark(v)
+	return s
 }
 
-// SetTeamId sets the value of TeamId.
-func (s *BenchmarkResult) SetTeamId(val TeamId) {
-	s.TeamId = val
+// SetFinishedBenchmark sets BenchmarkListItemSum to FinishedBenchmark.
+func (s *BenchmarkListItemSum) SetFinishedBenchmark(v FinishedBenchmark) {
+	s.Type = FinishedBenchmarkBenchmarkListItemSum
+	s.FinishedBenchmark = v
 }
 
-// SetUserId sets the value of UserId.
-func (s *BenchmarkResult) SetUserId(val UserId) {
-	s.UserId = val
+// GetFinishedBenchmark returns FinishedBenchmark and true boolean if BenchmarkListItemSum is FinishedBenchmark.
+func (s BenchmarkListItemSum) GetFinishedBenchmark() (v FinishedBenchmark, ok bool) {
+	if !s.IsFinishedBenchmark() {
+		return v, false
+	}
+	return s.FinishedBenchmark, true
 }
 
-// SetStatus sets the value of Status.
-func (s *BenchmarkResult) SetStatus(val BenchmarkStatus) {
-	s.Status = val
+// NewFinishedBenchmarkBenchmarkListItemSum returns new BenchmarkListItemSum from FinishedBenchmark.
+func NewFinishedBenchmarkBenchmarkListItemSum(v FinishedBenchmark) BenchmarkListItemSum {
+	var s BenchmarkListItemSum
+	s.SetFinishedBenchmark(v)
+	return s
 }
-
-// SetLog sets the value of Log.
-func (s *BenchmarkResult) SetLog(val string) {
-	s.Log = val
-}
-
-// SetScore sets the value of Score.
-func (s *BenchmarkResult) SetScore(val Score) {
-	s.Score = val
-}
-
-// SetCreatedAt sets the value of CreatedAt.
-func (s *BenchmarkResult) SetCreatedAt(val CreatedAt) {
-	s.CreatedAt = val
-}
-
-// SetStartedAt sets the value of StartedAt.
-func (s *BenchmarkResult) SetStartedAt(val StartedAt) {
-	s.StartedAt = val
-}
-
-// SetFinishedAt sets the value of FinishedAt.
-func (s *BenchmarkResult) SetFinishedAt(val FinishedAt) {
-	s.FinishedAt = val
-}
-
-func (*BenchmarkResult) getTeamBenchmarkResultRes() {}
 
 // Ref: #/components/schemas/BenchmarkStatus
 type BenchmarkStatus string
@@ -452,12 +455,152 @@ func (s *ErrorBadRequest) SetMessage(val OptString) {
 }
 
 func (*ErrorBadRequest) createTeamInstanceRes() {}
+func (*ErrorBadRequest) patchDocsRes()          {}
 func (*ErrorBadRequest) patchTeamInstanceRes()  {}
 func (*ErrorBadRequest) patchTeamRes()          {}
 func (*ErrorBadRequest) postBenchmarkRes()      {}
 func (*ErrorBadRequest) postTeamRes()           {}
+func (*ErrorBadRequest) putAdminsRes()          {}
 
 type FinishedAt time.Time
+
+// Status=finished のベンチマーク結果.
+// Ref: #/components/schemas/FinishedBenchmark
+type FinishedBenchmark struct {
+	ID         BenchmarkId             `json:"id"`
+	InstanceId InstanceId              `json:"instanceId"`
+	TeamId     TeamId                  `json:"teamId"`
+	UserId     UserId                  `json:"userId"`
+	Status     FinishedBenchmarkStatus `json:"status"`
+	Score      Score                   `json:"score"`
+	CreatedAt  CreatedAt               `json:"createdAt"`
+	StartedAt  StartedAt               `json:"startedAt"`
+	FinishedAt FinishedAt              `json:"finishedAt"`
+}
+
+// GetID returns the value of ID.
+func (s *FinishedBenchmark) GetID() BenchmarkId {
+	return s.ID
+}
+
+// GetInstanceId returns the value of InstanceId.
+func (s *FinishedBenchmark) GetInstanceId() InstanceId {
+	return s.InstanceId
+}
+
+// GetTeamId returns the value of TeamId.
+func (s *FinishedBenchmark) GetTeamId() TeamId {
+	return s.TeamId
+}
+
+// GetUserId returns the value of UserId.
+func (s *FinishedBenchmark) GetUserId() UserId {
+	return s.UserId
+}
+
+// GetStatus returns the value of Status.
+func (s *FinishedBenchmark) GetStatus() FinishedBenchmarkStatus {
+	return s.Status
+}
+
+// GetScore returns the value of Score.
+func (s *FinishedBenchmark) GetScore() Score {
+	return s.Score
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *FinishedBenchmark) GetCreatedAt() CreatedAt {
+	return s.CreatedAt
+}
+
+// GetStartedAt returns the value of StartedAt.
+func (s *FinishedBenchmark) GetStartedAt() StartedAt {
+	return s.StartedAt
+}
+
+// GetFinishedAt returns the value of FinishedAt.
+func (s *FinishedBenchmark) GetFinishedAt() FinishedAt {
+	return s.FinishedAt
+}
+
+// SetID sets the value of ID.
+func (s *FinishedBenchmark) SetID(val BenchmarkId) {
+	s.ID = val
+}
+
+// SetInstanceId sets the value of InstanceId.
+func (s *FinishedBenchmark) SetInstanceId(val InstanceId) {
+	s.InstanceId = val
+}
+
+// SetTeamId sets the value of TeamId.
+func (s *FinishedBenchmark) SetTeamId(val TeamId) {
+	s.TeamId = val
+}
+
+// SetUserId sets the value of UserId.
+func (s *FinishedBenchmark) SetUserId(val UserId) {
+	s.UserId = val
+}
+
+// SetStatus sets the value of Status.
+func (s *FinishedBenchmark) SetStatus(val FinishedBenchmarkStatus) {
+	s.Status = val
+}
+
+// SetScore sets the value of Score.
+func (s *FinishedBenchmark) SetScore(val Score) {
+	s.Score = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *FinishedBenchmark) SetCreatedAt(val CreatedAt) {
+	s.CreatedAt = val
+}
+
+// SetStartedAt sets the value of StartedAt.
+func (s *FinishedBenchmark) SetStartedAt(val StartedAt) {
+	s.StartedAt = val
+}
+
+// SetFinishedAt sets the value of FinishedAt.
+func (s *FinishedBenchmark) SetFinishedAt(val FinishedAt) {
+	s.FinishedAt = val
+}
+
+type FinishedBenchmarkStatus string
+
+const (
+	FinishedBenchmarkStatusFinished FinishedBenchmarkStatus = "finished"
+)
+
+// AllValues returns all FinishedBenchmarkStatus values.
+func (FinishedBenchmarkStatus) AllValues() []FinishedBenchmarkStatus {
+	return []FinishedBenchmarkStatus{
+		FinishedBenchmarkStatusFinished,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s FinishedBenchmarkStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case FinishedBenchmarkStatusFinished:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *FinishedBenchmarkStatus) UnmarshalText(data []byte) error {
+	switch FinishedBenchmarkStatus(data) {
+	case FinishedBenchmarkStatusFinished:
+		*s = FinishedBenchmarkStatusFinished
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
 
 type Forbidden struct {
 	Message OptString `json:"message"`
@@ -481,17 +624,35 @@ func (*Forbidden) getInstancesRes()           {}
 func (*Forbidden) getTeamBenchmarkResultRes() {}
 func (*Forbidden) getTeamBenchmarksRes()      {}
 func (*Forbidden) getTeamInstancesRes()       {}
+func (*Forbidden) patchDocsRes()              {}
 func (*Forbidden) patchTeamInstanceRes()      {}
 func (*Forbidden) patchTeamRes()              {}
 func (*Forbidden) postBenchmarkRes()          {}
+func (*Forbidden) putAdminsRes()              {}
 
-type GetBenchmarkQueueOKApplicationJSON []Benchmark
+type GetBenchmarkQueueOKApplicationJSON []BenchmarkListItem
 
 func (*GetBenchmarkQueueOKApplicationJSON) getBenchmarkQueueRes() {}
 
-type GetBenchmarksOKApplicationJSON []Benchmark
+type GetBenchmarksOKApplicationJSON []BenchmarkListItem
 
 func (*GetBenchmarksOKApplicationJSON) getBenchmarksRes() {}
+
+type GetDocsOK struct {
+	Body OptMarkdownDocument `json:"body"`
+}
+
+// GetBody returns the value of Body.
+func (s *GetDocsOK) GetBody() OptMarkdownDocument {
+	return s.Body
+}
+
+// SetBody sets the value of Body.
+func (s *GetDocsOK) SetBody(val OptMarkdownDocument) {
+	s.Body = val
+}
+
+func (*GetDocsOK) getDocsRes() {}
 
 type GetInstancesOKApplicationJSON []Instance
 
@@ -547,7 +708,15 @@ func (s *GetOauth2CodeSeeOther) SetLocation(val OptURI) {
 
 func (*GetOauth2CodeSeeOther) getOauth2CodeRes() {}
 
-type GetTeamBenchmarksOKApplicationJSON []Benchmark
+type GetRankingOKApplicationJSON []RankingItem
+
+func (*GetRankingOKApplicationJSON) getRankingRes() {}
+
+type GetScoresOKApplicationJSON []TeamScores
+
+func (*GetScoresOKApplicationJSON) getScoresRes() {}
+
+type GetTeamBenchmarksOKApplicationJSON []BenchmarkListItem
 
 func (*GetTeamBenchmarksOKApplicationJSON) getTeamBenchmarksRes() {}
 
@@ -562,6 +731,8 @@ func (*GetTeamsOKApplicationJSON) getTeamsRes() {}
 type GetUsersOKApplicationJSON []User
 
 func (*GetUsersOKApplicationJSON) getUsersRes() {}
+
+type GitHubId string
 
 type IPAddress string
 
@@ -654,6 +825,48 @@ func (*Instance) createTeamInstanceRes() {}
 
 type InstanceId uuid.UUID
 
+// Ref: #/components/schemas/InstanceOperation
+type InstanceOperation string
+
+const (
+	InstanceOperationStart InstanceOperation = "start"
+	InstanceOperationStop  InstanceOperation = "stop"
+)
+
+// AllValues returns all InstanceOperation values.
+func (InstanceOperation) AllValues() []InstanceOperation {
+	return []InstanceOperation{
+		InstanceOperationStart,
+		InstanceOperationStop,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s InstanceOperation) MarshalText() ([]byte, error) {
+	switch s {
+	case InstanceOperationStart:
+		return []byte(s), nil
+	case InstanceOperationStop:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *InstanceOperation) UnmarshalText(data []byte) error {
+	switch InstanceOperation(data) {
+	case InstanceOperationStart:
+		*s = InstanceOperationStart
+		return nil
+	case InstanceOperationStop:
+		*s = InstanceOperationStop
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/InstanceStatus
 type InstanceStatus string
 
@@ -722,21 +935,28 @@ func (*InternalServerError) deleteTeamInstanceRes()     {}
 func (*InternalServerError) getBenchmarkQueueRes()      {}
 func (*InternalServerError) getBenchmarkResultRes()     {}
 func (*InternalServerError) getBenchmarksRes()          {}
+func (*InternalServerError) getDocsRes()                {}
 func (*InternalServerError) getInstancesRes()           {}
 func (*InternalServerError) getMeRes()                  {}
 func (*InternalServerError) getOauth2CallbackRes()      {}
 func (*InternalServerError) getOauth2CodeRes()          {}
+func (*InternalServerError) getRankingRes()             {}
+func (*InternalServerError) getScoresRes()              {}
 func (*InternalServerError) getTeamBenchmarkResultRes() {}
 func (*InternalServerError) getTeamBenchmarksRes()      {}
 func (*InternalServerError) getTeamInstancesRes()       {}
 func (*InternalServerError) getTeamRes()                {}
 func (*InternalServerError) getTeamsRes()               {}
 func (*InternalServerError) getUsersRes()               {}
+func (*InternalServerError) patchDocsRes()              {}
 func (*InternalServerError) patchTeamInstanceRes()      {}
 func (*InternalServerError) patchTeamRes()              {}
 func (*InternalServerError) postBenchmarkRes()          {}
 func (*InternalServerError) postOauth2LogoutRes()       {}
 func (*InternalServerError) postTeamRes()               {}
+func (*InternalServerError) putAdminsRes()              {}
+
+type MarkdownDocument string
 
 type NotFound struct {
 	Message OptString `json:"message"`
@@ -761,6 +981,52 @@ func (*NotFound) getTeamInstancesRes()       {}
 func (*NotFound) getTeamRes()                {}
 func (*NotFound) patchTeamInstanceRes()      {}
 func (*NotFound) patchTeamRes()              {}
+
+// NewOptBenchmarkId returns new OptBenchmarkId with value set to v.
+func NewOptBenchmarkId(v BenchmarkId) OptBenchmarkId {
+	return OptBenchmarkId{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBenchmarkId is optional BenchmarkId.
+type OptBenchmarkId struct {
+	Value BenchmarkId
+	Set   bool
+}
+
+// IsSet returns true if OptBenchmarkId was set.
+func (o OptBenchmarkId) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBenchmarkId) Reset() {
+	var v BenchmarkId
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBenchmarkId) SetTo(v BenchmarkId) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBenchmarkId) Get() (v BenchmarkId, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBenchmarkId) Or(d BenchmarkId) BenchmarkId {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
 
 // NewOptBenchmarkStatus returns new OptBenchmarkStatus with value set to v.
 func NewOptBenchmarkStatus(v BenchmarkStatus) OptBenchmarkStatus {
@@ -808,38 +1074,38 @@ func (o OptBenchmarkStatus) Or(d BenchmarkStatus) BenchmarkStatus {
 	return d
 }
 
-// NewOptFinishedAt returns new OptFinishedAt with value set to v.
-func NewOptFinishedAt(v FinishedAt) OptFinishedAt {
-	return OptFinishedAt{
+// NewOptCreatedAt returns new OptCreatedAt with value set to v.
+func NewOptCreatedAt(v CreatedAt) OptCreatedAt {
+	return OptCreatedAt{
 		Value: v,
 		Set:   true,
 	}
 }
 
-// OptFinishedAt is optional FinishedAt.
-type OptFinishedAt struct {
-	Value FinishedAt
+// OptCreatedAt is optional CreatedAt.
+type OptCreatedAt struct {
+	Value CreatedAt
 	Set   bool
 }
 
-// IsSet returns true if OptFinishedAt was set.
-func (o OptFinishedAt) IsSet() bool { return o.Set }
+// IsSet returns true if OptCreatedAt was set.
+func (o OptCreatedAt) IsSet() bool { return o.Set }
 
 // Reset unsets value.
-func (o *OptFinishedAt) Reset() {
-	var v FinishedAt
+func (o *OptCreatedAt) Reset() {
+	var v CreatedAt
 	o.Value = v
 	o.Set = false
 }
 
 // SetTo sets value to v.
-func (o *OptFinishedAt) SetTo(v FinishedAt) {
+func (o *OptCreatedAt) SetTo(v CreatedAt) {
 	o.Set = true
 	o.Value = v
 }
 
 // Get returns value and boolean that denotes whether value was set.
-func (o OptFinishedAt) Get() (v FinishedAt, ok bool) {
+func (o OptCreatedAt) Get() (v CreatedAt, ok bool) {
 	if !o.Set {
 		return v, false
 	}
@@ -847,45 +1113,45 @@ func (o OptFinishedAt) Get() (v FinishedAt, ok bool) {
 }
 
 // Or returns value if set, or given parameter if does not.
-func (o OptFinishedAt) Or(d FinishedAt) FinishedAt {
+func (o OptCreatedAt) Or(d CreatedAt) CreatedAt {
 	if v, ok := o.Get(); ok {
 		return v
 	}
 	return d
 }
 
-// NewOptInstanceStatus returns new OptInstanceStatus with value set to v.
-func NewOptInstanceStatus(v InstanceStatus) OptInstanceStatus {
-	return OptInstanceStatus{
+// NewOptMarkdownDocument returns new OptMarkdownDocument with value set to v.
+func NewOptMarkdownDocument(v MarkdownDocument) OptMarkdownDocument {
+	return OptMarkdownDocument{
 		Value: v,
 		Set:   true,
 	}
 }
 
-// OptInstanceStatus is optional InstanceStatus.
-type OptInstanceStatus struct {
-	Value InstanceStatus
+// OptMarkdownDocument is optional MarkdownDocument.
+type OptMarkdownDocument struct {
+	Value MarkdownDocument
 	Set   bool
 }
 
-// IsSet returns true if OptInstanceStatus was set.
-func (o OptInstanceStatus) IsSet() bool { return o.Set }
+// IsSet returns true if OptMarkdownDocument was set.
+func (o OptMarkdownDocument) IsSet() bool { return o.Set }
 
 // Reset unsets value.
-func (o *OptInstanceStatus) Reset() {
-	var v InstanceStatus
+func (o *OptMarkdownDocument) Reset() {
+	var v MarkdownDocument
 	o.Value = v
 	o.Set = false
 }
 
 // SetTo sets value to v.
-func (o *OptInstanceStatus) SetTo(v InstanceStatus) {
+func (o *OptMarkdownDocument) SetTo(v MarkdownDocument) {
 	o.Set = true
 	o.Value = v
 }
 
 // Get returns value and boolean that denotes whether value was set.
-func (o OptInstanceStatus) Get() (v InstanceStatus, ok bool) {
+func (o OptMarkdownDocument) Get() (v MarkdownDocument, ok bool) {
 	if !o.Set {
 		return v, false
 	}
@@ -893,7 +1159,7 @@ func (o OptInstanceStatus) Get() (v InstanceStatus, ok bool) {
 }
 
 // Or returns value if set, or given parameter if does not.
-func (o OptInstanceStatus) Or(d InstanceStatus) InstanceStatus {
+func (o OptMarkdownDocument) Or(d MarkdownDocument) MarkdownDocument {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -1032,98 +1298,6 @@ func (o OptPostTeamReq) Get() (v PostTeamReq, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptPostTeamReq) Or(d PostTeamReq) PostTeamReq {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptScore returns new OptScore with value set to v.
-func NewOptScore(v Score) OptScore {
-	return OptScore{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptScore is optional Score.
-type OptScore struct {
-	Value Score
-	Set   bool
-}
-
-// IsSet returns true if OptScore was set.
-func (o OptScore) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptScore) Reset() {
-	var v Score
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptScore) SetTo(v Score) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptScore) Get() (v Score, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptScore) Or(d Score) Score {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptStartedAt returns new OptStartedAt with value set to v.
-func NewOptStartedAt(v StartedAt) OptStartedAt {
-	return OptStartedAt{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptStartedAt is optional StartedAt.
-type OptStartedAt struct {
-	Value StartedAt
-	Set   bool
-}
-
-// IsSet returns true if OptStartedAt was set.
-func (o OptStartedAt) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptStartedAt) Reset() {
-	var v StartedAt
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptStartedAt) SetTo(v StartedAt) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptStartedAt) Get() (v StartedAt, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptStartedAt) Or(d StartedAt) StartedAt {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -1314,29 +1488,61 @@ func (o OptURI) Or(d url.URL) url.URL {
 	return d
 }
 
+type PatchDocsOK struct {
+	Body OptMarkdownDocument `json:"body"`
+}
+
+// GetBody returns the value of Body.
+func (s *PatchDocsOK) GetBody() OptMarkdownDocument {
+	return s.Body
+}
+
+// SetBody sets the value of Body.
+func (s *PatchDocsOK) SetBody(val OptMarkdownDocument) {
+	s.Body = val
+}
+
+func (*PatchDocsOK) patchDocsRes() {}
+
+type PatchDocsReq struct {
+	Body MarkdownDocument `json:"body"`
+}
+
+// GetBody returns the value of Body.
+func (s *PatchDocsReq) GetBody() MarkdownDocument {
+	return s.Body
+}
+
+// SetBody sets the value of Body.
+func (s *PatchDocsReq) SetBody(val MarkdownDocument) {
+	s.Body = val
+}
+
 // PatchTeamInstanceOK is response for PatchTeamInstance operation.
 type PatchTeamInstanceOK struct{}
 
 func (*PatchTeamInstanceOK) patchTeamInstanceRes() {}
 
 type PatchTeamInstanceReq struct {
-	Status OptInstanceStatus `json:"status"`
+	Operation InstanceOperation `json:"operation"`
 }
 
-// GetStatus returns the value of Status.
-func (s *PatchTeamInstanceReq) GetStatus() OptInstanceStatus {
-	return s.Status
+// GetOperation returns the value of Operation.
+func (s *PatchTeamInstanceReq) GetOperation() InstanceOperation {
+	return s.Operation
 }
 
-// SetStatus sets the value of Status.
-func (s *PatchTeamInstanceReq) SetStatus(val OptInstanceStatus) {
-	s.Status = val
+// SetOperation sets the value of Operation.
+func (s *PatchTeamInstanceReq) SetOperation(val InstanceOperation) {
+	s.Operation = val
 }
 
 type PatchTeamReq struct {
 	Name OptTeamName `json:"name"`
 	// チームに所属させる部員のID.
 	Members []UserId `json:"members"`
+	// チームに所属させる部員のGitHub ID.
+	GithubIds []GitHubId `json:"githubIds"`
 }
 
 // GetName returns the value of Name.
@@ -1349,6 +1555,11 @@ func (s *PatchTeamReq) GetMembers() []UserId {
 	return s.Members
 }
 
+// GetGithubIds returns the value of GithubIds.
+func (s *PatchTeamReq) GetGithubIds() []GitHubId {
+	return s.GithubIds
+}
+
 // SetName sets the value of Name.
 func (s *PatchTeamReq) SetName(val OptTeamName) {
 	s.Name = val
@@ -1357,6 +1568,11 @@ func (s *PatchTeamReq) SetName(val OptTeamName) {
 // SetMembers sets the value of Members.
 func (s *PatchTeamReq) SetMembers(val []UserId) {
 	s.Members = val
+}
+
+// SetGithubIds sets the value of GithubIds.
+func (s *PatchTeamReq) SetGithubIds(val []GitHubId) {
+	s.GithubIds = val
 }
 
 type PostBenchmarkReq struct {
@@ -1420,6 +1636,229 @@ func (s *PostTeamReq) SetMembers(val []UserId) {
 	s.Members = val
 }
 
+// PutAdminsOK is response for PutAdmins operation.
+type PutAdminsOK struct{}
+
+func (*PutAdminsOK) putAdminsRes() {}
+
+// ランキングの順位。まだベンチマークを1回も実行していない場合、createdAtはnull.
+// Ref: #/components/schemas/RankingItem
+type RankingItem struct {
+	// 順位.
+	Rank      int          `json:"rank"`
+	TeamId    TeamId       `json:"teamId"`
+	Score     Score        `json:"score"`
+	CreatedAt OptCreatedAt `json:"createdAt"`
+}
+
+// GetRank returns the value of Rank.
+func (s *RankingItem) GetRank() int {
+	return s.Rank
+}
+
+// GetTeamId returns the value of TeamId.
+func (s *RankingItem) GetTeamId() TeamId {
+	return s.TeamId
+}
+
+// GetScore returns the value of Score.
+func (s *RankingItem) GetScore() Score {
+	return s.Score
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *RankingItem) GetCreatedAt() OptCreatedAt {
+	return s.CreatedAt
+}
+
+// SetRank sets the value of Rank.
+func (s *RankingItem) SetRank(val int) {
+	s.Rank = val
+}
+
+// SetTeamId sets the value of TeamId.
+func (s *RankingItem) SetTeamId(val TeamId) {
+	s.TeamId = val
+}
+
+// SetScore sets the value of Score.
+func (s *RankingItem) SetScore(val Score) {
+	s.Score = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *RankingItem) SetCreatedAt(val OptCreatedAt) {
+	s.CreatedAt = val
+}
+
+type RankingOrderBy string
+
+const (
+	RankingOrderByLatest  RankingOrderBy = "latest"
+	RankingOrderByHighest RankingOrderBy = "highest"
+)
+
+// AllValues returns all RankingOrderBy values.
+func (RankingOrderBy) AllValues() []RankingOrderBy {
+	return []RankingOrderBy{
+		RankingOrderByLatest,
+		RankingOrderByHighest,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s RankingOrderBy) MarshalText() ([]byte, error) {
+	switch s {
+	case RankingOrderByLatest:
+		return []byte(s), nil
+	case RankingOrderByHighest:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *RankingOrderBy) UnmarshalText(data []byte) error {
+	switch RankingOrderBy(data) {
+	case RankingOrderByLatest:
+		*s = RankingOrderByLatest
+		return nil
+	case RankingOrderByHighest:
+		*s = RankingOrderByHighest
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Status=running のベンチマーク結果.
+// Ref: #/components/schemas/RunningBenchmark
+type RunningBenchmark struct {
+	ID         BenchmarkId            `json:"id"`
+	InstanceId InstanceId             `json:"instanceId"`
+	TeamId     TeamId                 `json:"teamId"`
+	UserId     UserId                 `json:"userId"`
+	Status     RunningBenchmarkStatus `json:"status"`
+	Score      Score                  `json:"score"`
+	CreatedAt  CreatedAt              `json:"createdAt"`
+	StartedAt  StartedAt              `json:"startedAt"`
+}
+
+// GetID returns the value of ID.
+func (s *RunningBenchmark) GetID() BenchmarkId {
+	return s.ID
+}
+
+// GetInstanceId returns the value of InstanceId.
+func (s *RunningBenchmark) GetInstanceId() InstanceId {
+	return s.InstanceId
+}
+
+// GetTeamId returns the value of TeamId.
+func (s *RunningBenchmark) GetTeamId() TeamId {
+	return s.TeamId
+}
+
+// GetUserId returns the value of UserId.
+func (s *RunningBenchmark) GetUserId() UserId {
+	return s.UserId
+}
+
+// GetStatus returns the value of Status.
+func (s *RunningBenchmark) GetStatus() RunningBenchmarkStatus {
+	return s.Status
+}
+
+// GetScore returns the value of Score.
+func (s *RunningBenchmark) GetScore() Score {
+	return s.Score
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *RunningBenchmark) GetCreatedAt() CreatedAt {
+	return s.CreatedAt
+}
+
+// GetStartedAt returns the value of StartedAt.
+func (s *RunningBenchmark) GetStartedAt() StartedAt {
+	return s.StartedAt
+}
+
+// SetID sets the value of ID.
+func (s *RunningBenchmark) SetID(val BenchmarkId) {
+	s.ID = val
+}
+
+// SetInstanceId sets the value of InstanceId.
+func (s *RunningBenchmark) SetInstanceId(val InstanceId) {
+	s.InstanceId = val
+}
+
+// SetTeamId sets the value of TeamId.
+func (s *RunningBenchmark) SetTeamId(val TeamId) {
+	s.TeamId = val
+}
+
+// SetUserId sets the value of UserId.
+func (s *RunningBenchmark) SetUserId(val UserId) {
+	s.UserId = val
+}
+
+// SetStatus sets the value of Status.
+func (s *RunningBenchmark) SetStatus(val RunningBenchmarkStatus) {
+	s.Status = val
+}
+
+// SetScore sets the value of Score.
+func (s *RunningBenchmark) SetScore(val Score) {
+	s.Score = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *RunningBenchmark) SetCreatedAt(val CreatedAt) {
+	s.CreatedAt = val
+}
+
+// SetStartedAt sets the value of StartedAt.
+func (s *RunningBenchmark) SetStartedAt(val StartedAt) {
+	s.StartedAt = val
+}
+
+type RunningBenchmarkStatus string
+
+const (
+	RunningBenchmarkStatusRunning RunningBenchmarkStatus = "running"
+)
+
+// AllValues returns all RunningBenchmarkStatus values.
+func (RunningBenchmarkStatus) AllValues() []RunningBenchmarkStatus {
+	return []RunningBenchmarkStatus{
+		RunningBenchmarkStatusRunning,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s RunningBenchmarkStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case RunningBenchmarkStatusRunning:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *RunningBenchmarkStatus) UnmarshalText(data []byte) error {
+	switch RunningBenchmarkStatus(data) {
+	case RunningBenchmarkStatusRunning:
+		*s = RunningBenchmarkStatusRunning
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 type Score float64
 
 type StartedAt time.Time
@@ -1430,8 +1869,10 @@ type Team struct {
 	ID   TeamId   `json:"id"`
 	Name TeamName `json:"name"`
 	// チームに所属している部員のID.
-	Members   []UserId  `json:"members"`
-	CreatedAt time.Time `json:"createdAt"`
+	Members []UserId `json:"members"`
+	// チームに所属している部員のGitHub ID.
+	GithubIds []GitHubId `json:"githubIds"`
+	CreatedAt time.Time  `json:"createdAt"`
 }
 
 // GetID returns the value of ID.
@@ -1447,6 +1888,11 @@ func (s *Team) GetName() TeamName {
 // GetMembers returns the value of Members.
 func (s *Team) GetMembers() []UserId {
 	return s.Members
+}
+
+// GetGithubIds returns the value of GithubIds.
+func (s *Team) GetGithubIds() []GitHubId {
+	return s.GithubIds
 }
 
 // GetCreatedAt returns the value of CreatedAt.
@@ -1467,6 +1913,11 @@ func (s *Team) SetName(val TeamName) {
 // SetMembers sets the value of Members.
 func (s *Team) SetMembers(val []UserId) {
 	s.Members = val
+}
+
+// SetGithubIds sets the value of GithubIds.
+func (s *Team) SetGithubIds(val []GitHubId) {
+	s.GithubIds = val
 }
 
 // SetCreatedAt sets the value of CreatedAt.
@@ -1496,6 +1947,34 @@ type TeamId uuid.UUID
 
 type TeamName string
 
+// チームのスコア一覧。.
+// Ref: #/components/schemas/TeamScores
+type TeamScores struct {
+	TeamId TeamId `json:"teamId"`
+	// CreatedAtの昇順.
+	Scores []BenchScore `json:"scores"`
+}
+
+// GetTeamId returns the value of TeamId.
+func (s *TeamScores) GetTeamId() TeamId {
+	return s.TeamId
+}
+
+// GetScores returns the value of Scores.
+func (s *TeamScores) GetScores() []BenchScore {
+	return s.Scores
+}
+
+// SetTeamId sets the value of TeamId.
+func (s *TeamScores) SetTeamId(val TeamId) {
+	s.TeamId = val
+}
+
+// SetScores sets the value of Scores.
+func (s *TeamScores) SetScores(val []BenchScore) {
+	s.Scores = val
+}
+
 type Unauthorized struct {
 	Message OptString `json:"message"`
 }
@@ -1515,19 +1994,24 @@ func (*Unauthorized) deleteTeamInstanceRes()     {}
 func (*Unauthorized) getBenchmarkQueueRes()      {}
 func (*Unauthorized) getBenchmarkResultRes()     {}
 func (*Unauthorized) getBenchmarksRes()          {}
+func (*Unauthorized) getDocsRes()                {}
 func (*Unauthorized) getInstancesRes()           {}
 func (*Unauthorized) getMeRes()                  {}
+func (*Unauthorized) getRankingRes()             {}
+func (*Unauthorized) getScoresRes()              {}
 func (*Unauthorized) getTeamBenchmarkResultRes() {}
 func (*Unauthorized) getTeamBenchmarksRes()      {}
 func (*Unauthorized) getTeamInstancesRes()       {}
 func (*Unauthorized) getTeamRes()                {}
 func (*Unauthorized) getTeamsRes()               {}
 func (*Unauthorized) getUsersRes()               {}
+func (*Unauthorized) patchDocsRes()              {}
 func (*Unauthorized) patchTeamInstanceRes()      {}
 func (*Unauthorized) patchTeamRes()              {}
 func (*Unauthorized) postBenchmarkRes()          {}
 func (*Unauthorized) postOauth2LogoutRes()       {}
 func (*Unauthorized) postTeamRes()               {}
+func (*Unauthorized) putAdminsRes()              {}
 
 // 部員.
 // Ref: #/components/schemas/User
@@ -1598,3 +2082,108 @@ func (s *UserAuth) SetAPIKey(val string) {
 type UserId uuid.UUID
 
 type UserName string
+
+// Status=waiting のベンチマーク結果.
+// Ref: #/components/schemas/WaitingBenchmark
+type WaitingBenchmark struct {
+	ID         BenchmarkId            `json:"id"`
+	InstanceId InstanceId             `json:"instanceId"`
+	TeamId     TeamId                 `json:"teamId"`
+	UserId     UserId                 `json:"userId"`
+	Status     WaitingBenchmarkStatus `json:"status"`
+	CreatedAt  CreatedAt              `json:"createdAt"`
+}
+
+// GetID returns the value of ID.
+func (s *WaitingBenchmark) GetID() BenchmarkId {
+	return s.ID
+}
+
+// GetInstanceId returns the value of InstanceId.
+func (s *WaitingBenchmark) GetInstanceId() InstanceId {
+	return s.InstanceId
+}
+
+// GetTeamId returns the value of TeamId.
+func (s *WaitingBenchmark) GetTeamId() TeamId {
+	return s.TeamId
+}
+
+// GetUserId returns the value of UserId.
+func (s *WaitingBenchmark) GetUserId() UserId {
+	return s.UserId
+}
+
+// GetStatus returns the value of Status.
+func (s *WaitingBenchmark) GetStatus() WaitingBenchmarkStatus {
+	return s.Status
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *WaitingBenchmark) GetCreatedAt() CreatedAt {
+	return s.CreatedAt
+}
+
+// SetID sets the value of ID.
+func (s *WaitingBenchmark) SetID(val BenchmarkId) {
+	s.ID = val
+}
+
+// SetInstanceId sets the value of InstanceId.
+func (s *WaitingBenchmark) SetInstanceId(val InstanceId) {
+	s.InstanceId = val
+}
+
+// SetTeamId sets the value of TeamId.
+func (s *WaitingBenchmark) SetTeamId(val TeamId) {
+	s.TeamId = val
+}
+
+// SetUserId sets the value of UserId.
+func (s *WaitingBenchmark) SetUserId(val UserId) {
+	s.UserId = val
+}
+
+// SetStatus sets the value of Status.
+func (s *WaitingBenchmark) SetStatus(val WaitingBenchmarkStatus) {
+	s.Status = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *WaitingBenchmark) SetCreatedAt(val CreatedAt) {
+	s.CreatedAt = val
+}
+
+type WaitingBenchmarkStatus string
+
+const (
+	WaitingBenchmarkStatusWaiting WaitingBenchmarkStatus = "waiting"
+)
+
+// AllValues returns all WaitingBenchmarkStatus values.
+func (WaitingBenchmarkStatus) AllValues() []WaitingBenchmarkStatus {
+	return []WaitingBenchmarkStatus{
+		WaitingBenchmarkStatusWaiting,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s WaitingBenchmarkStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case WaitingBenchmarkStatusWaiting:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *WaitingBenchmarkStatus) UnmarshalText(data []byte) error {
+	switch WaitingBenchmarkStatus(data) {
+	case WaitingBenchmarkStatusWaiting:
+		*s = WaitingBenchmarkStatusWaiting
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
