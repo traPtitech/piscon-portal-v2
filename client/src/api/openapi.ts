@@ -549,23 +549,29 @@ export interface components {
       | components['schemas']['RunningBenchmark']
       | components['schemas']['FinishedBenchmark']
     /** @description ベンチマーク結果 */
-    Benchmark: (
+    Benchmark: {
+      status: 'Benchmark'
+    } & (Omit<
       | components['schemas']['WaitingBenchmark']
       | components['schemas']['RunningBenchmark']
-      | components['schemas']['FinishedBenchmark']
-    ) & {
+      | components['schemas']['FinishedBenchmark'],
+      'status'
+    > & {
       /**
        * @description ベンチマークの競技者用ログ（標準出力）
        * @example log
        */
       log: string
-    }
+    })
     /** @description Adminが見ることができるベンチマーク結果 */
-    BenchmarkAdminResult: (
+    BenchmarkAdminResult: {
+      status: 'BenchmarkAdminResult'
+    } & (Omit<
       | components['schemas']['WaitingBenchmark']
       | components['schemas']['RunningBenchmark']
-      | components['schemas']['FinishedBenchmark']
-    ) & {
+      | components['schemas']['FinishedBenchmark'],
+      'status'
+    > & {
       /**
        * @description ベンチマークの競技者用ログ（標準出力）
        * @example log
@@ -576,15 +582,18 @@ export interface components {
        * @example admin log
        */
       adminLog: string
-    }
+    })
     /** @description status=waiting のベンチマーク結果 */
     WaitingBenchmark: {
       id: components['schemas']['BenchmarkId']
       instanceId: components['schemas']['InstanceId']
       teamId: components['schemas']['TeamId']
       userId: components['schemas']['UserId']
-      /** @enum {string} */
-      status: 'waiting'
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      status: 'WaitingBenchmark'
       createdAt: components['schemas']['CreatedAt']
     }
     /** @description status=running のベンチマーク結果 */
@@ -593,8 +602,11 @@ export interface components {
       instanceId: components['schemas']['InstanceId']
       teamId: components['schemas']['TeamId']
       userId: components['schemas']['UserId']
-      /** @enum {string} */
-      status: 'running'
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      status: 'RunningBenchmark'
       score: components['schemas']['Score']
       createdAt: components['schemas']['CreatedAt']
       startedAt: components['schemas']['StartedAt']
@@ -605,9 +617,14 @@ export interface components {
       instanceId: components['schemas']['InstanceId']
       teamId: components['schemas']['TeamId']
       userId: components['schemas']['UserId']
-      /** @enum {string} */
-      status: 'finished'
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      status: 'FinishedBenchmark'
       score: components['schemas']['Score']
+      /** @enum {string} */
+      result: 'passed' | 'failed' | 'error'
       createdAt: components['schemas']['CreatedAt']
       startedAt: components['schemas']['StartedAt']
       finishedAt: components['schemas']['FinishedAt']
