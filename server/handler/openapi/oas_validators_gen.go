@@ -163,10 +163,34 @@ func (s *FinishedBenchmark) Validate() error {
 			Error: err,
 		})
 	}
+	if err := func() error {
+		if err := s.Result.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "result",
+			Error: err,
+		})
+	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
 	}
 	return nil
+}
+
+func (s FinishedBenchmarkResult) Validate() error {
+	switch s {
+	case "passed":
+		return nil
+	case "failed":
+		return nil
+	case "error":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
 }
 
 func (s FinishedBenchmarkStatus) Validate() error {

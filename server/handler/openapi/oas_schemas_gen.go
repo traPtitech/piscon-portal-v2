@@ -473,6 +473,7 @@ type FinishedBenchmark struct {
 	UserId     UserId                  `json:"userId"`
 	Status     FinishedBenchmarkStatus `json:"status"`
 	Score      Score                   `json:"score"`
+	Result     FinishedBenchmarkResult `json:"result"`
 	CreatedAt  CreatedAt               `json:"createdAt"`
 	StartedAt  StartedAt               `json:"startedAt"`
 	FinishedAt FinishedAt              `json:"finishedAt"`
@@ -506,6 +507,11 @@ func (s *FinishedBenchmark) GetStatus() FinishedBenchmarkStatus {
 // GetScore returns the value of Score.
 func (s *FinishedBenchmark) GetScore() Score {
 	return s.Score
+}
+
+// GetResult returns the value of Result.
+func (s *FinishedBenchmark) GetResult() FinishedBenchmarkResult {
+	return s.Result
 }
 
 // GetCreatedAt returns the value of CreatedAt.
@@ -553,6 +559,11 @@ func (s *FinishedBenchmark) SetScore(val Score) {
 	s.Score = val
 }
 
+// SetResult sets the value of Result.
+func (s *FinishedBenchmark) SetResult(val FinishedBenchmarkResult) {
+	s.Result = val
+}
+
 // SetCreatedAt sets the value of CreatedAt.
 func (s *FinishedBenchmark) SetCreatedAt(val CreatedAt) {
 	s.CreatedAt = val
@@ -566,6 +577,54 @@ func (s *FinishedBenchmark) SetStartedAt(val StartedAt) {
 // SetFinishedAt sets the value of FinishedAt.
 func (s *FinishedBenchmark) SetFinishedAt(val FinishedAt) {
 	s.FinishedAt = val
+}
+
+type FinishedBenchmarkResult string
+
+const (
+	FinishedBenchmarkResultPassed FinishedBenchmarkResult = "passed"
+	FinishedBenchmarkResultFailed FinishedBenchmarkResult = "failed"
+	FinishedBenchmarkResultError  FinishedBenchmarkResult = "error"
+)
+
+// AllValues returns all FinishedBenchmarkResult values.
+func (FinishedBenchmarkResult) AllValues() []FinishedBenchmarkResult {
+	return []FinishedBenchmarkResult{
+		FinishedBenchmarkResultPassed,
+		FinishedBenchmarkResultFailed,
+		FinishedBenchmarkResultError,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s FinishedBenchmarkResult) MarshalText() ([]byte, error) {
+	switch s {
+	case FinishedBenchmarkResultPassed:
+		return []byte(s), nil
+	case FinishedBenchmarkResultFailed:
+		return []byte(s), nil
+	case FinishedBenchmarkResultError:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *FinishedBenchmarkResult) UnmarshalText(data []byte) error {
+	switch FinishedBenchmarkResult(data) {
+	case FinishedBenchmarkResultPassed:
+		*s = FinishedBenchmarkResultPassed
+		return nil
+	case FinishedBenchmarkResultFailed:
+		*s = FinishedBenchmarkResultFailed
+		return nil
+	case FinishedBenchmarkResultError:
+		*s = FinishedBenchmarkResultError
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 type FinishedBenchmarkStatus string
