@@ -37,7 +37,10 @@ watch(
   <div v-if="bench" class="bench-detail-container">
     <div class="bench-score-container">
       <div class="bench-score-label">スコア</div>
-      <div v-if="bench.score !== undefined" class="bench-score-content">
+      <div
+        v-if="bench.status === 'running' || bench.status === 'finished'"
+        class="bench-score-content"
+      >
         {{ formatScore(bench.score) }}
       </div>
       <div v-else class="bench-score-content-dimmed">未計測</div>
@@ -63,14 +66,17 @@ watch(
       </div>
       <div class="bench-detail-element">
         <div class="bench-detail-label">開始時刻</div>
-        <div class="bench-detail-content" v-if="bench.startedAt">
+        <div
+          class="bench-detail-content"
+          v-if="bench.status === 'running' || bench.status === 'finished'"
+        >
           {{ formatDate(bench.startedAt, 'YYYY/MM/DD hh:mm:ss') }}
         </div>
         <div class="bench-detail-content-dimmed" v-else>まだ開始していません</div>
       </div>
       <div class="bench-detail-element">
         <div class="bench-detail-label">終了時刻</div>
-        <div class="bench-detail-content" v-if="bench.finishedAt">
+        <div class="bench-detail-content" v-if="bench.status === 'finished'">
           {{ formatDate(bench.finishedAt, 'YYYY/MM/DD hh:mm:ss') }}
         </div>
         <div class="bench-detail-content-dimmed" v-else>まだ終了していません</div>

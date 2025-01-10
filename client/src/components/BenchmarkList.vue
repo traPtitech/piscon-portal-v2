@@ -44,7 +44,7 @@ const { data: users } = useUsers()
     </div>
     <div class="list-label"></div>
     <template v-for="bench in sortedBenches" :key="bench.id">
-      <div v-if="bench.score !== undefined" class="bench-score">
+      <div v-if="bench.status === 'running' || bench.status === 'finished'" class="bench-score">
         {{ formatScore(bench.score) }}
       </div>
       <div v-else class="bench-score-loading">計測中</div>
