@@ -16,7 +16,9 @@
     "openapi": "openapi-typescript ../openapi/openapi.yml -o src/api/openapi.ts"
   },
   "dependencies": {
+    "@tanstack/vue-query": "^5.62.16",
     "openapi-fetch": "^0.13.4",
+    "uuidv7": "^1.0.2",
     "vue": "^3.5.13",
     "vue-router": "^4.4.5"
   },
