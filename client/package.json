@@ -13,7 +13,7 @@
     "lint:ci": "eslint .",
     "format": "prettier --write src/",
     "format:ci": "prettier --check src/",
-    "openapi": "openapi-typescript ../openapi/openapi.yml -o src/api/openapi.ts"
+    "openapi": "bun run scripts/openapi-gen.ts"
   },
   "dependencies": {
     "@tanstack/vue-query": "^5.62.16",
@@ -25,6 +25,7 @@
   "devDependencies": {
     "@iconify/vue": "^4.3.0",
     "@tsconfig/node22": "^22.0.0",
+    "@types/bun": "^1.1.16",
     "@types/node": "^22.9.3",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vue/eslint-config-prettier": "^10.1.0",
@@ -39,7 +40,8 @@
     "typescript": "~5.6.3",
     "vite": "^6.0.1",
     "vite-plugin-vue-devtools": "^7.6.5",
-    "vue-tsc": "^2.1.10"
+    "vue-tsc": "^2.1.10",
+    "yaml": "^2.7.0"
   },
   "msw": {
     "workerDirectory": [

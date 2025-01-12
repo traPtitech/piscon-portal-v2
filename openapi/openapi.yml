@@ -979,9 +979,9 @@ components:
         - discriminator:
             propertyName: status
           oneOf:
-          - $ref: "#/components/schemas/WaitingBenchmark"
-          - $ref: "#/components/schemas/RunningBenchmark"
-          - $ref: "#/components/schemas/FinishedBenchmark"
+            - $ref: "#/components/schemas/WaitingBenchmark"
+            - $ref: "#/components/schemas/RunningBenchmark"
+            - $ref: "#/components/schemas/FinishedBenchmark"
         - properties:
             log:
               type: "string"
@@ -997,9 +997,9 @@ components:
         - discriminator:
             propertyName: status
           oneOf:
-          - $ref: "#/components/schemas/WaitingBenchmark"
-          - $ref: "#/components/schemas/RunningBenchmark"
-          - $ref: "#/components/schemas/FinishedBenchmark"
+            - $ref: "#/components/schemas/WaitingBenchmark"
+            - $ref: "#/components/schemas/RunningBenchmark"
+            - $ref: "#/components/schemas/FinishedBenchmark"
         - properties:
             log:
               type: "string"
@@ -1012,7 +1012,7 @@ components:
           required:
             - log
             - adminLog
-    
+
     WaitingBenchmark:
       type: "object"
       description: "status=waiting のベンチマーク結果"
@@ -1089,6 +1089,12 @@ components:
             - "finished"
         score:
           $ref: "#/components/schemas/Score"
+        result:
+          type: "string"
+          enum:
+            - "passed"
+            - "failed"
+            - "error"
         createdAt:
           $ref: "#/components/schemas/CreatedAt"
         startedAt:
@@ -1102,6 +1108,7 @@ components:
         - userId
         - status
         - score
+        - result
         - createdAt
         - startedAt
         - finishedAt

@@ -608,6 +608,8 @@ export interface components {
       /** @enum {string} */
       status: 'finished'
       score: components['schemas']['Score']
+      /** @enum {string} */
+      result: 'passed' | 'failed' | 'error'
       createdAt: components['schemas']['CreatedAt']
       startedAt: components['schemas']['StartedAt']
       finishedAt: components['schemas']['FinishedAt']

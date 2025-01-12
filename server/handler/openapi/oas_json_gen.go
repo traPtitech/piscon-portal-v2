@@ -191,6 +191,10 @@ func (s Benchmark) encodeFields(e *jx.Encoder) {
 				s.Score.Encode(e)
 			}
 			{
+				e.FieldStart("result")
+				s.Result.Encode(e)
+			}
+			{
 				e.FieldStart("createdAt")
 				s.CreatedAt.Encode(e)
 			}
@@ -376,6 +380,10 @@ func (s BenchmarkAdminResult) encodeFields(e *jx.Encoder) {
 			{
 				e.FieldStart("score")
 				s.Score.Encode(e)
+			}
+			{
+				e.FieldStart("result")
+				s.Result.Encode(e)
 			}
 			{
 				e.FieldStart("createdAt")
@@ -653,6 +661,10 @@ func (s BenchmarkListItemSum) encodeFields(e *jx.Encoder) {
 			{
 				e.FieldStart("score")
 				s.Score.Encode(e)
+			}
+			{
+				e.FieldStart("result")
+				s.Result.Encode(e)
 			}
 			{
 				e.FieldStart("createdAt")
@@ -984,6 +996,10 @@ func (s *FinishedBenchmark) encodeFields(e *jx.Encoder) {
 		s.Score.Encode(e)
 	}
 	{
+		e.FieldStart("result")
+		s.Result.Encode(e)
+	}
+	{
 		e.FieldStart("createdAt")
 		s.CreatedAt.Encode(e)
 	}
@@ -997,16 +1013,17 @@ func (s *FinishedBenchmark) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfFinishedBenchmark = [9]string{
+var jsonFieldsNameOfFinishedBenchmark = [10]string{
 	0: "id",
 	1: "instanceId",
 	2: "teamId",
 	3: "userId",
 	4: "status",
 	5: "score",
-	6: "createdAt",
-	7: "startedAt",
-	8: "finishedAt",
+	6: "result",
+	7: "createdAt",
+	8: "startedAt",
+	9: "finishedAt",
 }
 
 // Decode decodes FinishedBenchmark from json.
@@ -1078,8 +1095,18 @@ func (s *FinishedBenchmark) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"score\"")
 			}
-		case "createdAt":
+		case "result":
 			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				if err := s.Result.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"result\"")
+			}
+		case "createdAt":
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				if err := s.CreatedAt.Decode(d); err != nil {
 					return err
@@ -1089,7 +1116,7 @@ func (s *FinishedBenchmark) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"createdAt\"")
 			}
 		case "startedAt":
-			requiredBitSet[0] |= 1 << 7
+			requiredBitSet[1] |= 1 << 0
 			if err := func() error {
 				if err := s.StartedAt.Decode(d); err != nil {
 					return err
@@ -1099,7 +1126,7 @@ func (s *FinishedBenchmark) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"startedAt\"")
 			}
 		case "finishedAt":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[1] |= 1 << 1
 			if err := func() error {
 				if err := s.FinishedAt.Decode(d); err != nil {
 					return err
@@ -1119,7 +1146,7 @@ func (s *FinishedBenchmark) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b11111111,
-		0b00000001,
+		0b00000011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -1161,6 +1188,48 @@ func (s *FinishedBenchmark) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *FinishedBenchmark) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes FinishedBenchmarkResult as json.
+func (s FinishedBenchmarkResult) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes FinishedBenchmarkResult from json.
+func (s *FinishedBenchmarkResult) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode FinishedBenchmarkResult to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch FinishedBenchmarkResult(v) {
+	case FinishedBenchmarkResultPassed:
+		*s = FinishedBenchmarkResultPassed
+	case FinishedBenchmarkResultFailed:
+		*s = FinishedBenchmarkResultFailed
+	case FinishedBenchmarkResultError:
+		*s = FinishedBenchmarkResultError
+	default:
+		*s = FinishedBenchmarkResult(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s FinishedBenchmarkResult) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *FinishedBenchmarkResult) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

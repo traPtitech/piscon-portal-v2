@@ -113,6 +113,7 @@ const benchmarks: paths['/benchmarks/{benchmarkId}']['get']['responses']['200'][
       score: 2000,
       log: '',
       adminLog: '',
+      result: 'passed',
     },
     {
       id: '01943f68-7d22-7abb-8b13-0b727cd4597e',
@@ -148,6 +149,7 @@ const benchmarks: paths['/benchmarks/{benchmarkId}']['get']['responses']['200'][
       score: 100,
       log: '',
       adminLog: '',
+      result: 'passed',
     },
     {
       id: '01943f6e-69dd-7167-84b3-478cf9c3253d',
@@ -161,6 +163,7 @@ const benchmarks: paths['/benchmarks/{benchmarkId}']['get']['responses']['200'][
       score: 1000,
       log: '',
       adminLog: '',
+      result: 'passed',
     },
     {
       id: '01943f6e-8b29-79af-8430-7b06ae9307e5',
@@ -174,6 +177,7 @@ const benchmarks: paths['/benchmarks/{benchmarkId}']['get']['responses']['200'][
       score: 1000,
       log: '',
       adminLog: '',
+      result: 'passed',
     },
   ]
 
@@ -328,10 +332,17 @@ setInterval(() => {
   // running のまま 60 秒経過したら finished にする
   for (const b of runningBenchmarks) {
     if (new Date(b.startedAt).getTime() + 60 * 1000 < Date.now()) {
-      // @ts-expect-error running -> finished で型の変換を行う必要があるが無視
-      b.status = 'finished'
-      // @ts-expect-error running -> finished で型の変換を行う必要があるが無視
-      b.finishedAt = new Date().toISOString()
+      const index = benchmarks.findIndex((bb) => bb.id === b.id)
+      const result = ['passed', 'failed', 'error'][Math.floor(Math.random() * 3)] as
+        | 'passed'
+        | 'failed'
+        | 'error'
+      benchmarks[index] = {
+        ...b,
+        status: 'finished',
+        finishedAt: new Date().toISOString(),
+        result,
+      }
     }
   }
 
@@ -339,12 +350,13 @@ setInterval(() => {
   if (runningBenchmarks.length === 0) {
     const waitingBenchmark = benchmarks.find((b) => b.status === 'waiting')
     if (waitingBenchmark !== undefined) {
-      // @ts-expect-error waiting -> running で型の変換を行う必要があるが無視
-      waitingBenchmark.status = 'running'
-      // @ts-expect-error waiting -> running で型の変換を行う必要があるが無視
-      waitingBenchmark.startedAt = new Date().toISOString()
-      // @ts-expect-error waiting -> running で型の変換を行う必要があるが無視
-      waitingBenchmark.score = 0
+      const index = benchmarks.findIndex((b) => b.id === waitingBenchmark.id)
+      benchmarks[index] = {
+        ...waitingBenchmark,
+        status: 'running',
+        startedAt: new Date().toISOString(),
+        score: 0,
+      }
     }
   }
 
