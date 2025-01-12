@@ -13,7 +13,7 @@
     "lint:ci": "eslint .",
     "format": "prettier --write src/",
     "format:ci": "prettier --check src/",
-    "openapi": "bun run scripts/openapi-gen.ts && openapi-typescript /tmp/openapi.yml --output src/api/openapi.ts"
+    "openapi": "bun run scripts/openapi-gen.ts"
   },
   "dependencies": {
     "@tanstack/vue-query": "^5.62.16",
