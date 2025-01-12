@@ -1,0 +1,48 @@
+name: Protobuf CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "proto/**"
+  pull_request:
+    paths:
+      - "proto/**"
+
+jobs:
+  buf:
+    name: buf check
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: bufbuild/buf-action@v1
+        with:
+          version: v1.49.0
+          push: false
+
+  buf-gen:
+    name: buf generate
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: bufbuild/buf-action@v1
+        with:
+          version: v1.49.0
+          setup_only: true
+
+      - name: Generate
+        run: buf generate
+        shell: bash
+
+      - name: Exit if diff exists
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "Generated files are different from committed files. Please run 'buf generate' and commit the changes."
+            exit 1
+          fi
+        shell: bash
