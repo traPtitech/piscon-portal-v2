@@ -4,10 +4,6 @@ managed:
   override:
     - file_option: go_package_prefix
       value: github.com/traPtitech/piscon-portal-v2/proto/gen
-  # Remove `disable` field if googleapis is not used
-  disable:
-    - module: buf.build/googleapis/googleapis
-      file_option: go_package_prefix
 plugins:
   - remote: buf.build/grpc/go:v1.5.1
     out: gen
