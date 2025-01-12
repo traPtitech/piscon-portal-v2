@@ -15,7 +15,7 @@ import (
 func (h *Handler) GetTeams(c echo.Context) error {
 	ctx := c.Request().Context()
 
-	teams, err := h.teamUseCase.GetTeams(ctx)
+	teams, err := h.useCase.GetTeams(ctx)
 	if err != nil {
 		return internalServerErrorResponse(c, err)
 	}
@@ -45,7 +45,7 @@ func (h *Handler) CreateTeam(c echo.Context) error {
 	}
 	userID := getUserIDFromSession(c)
 
-	team, err := h.teamUseCase.CreateTeam(ctx, usecase.CreateTeamInput{
+	team, err := h.useCase.CreateTeam(ctx, usecase.CreateTeamInput{
 		Name:      string(req.Name),
 		MemberIDs: lo.Map(req.Members, func(id openapi.UserId, _ int) uuid.UUID { return uuid.UUID(id) }),
 		CreatorID: userID,
@@ -68,7 +68,7 @@ func (h *Handler) GetTeam(c echo.Context) error {
 		return badRequestResponse(c, err.Error())
 	}
 
-	team, err := h.teamUseCase.GetTeam(ctx, teamID)
+	team, err := h.useCase.GetTeam(ctx, teamID)
 	if err != nil {
 		if errors.Is(err, usecase.ErrNotFound) {
 			return notFoundResponse(c)
@@ -91,7 +91,7 @@ func (h *Handler) UpdateTeam(c echo.Context) error {
 		return badRequestResponse(c, err.Error())
 	}
 
-	team, err := h.teamUseCase.UpdateTeam(ctx, usecase.UpdateTeamInput{
+	team, err := h.useCase.UpdateTeam(ctx, usecase.UpdateTeamInput{
 		ID:        teamID,
 		Name:      string(req.Name.Value),
 		MemberIDs: lo.Map(req.Members, func(id openapi.UserId, _ int) uuid.UUID { return uuid.UUID(id) }),
@@ -111,6 +111,7 @@ func toOpenAPITeam(team domain.Team) openapi.Team {
 		ID:        openapi.TeamId(team.ID),
 		Name:      openapi.TeamName(team.Name),
 		Members:   lo.Map(team.Members, func(m domain.User, _ int) openapi.UserId { return openapi.UserId(m.ID) }),
+		GithubIds: []openapi.GitHubId{}, // TODO: Implement
 		CreatedAt: team.CreatedAt,
 	}
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	sessmock "github.com/traPtitech/piscon-portal-v2/server/handler/internal/mock"
 	repomock "github.com/traPtitech/piscon-portal-v2/server/repository/mock"
+	usecasemock "github.com/traPtitech/piscon-portal-v2/server/usecase/mock"
 	"go.uber.org/mock/gomock"
 )
 
@@ -19,9 +20,10 @@ func TestAuthMiddleware(t *testing.T) {
 
 	ctrl := gomock.NewController(t)
 
-	mockRepo := repomock.NewMockRepository(ctrl)
-	mockSessManager := sessmock.NewMockSessionManager(ctrl)
-	handler := NewHandler(mockRepo, mockSessManager)
+	repoMock := repomock.NewMockRepository(ctrl)
+	sessMock := sessmock.NewMockSessionManager(ctrl)
+	usecaseMock := usecasemock.NewMockUseCase(ctrl)
+	handler := NewHandler(usecaseMock, repoMock, sessMock)
 
 	needAuthorize := handler.AuthMiddleware()(func(c echo.Context) error {
 		return c.NoContent(http.StatusOK)
@@ -35,8 +37,8 @@ func TestAuthMiddleware(t *testing.T) {
 		{
 			name: "ok",
 			setup: func() {
-				mockSessManager.EXPECT().GetSessionID(gomock.Any()).Return("sessionID", nil)
-				mockRepo.EXPECT().FindSession(gomock.Any(), "sessionID").Return(domain.Session{
+				sessMock.EXPECT().GetSessionID(gomock.Any()).Return("sessionID", nil)
+				repoMock.EXPECT().FindSession(gomock.Any(), "sessionID").Return(domain.Session{
 					ID:        "sessionID",
 					UserID:    uuid.New(),
 					ExpiresAt: time.Now().Add(time.Hour),
@@ -47,21 +49,21 @@ func TestAuthMiddleware(t *testing.T) {
 		{
 			name: "session not found",
 			setup: func() {
-				mockSessManager.EXPECT().GetSessionID(gomock.Any()).Return("", nil)
+				sessMock.EXPECT().GetSessionID(gomock.Any()).Return("", nil)
 			},
 			expectStatus: http.StatusUnauthorized,
 		},
 		{
 			name: "expired session",
 			setup: func() {
-				mockSessManager.EXPECT().GetSessionID(gomock.Any()).Return("sessionID", nil)
-				mockRepo.EXPECT().FindSession(gomock.Any(), "sessionID").Return(domain.Session{
+				sessMock.EXPECT().GetSessionID(gomock.Any()).Return("sessionID", nil)
+				repoMock.EXPECT().FindSession(gomock.Any(), "sessionID").Return(domain.Session{
 					ID:        "sessionID",
 					UserID:    uuid.New(),
 					ExpiresAt: time.Now().Add(-time.Hour),
 				}, nil)
 				// expired session should be deleted
-				mockRepo.EXPECT().DeleteSession(gomock.Any(), "sessionID").Return(nil)
+				repoMock.EXPECT().DeleteSession(gomock.Any(), "sessionID").Return(nil)
 			},
 			expectStatus: http.StatusUnauthorized,
 		},
@@ -86,9 +88,10 @@ func TestTeamAuthMiddleware(t *testing.T) {
 
 	ctrl := gomock.NewController(t)
 
-	mockRepo := repomock.NewMockRepository(ctrl)
-	mockSessManager := sessmock.NewMockSessionManager(ctrl)
-	handler := NewHandler(mockRepo, mockSessManager)
+	repoMock := repomock.NewMockRepository(ctrl)
+	sessMock := sessmock.NewMockSessionManager(ctrl)
+	usecaseMock := usecasemock.NewMockUseCase(ctrl)
+	handler := NewHandler(usecaseMock, repoMock, sessMock)
 
 	userID := uuid.New()
 	teamID := uuid.New()
@@ -105,7 +108,7 @@ func TestTeamAuthMiddleware(t *testing.T) {
 		{
 			name: "ok",
 			setup: func() {
-				mockRepo.EXPECT().FindTeam(gomock.Any(), teamID).Return(domain.Team{
+				repoMock.EXPECT().FindTeam(gomock.Any(), teamID).Return(domain.Team{
 					ID: teamID,
 					Members: []domain.User{
 						{ID: userID},
@@ -117,7 +120,7 @@ func TestTeamAuthMiddleware(t *testing.T) {
 		{
 			name: "user is not a member of the team",
 			setup: func() {
-				mockRepo.EXPECT().FindTeam(gomock.Any(), teamID).Return(domain.Team{
+				repoMock.EXPECT().FindTeam(gomock.Any(), teamID).Return(domain.Team{
 					ID:      uuid.New(),
 					Members: []domain.User{{ID: uuid.New()}},
 				}, nil)

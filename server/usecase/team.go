@@ -10,21 +10,28 @@ import (
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
 )
 
-type TeamUseCase struct {
+type TeamUseCase interface {
+	GetTeams(ctx context.Context) ([]domain.Team, error)
+	GetTeam(ctx context.Context, id uuid.UUID) (domain.Team, error)
+	CreateTeam(ctx context.Context, input CreateTeamInput) (domain.Team, error)
+	UpdateTeam(ctx context.Context, input UpdateTeamInput) (domain.Team, error)
+}
+
+type teamUseCaseImpl struct {
 	repo repository.Repository
 }
 
-func NewTeamUseCase(repo repository.Repository) *TeamUseCase {
-	return &TeamUseCase{
+func newTeamUseCase(repo repository.Repository) *teamUseCaseImpl {
+	return &teamUseCaseImpl{
 		repo: repo,
 	}
 }
 
-func (u *TeamUseCase) GetTeams(ctx context.Context) ([]domain.Team, error) {
+func (u *teamUseCaseImpl) GetTeams(ctx context.Context) ([]domain.Team, error) {
 	return u.repo.GetTeams(ctx)
 }
 
-func (u *TeamUseCase) GetTeam(ctx context.Context, id uuid.UUID) (domain.Team, error) {
+func (u *teamUseCaseImpl) GetTeam(ctx context.Context, id uuid.UUID) (domain.Team, error) {
 	team, err := u.repo.FindTeam(ctx, id)
 	if err != nil {
 		if errors.Is(err, repository.ErrNotFound) {
@@ -42,7 +49,7 @@ type CreateTeamInput struct {
 	CreatorID uuid.UUID
 }
 
-func (u *TeamUseCase) CreateTeam(ctx context.Context, input CreateTeamInput) (domain.Team, error) {
+func (u *teamUseCaseImpl) CreateTeam(ctx context.Context, input CreateTeamInput) (domain.Team, error) {
 	// creator must be a member of the team
 	isMember := slices.Contains(input.MemberIDs, input.CreatorID)
 	if !isMember {
@@ -76,7 +83,7 @@ type UpdateTeamInput struct {
 	MemberIDs []uuid.UUID
 }
 
-func (u *TeamUseCase) UpdateTeam(ctx context.Context, input UpdateTeamInput) (domain.Team, error) {
+func (u *teamUseCaseImpl) UpdateTeam(ctx context.Context, input UpdateTeamInput) (domain.Team, error) {
 	team, err := u.repo.FindTeam(ctx, input.ID)
 	if err != nil {
 		return domain.Team{}, err

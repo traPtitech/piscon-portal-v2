@@ -15,7 +15,7 @@ type Handler struct {
 	sessionManager SessionManager
 	oauth2Service  *oauth2.Service
 
-	teamUseCase *usecase.TeamUseCase
+	useCase usecase.UseCase
 }
 
 type Config struct {
@@ -27,7 +27,7 @@ type Config struct {
 	SessionManager SessionManager
 }
 
-func New(repo repository.Repository, config Config) (*Handler, error) {
+func New(useCase usecase.UseCase, repo repository.Repository, config Config) (*Handler, error) {
 	var sessionManager SessionManager
 	if config.SessionManager == nil {
 		sessionManager = internal.NewSessionManager(config.SessionSecret, config.Debug)
@@ -47,7 +47,7 @@ func New(repo repository.Repository, config Config) (*Handler, error) {
 		repo:           repo,
 		sessionManager: sessionManager,
 		oauth2Service:  oauth2Service,
-		teamUseCase:    usecase.NewTeamUseCase(repo),
+		useCase:        useCase,
 	}, nil
 }
 
