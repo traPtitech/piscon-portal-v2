@@ -1,6 +1,23 @@
-# protobuf
+# proto
 
 ポータルとベンチマーカーを実行する「runner」の通信を担当する。gRPCを使用する。
+
+## 環境
+
+protobufのコード生成を行うためには、[`buf`](https://buf.build/docs) が必要。[公式のインストール方法のドキュメント](https://buf.build/docs/installation/)を参照すること。
+コード生成を行わない場合、bufは不要。
+
+## コード生成
+
+```sh
+task proto:gen
+```
+
+もしくは
+
+```sh
+buf generate
+```
 
 ## 処理の流れ
 

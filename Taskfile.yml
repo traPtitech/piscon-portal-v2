@@ -13,7 +13,7 @@ tasks:
     cmds:
       - go test -cover -race ./...
 
-  gen:
+  go:gen:
     cmds:
       - task: up-db
       - go generate ./...
@@ -25,6 +25,19 @@ tasks:
     generates:
       - server/openapi/*.go
       - server/models/**/*.go
+
+  proto:gen:
+    cmds:
+      - buf generate
+    sources:
+      - proto/**/*.proto
+    generates:
+      - gen/**
+
+  gen:
+    cmds:
+      - task: go:gen
+      - task: proto:gen
 
   up-db:
     cmds:
