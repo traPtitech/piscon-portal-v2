@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -8,7 +9,6 @@ import (
 	"github.com/samber/lo"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/handler/openapi"
-	"github.com/traPtitech/piscon-portal-v2/server/repository"
 	"github.com/traPtitech/piscon-portal-v2/server/usecase"
 )
 
@@ -51,7 +51,7 @@ func (h *Handler) CreateTeam(c echo.Context) error {
 		CreatorID: userID,
 	})
 	if err != nil {
-		if usecase.IsErrBadRequest(err) {
+		if usecase.IsUseCaseError(err) {
 			return badRequestResponse(c, err.Error())
 		}
 		return internalServerErrorResponse(c, err)
@@ -68,9 +68,9 @@ func (h *Handler) GetTeam(c echo.Context) error {
 		return badRequestResponse(c, err.Error())
 	}
 
-	team, err := h.repo.FindTeam(ctx, teamID)
+	team, err := h.teamUseCase.GetTeam(ctx, teamID)
 	if err != nil {
-		if err == repository.ErrNotFound {
+		if errors.Is(err, usecase.ErrNotFound) {
 			return notFoundResponse(c)
 		}
 		return internalServerErrorResponse(c, err)
@@ -97,7 +97,7 @@ func (h *Handler) UpdateTeam(c echo.Context) error {
 		MemberIDs: lo.Map(req.Members, func(id openapi.UserId, _ int) uuid.UUID { return uuid.UUID(id) }),
 	})
 	if err != nil {
-		if usecase.IsErrBadRequest(err) {
+		if usecase.IsUseCaseError(err) {
 			return badRequestResponse(c, err.Error())
 		}
 		return internalServerErrorResponse(c, err)

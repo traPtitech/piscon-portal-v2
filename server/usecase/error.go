@@ -2,27 +2,31 @@ package usecase
 
 import "errors"
 
-type ErrBadRequest struct {
+type UseCaseError struct {
 	err error
 }
 
-func (e ErrBadRequest) Error() string {
+func (e UseCaseError) Error() string {
 	return e.err.Error()
 }
 
-func NewErrBadRequest(msg string) ErrBadRequest {
-	return ErrBadRequest{err: errors.New(msg)}
+func (e UseCaseError) Unwrap() error {
+	return e.err
 }
 
-func NewErrBadRequestFromErr(err error) ErrBadRequest {
-	return ErrBadRequest{err: err}
+func NewErrBadRequest(msg string) UseCaseError {
+	return UseCaseError{err: errors.New(msg)}
 }
 
-func IsErrBadRequest(err error) bool {
+func NewErrBadRequestFromErr(err error) UseCaseError {
+	return UseCaseError{err: err}
+}
+
+func IsUseCaseError(err error) bool {
 	if err == nil {
 		return false
 	}
-	return errors.As(err, &ErrBadRequest{})
+	return errors.As(err, &UseCaseError{})
 }
 
 var ErrNotFound = errors.New("not found")
