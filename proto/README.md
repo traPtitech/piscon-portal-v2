@@ -19,6 +19,10 @@ task proto:gen
 buf generate
 ```
 
+## フォーマット・Lint
+
+`buf`を使用する。
+
 ## 処理の流れ
 
 1. runnerがポータルにベンチマーカーキューの先頭を問い合わせる。ポータルは先頭のベンチマークIDを返す。(`GetBenchmarkJob`)
