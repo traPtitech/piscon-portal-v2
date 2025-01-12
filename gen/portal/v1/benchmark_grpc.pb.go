@@ -19,9 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	BenchmarkService_GetBenchmarkJob_FullMethodName     = "/portal.v1.BenchmarkService/GetBenchmarkJob"
-	BenchmarkService_SendBenchmarkResult_FullMethodName = "/portal.v1.BenchmarkService/SendBenchmarkResult"
-	BenchmarkService_PostJobFinished_FullMethodName     = "/portal.v1.BenchmarkService/PostJobFinished"
+	BenchmarkService_GetBenchmarkJob_FullMethodName       = "/portal.v1.BenchmarkService/GetBenchmarkJob"
+	BenchmarkService_SendBenchmarkProgress_FullMethodName = "/portal.v1.BenchmarkService/SendBenchmarkProgress"
+	BenchmarkService_PostJobFinished_FullMethodName       = "/portal.v1.BenchmarkService/PostJobFinished"
 )
 
 // BenchmarkServiceClient is the client API for BenchmarkService service.
@@ -29,7 +29,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BenchmarkServiceClient interface {
 	GetBenchmarkJob(ctx context.Context, in *GetBenchmarkJobRequest, opts ...grpc.CallOption) (*GetBenchmarkJobResponse, error)
-	SendBenchmarkResult(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[SendBenchmarkResultRequest, SendBenchmarkResultResponse], error)
+	SendBenchmarkProgress(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[SendBenchmarkProgressRequest, SendBenchmarkProgressResponse], error)
 	PostJobFinished(ctx context.Context, in *PostJobFinishedRequest, opts ...grpc.CallOption) (*PostJobFinishedResponse, error)
 }
 
@@ -51,18 +51,18 @@ func (c *benchmarkServiceClient) GetBenchmarkJob(ctx context.Context, in *GetBen
 	return out, nil
 }
 
-func (c *benchmarkServiceClient) SendBenchmarkResult(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[SendBenchmarkResultRequest, SendBenchmarkResultResponse], error) {
+func (c *benchmarkServiceClient) SendBenchmarkProgress(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[SendBenchmarkProgressRequest, SendBenchmarkProgressResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &BenchmarkService_ServiceDesc.Streams[0], BenchmarkService_SendBenchmarkResult_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &BenchmarkService_ServiceDesc.Streams[0], BenchmarkService_SendBenchmarkProgress_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &grpc.GenericClientStream[SendBenchmarkResultRequest, SendBenchmarkResultResponse]{ClientStream: stream}
+	x := &grpc.GenericClientStream[SendBenchmarkProgressRequest, SendBenchmarkProgressResponse]{ClientStream: stream}
 	return x, nil
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type BenchmarkService_SendBenchmarkResultClient = grpc.ClientStreamingClient[SendBenchmarkResultRequest, SendBenchmarkResultResponse]
+type BenchmarkService_SendBenchmarkProgressClient = grpc.ClientStreamingClient[SendBenchmarkProgressRequest, SendBenchmarkProgressResponse]
 
 func (c *benchmarkServiceClient) PostJobFinished(ctx context.Context, in *PostJobFinishedRequest, opts ...grpc.CallOption) (*PostJobFinishedResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
@@ -79,7 +79,7 @@ func (c *benchmarkServiceClient) PostJobFinished(ctx context.Context, in *PostJo
 // for forward compatibility.
 type BenchmarkServiceServer interface {
 	GetBenchmarkJob(context.Context, *GetBenchmarkJobRequest) (*GetBenchmarkJobResponse, error)
-	SendBenchmarkResult(grpc.ClientStreamingServer[SendBenchmarkResultRequest, SendBenchmarkResultResponse]) error
+	SendBenchmarkProgress(grpc.ClientStreamingServer[SendBenchmarkProgressRequest, SendBenchmarkProgressResponse]) error
 	PostJobFinished(context.Context, *PostJobFinishedRequest) (*PostJobFinishedResponse, error)
 	mustEmbedUnimplementedBenchmarkServiceServer()
 }
@@ -94,8 +94,8 @@ type UnimplementedBenchmarkServiceServer struct{}
 func (UnimplementedBenchmarkServiceServer) GetBenchmarkJob(context.Context, *GetBenchmarkJobRequest) (*GetBenchmarkJobResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetBenchmarkJob not implemented")
 }
-func (UnimplementedBenchmarkServiceServer) SendBenchmarkResult(grpc.ClientStreamingServer[SendBenchmarkResultRequest, SendBenchmarkResultResponse]) error {
-	return status.Errorf(codes.Unimplemented, "method SendBenchmarkResult not implemented")
+func (UnimplementedBenchmarkServiceServer) SendBenchmarkProgress(grpc.ClientStreamingServer[SendBenchmarkProgressRequest, SendBenchmarkProgressResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method SendBenchmarkProgress not implemented")
 }
 func (UnimplementedBenchmarkServiceServer) PostJobFinished(context.Context, *PostJobFinishedRequest) (*PostJobFinishedResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PostJobFinished not implemented")
@@ -139,12 +139,12 @@ func _BenchmarkService_GetBenchmarkJob_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
-func _BenchmarkService_SendBenchmarkResult_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(BenchmarkServiceServer).SendBenchmarkResult(&grpc.GenericServerStream[SendBenchmarkResultRequest, SendBenchmarkResultResponse]{ServerStream: stream})
+func _BenchmarkService_SendBenchmarkProgress_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(BenchmarkServiceServer).SendBenchmarkProgress(&grpc.GenericServerStream[SendBenchmarkProgressRequest, SendBenchmarkProgressResponse]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type BenchmarkService_SendBenchmarkResultServer = grpc.ClientStreamingServer[SendBenchmarkResultRequest, SendBenchmarkResultResponse]
+type BenchmarkService_SendBenchmarkProgressServer = grpc.ClientStreamingServer[SendBenchmarkProgressRequest, SendBenchmarkProgressResponse]
 
 func _BenchmarkService_PostJobFinished_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PostJobFinishedRequest)
@@ -182,8 +182,8 @@ var BenchmarkService_ServiceDesc = grpc.ServiceDesc{
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "SendBenchmarkResult",
-			Handler:       _BenchmarkService_SendBenchmarkResult_Handler,
+			StreamName:    "SendBenchmarkProgress",
+			Handler:       _BenchmarkService_SendBenchmarkProgress_Handler,
 			ClientStreams: true,
 		},
 	},

@@ -11,7 +11,7 @@ message GetBenchmarkJobResponse {
   bool exist = 2;
 }
 
-message SendBenchmarkResultRequest {
+message SendBenchmarkProgressRequest {
   string benchmark_id = 1;
   google.protobuf.Timestamp started_at = 2;
   string stdout = 3; // stdout, stderrどちらも、実行中でも全てのログを送る
@@ -19,17 +19,25 @@ message SendBenchmarkResultRequest {
   int64 score = 5;
 }
 
-message SendBenchmarkResultResponse {}
+message SendBenchmarkProgressResponse {}
+
+enum BenchmarkResult {
+  BENCHMARK_RESULT_UNSPECIFIED = 0;
+  BENCHMARK_RESULT_PASSED = 1;
+  BENCHMARK_RESULT_FAILED = 2;
+  BENCHMARK_RESULT_ERROR = 3;
+}
 
 message PostJobFinishedRequest {
   string benchmark_id = 1;
-  google.protobuf.Timestamp finished_at = 2;
+  BenchmarkResult result = 2;
+  google.protobuf.Timestamp finished_at = 3;
 }
 
 message PostJobFinishedResponse {}
 
 service BenchmarkService {
   rpc GetBenchmarkJob(GetBenchmarkJobRequest) returns (GetBenchmarkJobResponse);
-  rpc SendBenchmarkResult(stream SendBenchmarkResultRequest) returns (SendBenchmarkResultResponse);
+  rpc SendBenchmarkProgress(stream SendBenchmarkProgressRequest) returns (SendBenchmarkProgressResponse);
   rpc PostJobFinished(PostJobFinishedRequest) returns (PostJobFinishedResponse);
 }
