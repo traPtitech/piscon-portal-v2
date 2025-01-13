@@ -6,9 +6,13 @@ import "google/protobuf/timestamp.proto";
 
 message GetBenchmarkJobRequest {}
 
+message BenchmarkJob {
+  string benchmark_id = 1;
+  string target_url = 2;
+}
+
 message GetBenchmarkJobResponse {
-  optional string benchmark_id = 1;
-  bool exist = 2;
+  optional BenchmarkJob benchmark_job = 1; // まだジョブがない場合はnull
 }
 
 message SendBenchmarkProgressRequest {
