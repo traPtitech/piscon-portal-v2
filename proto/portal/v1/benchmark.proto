@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package portal.v1;
+
+import "google/protobuf/timestamp.proto";
+
+message GetBenchmarkJobRequest {}
+
+message BenchmarkJob {
+  string benchmark_id = 1;
+  string target_url = 2;
+}
+
+message GetBenchmarkJobResponse {
+  optional BenchmarkJob benchmark_job = 1; // まだジョブがない場合はnull
+}
+
+message SendBenchmarkProgressRequest {
+  string benchmark_id = 1;
+  google.protobuf.Timestamp started_at = 2;
+  string stdout = 3; // stdout, stderrどちらも、実行中でも全てのログを送る
+  string stderr = 4;
+  int64 score = 5;
+}
+
+message SendBenchmarkProgressResponse {}
+
+enum BenchmarkResult {
+  BENCHMARK_RESULT_UNSPECIFIED = 0;
+  BENCHMARK_RESULT_PASSED = 1;
+  BENCHMARK_RESULT_FAILED = 2;
+  BENCHMARK_RESULT_ERROR = 3;
+}
+
+message PostJobFinishedRequest {
+  string benchmark_id = 1;
+  BenchmarkResult result = 2;
+  google.protobuf.Timestamp finished_at = 3;
+  string runner_error = 4; // runner内部のエラーメッセージ
+}
+
+message PostJobFinishedResponse {}
+
+service BenchmarkService {
+  rpc GetBenchmarkJob(GetBenchmarkJobRequest) returns (GetBenchmarkJobResponse);
+  rpc SendBenchmarkProgress(stream SendBenchmarkProgressRequest) returns (SendBenchmarkProgressResponse);
+  rpc PostJobFinished(PostJobFinishedRequest) returns (PostJobFinishedResponse);
+}
