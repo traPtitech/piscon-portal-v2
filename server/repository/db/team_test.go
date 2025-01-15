@@ -170,7 +170,7 @@ func TestUpdateTeam(t *testing.T) {
 
 	// change the team name and add a new member
 	team.Name = "team2"
-	team.AddMember(newMember)
+	require.NoError(t, team.AddMember(newMember))
 	err := repo.UpdateTeam(context.Background(), team)
 	assert.NoError(t, err)
 

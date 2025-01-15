@@ -2,7 +2,7 @@ package usecase
 
 import "errors"
 
-type UseCaseError struct {
+type UseCaseError struct { //nolint revive
 	err error
 }
 

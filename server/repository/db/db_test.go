@@ -87,10 +87,10 @@ func createDatabase(name string) error {
 	return err
 }
 
-// retry retries f until it returns nil or max retries are reached. panic if max retries are reached.
-func retry(max int, f func() error) {
+// retry retries f until it returns nil or n retries are reached. panic if n retries are reached.
+func retry(n int, f func() error) {
 	var err error
-	for i := 0; i < max; i++ {
+	for i := 0; i < n; i++ {
 		err = f()
 		if err == nil {
 			return
