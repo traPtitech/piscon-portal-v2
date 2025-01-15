@@ -53,7 +53,7 @@ func (u *teamUseCaseImpl) CreateTeam(ctx context.Context, input CreateTeamInput)
 	// creator must be a member of the team
 	isMember := slices.Contains(input.MemberIDs, input.CreatorID)
 	if !isMember {
-		return domain.Team{}, NewErrBadRequest("creator must be a member of the team")
+		return domain.Team{}, NewUseCaseErrorFromMsg("creator must be a member of the team")
 	}
 
 	team := domain.NewTeam(input.Name)
@@ -61,12 +61,12 @@ func (u *teamUseCaseImpl) CreateTeam(ctx context.Context, input CreateTeamInput)
 		user, err := u.repo.FindUser(ctx, memberID)
 		if err != nil {
 			if errors.Is(err, repository.ErrNotFound) {
-				return domain.Team{}, NewErrBadRequest("member not found")
+				return domain.Team{}, NewUseCaseErrorFromMsg("member not found")
 			}
 			return domain.Team{}, err
 		}
 		if err := team.AddMember(user); err != nil {
-			return domain.Team{}, NewErrBadRequestFromErr(err)
+			return domain.Team{}, NewUseCaseError(err)
 		}
 	}
 

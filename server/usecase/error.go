@@ -14,11 +14,11 @@ func (e UseCaseError) Unwrap() error {
 	return e.err
 }
 
-func NewErrBadRequest(msg string) UseCaseError {
+func NewUseCaseErrorFromMsg(msg string) UseCaseError {
 	return UseCaseError{err: errors.New(msg)}
 }
 
-func NewErrBadRequestFromErr(err error) UseCaseError {
+func NewUseCaseError(err error) UseCaseError {
 	return UseCaseError{err: err}
 }
 
