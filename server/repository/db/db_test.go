@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stephenafamo/bob"
 	"github.com/testcontainers/testcontainers-go/modules/mysql"
 	dbrepo "github.com/traPtitech/piscon-portal-v2/server/repository/db"
 )
@@ -41,7 +42,7 @@ func TestMain(m *testing.M) {
 	m.Run()
 }
 
-func setupRepository(t *testing.T) *dbrepo.Repository {
+func setupRepository(t *testing.T) (*dbrepo.Repository, bob.Executor) {
 	t.Helper()
 
 	ctx := context.Background()
@@ -59,7 +60,7 @@ func setupRepository(t *testing.T) *dbrepo.Repository {
 		t.Fatal(err)
 	}
 
-	return dbrepo.NewRepository(db)
+	return dbrepo.NewRepository(db), bob.New(db)
 }
 
 func createDatabase(name string) error {
