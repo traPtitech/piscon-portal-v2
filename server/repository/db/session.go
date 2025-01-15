@@ -15,27 +15,15 @@ import (
 )
 
 func (r *Repository) FindSession(ctx context.Context, id string) (domain.Session, error) {
-	return findSession(ctx, r.db, id)
+	return findSession(ctx, r.executor(ctx), id)
 }
 
 func (r *Repository) CreateSession(ctx context.Context, session domain.Session) error {
-	return createSession(ctx, r.db, session)
+	return createSession(ctx, r.executor(ctx), session)
 }
 
 func (r *Repository) DeleteSession(ctx context.Context, id string) error {
-	return deleteSession(ctx, r.db, id)
-}
-
-func (t *txRepository) FindSession(ctx context.Context, id string) (domain.Session, error) {
-	return findSession(ctx, t.tx, id)
-}
-
-func (t *txRepository) CreateSession(ctx context.Context, session domain.Session) error {
-	return createSession(ctx, t.tx, session)
-}
-
-func (t *txRepository) DeleteSession(ctx context.Context, id string) error {
-	return deleteSession(ctx, t.tx, id)
+	return deleteSession(ctx, r.executor(ctx), id)
 }
 
 func findSession(ctx context.Context, executor bob.Executor, id string) (domain.Session, error) {

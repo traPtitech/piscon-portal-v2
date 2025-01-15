@@ -15,19 +15,11 @@ import (
 )
 
 func (r *Repository) FindUser(ctx context.Context, id uuid.UUID) (domain.User, error) {
-	return findUser(ctx, r.db, id.String())
+	return findUser(ctx, r.executor(ctx), id.String())
 }
 
 func (r *Repository) CreateUser(ctx context.Context, user domain.User) error {
-	return createUser(ctx, r.db, user)
-}
-
-func (t *txRepository) FindUser(ctx context.Context, id uuid.UUID) (domain.User, error) {
-	return findUser(ctx, t.tx, id.String())
-}
-
-func (t *txRepository) CreateUser(ctx context.Context, user domain.User) error {
-	return createUser(ctx, t.tx, user)
+	return createUser(ctx, r.executor(ctx), user)
 }
 
 func findUser(ctx context.Context, executor bob.Executor, id string) (domain.User, error) {

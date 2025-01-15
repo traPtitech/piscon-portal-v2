@@ -33,38 +33,64 @@ func (s *BenchScore) Validate() error {
 	return nil
 }
 
-func (s *Benchmark) Validate() error {
+func (s Benchmark) Validate() error {
+	switch s.Type {
+	case WaitingBenchmarkBenchmark:
+		if err := s.WaitingBenchmark.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case RunningBenchmarkBenchmark:
+		if err := s.RunningBenchmark.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case FinishedBenchmarkBenchmark:
+		if err := s.FinishedBenchmark.Validate(); err != nil {
+			return err
+		}
+		return nil
+	default:
+		return errors.Errorf("invalid type %q", s.Type)
+	}
+}
+
+func (s BenchmarkAdminResult) Validate() error {
+	switch s.Type {
+	case WaitingBenchmarkBenchmarkAdminResult:
+		if err := s.WaitingBenchmark.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case RunningBenchmarkBenchmarkAdminResult:
+		if err := s.RunningBenchmark.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case FinishedBenchmarkBenchmarkAdminResult:
+		if err := s.FinishedBenchmark.Validate(); err != nil {
+			return err
+		}
+		return nil
+	default:
+		return errors.Errorf("invalid type %q", s.Type)
+	}
+}
+
+func (s *BenchmarkListItem) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
 	}
 
 	var failures []validate.FieldError
 	if err := func() error {
-		if err := s.Status.Validate(); err != nil {
+		if err := s.OneOf.Validate(); err != nil {
 			return err
 		}
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "status",
-			Error: err,
-		})
-	}
-	if err := func() error {
-		if value, ok := s.Score.Get(); ok {
-			if err := func() error {
-				if err := value.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "score",
+			Name:  "OneOf",
 			Error: err,
 		})
 	}
@@ -74,72 +100,26 @@ func (s *Benchmark) Validate() error {
 	return nil
 }
 
-func (s *BenchmarkAdminResult) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
-	}
-
-	var failures []validate.FieldError
-	if err := func() error {
-		if err := s.Status.Validate(); err != nil {
+func (s BenchmarkListItemSum) Validate() error {
+	switch s.Type {
+	case WaitingBenchmarkBenchmarkListItemSum:
+		if err := s.WaitingBenchmark.Validate(); err != nil {
 			return err
 		}
 		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "status",
-			Error: err,
-		})
-	}
-	if err := func() error {
-		if err := s.Score.Validate(); err != nil {
+	case RunningBenchmarkBenchmarkListItemSum:
+		if err := s.RunningBenchmark.Validate(); err != nil {
 			return err
 		}
 		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "score",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s *BenchmarkResult) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
-	}
-
-	var failures []validate.FieldError
-	if err := func() error {
-		if err := s.Status.Validate(); err != nil {
+	case FinishedBenchmarkBenchmarkListItemSum:
+		if err := s.FinishedBenchmark.Validate(); err != nil {
 			return err
 		}
 		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "status",
-			Error: err,
-		})
+	default:
+		return errors.Errorf("invalid type %q", s.Type)
 	}
-	if err := func() error {
-		if err := s.Score.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "score",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
 }
 
 func (s BenchmarkStatus) Validate() error {
@@ -155,8 +135,75 @@ func (s BenchmarkStatus) Validate() error {
 	}
 }
 
+func (s *FinishedBenchmark) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Status.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "status",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.Score.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "score",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.Result.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "result",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s FinishedBenchmarkResult) Validate() error {
+	switch s {
+	case "passed":
+		return nil
+	case "failed":
+		return nil
+	case "error":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s FinishedBenchmarkStatus) Validate() error {
+	switch s {
+	case "finished":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s GetBenchmarkQueueOKApplicationJSON) Validate() error {
-	alias := ([]Benchmark)(s)
+	alias := ([]BenchmarkListItem)(s)
 	if alias == nil {
 		return errors.New("nil is invalid value")
 	}
@@ -181,7 +228,7 @@ func (s GetBenchmarkQueueOKApplicationJSON) Validate() error {
 }
 
 func (s GetBenchmarksOKApplicationJSON) Validate() error {
-	alias := ([]Benchmark)(s)
+	alias := ([]BenchmarkListItem)(s)
 	if alias == nil {
 		return errors.New("nil is invalid value")
 	}
@@ -281,7 +328,7 @@ func (s GetScoresOKApplicationJSON) Validate() error {
 }
 
 func (s GetTeamBenchmarksOKApplicationJSON) Validate() error {
-	alias := ([]Benchmark)(s)
+	alias := ([]BenchmarkListItem)(s)
 	if alias == nil {
 		return errors.New("nil is invalid value")
 	}
@@ -562,6 +609,49 @@ func (s RankingOrderBy) Validate() error {
 	}
 }
 
+func (s *RunningBenchmark) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Status.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "status",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.Score.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "score",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s RunningBenchmarkStatus) Validate() error {
+	switch s {
+	case "running":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s Score) Validate() error {
 	alias := (float64)(s)
 	if err := (validate.Float{}).Validate(float64(alias)); err != nil {
@@ -655,4 +745,36 @@ func (s *TeamScores) Validate() error {
 		return &validate.Error{Fields: failures}
 	}
 	return nil
+}
+
+func (s *WaitingBenchmark) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Status.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "status",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s WaitingBenchmarkStatus) Validate() error {
+	switch s {
+	case "waiting":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
 }

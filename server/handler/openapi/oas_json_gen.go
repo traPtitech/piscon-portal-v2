@@ -156,69 +156,118 @@ func (s *BenchScore) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode implements json.Marshaler.
-func (s *Benchmark) Encode(e *jx.Encoder) {
+// Encode encodes Benchmark as json.
+func (s Benchmark) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
-// encodeFields encodes fields.
-func (s *Benchmark) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("id")
-		s.ID.Encode(e)
-	}
-	{
-		e.FieldStart("instanceId")
-		s.InstanceId.Encode(e)
-	}
-	{
-		e.FieldStart("teamId")
-		s.TeamId.Encode(e)
-	}
-	{
-		e.FieldStart("userId")
-		s.UserId.Encode(e)
-	}
-	{
+func (s Benchmark) encodeFields(e *jx.Encoder) {
+	switch s.Type {
+	case FinishedBenchmarkBenchmark:
 		e.FieldStart("status")
-		s.Status.Encode(e)
-	}
-	{
-		if s.Score.Set {
-			e.FieldStart("score")
-			s.Score.Encode(e)
+		e.Str("FinishedBenchmark")
+		{
+			s := s.FinishedBenchmark
+			{
+				e.FieldStart("id")
+				s.ID.Encode(e)
+			}
+			{
+				e.FieldStart("instanceId")
+				s.InstanceId.Encode(e)
+			}
+			{
+				e.FieldStart("teamId")
+				s.TeamId.Encode(e)
+			}
+			{
+				e.FieldStart("userId")
+				s.UserId.Encode(e)
+			}
+			{
+				e.FieldStart("score")
+				s.Score.Encode(e)
+			}
+			{
+				e.FieldStart("result")
+				s.Result.Encode(e)
+			}
+			{
+				e.FieldStart("createdAt")
+				s.CreatedAt.Encode(e)
+			}
+			{
+				e.FieldStart("startedAt")
+				s.StartedAt.Encode(e)
+			}
+			{
+				e.FieldStart("finishedAt")
+				s.FinishedAt.Encode(e)
+			}
+		}
+	case RunningBenchmarkBenchmark:
+		e.FieldStart("status")
+		e.Str("RunningBenchmark")
+		{
+			s := s.RunningBenchmark
+			{
+				e.FieldStart("id")
+				s.ID.Encode(e)
+			}
+			{
+				e.FieldStart("instanceId")
+				s.InstanceId.Encode(e)
+			}
+			{
+				e.FieldStart("teamId")
+				s.TeamId.Encode(e)
+			}
+			{
+				e.FieldStart("userId")
+				s.UserId.Encode(e)
+			}
+			{
+				e.FieldStart("score")
+				s.Score.Encode(e)
+			}
+			{
+				e.FieldStart("createdAt")
+				s.CreatedAt.Encode(e)
+			}
+			{
+				e.FieldStart("startedAt")
+				s.StartedAt.Encode(e)
+			}
+		}
+	case WaitingBenchmarkBenchmark:
+		e.FieldStart("status")
+		e.Str("WaitingBenchmark")
+		{
+			s := s.WaitingBenchmark
+			{
+				e.FieldStart("id")
+				s.ID.Encode(e)
+			}
+			{
+				e.FieldStart("instanceId")
+				s.InstanceId.Encode(e)
+			}
+			{
+				e.FieldStart("teamId")
+				s.TeamId.Encode(e)
+			}
+			{
+				e.FieldStart("userId")
+				s.UserId.Encode(e)
+			}
+			{
+				e.FieldStart("createdAt")
+				s.CreatedAt.Encode(e)
+			}
 		}
 	}
-	{
-		e.FieldStart("createdAt")
-		s.CreatedAt.Encode(e)
-	}
-	{
-		if s.StartedAt.Set {
-			e.FieldStart("startedAt")
-			s.StartedAt.Encode(e)
-		}
-	}
-	{
-		if s.FinishedAt.Set {
-			e.FieldStart("finishedAt")
-			s.FinishedAt.Encode(e)
-		}
-	}
-}
-
-var jsonFieldsNameOfBenchmark = [9]string{
-	0: "id",
-	1: "instanceId",
-	2: "teamId",
-	3: "userId",
-	4: "status",
-	5: "score",
-	6: "createdAt",
-	7: "startedAt",
-	8: "finishedAt",
 }
 
 // Decode decodes Benchmark from json.
@@ -226,146 +275,67 @@ func (s *Benchmark) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode Benchmark to nil")
 	}
-	var requiredBitSet [2]uint8
+	// Sum type discriminator.
+	if typ := d.Next(); typ != jx.Object {
+		return errors.Errorf("unexpected json type %q", typ)
+	}
 
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "id":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				if err := s.ID.Decode(d); err != nil {
+	var found bool
+	if err := d.Capture(func(d *jx.Decoder) error {
+		return d.ObjBytes(func(d *jx.Decoder, key []byte) error {
+			if found {
+				return d.Skip()
+			}
+			switch string(key) {
+			case "status":
+				typ, err := d.Str()
+				if err != nil {
 					return err
 				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"id\"")
-			}
-		case "instanceId":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				if err := s.InstanceId.Decode(d); err != nil {
-					return err
+				switch typ {
+				case "FinishedBenchmark":
+					s.Type = FinishedBenchmarkBenchmark
+					found = true
+				case "RunningBenchmark":
+					s.Type = RunningBenchmarkBenchmark
+					found = true
+				case "WaitingBenchmark":
+					s.Type = WaitingBenchmarkBenchmark
+					found = true
+				default:
+					return errors.Errorf("unknown type %s", typ)
 				}
 				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"instanceId\"")
 			}
-		case "teamId":
-			requiredBitSet[0] |= 1 << 2
-			if err := func() error {
-				if err := s.TeamId.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"teamId\"")
-			}
-		case "userId":
-			requiredBitSet[0] |= 1 << 3
-			if err := func() error {
-				if err := s.UserId.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"userId\"")
-			}
-		case "status":
-			requiredBitSet[0] |= 1 << 4
-			if err := func() error {
-				if err := s.Status.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"status\"")
-			}
-		case "score":
-			if err := func() error {
-				s.Score.Reset()
-				if err := s.Score.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"score\"")
-			}
-		case "createdAt":
-			requiredBitSet[0] |= 1 << 6
-			if err := func() error {
-				if err := s.CreatedAt.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"createdAt\"")
-			}
-		case "startedAt":
-			if err := func() error {
-				s.StartedAt.Reset()
-				if err := s.StartedAt.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"startedAt\"")
-			}
-		case "finishedAt":
-			if err := func() error {
-				s.FinishedAt.Reset()
-				if err := s.FinishedAt.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"finishedAt\"")
-			}
-		default:
 			return d.Skip()
-		}
-		return nil
+		})
 	}); err != nil {
-		return errors.Wrap(err, "decode Benchmark")
+		return errors.Wrap(err, "capture")
 	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [2]uint8{
-		0b01011111,
-		0b00000000,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfBenchmark) {
-					name = jsonFieldsNameOfBenchmark[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
+	if !found {
+		return errors.New("unable to detect sum type variant")
+	}
+	switch s.Type {
+	case WaitingBenchmarkBenchmark:
+		if err := s.WaitingBenchmark.Decode(d); err != nil {
+			return err
 		}
+	case RunningBenchmarkBenchmark:
+		if err := s.RunningBenchmark.Decode(d); err != nil {
+			return err
+		}
+	case FinishedBenchmarkBenchmark:
+		if err := s.FinishedBenchmark.Decode(d); err != nil {
+			return err
+		}
+	default:
+		return errors.Errorf("inferred invalid type: %s", s.Type)
 	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *Benchmark) MarshalJSON() ([]byte, error) {
+func (s Benchmark) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
@@ -377,73 +347,118 @@ func (s *Benchmark) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode implements json.Marshaler.
-func (s *BenchmarkAdminResult) Encode(e *jx.Encoder) {
+// Encode encodes BenchmarkAdminResult as json.
+func (s BenchmarkAdminResult) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
-// encodeFields encodes fields.
-func (s *BenchmarkAdminResult) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("id")
-		s.ID.Encode(e)
-	}
-	{
-		e.FieldStart("instanceId")
-		s.InstanceId.Encode(e)
-	}
-	{
-		e.FieldStart("teamId")
-		s.TeamId.Encode(e)
-	}
-	{
-		e.FieldStart("userId")
-		s.UserId.Encode(e)
-	}
-	{
+func (s BenchmarkAdminResult) encodeFields(e *jx.Encoder) {
+	switch s.Type {
+	case FinishedBenchmarkBenchmarkAdminResult:
 		e.FieldStart("status")
-		s.Status.Encode(e)
+		e.Str("FinishedBenchmark")
+		{
+			s := s.FinishedBenchmark
+			{
+				e.FieldStart("id")
+				s.ID.Encode(e)
+			}
+			{
+				e.FieldStart("instanceId")
+				s.InstanceId.Encode(e)
+			}
+			{
+				e.FieldStart("teamId")
+				s.TeamId.Encode(e)
+			}
+			{
+				e.FieldStart("userId")
+				s.UserId.Encode(e)
+			}
+			{
+				e.FieldStart("score")
+				s.Score.Encode(e)
+			}
+			{
+				e.FieldStart("result")
+				s.Result.Encode(e)
+			}
+			{
+				e.FieldStart("createdAt")
+				s.CreatedAt.Encode(e)
+			}
+			{
+				e.FieldStart("startedAt")
+				s.StartedAt.Encode(e)
+			}
+			{
+				e.FieldStart("finishedAt")
+				s.FinishedAt.Encode(e)
+			}
+		}
+	case RunningBenchmarkBenchmarkAdminResult:
+		e.FieldStart("status")
+		e.Str("RunningBenchmark")
+		{
+			s := s.RunningBenchmark
+			{
+				e.FieldStart("id")
+				s.ID.Encode(e)
+			}
+			{
+				e.FieldStart("instanceId")
+				s.InstanceId.Encode(e)
+			}
+			{
+				e.FieldStart("teamId")
+				s.TeamId.Encode(e)
+			}
+			{
+				e.FieldStart("userId")
+				s.UserId.Encode(e)
+			}
+			{
+				e.FieldStart("score")
+				s.Score.Encode(e)
+			}
+			{
+				e.FieldStart("createdAt")
+				s.CreatedAt.Encode(e)
+			}
+			{
+				e.FieldStart("startedAt")
+				s.StartedAt.Encode(e)
+			}
+		}
+	case WaitingBenchmarkBenchmarkAdminResult:
+		e.FieldStart("status")
+		e.Str("WaitingBenchmark")
+		{
+			s := s.WaitingBenchmark
+			{
+				e.FieldStart("id")
+				s.ID.Encode(e)
+			}
+			{
+				e.FieldStart("instanceId")
+				s.InstanceId.Encode(e)
+			}
+			{
+				e.FieldStart("teamId")
+				s.TeamId.Encode(e)
+			}
+			{
+				e.FieldStart("userId")
+				s.UserId.Encode(e)
+			}
+			{
+				e.FieldStart("createdAt")
+				s.CreatedAt.Encode(e)
+			}
+		}
 	}
-	{
-		e.FieldStart("log")
-		e.Str(s.Log)
-	}
-	{
-		e.FieldStart("adminLog")
-		e.Str(s.AdminLog)
-	}
-	{
-		e.FieldStart("score")
-		s.Score.Encode(e)
-	}
-	{
-		e.FieldStart("createdAt")
-		s.CreatedAt.Encode(e)
-	}
-	{
-		e.FieldStart("startedAt")
-		s.StartedAt.Encode(e)
-	}
-	{
-		e.FieldStart("finishedAt")
-		s.FinishedAt.Encode(e)
-	}
-}
-
-var jsonFieldsNameOfBenchmarkAdminResult = [11]string{
-	0:  "id",
-	1:  "instanceId",
-	2:  "teamId",
-	3:  "userId",
-	4:  "status",
-	5:  "log",
-	6:  "adminLog",
-	7:  "score",
-	8:  "createdAt",
-	9:  "startedAt",
-	10: "finishedAt",
 }
 
 // Decode decodes BenchmarkAdminResult from json.
@@ -451,170 +466,67 @@ func (s *BenchmarkAdminResult) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode BenchmarkAdminResult to nil")
 	}
-	var requiredBitSet [2]uint8
+	// Sum type discriminator.
+	if typ := d.Next(); typ != jx.Object {
+		return errors.Errorf("unexpected json type %q", typ)
+	}
 
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "id":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				if err := s.ID.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"id\"")
+	var found bool
+	if err := d.Capture(func(d *jx.Decoder) error {
+		return d.ObjBytes(func(d *jx.Decoder, key []byte) error {
+			if found {
+				return d.Skip()
 			}
-		case "instanceId":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				if err := s.InstanceId.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"instanceId\"")
-			}
-		case "teamId":
-			requiredBitSet[0] |= 1 << 2
-			if err := func() error {
-				if err := s.TeamId.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"teamId\"")
-			}
-		case "userId":
-			requiredBitSet[0] |= 1 << 3
-			if err := func() error {
-				if err := s.UserId.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"userId\"")
-			}
-		case "status":
-			requiredBitSet[0] |= 1 << 4
-			if err := func() error {
-				if err := s.Status.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"status\"")
-			}
-		case "log":
-			requiredBitSet[0] |= 1 << 5
-			if err := func() error {
-				v, err := d.Str()
-				s.Log = string(v)
+			switch string(key) {
+			case "status":
+				typ, err := d.Str()
 				if err != nil {
 					return err
 				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"log\"")
-			}
-		case "adminLog":
-			requiredBitSet[0] |= 1 << 6
-			if err := func() error {
-				v, err := d.Str()
-				s.AdminLog = string(v)
-				if err != nil {
-					return err
+				switch typ {
+				case "FinishedBenchmark":
+					s.Type = FinishedBenchmarkBenchmarkAdminResult
+					found = true
+				case "RunningBenchmark":
+					s.Type = RunningBenchmarkBenchmarkAdminResult
+					found = true
+				case "WaitingBenchmark":
+					s.Type = WaitingBenchmarkBenchmarkAdminResult
+					found = true
+				default:
+					return errors.Errorf("unknown type %s", typ)
 				}
 				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"adminLog\"")
 			}
-		case "score":
-			requiredBitSet[0] |= 1 << 7
-			if err := func() error {
-				if err := s.Score.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"score\"")
-			}
-		case "createdAt":
-			requiredBitSet[1] |= 1 << 0
-			if err := func() error {
-				if err := s.CreatedAt.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"createdAt\"")
-			}
-		case "startedAt":
-			requiredBitSet[1] |= 1 << 1
-			if err := func() error {
-				if err := s.StartedAt.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"startedAt\"")
-			}
-		case "finishedAt":
-			requiredBitSet[1] |= 1 << 2
-			if err := func() error {
-				if err := s.FinishedAt.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"finishedAt\"")
-			}
-		default:
 			return d.Skip()
-		}
-		return nil
+		})
 	}); err != nil {
-		return errors.Wrap(err, "decode BenchmarkAdminResult")
+		return errors.Wrap(err, "capture")
 	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [2]uint8{
-		0b11111111,
-		0b00000111,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfBenchmarkAdminResult) {
-					name = jsonFieldsNameOfBenchmarkAdminResult[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
+	if !found {
+		return errors.New("unable to detect sum type variant")
+	}
+	switch s.Type {
+	case WaitingBenchmarkBenchmarkAdminResult:
+		if err := s.WaitingBenchmark.Decode(d); err != nil {
+			return err
 		}
+	case RunningBenchmarkBenchmarkAdminResult:
+		if err := s.RunningBenchmark.Decode(d); err != nil {
+			return err
+		}
+	case FinishedBenchmarkBenchmarkAdminResult:
+		if err := s.FinishedBenchmark.Decode(d); err != nil {
+			return err
+		}
+	default:
+		return errors.Errorf("inferred invalid type: %s", s.Type)
 	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *BenchmarkAdminResult) MarshalJSON() ([]byte, error) {
+func (s BenchmarkAdminResult) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
@@ -667,275 +579,242 @@ func (s *BenchmarkId) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s *BenchmarkResult) Encode(e *jx.Encoder) {
+func (s *BenchmarkListItem) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *BenchmarkResult) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("id")
-		s.ID.Encode(e)
-	}
-	{
-		e.FieldStart("instanceId")
-		s.InstanceId.Encode(e)
-	}
-	{
-		e.FieldStart("teamId")
-		s.TeamId.Encode(e)
-	}
-	{
-		e.FieldStart("userId")
-		s.UserId.Encode(e)
-	}
-	{
-		e.FieldStart("status")
-		s.Status.Encode(e)
-	}
-	{
-		e.FieldStart("log")
-		e.Str(s.Log)
-	}
-	{
-		e.FieldStart("score")
-		s.Score.Encode(e)
-	}
-	{
-		e.FieldStart("createdAt")
-		s.CreatedAt.Encode(e)
-	}
-	{
-		e.FieldStart("startedAt")
-		s.StartedAt.Encode(e)
-	}
-	{
-		e.FieldStart("finishedAt")
-		s.FinishedAt.Encode(e)
-	}
+func (s *BenchmarkListItem) encodeFields(e *jx.Encoder) {
+	s.OneOf.encodeFields(e)
 }
 
-var jsonFieldsNameOfBenchmarkResult = [10]string{
-	0: "id",
-	1: "instanceId",
-	2: "teamId",
-	3: "userId",
-	4: "status",
-	5: "log",
-	6: "score",
-	7: "createdAt",
-	8: "startedAt",
-	9: "finishedAt",
-}
+var jsonFieldsNameOfBenchmarkListItem = [0]string{}
 
-// Decode decodes BenchmarkResult from json.
-func (s *BenchmarkResult) Decode(d *jx.Decoder) error {
+// Decode decodes BenchmarkListItem from json.
+func (s *BenchmarkListItem) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode BenchmarkResult to nil")
+		return errors.New("invalid: unable to decode BenchmarkListItem to nil")
 	}
-	var requiredBitSet [2]uint8
+	if err := d.Capture(func(d *jx.Decoder) error {
+		return s.OneOf.Decode(d)
+	}); err != nil {
+		return errors.Wrap(err, "decode field OneOf")
+	}
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "id":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				if err := s.ID.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"id\"")
-			}
-		case "instanceId":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				if err := s.InstanceId.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"instanceId\"")
-			}
-		case "teamId":
-			requiredBitSet[0] |= 1 << 2
-			if err := func() error {
-				if err := s.TeamId.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"teamId\"")
-			}
-		case "userId":
-			requiredBitSet[0] |= 1 << 3
-			if err := func() error {
-				if err := s.UserId.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"userId\"")
-			}
-		case "status":
-			requiredBitSet[0] |= 1 << 4
-			if err := func() error {
-				if err := s.Status.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"status\"")
-			}
-		case "log":
-			requiredBitSet[0] |= 1 << 5
-			if err := func() error {
-				v, err := d.Str()
-				s.Log = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"log\"")
-			}
-		case "score":
-			requiredBitSet[0] |= 1 << 6
-			if err := func() error {
-				if err := s.Score.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"score\"")
-			}
-		case "createdAt":
-			requiredBitSet[0] |= 1 << 7
-			if err := func() error {
-				if err := s.CreatedAt.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"createdAt\"")
-			}
-		case "startedAt":
-			requiredBitSet[1] |= 1 << 0
-			if err := func() error {
-				if err := s.StartedAt.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"startedAt\"")
-			}
-		case "finishedAt":
-			requiredBitSet[1] |= 1 << 1
-			if err := func() error {
-				if err := s.FinishedAt.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"finishedAt\"")
-			}
 		default:
 			return d.Skip()
 		}
-		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode BenchmarkResult")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [2]uint8{
-		0b11111111,
-		0b00000011,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfBenchmarkResult) {
-					name = jsonFieldsNameOfBenchmarkResult[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
+		return errors.Wrap(err, "decode BenchmarkListItem")
 	}
 
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *BenchmarkResult) MarshalJSON() ([]byte, error) {
+func (s *BenchmarkListItem) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *BenchmarkResult) UnmarshalJSON(data []byte) error {
+func (s *BenchmarkListItem) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
-// Encode encodes BenchmarkStatus as json.
-func (s BenchmarkStatus) Encode(e *jx.Encoder) {
-	e.Str(string(s))
+// Encode encodes BenchmarkListItemSum as json.
+func (s BenchmarkListItemSum) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
 }
 
-// Decode decodes BenchmarkStatus from json.
-func (s *BenchmarkStatus) Decode(d *jx.Decoder) error {
+func (s BenchmarkListItemSum) encodeFields(e *jx.Encoder) {
+	switch s.Type {
+	case FinishedBenchmarkBenchmarkListItemSum:
+		e.FieldStart("status")
+		e.Str("FinishedBenchmark")
+		{
+			s := s.FinishedBenchmark
+			{
+				e.FieldStart("id")
+				s.ID.Encode(e)
+			}
+			{
+				e.FieldStart("instanceId")
+				s.InstanceId.Encode(e)
+			}
+			{
+				e.FieldStart("teamId")
+				s.TeamId.Encode(e)
+			}
+			{
+				e.FieldStart("userId")
+				s.UserId.Encode(e)
+			}
+			{
+				e.FieldStart("score")
+				s.Score.Encode(e)
+			}
+			{
+				e.FieldStart("result")
+				s.Result.Encode(e)
+			}
+			{
+				e.FieldStart("createdAt")
+				s.CreatedAt.Encode(e)
+			}
+			{
+				e.FieldStart("startedAt")
+				s.StartedAt.Encode(e)
+			}
+			{
+				e.FieldStart("finishedAt")
+				s.FinishedAt.Encode(e)
+			}
+		}
+	case RunningBenchmarkBenchmarkListItemSum:
+		e.FieldStart("status")
+		e.Str("RunningBenchmark")
+		{
+			s := s.RunningBenchmark
+			{
+				e.FieldStart("id")
+				s.ID.Encode(e)
+			}
+			{
+				e.FieldStart("instanceId")
+				s.InstanceId.Encode(e)
+			}
+			{
+				e.FieldStart("teamId")
+				s.TeamId.Encode(e)
+			}
+			{
+				e.FieldStart("userId")
+				s.UserId.Encode(e)
+			}
+			{
+				e.FieldStart("score")
+				s.Score.Encode(e)
+			}
+			{
+				e.FieldStart("createdAt")
+				s.CreatedAt.Encode(e)
+			}
+			{
+				e.FieldStart("startedAt")
+				s.StartedAt.Encode(e)
+			}
+		}
+	case WaitingBenchmarkBenchmarkListItemSum:
+		e.FieldStart("status")
+		e.Str("WaitingBenchmark")
+		{
+			s := s.WaitingBenchmark
+			{
+				e.FieldStart("id")
+				s.ID.Encode(e)
+			}
+			{
+				e.FieldStart("instanceId")
+				s.InstanceId.Encode(e)
+			}
+			{
+				e.FieldStart("teamId")
+				s.TeamId.Encode(e)
+			}
+			{
+				e.FieldStart("userId")
+				s.UserId.Encode(e)
+			}
+			{
+				e.FieldStart("createdAt")
+				s.CreatedAt.Encode(e)
+			}
+		}
+	}
+}
+
+// Decode decodes BenchmarkListItemSum from json.
+func (s *BenchmarkListItemSum) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode BenchmarkStatus to nil")
+		return errors.New("invalid: unable to decode BenchmarkListItemSum to nil")
 	}
-	v, err := d.StrBytes()
-	if err != nil {
-		return err
-	}
-	// Try to use constant string.
-	switch BenchmarkStatus(v) {
-	case BenchmarkStatusWaiting:
-		*s = BenchmarkStatusWaiting
-	case BenchmarkStatusRunning:
-		*s = BenchmarkStatusRunning
-	case BenchmarkStatusFinished:
-		*s = BenchmarkStatusFinished
-	default:
-		*s = BenchmarkStatus(v)
+	// Sum type discriminator.
+	if typ := d.Next(); typ != jx.Object {
+		return errors.Errorf("unexpected json type %q", typ)
 	}
 
+	var found bool
+	if err := d.Capture(func(d *jx.Decoder) error {
+		return d.ObjBytes(func(d *jx.Decoder, key []byte) error {
+			if found {
+				return d.Skip()
+			}
+			switch string(key) {
+			case "status":
+				typ, err := d.Str()
+				if err != nil {
+					return err
+				}
+				switch typ {
+				case "FinishedBenchmark":
+					s.Type = FinishedBenchmarkBenchmarkListItemSum
+					found = true
+				case "RunningBenchmark":
+					s.Type = RunningBenchmarkBenchmarkListItemSum
+					found = true
+				case "WaitingBenchmark":
+					s.Type = WaitingBenchmarkBenchmarkListItemSum
+					found = true
+				default:
+					return errors.Errorf("unknown type %s", typ)
+				}
+				return nil
+			}
+			return d.Skip()
+		})
+	}); err != nil {
+		return errors.Wrap(err, "capture")
+	}
+	if !found {
+		return errors.New("unable to detect sum type variant")
+	}
+	switch s.Type {
+	case WaitingBenchmarkBenchmarkListItemSum:
+		if err := s.WaitingBenchmark.Decode(d); err != nil {
+			return err
+		}
+	case RunningBenchmarkBenchmarkListItemSum:
+		if err := s.RunningBenchmark.Decode(d); err != nil {
+			return err
+		}
+	case FinishedBenchmarkBenchmarkListItemSum:
+		if err := s.FinishedBenchmark.Decode(d); err != nil {
+			return err
+		}
+	default:
+		return errors.Errorf("inferred invalid type: %s", s.Type)
+	}
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s BenchmarkStatus) MarshalJSON() ([]byte, error) {
+func (s BenchmarkListItemSum) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *BenchmarkStatus) UnmarshalJSON(data []byte) error {
+func (s *BenchmarkListItemSum) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -1084,6 +963,316 @@ func (s *FinishedAt) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *FinishedBenchmark) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *FinishedBenchmark) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("id")
+		s.ID.Encode(e)
+	}
+	{
+		e.FieldStart("instanceId")
+		s.InstanceId.Encode(e)
+	}
+	{
+		e.FieldStart("teamId")
+		s.TeamId.Encode(e)
+	}
+	{
+		e.FieldStart("userId")
+		s.UserId.Encode(e)
+	}
+	{
+		e.FieldStart("status")
+		s.Status.Encode(e)
+	}
+	{
+		e.FieldStart("score")
+		s.Score.Encode(e)
+	}
+	{
+		e.FieldStart("result")
+		s.Result.Encode(e)
+	}
+	{
+		e.FieldStart("createdAt")
+		s.CreatedAt.Encode(e)
+	}
+	{
+		e.FieldStart("startedAt")
+		s.StartedAt.Encode(e)
+	}
+	{
+		e.FieldStart("finishedAt")
+		s.FinishedAt.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfFinishedBenchmark = [10]string{
+	0: "id",
+	1: "instanceId",
+	2: "teamId",
+	3: "userId",
+	4: "status",
+	5: "score",
+	6: "result",
+	7: "createdAt",
+	8: "startedAt",
+	9: "finishedAt",
+}
+
+// Decode decodes FinishedBenchmark from json.
+func (s *FinishedBenchmark) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode FinishedBenchmark to nil")
+	}
+	var requiredBitSet [2]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "id":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.ID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"id\"")
+			}
+		case "instanceId":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.InstanceId.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"instanceId\"")
+			}
+		case "teamId":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.TeamId.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"teamId\"")
+			}
+		case "userId":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				if err := s.UserId.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"userId\"")
+			}
+		case "status":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				if err := s.Status.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"status\"")
+			}
+		case "score":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				if err := s.Score.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"score\"")
+			}
+		case "result":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				if err := s.Result.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"result\"")
+			}
+		case "createdAt":
+			requiredBitSet[0] |= 1 << 7
+			if err := func() error {
+				if err := s.CreatedAt.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"createdAt\"")
+			}
+		case "startedAt":
+			requiredBitSet[1] |= 1 << 0
+			if err := func() error {
+				if err := s.StartedAt.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"startedAt\"")
+			}
+		case "finishedAt":
+			requiredBitSet[1] |= 1 << 1
+			if err := func() error {
+				if err := s.FinishedAt.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"finishedAt\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode FinishedBenchmark")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [2]uint8{
+		0b11111111,
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfFinishedBenchmark) {
+					name = jsonFieldsNameOfFinishedBenchmark[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *FinishedBenchmark) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *FinishedBenchmark) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes FinishedBenchmarkResult as json.
+func (s FinishedBenchmarkResult) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes FinishedBenchmarkResult from json.
+func (s *FinishedBenchmarkResult) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode FinishedBenchmarkResult to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch FinishedBenchmarkResult(v) {
+	case FinishedBenchmarkResultPassed:
+		*s = FinishedBenchmarkResultPassed
+	case FinishedBenchmarkResultFailed:
+		*s = FinishedBenchmarkResultFailed
+	case FinishedBenchmarkResultError:
+		*s = FinishedBenchmarkResultError
+	default:
+		*s = FinishedBenchmarkResult(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s FinishedBenchmarkResult) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *FinishedBenchmarkResult) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes FinishedBenchmarkStatus as json.
+func (s FinishedBenchmarkStatus) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes FinishedBenchmarkStatus from json.
+func (s *FinishedBenchmarkStatus) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode FinishedBenchmarkStatus to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch FinishedBenchmarkStatus(v) {
+	case FinishedBenchmarkStatusFinished:
+		*s = FinishedBenchmarkStatusFinished
+	default:
+		*s = FinishedBenchmarkStatus(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s FinishedBenchmarkStatus) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *FinishedBenchmarkStatus) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *Forbidden) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -1148,7 +1337,7 @@ func (s *Forbidden) UnmarshalJSON(data []byte) error {
 
 // Encode encodes GetBenchmarkQueueOKApplicationJSON as json.
 func (s GetBenchmarkQueueOKApplicationJSON) Encode(e *jx.Encoder) {
-	unwrapped := []Benchmark(s)
+	unwrapped := []BenchmarkListItem(s)
 
 	e.ArrStart()
 	for _, elem := range unwrapped {
@@ -1162,11 +1351,11 @@ func (s *GetBenchmarkQueueOKApplicationJSON) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetBenchmarkQueueOKApplicationJSON to nil")
 	}
-	var unwrapped []Benchmark
+	var unwrapped []BenchmarkListItem
 	if err := func() error {
-		unwrapped = make([]Benchmark, 0)
+		unwrapped = make([]BenchmarkListItem, 0)
 		if err := d.Arr(func(d *jx.Decoder) error {
-			var elem Benchmark
+			var elem BenchmarkListItem
 			if err := elem.Decode(d); err != nil {
 				return err
 			}
@@ -1198,7 +1387,7 @@ func (s *GetBenchmarkQueueOKApplicationJSON) UnmarshalJSON(data []byte) error {
 
 // Encode encodes GetBenchmarksOKApplicationJSON as json.
 func (s GetBenchmarksOKApplicationJSON) Encode(e *jx.Encoder) {
-	unwrapped := []Benchmark(s)
+	unwrapped := []BenchmarkListItem(s)
 
 	e.ArrStart()
 	for _, elem := range unwrapped {
@@ -1212,11 +1401,11 @@ func (s *GetBenchmarksOKApplicationJSON) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetBenchmarksOKApplicationJSON to nil")
 	}
-	var unwrapped []Benchmark
+	var unwrapped []BenchmarkListItem
 	if err := func() error {
-		unwrapped = make([]Benchmark, 0)
+		unwrapped = make([]BenchmarkListItem, 0)
 		if err := d.Arr(func(d *jx.Decoder) error {
-			var elem Benchmark
+			var elem BenchmarkListItem
 			if err := elem.Decode(d); err != nil {
 				return err
 			}
@@ -1524,7 +1713,7 @@ func (s *GetScoresOKApplicationJSON) UnmarshalJSON(data []byte) error {
 
 // Encode encodes GetTeamBenchmarksOKApplicationJSON as json.
 func (s GetTeamBenchmarksOKApplicationJSON) Encode(e *jx.Encoder) {
-	unwrapped := []Benchmark(s)
+	unwrapped := []BenchmarkListItem(s)
 
 	e.ArrStart()
 	for _, elem := range unwrapped {
@@ -1538,11 +1727,11 @@ func (s *GetTeamBenchmarksOKApplicationJSON) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetTeamBenchmarksOKApplicationJSON to nil")
 	}
-	var unwrapped []Benchmark
+	var unwrapped []BenchmarkListItem
 	if err := func() error {
-		unwrapped = make([]Benchmark, 0)
+		unwrapped = make([]BenchmarkListItem, 0)
 		if err := d.Arr(func(d *jx.Decoder) error {
-			var elem Benchmark
+			var elem BenchmarkListItem
 			if err := elem.Decode(d); err != nil {
 				return err
 			}
@@ -2344,39 +2533,6 @@ func (s *OptCreatedAt) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes FinishedAt as json.
-func (o OptFinishedAt) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	o.Value.Encode(e)
-}
-
-// Decode decodes FinishedAt from json.
-func (o *OptFinishedAt) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptFinishedAt to nil")
-	}
-	o.Set = true
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptFinishedAt) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptFinishedAt) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
 // Encode encodes MarkdownDocument as json.
 func (o OptMarkdownDocument) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -2505,72 +2661,6 @@ func (s OptPostTeamReq) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptPostTeamReq) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes Score as json.
-func (o OptScore) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	o.Value.Encode(e)
-}
-
-// Decode decodes Score from json.
-func (o *OptScore) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptScore to nil")
-	}
-	o.Set = true
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptScore) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptScore) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes StartedAt as json.
-func (o OptStartedAt) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	o.Value.Encode(e)
-}
-
-// Decode decodes StartedAt from json.
-func (o *OptStartedAt) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptStartedAt to nil")
-	}
-	o.Set = true
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptStartedAt) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptStartedAt) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -3467,6 +3557,243 @@ func (s *RankingItem) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode implements json.Marshaler.
+func (s *RunningBenchmark) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *RunningBenchmark) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("id")
+		s.ID.Encode(e)
+	}
+	{
+		e.FieldStart("instanceId")
+		s.InstanceId.Encode(e)
+	}
+	{
+		e.FieldStart("teamId")
+		s.TeamId.Encode(e)
+	}
+	{
+		e.FieldStart("userId")
+		s.UserId.Encode(e)
+	}
+	{
+		e.FieldStart("status")
+		s.Status.Encode(e)
+	}
+	{
+		e.FieldStart("score")
+		s.Score.Encode(e)
+	}
+	{
+		e.FieldStart("createdAt")
+		s.CreatedAt.Encode(e)
+	}
+	{
+		e.FieldStart("startedAt")
+		s.StartedAt.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfRunningBenchmark = [8]string{
+	0: "id",
+	1: "instanceId",
+	2: "teamId",
+	3: "userId",
+	4: "status",
+	5: "score",
+	6: "createdAt",
+	7: "startedAt",
+}
+
+// Decode decodes RunningBenchmark from json.
+func (s *RunningBenchmark) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode RunningBenchmark to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "id":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.ID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"id\"")
+			}
+		case "instanceId":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.InstanceId.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"instanceId\"")
+			}
+		case "teamId":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.TeamId.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"teamId\"")
+			}
+		case "userId":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				if err := s.UserId.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"userId\"")
+			}
+		case "status":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				if err := s.Status.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"status\"")
+			}
+		case "score":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				if err := s.Score.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"score\"")
+			}
+		case "createdAt":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				if err := s.CreatedAt.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"createdAt\"")
+			}
+		case "startedAt":
+			requiredBitSet[0] |= 1 << 7
+			if err := func() error {
+				if err := s.StartedAt.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"startedAt\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode RunningBenchmark")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b11111111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfRunningBenchmark) {
+					name = jsonFieldsNameOfRunningBenchmark[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *RunningBenchmark) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *RunningBenchmark) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes RunningBenchmarkStatus as json.
+func (s RunningBenchmarkStatus) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes RunningBenchmarkStatus from json.
+func (s *RunningBenchmarkStatus) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode RunningBenchmarkStatus to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch RunningBenchmarkStatus(v) {
+	case RunningBenchmarkStatusRunning:
+		*s = RunningBenchmarkStatusRunning
+	default:
+		*s = RunningBenchmarkStatus(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s RunningBenchmarkStatus) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *RunningBenchmarkStatus) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes Score as json.
 func (s Score) Encode(e *jx.Encoder) {
 	unwrapped := float64(s)
@@ -4211,6 +4538,213 @@ func (s UserName) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *UserName) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *WaitingBenchmark) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *WaitingBenchmark) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("id")
+		s.ID.Encode(e)
+	}
+	{
+		e.FieldStart("instanceId")
+		s.InstanceId.Encode(e)
+	}
+	{
+		e.FieldStart("teamId")
+		s.TeamId.Encode(e)
+	}
+	{
+		e.FieldStart("userId")
+		s.UserId.Encode(e)
+	}
+	{
+		e.FieldStart("status")
+		s.Status.Encode(e)
+	}
+	{
+		e.FieldStart("createdAt")
+		s.CreatedAt.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfWaitingBenchmark = [6]string{
+	0: "id",
+	1: "instanceId",
+	2: "teamId",
+	3: "userId",
+	4: "status",
+	5: "createdAt",
+}
+
+// Decode decodes WaitingBenchmark from json.
+func (s *WaitingBenchmark) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode WaitingBenchmark to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "id":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.ID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"id\"")
+			}
+		case "instanceId":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.InstanceId.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"instanceId\"")
+			}
+		case "teamId":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.TeamId.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"teamId\"")
+			}
+		case "userId":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				if err := s.UserId.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"userId\"")
+			}
+		case "status":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				if err := s.Status.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"status\"")
+			}
+		case "createdAt":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				if err := s.CreatedAt.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"createdAt\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode WaitingBenchmark")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00111111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfWaitingBenchmark) {
+					name = jsonFieldsNameOfWaitingBenchmark[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *WaitingBenchmark) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *WaitingBenchmark) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes WaitingBenchmarkStatus as json.
+func (s WaitingBenchmarkStatus) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes WaitingBenchmarkStatus from json.
+func (s *WaitingBenchmarkStatus) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode WaitingBenchmarkStatus to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch WaitingBenchmarkStatus(v) {
+	case WaitingBenchmarkStatusWaiting:
+		*s = WaitingBenchmarkStatusWaiting
+	default:
+		*s = WaitingBenchmarkStatus(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s WaitingBenchmarkStatus) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *WaitingBenchmarkStatus) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
