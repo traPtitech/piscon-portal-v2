@@ -23,6 +23,7 @@ import (
 	"github.com/traPtitech/piscon-portal-v2/server/handler"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
 	"github.com/traPtitech/piscon-portal-v2/server/services/oauth2"
+	"github.com/traPtitech/piscon-portal-v2/server/usecase"
 	"github.com/traPtitech/piscon-portal-v2/server/utils/random"
 )
 
@@ -35,7 +36,7 @@ func TestMain(m *testing.M) {
 	m.Run()
 }
 
-func NewPortalServer(repo repository.Repository) *httptest.Server {
+func NewPortalServer(useCase usecase.UseCase, repo repository.Repository) *httptest.Server {
 	e := echo.New()
 	server := httptest.NewTLSServer(e)
 
@@ -50,7 +51,7 @@ func NewPortalServer(repo repository.Repository) *httptest.Server {
 			TokenURL:     oauth2ServerURL + "/token",
 		},
 	}
-	h, err := handler.New(repo, config)
+	h, err := handler.New(useCase, repo, config)
 	if err != nil {
 		panic(err)
 	}
@@ -60,8 +61,7 @@ func NewPortalServer(repo repository.Repository) *httptest.Server {
 	return server
 }
 
-// NewHandler returns a new handler for middleware testing.
-func NewHandler(repo repository.Repository, sessionManager handler.SessionManager) *handler.Handler {
+func NewHandler(useCase usecase.UseCase, repo repository.Repository, sessionManager handler.SessionManager) *handler.Handler {
 	config := handler.Config{
 		RootURL:       "http://localhost",
 		SessionSecret: "secret",
@@ -74,7 +74,7 @@ func NewHandler(repo repository.Repository, sessionManager handler.SessionManage
 		},
 		SessionManager: sessionManager,
 	}
-	h, err := handler.New(repo, config)
+	h, err := handler.New(useCase, repo, config)
 	if err != nil {
 		panic(err)
 	}
@@ -91,7 +91,7 @@ func NewClient(server *httptest.Server) *http.Client {
 	return client
 }
 
-func Login(t *testing.T, server *httptest.Server, client *http.Client, userID string) error {
+func Login(t *testing.T, server *httptest.Server, client *http.Client, userID uuid.UUID) error {
 	t.Helper()
 
 	// not following redirect for the first request
@@ -117,7 +117,7 @@ func Login(t *testing.T, server *httptest.Server, client *http.Client, userID st
 		return err
 	}
 	q := authURL.Query()
-	q.Add("user", userID)
+	q.Add("user", userID.String())
 	authURL.RawQuery = q.Encode()
 
 	// from here, follow redirect

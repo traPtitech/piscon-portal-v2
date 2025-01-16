@@ -11,18 +11,20 @@ import (
 	"github.com/google/uuid"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
-	"github.com/traPtitech/piscon-portal-v2/server/repository/mock"
+	repomock "github.com/traPtitech/piscon-portal-v2/server/repository/mock"
+	usecasemock "github.com/traPtitech/piscon-portal-v2/server/usecase/mock"
 	"go.uber.org/mock/gomock"
 )
 
 func TestLogin(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
-	mockRepo := mock.NewMockRepository(ctrl)
+	mockRepo := repomock.NewMockRepository(ctrl)
+	usecaseMock := usecasemock.NewMockUseCase(ctrl)
 
-	server := NewPortalServer(mockRepo)
+	server := NewPortalServer(usecaseMock, mockRepo)
 	client := NewClient(server)
-	userID := uuid.NewString()
+	userID := uuid.New()
 
 	testFirstLogin(t, mockRepo, server, client, userID)
 }
@@ -30,11 +32,12 @@ func TestLogin(t *testing.T) {
 func TestLoginAsExistingUser(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
-	mockRepo := mock.NewMockRepository(ctrl)
+	mockRepo := repomock.NewMockRepository(ctrl)
+	usecaseMock := usecasemock.NewMockUseCase(ctrl)
 
-	server := NewPortalServer(mockRepo)
+	server := NewPortalServer(usecaseMock, mockRepo)
 	client := NewClient(server)
-	userID := uuid.NewString()
+	userID := uuid.New()
 
 	// user already exists, so only create session
 	mockRepo.EXPECT().Transaction(gomock.Any(), gomock.Any()).
@@ -54,11 +57,12 @@ func TestLoginAsExistingUser(t *testing.T) {
 func TestLogout(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
-	mockRepo := mock.NewMockRepository(ctrl)
+	mockRepo := repomock.NewMockRepository(ctrl)
+	mockUseCase := usecasemock.NewMockUseCase(ctrl)
 
-	server := NewPortalServer(mockRepo)
+	server := NewPortalServer(mockUseCase, mockRepo)
 	client := NewClient(server)
-	userID := uuid.NewString()
+	userID := uuid.New()
 
 	testFirstLogin(t, mockRepo, server, client, userID)
 
@@ -84,7 +88,7 @@ func TestLogout(t *testing.T) {
 	}
 }
 
-func testFirstLogin(t *testing.T, mockRepo *mock.MockRepository, server *httptest.Server, client *http.Client, userID string) {
+func testFirstLogin(t *testing.T, mockRepo *repomock.MockRepository, server *httptest.Server, client *http.Client, userID uuid.UUID) {
 	// create user and session
 	mockRepo.EXPECT().Transaction(gomock.Any(), gomock.Any()).
 		DoAndReturn(func(ctx context.Context, f func(context.Context, repository.Repository) error) error {

@@ -7,12 +7,15 @@ import (
 	"github.com/traPtitech/piscon-portal-v2/server/handler/internal"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
 	"github.com/traPtitech/piscon-portal-v2/server/services/oauth2"
+	"github.com/traPtitech/piscon-portal-v2/server/usecase"
 )
 
 type Handler struct {
 	repo           repository.Repository
 	sessionManager SessionManager
 	oauth2Service  *oauth2.Service
+
+	useCase usecase.UseCase
 }
 
 type Config struct {
@@ -24,7 +27,7 @@ type Config struct {
 	SessionManager SessionManager
 }
 
-func New(repo repository.Repository, config Config) (*Handler, error) {
+func New(useCase usecase.UseCase, repo repository.Repository, config Config) (*Handler, error) {
 	var sessionManager SessionManager
 	if config.SessionManager == nil {
 		sessionManager = internal.NewSessionManager(config.SessionSecret, config.Debug)
@@ -44,6 +47,7 @@ func New(repo repository.Repository, config Config) (*Handler, error) {
 		repo:           repo,
 		sessionManager: sessionManager,
 		oauth2Service:  oauth2Service,
+		useCase:        useCase,
 	}, nil
 }
 
@@ -54,4 +58,11 @@ func (h *Handler) SetupRoutes(e *echo.Echo) {
 	api.GET("/oauth2/code", h.GetOauth2Code)
 	api.GET("/oauth2/callback", h.Oauth2Callback)
 	api.POST("/oauth2/logout", h.Logout, h.AuthMiddleware())
+
+	teams := api.Group("/teams", h.AuthMiddleware())
+	teams.GET("", h.GetTeams)
+	teams.POST("", h.CreateTeam)
+	teams.GET("/:teamID", h.GetTeam)
+	// TODO: Admins can access even if they are not members of the team.
+	teams.PATCH("/:teamID", h.UpdateTeam, h.TeamAuthMiddleware())
 }
