@@ -931,16 +931,24 @@ type InstanceStatus string
 
 const (
 	InstanceStatusBuilding InstanceStatus = "building"
+	InstanceStatusStarting InstanceStatus = "starting"
 	InstanceStatusRunning  InstanceStatus = "running"
+	InstanceStatusStopping InstanceStatus = "stopping"
 	InstanceStatusStopped  InstanceStatus = "stopped"
+	InstanceStatusDeleting InstanceStatus = "deleting"
+	InstanceStatusDeleted  InstanceStatus = "deleted"
 )
 
 // AllValues returns all InstanceStatus values.
 func (InstanceStatus) AllValues() []InstanceStatus {
 	return []InstanceStatus{
 		InstanceStatusBuilding,
+		InstanceStatusStarting,
 		InstanceStatusRunning,
+		InstanceStatusStopping,
 		InstanceStatusStopped,
+		InstanceStatusDeleting,
+		InstanceStatusDeleted,
 	}
 }
 
@@ -949,9 +957,17 @@ func (s InstanceStatus) MarshalText() ([]byte, error) {
 	switch s {
 	case InstanceStatusBuilding:
 		return []byte(s), nil
+	case InstanceStatusStarting:
+		return []byte(s), nil
 	case InstanceStatusRunning:
 		return []byte(s), nil
+	case InstanceStatusStopping:
+		return []byte(s), nil
 	case InstanceStatusStopped:
+		return []byte(s), nil
+	case InstanceStatusDeleting:
+		return []byte(s), nil
+	case InstanceStatusDeleted:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -964,11 +980,23 @@ func (s *InstanceStatus) UnmarshalText(data []byte) error {
 	case InstanceStatusBuilding:
 		*s = InstanceStatusBuilding
 		return nil
+	case InstanceStatusStarting:
+		*s = InstanceStatusStarting
+		return nil
 	case InstanceStatusRunning:
 		*s = InstanceStatusRunning
 		return nil
+	case InstanceStatusStopping:
+		*s = InstanceStatusStopping
+		return nil
 	case InstanceStatusStopped:
 		*s = InstanceStatusStopped
+		return nil
+	case InstanceStatusDeleting:
+		*s = InstanceStatusDeleting
+		return nil
+	case InstanceStatusDeleted:
+		*s = InstanceStatusDeleted
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
