@@ -211,14 +211,45 @@ export const handlers = [
     const res = instances.filter((i) => i.teamId === teamId)
     return HttpResponse.json(res)
   }),
-  http.post(new RegExp(`${apiBaseUrl}/teams/([^/]+)/instances`), () => {
-    // TODO
+  http.post(new RegExp(`${apiBaseUrl}/teams/([^/]+)/instances`), (c) => {
+    const teamId = c.params[0] as string
+    const newServerId = instances.reduce((max, i) => Math.max(max, i.serverId), 0) + 1
+    const newInstance: components['schemas']['Instance'] = {
+      id: uuidv7(),
+      teamId,
+      serverId: newServerId,
+      privateIPAddress: `192.168.0.${newServerId}`,
+      publicIPAddress: `203.0.113.${newServerId}`,
+      status: 'building',
+      createdAt: new Date().toISOString(),
+    }
+    instances.push(newInstance)
   }),
-  http.delete(new RegExp(`${apiBaseUrl}/teams/([^/]+)/instances/([^/]+)`), () => {
-    // TODO
+  http.delete(new RegExp(`${apiBaseUrl}/teams/([^/]+)/instances/([^/]+)`), (c) => {
+    const teamId = c.params[0] as string
+    const instanceId = c.params[1] as string
+    const index = instances.findIndex((i) => i.teamId === teamId && i.id === instanceId)
+    instances[index] = { ...instances[index], status: 'deleting' }
   }),
-  http.patch(new RegExp(`${apiBaseUrl}/teams/([^/]+)/instances/([^/]+)`), () => {
-    // TODO
+  http.patch(new RegExp(`${apiBaseUrl}/teams/([^/]+)/instances/([^/]+)`), async (c) => {
+    const teamId = c.params[0] as string
+    const instanceId = c.params[1] as string
+    const index = instances.findIndex((i) => i.teamId === teamId && i.id === instanceId)
+    const body = (await c.request.json()) as { operation: 'start' | 'stop' }
+    const operation = body.operation as 'start' | 'stop'
+    if (operation === 'start') {
+      if (instances[index].status === 'stopped') {
+        instances[index] = { ...instances[index], status: 'starting' }
+        return HttpResponse.json({}, { status: 200 })
+      }
+    }
+    if (operation === 'stop') {
+      if (instances[index].status === 'running') {
+        instances[index] = { ...instances[index], status: 'stopping' }
+        return HttpResponse.json({}, { status: 200 })
+      }
+    }
+    return HttpResponse.json({ message: 'Bad request' }, { status: 400 })
   }),
   http.get(`${apiBaseUrl}/instances`, () => HttpResponse.json(instances)),
   http.post(`${apiBaseUrl}/benchmarks`, () => {
@@ -383,3 +414,31 @@ setInterval(() => {
     })
   }
 }, 100)
+
+// チームのインスタンスの状態を定期的に更新する
+setInterval(() => {
+  const buildingInstances = instances.filter((i) => i.status === 'building')
+  const startingInstances = instances.filter((i) => i.status === 'starting')
+  const stoppingInstances = instances.filter((i) => i.status === 'stopping')
+  const deletingInstances = instances.filter((i) => i.status === 'deleting')
+
+  // building -> running
+  for (const i of buildingInstances) {
+    if (Math.random() < 0.2) i.status = 'running'
+  }
+
+  // starting -> running
+  for (const i of startingInstances) {
+    if (Math.random() < 0.3) i.status = 'running'
+  }
+
+  // stopping -> stopped
+  for (const i of stoppingInstances) {
+    if (Math.random() < 0.3) i.status = 'stopped'
+  }
+
+  // deleting -> deleted
+  for (const i of deletingInstances) {
+    if (Math.random() < 0.3) i.status = 'deleted'
+  }
+}, 500)
