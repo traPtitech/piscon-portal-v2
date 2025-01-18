@@ -430,7 +430,14 @@ export interface components {
      * @example running
      * @enum {string}
      */
-    InstanceStatus: 'building' | 'running' | 'stopped'
+    InstanceStatus:
+      | 'building'
+      | 'starting'
+      | 'running'
+      | 'stopping'
+      | 'stopped'
+      | 'deleting'
+      | 'deleted'
     /**
      * @example start
      * @enum {string}
