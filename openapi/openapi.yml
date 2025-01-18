@@ -811,8 +811,11 @@ components:
       type: "string"
       enum:
         - "building"
+        - "starting"
         - "running"
+        - "stopping"
         - "stopped"
+        - "deleting"
         - "deleted"
       example: "running"
     InstanceOperation:
