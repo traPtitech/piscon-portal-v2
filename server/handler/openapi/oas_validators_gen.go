@@ -468,9 +468,15 @@ func (s InstanceStatus) Validate() error {
 	switch s {
 	case "building":
 		return nil
+	case "starting":
+		return nil
 	case "running":
 		return nil
+	case "stopping":
+		return nil
 	case "stopped":
+		return nil
+	case "deleting":
 		return nil
 	case "deleted":
 		return nil
