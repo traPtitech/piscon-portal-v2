@@ -933,6 +933,7 @@ const (
 	InstanceStatusBuilding InstanceStatus = "building"
 	InstanceStatusRunning  InstanceStatus = "running"
 	InstanceStatusStopped  InstanceStatus = "stopped"
+	InstanceStatusDeleted  InstanceStatus = "deleted"
 )
 
 // AllValues returns all InstanceStatus values.
@@ -941,6 +942,7 @@ func (InstanceStatus) AllValues() []InstanceStatus {
 		InstanceStatusBuilding,
 		InstanceStatusRunning,
 		InstanceStatusStopped,
+		InstanceStatusDeleted,
 	}
 }
 
@@ -952,6 +954,8 @@ func (s InstanceStatus) MarshalText() ([]byte, error) {
 	case InstanceStatusRunning:
 		return []byte(s), nil
 	case InstanceStatusStopped:
+		return []byte(s), nil
+	case InstanceStatusDeleted:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -969,6 +973,9 @@ func (s *InstanceStatus) UnmarshalText(data []byte) error {
 		return nil
 	case InstanceStatusStopped:
 		*s = InstanceStatusStopped
+		return nil
+	case InstanceStatusDeleted:
+		*s = InstanceStatusDeleted
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)

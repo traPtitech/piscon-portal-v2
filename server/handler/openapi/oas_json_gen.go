@@ -2281,6 +2281,8 @@ func (s *InstanceStatus) Decode(d *jx.Decoder) error {
 		*s = InstanceStatusRunning
 	case InstanceStatusStopped:
 		*s = InstanceStatusStopped
+	case InstanceStatusDeleted:
+		*s = InstanceStatusDeleted
 	default:
 		*s = InstanceStatus(v)
 	}

@@ -472,6 +472,8 @@ func (s InstanceStatus) Validate() error {
 		return nil
 	case "stopped":
 		return nil
+	case "deleted":
+		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
