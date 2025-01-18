@@ -813,6 +813,7 @@ components:
         - "building"
         - "running"
         - "stopped"
+        - "deleted"
       example: "running"
     InstanceOperation:
       type: "string"
