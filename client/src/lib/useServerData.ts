@@ -176,3 +176,22 @@ export const useBench = (benchmarkId: string) =>
         .GET('/benchmarks/{benchmarkId}', { params: { path: { benchmarkId } } })
         .then((r) => r.data),
   })
+
+export const useDocs = () =>
+  useQuery({
+    queryKey: ['docs'],
+    queryFn: () => api.GET('/docs').then((r) => r.data),
+  })
+
+export const useUpdateDocs = () => {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (params: { body: string }) =>
+      api.PATCH('/docs', {
+        body: params,
+      }),
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: ['docs'] })
+    },
+  })
+}
