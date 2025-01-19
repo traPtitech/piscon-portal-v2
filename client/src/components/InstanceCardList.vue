@@ -195,18 +195,10 @@ setInterval(() => {
 
 .action-button {
   flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
 }
 
 .create-instance-button {
   width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
 }
 
 @container (max-width: 600px) {

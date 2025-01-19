@@ -21,6 +21,10 @@ defineProps<{
   font-weight: 700;
   font-size: 0.9rem;
   transition: background-color 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25rem;
 }
 .button:disabled:disabled {
   background-color: var(--ct-slate-100);
