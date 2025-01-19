@@ -93,3 +93,29 @@ export const useDeleteTeamInstance = (client: QueryClient) =>
       client.invalidateQueries({ queryKey: ['instances'] })
     },
   })
+
+export const useCreateTeam = (client: QueryClient) =>
+  useMutation({
+    mutationFn: (params: { name: string; members: string[] }) =>
+      api.POST('/teams', {
+        body: params,
+      }),
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: ['teams'] })
+      client.invalidateQueries({ queryKey: ['me'] })
+    },
+  })
+
+export const useUpdateTeam = (client: QueryClient) =>
+  useMutation({
+    mutationFn: (params: { teamId: string; name: string; members: string[] }) =>
+      api.PATCH('/teams/{teamId}', {
+        params: { path: { teamId: params.teamId } },
+        body: params,
+      }),
+    onSuccess: (_, params) => {
+      client.invalidateQueries({ queryKey: ['team', params.teamId] })
+      client.invalidateQueries({ queryKey: ['teams'] })
+      client.invalidateQueries({ queryKey: ['me'] })
+    },
+  })

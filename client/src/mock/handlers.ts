@@ -194,14 +194,49 @@ export const handlers = [
   http.get(`${apiBaseUrl}/users`, () => HttpResponse.json(users)),
   http.get(`${apiBaseUrl}/users/me`, () => HttpResponse.json(users[0])),
   http.get(`${apiBaseUrl}/teams`, () => HttpResponse.json(teams)),
-  http.post(`${apiBaseUrl}/teams`, () => {
-    // TODO
+  http.post(`${apiBaseUrl}/teams`, async (c) => {
+    type Body = NonNullable<paths['/teams']['post']['requestBody']>['content']['application/json']
+    const body = (await c.request.json()) as Body
+    const newTeam: components['schemas']['Team'] = {
+      id: uuidv7(),
+      name: body.name,
+      members: body.members,
+      createdAt: new Date().toISOString(),
+    }
+    teams.push(newTeam)
+    for (const member of body.members) {
+      const user = users.find((u) => u.id === member)
+      if (user !== undefined) user.teamId = newTeam.id
+    }
+    return HttpResponse.json(newTeam)
   }),
   http.get(new RegExp(`${apiBaseUrl}/teams/([^/]+)$`), (c) => {
-    // TODO
     const teamId = c.params[0] as string
     const team = teams.find((t) => t.id === teamId)
     if (team === undefined) return HttpResponse.json({ message: 'Not found' }, { status: 404 })
+    return HttpResponse.json(team)
+  }),
+  http.patch(new RegExp(`${apiBaseUrl}/teams/([^/]+)$`), async (c) => {
+    const teamId = c.params[0] as string
+    const team = teams.find((t) => t.id === teamId)
+    if (team === undefined) return HttpResponse.json({ message: 'Not found' }, { status: 404 })
+
+    const body = (await c.request.json()) as { name: string; members: string[] }
+    team.name = body.name
+    const oldMembers = team.members
+    team.members = body.members
+
+    const removedMembers = oldMembers.filter((m) => !body.members.includes(m))
+    for (const member of removedMembers) {
+      const user = users.find((u) => u.id === member)
+      if (user !== undefined) user.teamId = undefined
+    }
+    const addedMembers = body.members.filter((m) => !oldMembers.includes(m))
+    for (const member of addedMembers) {
+      const user = users.find((u) => u.id === member)
+      if (user !== undefined) user.teamId = teamId
+    }
+
     return HttpResponse.json(team)
   }),
   http.get(new RegExp(`${apiBaseUrl}/teams/([^/]+)/instances`), (c) => {
@@ -235,7 +270,9 @@ export const handlers = [
     const teamId = c.params[0] as string
     const instanceId = c.params[1] as string
     const index = instances.findIndex((i) => i.teamId === teamId && i.id === instanceId)
-    const body = (await c.request.json()) as { operation: 'start' | 'stop' }
+    type Body =
+      paths['/teams/{teamId}/instances/{instanceId}']['patch']['requestBody']['content']['application/json']
+    const body = (await c.request.json()) as Body
     const operation = body.operation as 'start' | 'stop'
     if (operation === 'start') {
       if (instances[index].status === 'stopped') {
