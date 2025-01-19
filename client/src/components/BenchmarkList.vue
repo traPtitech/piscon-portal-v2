@@ -1,25 +1,38 @@
 <script setup lang="ts">
-import { useTeamBenches, useTeamInstances } from '@/lib/useServerData'
-import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { formatDate } from '@/lib/formatDate'
 import { Icon } from '@iconify/vue'
-import ErrorMessage from '@/components/ErrorMessage.vue'
 import BenchmarkStatusChip from '@/components/BenchmarkStatusChip.vue'
 import { formatScore } from '@/lib/formatScore'
 import UserAvatar from '@/components/UserAvatar.vue'
 import { useUsers } from '@/lib/useUsers'
+import type { components } from '@/api/openapi'
+import { computed } from 'vue'
+import { useTeams } from '@/lib/useServerData'
 
-const { teamId } = defineProps<{ teamId: string }>()
+type Bench = components['schemas']['BenchmarkListItem']
+type Instance = components['schemas']['Instance']
+const { benches, instances, isAdmin } = defineProps<{
+  benches: Bench[]
+  instances: Instance[]
+  isAdmin?: boolean
+}>()
 
-const { data: benches, error: benchesError } = useTeamBenches(teamId)
 const sortedBenches = computed(() =>
-  [...(benches.value ?? [])].sort(
+  [...(benches ?? [])].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   ),
 )
-const { data: instances } = useTeamInstances(teamId)
+
 const { getUserById } = useUsers()
+const { data: teams } = useTeams()
+
+const columns = computed(() => (isAdmin ? 7 : 6))
+
+const getTeamName = (teamId: string) => teams.value?.find((t) => t.id === teamId)?.name ?? ''
+const getInstanceServerId = (instanceId: string) =>
+  instances.find((i) => i.id === instanceId)?.serverId ?? '?'
+const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
 </script>
 
 <template>
@@ -31,6 +44,10 @@ const { getUserById } = useUsers()
     <div class="list-label">
       <Icon icon="mdi:calendar-clock" width="24" height="24" />
       <span>日時</span>
+    </div>
+    <div class="list-label" v-if="isAdmin">
+      <Icon icon="mdi:account-group" width="24" height="24" />
+      <span>チーム</span>
     </div>
     <div class="list-label">
       <Icon icon="mdi:server-network" width="24" height="24" />
@@ -53,32 +70,35 @@ const { getUserById } = useUsers()
       <div>
         {{ formatDate(bench.createdAt, 'YYYY/MM/DD hh:mm:ss.SSS') }}
       </div>
-      <div class="bench-server">
-        サーバー{{ instances?.find((i) => i.id === bench.instanceId)?.serverId ?? '?' }}
+      <div v-if="isAdmin" class="bench-team">
+        {{ getTeamName(bench.teamId) }}
       </div>
+      <div class="bench-server">サーバー{{ getInstanceServerId(bench.instanceId) }}</div>
       <div class="bench-user">
-        <UserAvatar :name="getUserById(bench.userId)?.name ?? ''" />
-        <span>@{{ getUserById(bench.userId)?.name }}</span>
+        <UserAvatar :name="getUserName(bench.userId)" />
+        <span>@{{ getUserName(bench.userId) }}</span>
       </div>
       <div>
         <BenchmarkStatusChip :status="bench.status" />
       </div>
       <div>
-        <RouterLink :to="`/benches/${bench.id}`" class="bench-link">
+        <RouterLink
+          :to="isAdmin ? `/admin/benches/${bench.id}` : `/benches/${bench.id}`"
+          class="bench-link"
+        >
           <span>詳細を見る</span>
           <Icon icon="mdi:chevron-right" width="24" height="24" />
         </RouterLink>
       </div>
     </template>
   </div>
-  <ErrorMessage v-if="benchesError" />
 </template>
 
 <style scoped>
 .bench-list {
   width: 100%;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto;
+  grid-template-columns: repeat(v-bind(columns), 1fr);
 }
 
 .bench-skeleton {

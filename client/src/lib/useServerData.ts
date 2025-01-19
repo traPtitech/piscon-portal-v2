@@ -161,3 +161,9 @@ export const useTeams = () =>
     queryKey: ['teams'],
     queryFn: () => api.GET('/teams').then((r) => r.data),
   })
+
+export const useAllBenches = () =>
+  useQuery({
+    queryKey: ['benches'],
+    queryFn: () => api.GET('/benchmarks').then((r) => r.data),
+  })
