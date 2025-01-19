@@ -22,6 +22,8 @@ tasks:
       - server/bobgen.yaml
       - server/ogen.yaml
       - server/schema.sql
+      - runner/benchmarker/**.go
+      - runner/portal/**.go
     generates:
       - server/openapi/*.go
       - server/models/**/*.go
