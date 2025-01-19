@@ -35,6 +35,7 @@ func (t *Team) AddMember(user User) error {
 	if len(t.Members) >= MaxTeamMembers {
 		return errors.New("team is full")
 	}
+	user.TeamID = uuid.NullUUID{UUID: t.ID, Valid: true}
 	t.Members = append(t.Members, user)
 	return nil
 }
