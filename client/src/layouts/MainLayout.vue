@@ -15,8 +15,8 @@ const links = [
 ]
 
 const adminLinks = [
-  { icon: 'mdi:database-cog', name: 'インスタンス', path: '/admin/instances' },
   { icon: 'mdi:thunder-circle', name: 'ベンチマーク', path: '/admin/benches' },
+  { icon: 'mdi:database-cog', name: 'インスタンス', path: '/admin/instances' },
   { icon: 'mdi:account-cog', name: 'チーム管理', path: '/admin/teams' },
   { icon: 'mdi:text-box-edit', name: 'ドキュメント', path: '/admin/docs' },
   { icon: 'mdi:account-lock', name: '権限管理', path: '/admin/permissions' },
