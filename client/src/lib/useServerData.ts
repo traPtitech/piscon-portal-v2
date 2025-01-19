@@ -149,3 +149,15 @@ export const useEnqueueBenchmark = (options?: { redirect?: boolean }) => {
     },
   })
 }
+
+export const useAllInstances = () =>
+  useQuery({
+    queryKey: ['instances'],
+    queryFn: () => api.GET('/instances').then((r) => r.data),
+  })
+
+export const useTeams = () =>
+  useQuery({
+    queryKey: ['teams'],
+    queryFn: () => api.GET('/teams').then((r) => r.data),
+  })
