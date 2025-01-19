@@ -2,7 +2,7 @@ import { api } from '@/api'
 import router from '@/router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 
-export const useUsers = () =>
+export const useUsersData = () =>
   useQuery({
     queryKey: ['users'],
     queryFn: () => api.GET('/users').then((r) => r.data),

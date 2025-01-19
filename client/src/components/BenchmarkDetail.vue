@@ -2,9 +2,10 @@
 import BenchmarkStatusChip from '@/components/BenchmarkStatusChip.vue'
 import ErrorMessage from '@/components/ErrorMessage.vue'
 import { formatDate } from '@/lib/formatDate'
-import { useTeamBench, useTeamInstances, useUsers } from '@/lib/useServerData'
+import { useTeamBench, useTeamInstances } from '@/lib/useServerData'
 import { computed, watch } from 'vue'
 import { formatScore } from '@/lib/formatScore'
+import { useUsers } from '@/lib/useUsers'
 
 const { teamId, benchId } = defineProps<{
   teamId: string
@@ -13,10 +14,10 @@ const { teamId, benchId } = defineProps<{
 
 const { data: bench, error: benchError, refetch } = useTeamBench(teamId, benchId)
 const { data: instances } = useTeamInstances(teamId)
-const { data: users } = useUsers()
+const { getUserById } = useUsers()
 
 const instance = computed(() => instances.value?.find((i) => i.id === bench.value?.instanceId))
-const user = computed(() => users.value?.find((u) => u.id === bench.value?.userId))
+const user = computed(() => getUserById(bench.value?.userId))
 
 watch(
   bench,

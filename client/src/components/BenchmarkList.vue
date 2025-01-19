@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useTeamBenches, useTeamInstances, useUsers } from '@/lib/useServerData'
+import { useTeamBenches, useTeamInstances } from '@/lib/useServerData'
 import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { formatDate } from '@/lib/formatDate'
@@ -8,6 +8,7 @@ import ErrorMessage from '@/components/ErrorMessage.vue'
 import BenchmarkStatusChip from '@/components/BenchmarkStatusChip.vue'
 import { formatScore } from '@/lib/formatScore'
 import UserAvatar from '@/components/UserAvatar.vue'
+import { useUsers } from '@/lib/useUsers'
 
 const { teamId } = defineProps<{ teamId: string }>()
 
@@ -18,7 +19,7 @@ const sortedBenches = computed(() =>
   ),
 )
 const { data: instances } = useTeamInstances(teamId)
-const { data: users } = useUsers()
+const { getUserById } = useUsers()
 </script>
 
 <template>
@@ -56,8 +57,8 @@ const { data: users } = useUsers()
         サーバー{{ instances?.find((i) => i.id === bench.instanceId)?.serverId ?? '?' }}
       </div>
       <div class="bench-user">
-        <UserAvatar :name="users?.find((u) => u.id === bench.userId)?.name ?? ''" />
-        <span>@{{ users?.find((u) => u.id === bench.userId)?.name }}</span>
+        <UserAvatar :name="getUserById(bench.userId)?.name ?? ''" />
+        <span>@{{ getUserById(bench.userId)?.name }}</span>
       </div>
       <div>
         <BenchmarkStatusChip :status="bench.status" />

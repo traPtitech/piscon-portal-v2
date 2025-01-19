@@ -1,20 +1,17 @@
 <script setup lang="ts">
 import UserAvatar from '@/components/UserAvatar.vue'
-import { useMe, useTeam, useUpdateTeam, useUsers } from '@/lib/useServerData'
-import { computed } from 'vue'
+import { useMe, useTeam, useUpdateTeam } from '@/lib/useServerData'
 import { Icon } from '@iconify/vue'
 import MainButton from '@/components/MainButton.vue'
 import ActionFormCard from '@/components/ActionFormCard.vue'
+import { useUsers } from '@/lib/useUsers'
 
 const { teamId } = defineProps<{ teamId: string }>()
 
 const { data: me } = useMe()
 const { data: team } = useTeam(teamId)
-const { data: users } = useUsers()
+const { getUserById, getUserByName } = useUsers()
 const { mutate: updateTeam } = useUpdateTeam()
-
-const userMap = computed(() => new Map(users.value?.map((user) => [user.id, user])))
-const getUser = (id: string) => userMap.value.get(id)
 
 const changeTeamName = (name: string) => {
   if (team.value === undefined) return
@@ -38,7 +35,7 @@ const addMember = (memberId: string) => {
 }
 
 const addNewMemberHandler = (newMemberName: string) => {
-  const user = users.value?.find((user) => user.name === newMemberName)
+  const user = getUserByName(newMemberName)
   if (user === undefined) return
   addMember(user.id)
 }
@@ -61,8 +58,8 @@ const addNewMemberHandler = (newMemberName: string) => {
       </div>
       <div class="members-list">
         <div v-for="member in team.members" :key="member" class="member-container">
-          <UserAvatar :name="getUser(member)?.name ?? ''" />
-          <div>{{ getUser(member)?.name }}</div>
+          <UserAvatar :name="getUserById(member)?.name ?? ''" />
+          <div>{{ getUserById(member)?.name }}</div>
           <MainButton
             @click="removeMember(member)"
             :disabled="me?.id === member"
