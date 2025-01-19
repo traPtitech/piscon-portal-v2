@@ -18,9 +18,11 @@ type Runner struct {
 	benchmarker benchmarker.Benchmarker
 }
 
-func Prepare() *Runner {
-
-	return &Runner{}
+func Prepare(portal portal.Portal, benchmarker benchmarker.Benchmarker) *Runner {
+	return &Runner{
+		portal:      portal,
+		benchmarker: benchmarker,
+	}
 }
 
 func (r *Runner) Run() error {
