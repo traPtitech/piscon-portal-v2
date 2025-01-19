@@ -18,10 +18,10 @@ type UserUseCase interface {
 
 type userUseCaseImpl struct {
 	repo        repository.Repository
-	traqService *traq.Service
+	traqService traq.Service
 }
 
-func NewUserUseCase(repo repository.Repository, traqService *traq.Service) *userUseCaseImpl {
+func NewUserUseCase(repo repository.Repository, traqService traq.Service) *userUseCaseImpl {
 	return &userUseCaseImpl{
 		repo:        repo,
 		traqService: traqService,
@@ -64,7 +64,6 @@ func (u *userUseCaseImpl) GetUsers(ctx context.Context) ([]domain.User, error) {
 			})
 		}
 	}
-
 	users = append(users, portalUsers...)
 
 	return users, nil

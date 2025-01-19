@@ -8,6 +8,7 @@ import (
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/google/uuid"
 	"github.com/jellydator/ttlcache/v3"
+	"github.com/traPtitech/piscon-portal-v2/server/services/traq"
 	"golang.org/x/oauth2"
 )
 
@@ -88,12 +89,7 @@ func (s *Service) Exchange(ctx context.Context, sessionID, code string) (*oauth2
 	return s.config.Exchange(ctx, code, oauth2.VerifierOption(codeVerifier.Value()))
 }
 
-type TraQUserInfo struct {
-	ID   uuid.UUID `json:"sub"`
-	Name string    `json:"name"`
-}
-
-func (s *Service) GetUserInfo(ctx context.Context, token *oauth2.Token) (*TraQUserInfo, error) {
+func (s *Service) GetUserInfo(ctx context.Context, token *oauth2.Token) (*traq.User, error) {
 	rawIDToken, ok := token.Extra("id_token").(string)
 	if !ok {
 		return nil, errors.New("missing id_token")
@@ -103,12 +99,22 @@ func (s *Service) GetUserInfo(ctx context.Context, token *oauth2.Token) (*TraQUs
 		return nil, err
 	}
 
+	type Payload struct {
+		Sub  string `json:"sub"`
+		Name string `json:"name"`
+	}
+
 	// traQ returns username in "name" claim
 	// ref: https://github.com/traPtitech/traQ/blob/v3.21.0/service/oidc/userinfo.go#L57
-	var info TraQUserInfo
-	if err := idToken.Claims(&info); err != nil {
+	var payload Payload
+	if err := idToken.Claims(&payload); err != nil {
 		return nil, err
 	}
 
-	return &info, nil
+	id, err := uuid.Parse(payload.Sub)
+	if err != nil {
+		return nil, err
+	}
+
+	return &traq.User{ID: id, Name: payload.Name}, nil
 }

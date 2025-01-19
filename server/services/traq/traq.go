@@ -12,20 +12,25 @@ type User struct {
 	Name string
 }
 
-type Service struct {
+//go:generate go run go.uber.org/mock/mockgen@v0.5.0 -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed=true
+type Service interface {
+	GetUsers(ctx context.Context) ([]User, error)
+}
+
+type ServiceImpl struct {
 	client *traq.APIClient
 	token  string
 }
 
-func NewService(accessToken string) *Service {
+func NewService(accessToken string) Service {
 	client := traq.NewAPIClient(traq.NewConfiguration())
-	return &Service{
+	return &ServiceImpl{
 		client: client,
 		token:  accessToken,
 	}
 }
 
-func (s *Service) GetUsers(ctx context.Context) ([]User, error) {
+func (s *ServiceImpl) GetUsers(ctx context.Context) ([]User, error) {
 	auth := context.WithValue(ctx, traq.ContextAccessToken, s.token)
 	users, _, err := s.client.UserApi.GetUsers(auth).Execute()
 	if err != nil {

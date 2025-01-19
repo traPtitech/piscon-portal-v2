@@ -16,7 +16,7 @@ type useCaseImpl struct {
 	*userUseCaseImpl
 }
 
-func New(repo repository.Repository, traqService *traq.Service) UseCase {
+func New(repo repository.Repository, traqService traq.Service) UseCase {
 	return &useCaseImpl{
 		teamUseCaseImpl: NewTeamUseCase(repo),
 		userUseCaseImpl: NewUserUseCase(repo, traqService),
