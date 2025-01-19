@@ -7,6 +7,7 @@ import { Icon } from '@iconify/vue'
 import ErrorMessage from '@/components/ErrorMessage.vue'
 import BenchmarkStatusChip from '@/components/BenchmarkStatusChip.vue'
 import { formatScore } from '@/lib/formatScore'
+import UserAvatar from '@/components/UserAvatar.vue'
 
 const { teamId } = defineProps<{ teamId: string }>()
 
@@ -55,12 +56,7 @@ const { data: users } = useUsers()
         サーバー{{ instances?.find((i) => i.id === bench.instanceId)?.serverId ?? '?' }}
       </div>
       <div class="bench-user">
-        <img
-          :src="`https://q.trap.jp/api/v3/public/icon/${users?.find((u) => u.id === bench.userId)?.name}`"
-          alt=""
-          width="24"
-          height="24"
-        />
+        <UserAvatar :name="users?.find((u) => u.id === bench.userId)?.name ?? ''" />
         <span>@{{ users?.find((u) => u.id === bench.userId)?.name }}</span>
       </div>
       <div>
