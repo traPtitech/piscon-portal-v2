@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/utils/testutil"
 )
@@ -26,7 +26,7 @@ func TestFindUser(t *testing.T) {
 	mustMakeUser(t, db, user)
 
 	got, err := repo.FindUser(context.Background(), user.ID)
-	require.NoError(t, err)
+	assert.NoError(t, err)
 
 	testutil.CompareUser(t, user, got)
 }
@@ -56,7 +56,7 @@ func TestGetUsers(t *testing.T) {
 	}
 
 	got, err := repo.GetUsers(context.Background())
-	require.NoError(t, err)
+	assert.NoError(t, err)
 
 	testutil.CompareUsers(t, users, got)
 }
