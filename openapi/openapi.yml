@@ -109,8 +109,8 @@ paths:
   /users:
     get:
       tags: ["users"]
-      summary: "部員一覧取得"
-      description: "凍結されていない部員一覧を取得します"
+      summary: "ユーザー一覧取得"
+      description: "ユーザー一覧を取得します"
       operationId: "getUsers"
       security:
         - UserAuth: []
