@@ -10,6 +10,7 @@ import (
 	"github.com/traPtitech/piscon-portal-v2/server/handler"
 	dbrepo "github.com/traPtitech/piscon-portal-v2/server/repository/db"
 	"github.com/traPtitech/piscon-portal-v2/server/services/oauth2"
+	"github.com/traPtitech/piscon-portal-v2/server/services/traq"
 	"github.com/traPtitech/piscon-portal-v2/server/usecase"
 )
 
@@ -43,7 +44,8 @@ func main() {
 		},
 	}
 	repo := dbrepo.NewRepository(db)
-	useCase := usecase.New(repo)
+	traqService := traq.NewService(os.Getenv("TRAQ_ACCESS_TOKEN"))
+	useCase := usecase.New(repo, traqService)
 	handler, err := handler.New(useCase, repo, config)
 	if err != nil {
 		panic(err)

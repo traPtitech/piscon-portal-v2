@@ -351,6 +351,45 @@ func (c *MockRepositoryGetTeamsCall) DoAndReturn(f func(context.Context) ([]doma
 	return c
 }
 
+// GetUsers mocks base method.
+func (m *MockRepository) GetUsers(ctx context.Context) ([]domain.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUsers", ctx)
+	ret0, _ := ret[0].([]domain.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUsers indicates an expected call of GetUsers.
+func (mr *MockRepositoryMockRecorder) GetUsers(ctx any) *MockRepositoryGetUsersCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUsers", reflect.TypeOf((*MockRepository)(nil).GetUsers), ctx)
+	return &MockRepositoryGetUsersCall{Call: call}
+}
+
+// MockRepositoryGetUsersCall wrap *gomock.Call
+type MockRepositoryGetUsersCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockRepositoryGetUsersCall) Return(arg0 []domain.User, arg1 error) *MockRepositoryGetUsersCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockRepositoryGetUsersCall) Do(f func(context.Context) ([]domain.User, error)) *MockRepositoryGetUsersCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockRepositoryGetUsersCall) DoAndReturn(f func(context.Context) ([]domain.User, error)) *MockRepositoryGetUsersCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // Transaction mocks base method.
 func (m *MockRepository) Transaction(ctx context.Context, f func(context.Context, repository.Repository) error) error {
 	m.ctrl.T.Helper()

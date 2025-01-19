@@ -22,6 +22,24 @@ func (r *Repository) CreateUser(ctx context.Context, user domain.User) error {
 	return createUser(ctx, r.executor(ctx), user)
 }
 
+func (r *Repository) GetUsers(ctx context.Context) ([]domain.User, error) {
+	users, err := models.Users.Query().All(ctx, r.executor(ctx))
+	if err != nil {
+		return nil, fmt.Errorf("get users: %w", err)
+	}
+
+	res := make([]domain.User, 0, len(users))
+	for _, user := range users {
+		domainUser, err := toDomainUser(user)
+		if err != nil {
+			return nil, fmt.Errorf("convert user: %w", err)
+		}
+		res = append(res, domainUser)
+	}
+
+	return res, nil
+}
+
 func findUser(ctx context.Context, executor bob.Executor, id string) (domain.User, error) {
 	user, err := models.FindUser(ctx, executor, id)
 	if err != nil {
