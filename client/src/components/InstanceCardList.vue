@@ -50,7 +50,7 @@ setInterval(() => {
       <MainSwitch v-model="showDeleted">削除済みのインスタンスも表示する</MainSwitch>
     </div>
     <div v-if="visibleInstances?.length === 0" class="no-instances">
-      まだインスタンスがありません
+      現在インスタンスはありません
     </div>
     <div class="instance-card-list">
       <div v-for="instance in visibleInstances" :key="instance.id" class="instance-card">
