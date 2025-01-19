@@ -14,12 +14,6 @@ export default [
   },
   {
     files: ['**/*.ts', '**/*.tsx'],
-    plugins: {
-      '@typescript-eslint': import('@typescript-eslint/eslint-plugin'),
-    },
-    languageOptions: {
-      parser: '@typescript-eslint/parser',
-    },
     rules: {
       '@typescript-eslint/no-unused-vars': [
         'error',
