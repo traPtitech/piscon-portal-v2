@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
+	"github.com/traPtitech/piscon-portal-v2/server/handler"
 	"github.com/traPtitech/piscon-portal-v2/server/handler/openapi"
 	repomock "github.com/traPtitech/piscon-portal-v2/server/repository/mock"
 	usecasemock "github.com/traPtitech/piscon-portal-v2/server/usecase/mock"
@@ -37,7 +38,7 @@ func TestGetUserMe(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/users/me", nil)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
-	c.Set("userID", user.ID)
+	c.Set(handler.UserIDKey, user.ID)
 
 	_ = h.GetUserMe(c)
 
