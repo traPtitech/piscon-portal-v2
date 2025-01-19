@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { RouterLink, useRoute } from 'vue-router'
 import { Icon } from '@iconify/vue'
+import { useMe } from '@/lib/useServerData'
 const route = useRoute()
+
+const { data: me } = useMe()
 
 const links = [
   { icon: 'mdi:crown', name: '順位表', path: '/' },
@@ -10,6 +13,17 @@ const links = [
   { icon: 'mdi:account-group', name: 'チーム管理', path: '/team' },
   { icon: 'mdi:drive-document', name: 'ドキュメント', path: '/docs' },
 ]
+
+const adminLinks = [
+  { icon: 'mdi:database-cog', name: 'インスタンス', path: '/admin/instances' },
+  { icon: 'mdi:thunder-circle', name: 'ベンチマーク', path: '/admin/benches' },
+  { icon: 'mdi:account-cog', name: 'チーム管理', path: '/admin/teams' },
+  { icon: 'mdi:text-box-edit', name: 'ドキュメント', path: '/admin/docs' },
+  { icon: 'mdi:account-lock', name: '権限管理', path: '/admin/permissions' },
+]
+
+const isActive = (link: string) =>
+  link !== '/' ? route.path.startsWith(link) : route.path === link
 </script>
 
 <template>
@@ -20,7 +34,7 @@ const links = [
         <RouterLink
           v-for="link in links"
           class="nav-link"
-          :class="{ active: link.path === route.path }"
+          :class="{ active: isActive(link.path) }"
           :key="link.path"
           :to="link.path"
         >
@@ -29,6 +43,21 @@ const links = [
             {{ link.name }}
           </span>
         </RouterLink>
+        <div class="for-admins-label">管理者向け</div>
+        <template v-if="me?.isAdmin">
+          <RouterLink
+            v-for="link in adminLinks"
+            class="nav-link"
+            :class="{ active: isActive(link.path) }"
+            :key="link.path"
+            :to="link.path"
+          >
+            <Icon :icon="link.icon" width="24" height="24" />
+            <span>
+              {{ link.name }}
+            </span>
+          </RouterLink>
+        </template>
       </div>
     </nav>
     <div class="main-content">
@@ -89,5 +118,26 @@ const links = [
 .main-content {
   overflow-y: auto;
   min-width: 0;
+}
+
+.for-admins-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ct-slate-500);
+  margin-top: 2rem;
+  display: flex;
+  align-items: center;
+}
+.for-admins-label::before,
+.for-admins-label::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--ct-slate-500);
+}
+.for-admins-label::before {
+  margin-right: 0.5rem;
+}
+.for-admins-label::after {
+  margin-left: 0.5rem;
 }
 </style>
