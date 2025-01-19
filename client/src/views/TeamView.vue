@@ -1,11 +1,8 @@
 <script setup lang="ts">
-import MainButton from '@/components/MainButton.vue'
 import PageTitle from '@/components/PageTitle.vue'
 import TeamManagement from '@/components/TeamManagement.vue'
 import { useCreateTeam, useMe } from '@/lib/useServerData'
 import { useQueryClient } from '@tanstack/vue-query'
-import { ref } from 'vue'
-import { Icon } from '@iconify/vue'
 import notfoundImage from '@/assets/not-found.png'
 import ActionFormCard from '@/components/ActionFormCard.vue'
 
@@ -13,7 +10,6 @@ const client = useQueryClient()
 const { data: me } = useMe()
 const { mutate: createTeam } = useCreateTeam(client)
 
-const teamName = ref('')
 const createTeamHandler = (teamName: string) => {
   if (me.value === undefined) return
   createTeam({ name: teamName, members: [me.value.id] })
