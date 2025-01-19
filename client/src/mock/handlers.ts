@@ -99,87 +99,86 @@ const instances: paths['/teams/{teamId}/instances']['get']['responses']['200']['
     },
   ]
 
-const benchmarks: paths['/benchmarks/{benchmarkId}']['get']['responses']['200']['content']['application/json'][] =
-  [
-    {
-      id: '01943f67-d9ed-7bbb-81eb-20f81391ffea',
-      instanceId: instanceIds['ikura-cp-1'],
-      teamId: teamIds['ikura-cp'],
-      userId: userIds.cp20,
-      status: 'finished',
-      createdAt: '2025-01-01T01:00:00Z',
-      startedAt: '2025-01-01T01:00:01Z',
-      finishedAt: '2025-01-01T01:01:00Z',
-      score: 2000,
-      log: '',
-      adminLog: '',
-      result: 'passed',
-    },
-    {
-      id: '01943f68-7d22-7abb-8b13-0b727cd4597e',
-      instanceId: instanceIds['ikura-cp-1'],
-      teamId: teamIds['ikura-cp'],
-      userId: userIds.cp20,
-      status: 'running',
-      createdAt: '2025-01-01T02:00:00Z',
-      startedAt: '2025-01-01T02:00:01Z',
-      score: 0,
-      log: '',
-      adminLog: '',
-    },
-    {
-      id: '01943f69-3aec-7702-8d1e-8642d9c5b47b',
-      instanceId: instanceIds['ikura-cp-1'],
-      teamId: teamIds['ikura-cp'],
-      userId: userIds.cp20,
-      status: 'waiting',
-      createdAt: '2025-01-01T03:00:00Z',
-      log: '',
-      adminLog: '',
-    },
-    {
-      id: '01943f6b-7276-79a9-9bd3-69d1d5a9cb3d',
-      instanceId: instanceIds['piropiro-1'],
-      teamId: teamIds['piropiro'],
-      userId: userIds.pirosiki,
-      status: 'finished',
-      createdAt: '2025-01-02T01:00:00Z',
-      startedAt: '2025-01-02T01:00:01Z',
-      finishedAt: '2025-01-02T01:01:00Z',
-      score: 100,
-      log: '',
-      adminLog: '',
-      result: 'passed',
-    },
-    {
-      id: '01943f6e-69dd-7167-84b3-478cf9c3253d',
-      instanceId: instanceIds['piropiro-1'],
-      teamId: teamIds['piropiro'],
-      userId: userIds.pirosiki,
-      status: 'finished',
-      createdAt: '2025-01-02T02:00:00Z',
-      startedAt: '2025-01-02T02:00:01Z',
-      finishedAt: '2025-01-02T02:01:00Z',
-      score: 1000,
-      log: '',
-      adminLog: '',
-      result: 'passed',
-    },
-    {
-      id: '01943f6e-8b29-79af-8430-7b06ae9307e5',
-      instanceId: instanceIds['piropiro-1'],
-      teamId: teamIds['piropiro'],
-      userId: userIds.pirosiki,
-      status: 'finished',
-      createdAt: '2025-01-02T03:00:00Z',
-      startedAt: '2025-01-02T03:00:01Z',
-      finishedAt: '2025-01-02T03:01:00Z',
-      score: 1000,
-      log: '',
-      adminLog: '',
-      result: 'passed',
-    },
-  ]
+const benchmarks: components['schemas']['BenchmarkAdminResult'][] = [
+  {
+    id: '01943f67-d9ed-7bbb-81eb-20f81391ffea',
+    instanceId: instanceIds['ikura-cp-1'],
+    teamId: teamIds['ikura-cp'],
+    userId: userIds.cp20,
+    status: 'finished',
+    createdAt: '2025-01-01T01:00:00Z',
+    startedAt: '2025-01-01T01:00:01Z',
+    finishedAt: '2025-01-01T01:01:00Z',
+    score: 2000,
+    log: '',
+    adminLog: '',
+    result: 'passed',
+  },
+  {
+    id: '01943f68-7d22-7abb-8b13-0b727cd4597e',
+    instanceId: instanceIds['ikura-cp-1'],
+    teamId: teamIds['ikura-cp'],
+    userId: userIds.cp20,
+    status: 'running',
+    createdAt: '2025-01-01T02:00:00Z',
+    startedAt: '2025-01-01T02:00:01Z',
+    score: 0,
+    log: '',
+    adminLog: '',
+  },
+  {
+    id: '01943f69-3aec-7702-8d1e-8642d9c5b47b',
+    instanceId: instanceIds['ikura-cp-1'],
+    teamId: teamIds['ikura-cp'],
+    userId: userIds.cp20,
+    status: 'waiting',
+    createdAt: '2025-01-01T03:00:00Z',
+    log: '',
+    adminLog: '',
+  },
+  {
+    id: '01943f6b-7276-79a9-9bd3-69d1d5a9cb3d',
+    instanceId: instanceIds['piropiro-1'],
+    teamId: teamIds['piropiro'],
+    userId: userIds.pirosiki,
+    status: 'finished',
+    createdAt: '2025-01-02T01:00:00Z',
+    startedAt: '2025-01-02T01:00:01Z',
+    finishedAt: '2025-01-02T01:01:00Z',
+    score: 100,
+    log: '',
+    adminLog: '',
+    result: 'passed',
+  },
+  {
+    id: '01943f6e-69dd-7167-84b3-478cf9c3253d',
+    instanceId: instanceIds['piropiro-1'],
+    teamId: teamIds['piropiro'],
+    userId: userIds.pirosiki,
+    status: 'finished',
+    createdAt: '2025-01-02T02:00:00Z',
+    startedAt: '2025-01-02T02:00:01Z',
+    finishedAt: '2025-01-02T02:01:00Z',
+    score: 1000,
+    log: '',
+    adminLog: '',
+    result: 'passed',
+  },
+  {
+    id: '01943f6e-8b29-79af-8430-7b06ae9307e5',
+    instanceId: instanceIds['piropiro-1'],
+    teamId: teamIds['piropiro'],
+    userId: userIds.pirosiki,
+    status: 'finished',
+    createdAt: '2025-01-02T03:00:00Z',
+    startedAt: '2025-01-02T03:00:01Z',
+    finishedAt: '2025-01-02T03:01:00Z',
+    score: 1000,
+    log: '',
+    adminLog: '',
+    result: 'passed',
+  },
+]
 
 export const handlers = [
   http.get(`${apiBaseUrl}/oauth2/code`, () => {
@@ -211,18 +210,71 @@ export const handlers = [
     const res = instances.filter((i) => i.teamId === teamId)
     return HttpResponse.json(res)
   }),
-  http.post(new RegExp(`${apiBaseUrl}/teams/([^/]+)/instances`), () => {
-    // TODO
+  http.post(new RegExp(`${apiBaseUrl}/teams/([^/]+)/instances`), (c) => {
+    const teamId = c.params[0] as string
+    const newServerId = instances.reduce((max, i) => Math.max(max, i.serverId), 0) + 1
+    const newInstance: components['schemas']['Instance'] = {
+      id: uuidv7(),
+      teamId,
+      serverId: newServerId,
+      privateIPAddress: `192.168.0.${newServerId}`,
+      publicIPAddress: `203.0.113.${newServerId}`,
+      status: 'building',
+      createdAt: new Date().toISOString(),
+    }
+    instances.push(newInstance)
   }),
-  http.delete(new RegExp(`${apiBaseUrl}/teams/([^/]+)/instances/([^/]+)`), () => {
-    // TODO
+  http.delete(new RegExp(`${apiBaseUrl}/teams/([^/]+)/instances/([^/]+)`), (c) => {
+    const teamId = c.params[0] as string
+    const instanceId = c.params[1] as string
+    const index = instances.findIndex((i) => i.teamId === teamId && i.id === instanceId)
+    instances[index] = { ...instances[index], status: 'deleting' }
   }),
-  http.patch(new RegExp(`${apiBaseUrl}/teams/([^/]+)/instances/([^/]+)`), () => {
-    // TODO
+  http.patch(new RegExp(`${apiBaseUrl}/teams/([^/]+)/instances/([^/]+)`), async (c) => {
+    const teamId = c.params[0] as string
+    const instanceId = c.params[1] as string
+    const index = instances.findIndex((i) => i.teamId === teamId && i.id === instanceId)
+    const body = (await c.request.json()) as { operation: 'start' | 'stop' }
+    const operation = body.operation as 'start' | 'stop'
+    if (operation === 'start') {
+      if (instances[index].status === 'stopped') {
+        instances[index] = { ...instances[index], status: 'starting' }
+        return HttpResponse.json({}, { status: 200 })
+      }
+    }
+    if (operation === 'stop') {
+      if (instances[index].status === 'running') {
+        instances[index] = { ...instances[index], status: 'stopping' }
+        return HttpResponse.json({}, { status: 200 })
+      }
+    }
+    return HttpResponse.json({ message: 'Bad request' }, { status: 400 })
   }),
   http.get(`${apiBaseUrl}/instances`, () => HttpResponse.json(instances)),
-  http.post(`${apiBaseUrl}/benchmarks`, () => {
-    // TODO
+  http.post(`${apiBaseUrl}/benchmarks`, async (c) => {
+    type Body = NonNullable<
+      paths['/benchmarks']['post']['requestBody']
+    >['content']['application/json']
+    const body = (await c.request.json()) as Body
+
+    const instance = instances.find((i) => i.id === body.instanceId)
+    if (instance === undefined) return HttpResponse.json({ message: 'Not found' }, { status: 404 })
+
+    const me = users[0]
+
+    const benchmark: components['schemas']['BenchmarkAdminResult'] = {
+      id: uuidv7(),
+      instanceId: instance.id,
+      teamId: instance.teamId,
+      userId: me.id,
+      status: 'waiting',
+      createdAt: new Date().toISOString(),
+      log: '',
+      adminLog: '',
+    }
+
+    benchmarks.push(benchmark)
+    return HttpResponse.json(benchmark, { status: 201 })
   }),
   http.get(`${apiBaseUrl}/benchmarks`, () => HttpResponse.json(benchmarks)),
   http.get(`${apiBaseUrl}/benchmarks/queue`, () => {
@@ -383,3 +435,31 @@ setInterval(() => {
     })
   }
 }, 100)
+
+// チームのインスタンスの状態を定期的に更新する
+setInterval(() => {
+  const buildingInstances = instances.filter((i) => i.status === 'building')
+  const startingInstances = instances.filter((i) => i.status === 'starting')
+  const stoppingInstances = instances.filter((i) => i.status === 'stopping')
+  const deletingInstances = instances.filter((i) => i.status === 'deleting')
+
+  // building -> running
+  for (const i of buildingInstances) {
+    if (Math.random() < 0.2) i.status = 'running'
+  }
+
+  // starting -> running
+  for (const i of startingInstances) {
+    if (Math.random() < 0.3) i.status = 'running'
+  }
+
+  // stopping -> stopped
+  for (const i of stoppingInstances) {
+    if (Math.random() < 0.3) i.status = 'stopped'
+  }
+
+  // deleting -> deleted
+  for (const i of deletingInstances) {
+    if (Math.random() < 0.3) i.status = 'deleted'
+  }
+}, 500)

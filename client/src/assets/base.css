@@ -49,6 +49,9 @@
   --ct-red-950-rgb: 69, 10, 10;
 
   --color-primary: #005bac;
+  --color-primary-rgb: 0, 91, 172;
+  --color-primary-hover: #004a9a;
+  --color-primary-hover-rgb: 0, 74, 154;
   --color-primary-background: var(--ct-slate-200);
 }
 

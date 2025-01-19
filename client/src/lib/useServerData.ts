@@ -1,5 +1,6 @@
 import { api } from '@/api'
-import { useQuery } from '@tanstack/vue-query'
+import router from '@/router'
+import { useQuery, useMutation, QueryClient } from '@tanstack/vue-query'
 
 export const useUsers = () =>
   useQuery({
@@ -42,4 +43,69 @@ export const useTeam = (teamId: string) =>
   useQuery({
     queryKey: ['team', teamId],
     queryFn: () => api.GET('/teams/{teamId}', { params: { path: { teamId } } }).then((r) => r.data),
+  })
+
+export const useCreateTeamInstance = (client: QueryClient) =>
+  useMutation({
+    mutationFn: (params: { teamId: string }) =>
+      api.POST('/teams/{teamId}/instances', {
+        params: { path: params },
+      }),
+    onSuccess: (_, params) => {
+      client.invalidateQueries({ queryKey: ['team-instances', params.teamId] })
+      client.invalidateQueries({ queryKey: ['instances'] })
+    },
+  })
+
+export const useStartTeamInstance = (client: QueryClient) =>
+  useMutation({
+    mutationFn: (params: { teamId: string; instanceId: string }) =>
+      api.PATCH('/teams/{teamId}/instances/{instanceId}', {
+        params: { path: params },
+        body: { operation: 'start' },
+      }),
+    onSuccess: (_, params) => {
+      client.invalidateQueries({ queryKey: ['team-instances', params.teamId] })
+      client.invalidateQueries({ queryKey: ['instances'] })
+    },
+  })
+
+export const useStopTeamInstance = (client: QueryClient) =>
+  useMutation({
+    mutationFn: (params: { teamId: string; instanceId: string }) =>
+      api.PATCH('/teams/{teamId}/instances/{instanceId}', {
+        params: { path: params },
+        body: { operation: 'stop' },
+      }),
+    onSuccess: (_, params) => {
+      client.invalidateQueries({ queryKey: ['team-instances', params.teamId] })
+      client.invalidateQueries({ queryKey: ['instances'] })
+    },
+  })
+
+export const useDeleteTeamInstance = (client: QueryClient) =>
+  useMutation({
+    mutationFn: (params: { teamId: string; instanceId: string }) =>
+      api.DELETE('/teams/{teamId}/instances/{instanceId}', {
+        params: { path: params },
+      }),
+    onSuccess: (_, params) => {
+      client.invalidateQueries({ queryKey: ['team-instances', params.teamId] })
+      client.invalidateQueries({ queryKey: ['instances'] })
+    },
+  })
+
+export const useEnqueueBenchmark = (client: QueryClient, options?: { redirect?: boolean }) =>
+  useMutation({
+    mutationFn: (params: { teamId: string; instanceId: string }) =>
+      api.POST('/benchmarks', {
+        body: { instanceId: params.instanceId },
+      }),
+    onSuccess: (res, params) => {
+      client.invalidateQueries({ queryKey: ['team-benches', params.teamId] })
+      client.invalidateQueries({ queryKey: ['benches'] })
+      if (options?.redirect && res.data !== undefined) {
+        router.push(`/benches/${res.data.id}`)
+      }
+    },
   })
