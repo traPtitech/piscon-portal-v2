@@ -12,20 +12,18 @@ import {
   useTeamInstances,
 } from '@/lib/useServerData'
 import { Icon } from '@iconify/vue'
-import { useQueryClient } from '@tanstack/vue-query'
 import { ref, computed } from 'vue'
 
 const { teamId } = defineProps<{ teamId: string }>()
 
 const showDeleted = ref(false)
 
-const client = useQueryClient()
 const { data: instances, refetch } = useTeamInstances(teamId)
-const { mutate: createInstance } = useCreateTeamInstance(client)
-const { mutate: startInstance } = useStartTeamInstance(client)
-const { mutate: stopInstance } = useStopTeamInstance(client)
-const { mutate: deleteInstance } = useDeleteTeamInstance(client)
-const { mutate: enqueueBenchmark } = useEnqueueBenchmark(client, { redirect: true })
+const { mutate: createInstance } = useCreateTeamInstance()
+const { mutate: startInstance } = useStartTeamInstance()
+const { mutate: stopInstance } = useStopTeamInstance()
+const { mutate: deleteInstance } = useDeleteTeamInstance()
+const { mutate: enqueueBenchmark } = useEnqueueBenchmark({ redirect: true })
 
 const visibleInstances = computed(() =>
   instances.value?.filter((i) => showDeleted.value || i.status !== 'deleted'),

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import UserAvatar from '@/components/UserAvatar.vue'
 import { useMe, useTeam, useUpdateTeam, useUsers } from '@/lib/useServerData'
-import { useQueryClient } from '@tanstack/vue-query'
 import { computed } from 'vue'
 import { Icon } from '@iconify/vue'
 import MainButton from '@/components/MainButton.vue'
@@ -9,11 +8,10 @@ import ActionFormCard from '@/components/ActionFormCard.vue'
 
 const { teamId } = defineProps<{ teamId: string }>()
 
-const client = useQueryClient()
 const { data: me } = useMe()
 const { data: team } = useTeam(teamId)
 const { data: users } = useUsers()
-const { mutate: updateTeam } = useUpdateTeam(client)
+const { mutate: updateTeam } = useUpdateTeam()
 
 const userMap = computed(() => new Map(users.value?.map((user) => [user.id, user])))
 const getUser = (id: string) => userMap.value.get(id)

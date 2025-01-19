@@ -1,6 +1,6 @@
 import { api } from '@/api'
 import router from '@/router'
-import { useQuery, useMutation, QueryClient } from '@tanstack/vue-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 
 export const useUsers = () =>
   useQuery({
@@ -45,8 +45,9 @@ export const useTeam = (teamId: string) =>
     queryFn: () => api.GET('/teams/{teamId}', { params: { path: { teamId } } }).then((r) => r.data),
   })
 
-export const useCreateTeamInstance = (client: QueryClient) =>
-  useMutation({
+export const useCreateTeamInstance = () => {
+  const client = useQueryClient()
+  return useMutation({
     mutationFn: (params: { teamId: string }) =>
       api.POST('/teams/{teamId}/instances', {
         params: { path: params },
@@ -56,9 +57,11 @@ export const useCreateTeamInstance = (client: QueryClient) =>
       client.invalidateQueries({ queryKey: ['instances'] })
     },
   })
+}
 
-export const useStartTeamInstance = (client: QueryClient) =>
-  useMutation({
+export const useStartTeamInstance = () => {
+  const client = useQueryClient()
+  return useMutation({
     mutationFn: (params: { teamId: string; instanceId: string }) =>
       api.PATCH('/teams/{teamId}/instances/{instanceId}', {
         params: { path: params },
@@ -69,9 +72,11 @@ export const useStartTeamInstance = (client: QueryClient) =>
       client.invalidateQueries({ queryKey: ['instances'] })
     },
   })
+}
 
-export const useStopTeamInstance = (client: QueryClient) =>
-  useMutation({
+export const useStopTeamInstance = () => {
+  const client = useQueryClient()
+  return useMutation({
     mutationFn: (params: { teamId: string; instanceId: string }) =>
       api.PATCH('/teams/{teamId}/instances/{instanceId}', {
         params: { path: params },
@@ -82,9 +87,11 @@ export const useStopTeamInstance = (client: QueryClient) =>
       client.invalidateQueries({ queryKey: ['instances'] })
     },
   })
+}
 
-export const useDeleteTeamInstance = (client: QueryClient) =>
-  useMutation({
+export const useDeleteTeamInstance = () => {
+  const client = useQueryClient()
+  return useMutation({
     mutationFn: (params: { teamId: string; instanceId: string }) =>
       api.DELETE('/teams/{teamId}/instances/{instanceId}', {
         params: { path: params },
@@ -94,9 +101,11 @@ export const useDeleteTeamInstance = (client: QueryClient) =>
       client.invalidateQueries({ queryKey: ['instances'] })
     },
   })
+}
 
-export const useCreateTeam = (client: QueryClient) =>
-  useMutation({
+export const useCreateTeam = () => {
+  const client = useQueryClient()
+  return useMutation({
     mutationFn: (params: { name: string; members: string[] }) =>
       api.POST('/teams', {
         body: params,
@@ -106,9 +115,11 @@ export const useCreateTeam = (client: QueryClient) =>
       client.invalidateQueries({ queryKey: ['me'] })
     },
   })
+}
 
-export const useUpdateTeam = (client: QueryClient) =>
-  useMutation({
+export const useUpdateTeam = () => {
+  const client = useQueryClient()
+  return useMutation({
     mutationFn: (params: { teamId: string; name: string; members: string[] }) =>
       api.PATCH('/teams/{teamId}', {
         params: { path: { teamId: params.teamId } },
@@ -120,9 +131,11 @@ export const useUpdateTeam = (client: QueryClient) =>
       client.invalidateQueries({ queryKey: ['me'] })
     },
   })
+}
 
-export const useEnqueueBenchmark = (client: QueryClient, options?: { redirect?: boolean }) =>
-  useMutation({
+export const useEnqueueBenchmark = (options?: { redirect?: boolean }) => {
+  const client = useQueryClient()
+  return useMutation({
     mutationFn: (params: { teamId: string; instanceId: string }) =>
       api.POST('/benchmarks', {
         body: { instanceId: params.instanceId },
@@ -135,3 +148,4 @@ export const useEnqueueBenchmark = (client: QueryClient, options?: { redirect?: 
       }
     },
   })
+}
