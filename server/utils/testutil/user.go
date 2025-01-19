@@ -27,8 +27,8 @@ func CompareUsers(t *testing.T, want, got []domain.User) {
 func CompareUser(t *testing.T, want, got domain.User) {
 	t.Helper()
 
-	assert.Equal(t, want.ID, got.ID)
-	assert.Equal(t, want.Name, got.Name)
-	assert.Equal(t, want.TeamID, got.TeamID)
-	assert.Equal(t, want.IsAdmin, got.IsAdmin)
+	assert.Equal(t, want.ID, got.ID, "user.ID mismatch")
+	assert.Equal(t, want.Name, got.Name, "user.Name mismatch")
+	assert.Equal(t, want.TeamID, got.TeamID, "user.TeamID mismatch")
+	assert.Equal(t, want.IsAdmin, got.IsAdmin, "user.IsAdmin mismatch")
 }

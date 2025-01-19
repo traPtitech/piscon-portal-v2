@@ -28,8 +28,8 @@ func CompareTeams(t *testing.T, want, got []domain.Team) {
 func CompareTeam(t *testing.T, want, got domain.Team) {
 	t.Helper()
 
-	assert.Equal(t, want.ID, got.ID)
-	assert.Equal(t, want.Name, got.Name)
-	assert.WithinDuration(t, want.CreatedAt, got.CreatedAt, time.Second)
+	assert.Equal(t, want.ID, got.ID, "team.ID mismatch")
+	assert.Equal(t, want.Name, got.Name, "team.Name mismatch")
+	assert.WithinDuration(t, want.CreatedAt, got.CreatedAt, time.Second, "team.CreatedAt mismatch")
 	CompareUsers(t, want.Members, got.Members)
 }
