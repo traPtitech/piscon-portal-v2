@@ -59,6 +59,10 @@ func (h *Handler) SetupRoutes(e *echo.Echo) {
 	api.GET("/oauth2/callback", h.Oauth2Callback)
 	api.POST("/oauth2/logout", h.Logout, h.AuthMiddleware())
 
+	users := api.Group("/users", h.AuthMiddleware())
+	users.GET("", h.GetUsers)
+	users.GET("/me", h.GetUserMe)
+
 	teams := api.Group("/teams", h.AuthMiddleware())
 	teams.GET("", h.GetTeams)
 	teams.POST("", h.CreateTeam)

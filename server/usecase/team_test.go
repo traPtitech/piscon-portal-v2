@@ -18,7 +18,7 @@ func TestCreateTeam(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mock.NewMockRepository(ctrl)
-	useCase := usecase.New(mockRepo)
+	useCase := usecase.NewTeamUseCase(mockRepo)
 
 	userID := uuid.New()
 
@@ -109,7 +109,7 @@ func TestUpdateTeam(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	mockRepo := mock.NewMockRepository(ctrl)
-	useCase := usecase.New(mockRepo)
+	useCase := usecase.NewTeamUseCase(mockRepo)
 
 	userID := uuid.New()
 

@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
+	"github.com/traPtitech/piscon-portal-v2/server/handler"
 	sessmock "github.com/traPtitech/piscon-portal-v2/server/handler/internal/mock"
 	repomock "github.com/traPtitech/piscon-portal-v2/server/repository/mock"
 	usecasemock "github.com/traPtitech/piscon-portal-v2/server/usecase/mock"
@@ -91,12 +92,12 @@ func TestTeamAuthMiddleware(t *testing.T) {
 	repoMock := repomock.NewMockRepository(ctrl)
 	sessMock := sessmock.NewMockSessionManager(ctrl)
 	usecaseMock := usecasemock.NewMockUseCase(ctrl)
-	handler := NewHandler(usecaseMock, repoMock, sessMock)
+	h := NewHandler(usecaseMock, repoMock, sessMock)
 
 	userID := uuid.New()
 	teamID := uuid.New()
 
-	needAuthorize := handler.TeamAuthMiddleware()(func(c echo.Context) error {
+	needAuthorize := h.TeamAuthMiddleware()(func(c echo.Context) error {
 		return c.NoContent(http.StatusOK)
 	})
 
@@ -137,7 +138,7 @@ func TestTeamAuthMiddleware(t *testing.T) {
 			c := echo.New().NewContext(req, rec)
 			c.SetParamNames("teamID")
 			c.SetParamValues(teamID.String())
-			c.Set("userID", userID)
+			c.Set(handler.UserIDKey, userID)
 
 			tt.setup()
 

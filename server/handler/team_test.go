@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
+	"github.com/traPtitech/piscon-portal-v2/server/handler"
 	"github.com/traPtitech/piscon-portal-v2/server/handler/openapi"
 	repomock "github.com/traPtitech/piscon-portal-v2/server/repository/mock"
 	"github.com/traPtitech/piscon-portal-v2/server/usecase"
@@ -96,7 +97,7 @@ func TestCreateTeam(t *testing.T) {
 	httpReq := newJSONRequest(http.MethodPost, "/teams", req)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(httpReq, rec)
-	c.Set("userID", userID)
+	c.Set(handler.UserIDKey, userID)
 	h := NewHandler(useCaseMock, repoMock, nil)
 
 	teamID := uuid.New()
@@ -136,7 +137,7 @@ func TestCreateTeam_Error(t *testing.T) {
 	httpReq := newJSONRequest(http.MethodPost, "/teams", req)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(httpReq, rec)
-	c.Set("userID", userID)
+	c.Set(handler.UserIDKey, userID)
 	h := NewHandler(useCaseMock, repoMock, nil)
 
 	useCaseMock.EXPECT().CreateTeam(gomock.Any(), usecase.CreateTeamInput{
