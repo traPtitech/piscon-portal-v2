@@ -1,55 +1,46 @@
 <script setup lang="ts">
 import BenchmarkStatusChip from '@/components/BenchmarkStatusChip.vue'
-import ErrorMessage from '@/components/ErrorMessage.vue'
 import { formatDate } from '@/lib/formatDate'
-import { useTeamBench, useTeamInstances } from '@/lib/useServerData'
-import { computed, watch } from 'vue'
+import { useTeam } from '@/lib/useServerData'
+import { computed } from 'vue'
 import { formatScore } from '@/lib/formatScore'
 import { useUsers } from '@/lib/useUsers'
+import type { components } from '@/api/openapi'
 
-const { teamId, benchId } = defineProps<{
-  teamId: string
-  benchId: string
-}>()
+type Bench =
+  | (components['schemas']['Benchmark'] & { adminLog?: string })
+  | components['schemas']['BenchmarkAdminResult']
+type Instance = components['schemas']['Instance']
+const { bench, instances } = defineProps<{ bench: Bench; instances: Instance[] }>()
 
-const { data: bench, error: benchError, refetch } = useTeamBench(teamId, benchId)
-const { data: instances } = useTeamInstances(teamId)
+const { data: team } = useTeam(bench.teamId)
 const { getUserById } = useUsers()
 
-const instance = computed(() => instances.value?.find((i) => i.id === bench.value?.instanceId))
-const user = computed(() => getUserById(bench.value?.userId))
-
-watch(
-  bench,
-  () => {
-    if (bench.value?.status === 'running' || bench.value?.status === 'waiting') {
-      const interval = setInterval(() => {
-        refetch()
-      }, 1000)
-      return () => clearInterval(interval)
-    }
-  },
-  { immediate: true },
-)
+const instance = computed(() => instances?.find((i) => i.id === bench?.instanceId))
+const user = computed(() => getUserById(bench?.userId))
 </script>
 
 <template>
-  <ErrorMessage v-if="benchError"></ErrorMessage>
   <div v-if="bench" class="bench-detail-container">
     <div class="bench-score-container">
-      <div class="bench-score-label">スコア</div>
-      <div
-        v-if="bench.status === 'running' || bench.status === 'finished'"
-        class="bench-score-content"
-      >
-        {{ formatScore(bench.score) }}
+      <div class="bench-score-element">
+        <div class="bench-score-label">スコア</div>
+        <div
+          v-if="bench.status === 'running' || bench.status === 'finished'"
+          class="bench-score-content"
+        >
+          {{ formatScore(bench.score) }}
+        </div>
+        <div v-else class="bench-score-content-dimmed">未計測</div>
       </div>
-      <div v-else class="bench-score-content-dimmed">未計測</div>
+      <div class="bench-status">
+        <BenchmarkStatusChip :status="bench.status" />
+      </div>
     </div>
     <div class="bench-detail-element-container">
       <div class="bench-detail-element">
-        <div class="bench-detail-label">ステータス</div>
-        <BenchmarkStatusChip :status="bench.status" />
+        <div class="bench-detail-label">チーム</div>
+        <div class="bench-detail-content">{{ team?.name }}</div>
       </div>
       <div class="bench-detail-element">
         <div class="bench-detail-label">実行ユーザー</div>
@@ -84,7 +75,12 @@ watch(
       </div>
     </div>
     <div class="bench-log-container">
+      <div class="bench-log-label">ベンチマーカーログ</div>
       <pre><code>{{ bench.log }}</code></pre>
+    </div>
+    <div class="bench-log-container error" v-if="bench.adminLog !== undefined">
+      <div class="bench-log-label">ベンチマーカーエラーログ</div>
+      <pre><code>{{ bench.adminLog }}</code></pre>
     </div>
   </div>
 </template>
@@ -97,11 +93,21 @@ watch(
 }
 
 .bench-score-container {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem;
   border: 1px solid var(--ct-slate-300);
   border-radius: 2px;
   padding: 0.5rem;
+}
+.bench-score-element {
+  display: flex;
+  flex-direction: column;
+}
+.bench-status {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 .bench-score-label {
   font-weight: 700;
@@ -147,5 +153,17 @@ watch(
   font-size: 0.8rem;
   padding: 1rem;
   overflow-x: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bench-log-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.bench-log-container.error {
+  color: var(--ct-red-300);
 }
 </style>

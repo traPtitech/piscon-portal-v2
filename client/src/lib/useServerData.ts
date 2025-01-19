@@ -167,3 +167,12 @@ export const useAllBenches = () =>
     queryKey: ['benches'],
     queryFn: () => api.GET('/benchmarks').then((r) => r.data),
   })
+
+export const useBench = (benchmarkId: string) =>
+  useQuery({
+    queryKey: ['bench', benchmarkId],
+    queryFn: () =>
+      api
+        .GET('/benchmarks/{benchmarkId}', { params: { path: { benchmarkId } } })
+        .then((r) => r.data),
+  })

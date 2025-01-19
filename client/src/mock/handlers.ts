@@ -332,10 +332,14 @@ export const handlers = [
     const benchmarkId = c.params[1] as string
     const benchmark = benchmarks.find((b) => b.teamId === teamId && b.id === benchmarkId)
     if (benchmark === undefined) return HttpResponse.json({ message: 'Not found' }, { status: 404 })
-    return HttpResponse.json(benchmark)
+    const { adminLog: _, ...res } = benchmark
+    return HttpResponse.json(res)
   }),
-  http.patch(new RegExp(`${apiBaseUrl}/benchmarks/([^/]+)`), () => {
-    // TODO
+  http.get(new RegExp(`${apiBaseUrl}/benchmarks/([^/]+)`), (c) => {
+    const benchmarkId = c.params[0] as string
+    const benchmark = benchmarks.find((b) => b.id === benchmarkId)
+    if (benchmark === undefined) return HttpResponse.json({ message: 'Not found' }, { status: 404 })
+    return HttpResponse.json(benchmark)
   }),
   http.get(`${apiBaseUrl}/scores`, () => {
     const res: paths['/scores']['get']['responses']['200']['content']['application/json'] =
