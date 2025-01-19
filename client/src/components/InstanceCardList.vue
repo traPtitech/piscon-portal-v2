@@ -6,6 +6,7 @@ import MainSwitch from '@/components/MainSwitch.vue'
 import {
   useCreateTeamInstance,
   useDeleteTeamInstance,
+  useEnqueueBenchmark,
   useStartTeamInstance,
   useStopTeamInstance,
   useTeamInstances,
@@ -24,6 +25,7 @@ const { mutate: createInstance } = useCreateTeamInstance(client)
 const { mutate: startInstance } = useStartTeamInstance(client)
 const { mutate: stopInstance } = useStopTeamInstance(client)
 const { mutate: deleteInstance } = useDeleteTeamInstance(client)
+const { mutate: enqueueBenchmark } = useEnqueueBenchmark(client, { redirect: true })
 
 const visibleInstances = computed(() =>
   instances.value?.filter((i) => showDeleted.value || i.status !== 'deleted'),
@@ -42,6 +44,10 @@ setInterval(() => {
     refetch()
   }
 }, 500)
+
+const enqueueBenchmarkHandler = (instanceId: string) => {
+  enqueueBenchmark({ teamId, instanceId })
+}
 </script>
 
 <template>
@@ -80,10 +86,20 @@ setInterval(() => {
               </div>
             </div>
           </div>
+          <div class="info-actions">
+            <MainButton
+              @click="enqueueBenchmarkHandler(instance.id)"
+              class="action-button"
+              :disabled="instance.status !== 'running'"
+            >
+              <Icon icon="mdi:thunder" width="20" height="20" />
+              <span>ベンチマーク実行</span>
+            </MainButton>
+          </div>
         </div>
-        <div class="action-buttons">
+        <div class="management-buttons">
           <MainButton
-            class="action-button"
+            class="management-button"
             :disabled="instance.status !== 'stopped'"
             @click="startInstance({ teamId, instanceId: instance.id })"
           >
@@ -91,7 +107,7 @@ setInterval(() => {
             <span>起動</span>
           </MainButton>
           <MainButton
-            class="action-button"
+            class="management-button"
             :disabled="instance.status !== 'running'"
             @click="stopInstance({ teamId, instanceId: instance.id })"
           >
@@ -99,7 +115,7 @@ setInterval(() => {
             <span>停止</span>
           </MainButton>
           <MainButton
-            class="action-button"
+            class="management-button"
             variant="destructive"
             :disabled="instance.status !== 'stopped'"
             @click="deleteInstance({ teamId, instanceId: instance.id })"
@@ -186,14 +202,26 @@ setInterval(() => {
   gap: 0.25rem;
 }
 
-.action-buttons {
+.info-actions {
+  display: flex;
+}
+
+.action-button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.management-buttons {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   width: 160px;
 }
 
-.action-button {
+.management-button {
   flex: 1;
   display: flex;
   align-items: center;
