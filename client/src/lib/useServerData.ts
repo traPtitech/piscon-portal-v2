@@ -1,4 +1,5 @@
 import { api } from '@/api'
+import router from '@/router'
 import { useQuery, useMutation, QueryClient } from '@tanstack/vue-query'
 
 export const useUsers = () =>
@@ -117,5 +118,20 @@ export const useUpdateTeam = (client: QueryClient) =>
       client.invalidateQueries({ queryKey: ['team', params.teamId] })
       client.invalidateQueries({ queryKey: ['teams'] })
       client.invalidateQueries({ queryKey: ['me'] })
+    },
+  })
+
+export const useEnqueueBenchmark = (client: QueryClient, options?: { redirect?: boolean }) =>
+  useMutation({
+    mutationFn: (params: { teamId: string; instanceId: string }) =>
+      api.POST('/benchmarks', {
+        body: { instanceId: params.instanceId },
+      }),
+    onSuccess: (res, params) => {
+      client.invalidateQueries({ queryKey: ['team-benches', params.teamId] })
+      client.invalidateQueries({ queryKey: ['benches'] })
+      if (options?.redirect && res.data !== undefined) {
+        router.push(`/benches/${res.data.id}`)
+      }
     },
   })
