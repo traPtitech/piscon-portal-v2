@@ -10,6 +10,27 @@ import (
 	"github.com/traPtitech/piscon-portal-v2/server/utils/testutil"
 )
 
+func TestFindUser(t *testing.T) {
+	t.Parallel()
+
+	repo, db := setupRepository(t)
+
+	team := domain.NewTeam("team1")
+	user := domain.User{
+		ID:     uuid.New(),
+		Name:   "user1",
+		TeamID: uuid.NullUUID{UUID: team.ID, Valid: true},
+	}
+
+	mustMakeTeam(t, db, team)
+	mustMakeUser(t, db, user)
+
+	got, err := repo.FindUser(context.Background(), user.ID)
+	require.NoError(t, err)
+
+	testutil.CompareUser(t, user, got)
+}
+
 func TestGetUsers(t *testing.T) {
 	t.Parallel()
 
