@@ -12,6 +12,24 @@ export default [
     name: 'app/files-to-ignore',
     ignores: ['**/dist/**', '**/dist-ssr/**', '**/coverage/**'],
   },
+  {
+    files: ['**/*.ts', '**/*.tsx'],
+    plugins: {
+      '@typescript-eslint': import('@typescript-eslint/eslint-plugin'),
+    },
+    languageOptions: {
+      parser: '@typescript-eslint/parser',
+    },
+    rules: {
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          varsIgnorePattern: '^_',
+          argsIgnorePattern: '^_',
+        },
+      ],
+    },
+  },
 
   ...pluginVue.configs['flat/essential'],
   ...vueTsEslintConfig(),
