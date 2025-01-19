@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	r := runner.Prepare()
+	r := runner.Prepare(nil, nil) //TODO: Implement
 
 	for {
 		if err := r.Run(); err != nil {
