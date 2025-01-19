@@ -43,6 +43,26 @@ const router = createRouter({
       name: 'admin-benches',
       component: () => import('@/views/AdminBenchesView.vue'),
     },
+    {
+      path: '/admin/benches/:id',
+      name: 'admin-bench',
+      component: () => import('@/views/AdminBenchView.vue'),
+    },
+    {
+      path: '/admin/teams',
+      name: 'admin-teams',
+      component: () => import('@/views/AdminTeamsView.vue'),
+    },
+    {
+      path: '/admin/docs',
+      name: 'admin-docs',
+      component: () => import('@/views/AdminDocsView.vue'),
+    },
+    {
+      path: '/admin/permissions',
+      name: 'admin-permissions',
+      component: () => import('@/views/AdminPermissionsView.vue'),
+    },
   ],
 })
 

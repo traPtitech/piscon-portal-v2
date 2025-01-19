@@ -20,5 +20,6 @@ const { icon } = defineProps<{
   display: flex;
   align-items: center;
   font-size: 1.5rem;
+  gap: 0.25rem;
 }
 </style>
