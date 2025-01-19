@@ -8,7 +8,6 @@ import (
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/google/uuid"
 	"github.com/jellydator/ttlcache/v3"
-	"github.com/traPtitech/piscon-portal-v2/server/services/traq"
 	"golang.org/x/oauth2"
 )
 
@@ -89,7 +88,12 @@ func (s *Service) Exchange(ctx context.Context, sessionID, code string) (*oauth2
 	return s.config.Exchange(ctx, code, oauth2.VerifierOption(codeVerifier.Value()))
 }
 
-func (s *Service) GetUserInfo(ctx context.Context, token *oauth2.Token) (*traq.User, error) {
+type UserInfo struct {
+	ID   uuid.UUID
+	Name string
+}
+
+func (s *Service) GetUserInfo(ctx context.Context, token *oauth2.Token) (*UserInfo, error) {
 	rawIDToken, ok := token.Extra("id_token").(string)
 	if !ok {
 		return nil, errors.New("missing id_token")
@@ -116,5 +120,5 @@ func (s *Service) GetUserInfo(ctx context.Context, token *oauth2.Token) (*traq.U
 		return nil, err
 	}
 
-	return &traq.User{ID: id, Name: payload.Name}, nil
+	return &UserInfo{ID: id, Name: payload.Name}, nil
 }
