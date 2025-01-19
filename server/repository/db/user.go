@@ -64,8 +64,9 @@ func toDomainUser(user *models.User) (domain.User, error) {
 	}
 
 	return domain.User{
-		ID:     userID,
-		Name:   user.Name,
-		TeamID: teamID,
+		ID:      userID,
+		Name:    user.Name,
+		IsAdmin: user.IsAdmin,
+		TeamID:  teamID,
 	}, nil
 }
