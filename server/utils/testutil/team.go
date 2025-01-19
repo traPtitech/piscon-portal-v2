@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"slices"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
@@ -29,5 +30,6 @@ func CompareTeam(t *testing.T, want, got domain.Team) {
 
 	assert.Equal(t, want.ID, got.ID)
 	assert.Equal(t, want.Name, got.Name)
+	assert.WithinDuration(t, want.CreatedAt, got.CreatedAt, time.Second)
 	CompareUsers(t, want.Members, got.Members)
 }
