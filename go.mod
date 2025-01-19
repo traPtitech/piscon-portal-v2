@@ -20,7 +20,6 @@ require (
 	github.com/stephenafamo/bob v0.29.0
 	github.com/stretchr/testify v1.10.0
 	github.com/testcontainers/testcontainers-go/modules/mysql v0.35.0
-	github.com/traPtitech/go-traq v0.0.0-20241109062858-3757c489f610
 	go.uber.org/mock v0.5.0
 	golang.org/x/oauth2 v0.25.0
 	google.golang.org/grpc v1.69.2
