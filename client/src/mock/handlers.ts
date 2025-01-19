@@ -180,6 +180,41 @@ const benchmarks: components['schemas']['BenchmarkAdminResult'][] = [
   },
 ]
 
+const docs = `# ドキュメント
+
+## はじめに
+
+これはドキュメントです。
+同じ段落
+
+違う段落
+
+ここに説明が入る
+
+## 使い方
+
+1. これを使ってください。
+2. あれを使ってください。
+3. これを使ってください。
+
+## 注意事項
+
+- \`inline code\`
+- **bold**
+- *italic*
+- [link](https://example.com)
+- ==emphasized==
+- ~deleted~
+
+> 引用
+
+## その他
+
+\`\`\`js
+const code = 'Hello, world!';
+\`\`\`
+`
+
 export const handlers = [
   http.get(`${apiBaseUrl}/oauth2/code`, () => {
     // TODO
@@ -390,7 +425,7 @@ export const handlers = [
   }),
   http.get(`${apiBaseUrl}/docs`, () => {
     const res: paths['/docs']['get']['responses']['200']['content']['application/json'] = {
-      body: 'This is a document.',
+      body: docs,
     }
 
     return HttpResponse.json(res)

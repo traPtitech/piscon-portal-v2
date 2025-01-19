@@ -149,3 +149,9 @@ export const useEnqueueBenchmark = (options?: { redirect?: boolean }) => {
     },
   })
 }
+
+export const useDocs = () =>
+  useQuery({
+    queryKey: ['docs'],
+    queryFn: () => api.GET('/docs').then((r) => r.data),
+  })
