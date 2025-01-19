@@ -195,3 +195,17 @@ export const useUpdateDocs = () => {
     },
   })
 }
+
+export const useUpdateAdmins = () => {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (params: string[]) =>
+      api.PUT('/admins', {
+        body: params,
+      }),
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: ['admins'] })
+      client.invalidateQueries({ queryKey: ['users'] })
+    },
+  })
+}

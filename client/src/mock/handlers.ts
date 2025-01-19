@@ -389,8 +389,15 @@ export const handlers = [
 
     return HttpResponse.json(res)
   }),
-  http.put(`${apiBaseUrl}/admins`, () => {
-    // TODO
+  http.put(`${apiBaseUrl}/admins`, async (c) => {
+    type Body = paths['/admins']['put']['requestBody']['content']['application/json']
+    const body = (await c.request.json()) as Body
+
+    for (const user of users) {
+      user.isAdmin = body.includes(user.id)
+    }
+
+    return HttpResponse.json({})
   }),
   http.get(`${apiBaseUrl}/docs`, () => {
     const res: paths['/docs']['get']['responses']['200']['content']['application/json'] = {
