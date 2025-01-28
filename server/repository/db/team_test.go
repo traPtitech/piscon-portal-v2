@@ -1,9 +1,7 @@
 package db_test
 
 import (
-	"cmp"
 	"context"
-	"slices"
 	"testing"
 	"time"
 
@@ -11,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
+	"github.com/traPtitech/piscon-portal-v2/server/utils/testutil"
 )
 
 func TestGetTeam(t *testing.T) {
@@ -45,7 +44,7 @@ func TestGetTeam(t *testing.T) {
 	got, err := repo.FindTeam(context.Background(), team.ID)
 	require.NoError(t, err)
 
-	compareTeam(t, team, got)
+	testutil.CompareTeam(t, team, got)
 }
 
 func TestGetTeams(t *testing.T) {
@@ -104,14 +103,8 @@ func TestGetTeams(t *testing.T) {
 	got, err := repo.GetTeams(context.Background())
 	require.NoError(t, err)
 
-	assert.Len(t, got, len(teams))
+	testutil.CompareTeams(t, teams, got)
 
-	// sort teams by ID
-	slices.SortFunc(got, func(a, b domain.Team) int { return cmp.Compare(a.ID.String(), b.ID.String()) })
-	slices.SortFunc(teams, func(a, b domain.Team) int { return cmp.Compare(a.ID.String(), b.ID.String()) })
-	for i, team := range teams {
-		compareTeam(t, team, got[i])
-	}
 }
 
 func TestCreateTeam(t *testing.T) {
@@ -129,14 +122,18 @@ func TestCreateTeam(t *testing.T) {
 			Name: "user2",
 		},
 	}
+	for _, member := range members {
+		mustMakeUser(t, db, member)
+	}
+
 	team := domain.Team{
 		ID:        uuid.New(),
 		Name:      "team1",
 		Members:   members,
 		CreatedAt: time.Now(),
 	}
-	for _, member := range members {
-		mustMakeUser(t, db, member)
+	for i := range team.Members {
+		team.Members[i].TeamID = uuid.NullUUID{UUID: team.ID, Valid: true}
 	}
 
 	err := repo.CreateTeam(context.Background(), team)
@@ -147,7 +144,7 @@ func TestCreateTeam(t *testing.T) {
 	got, err := repo.FindTeam(context.Background(), team.ID)
 	require.NoError(t, err)
 
-	compareTeam(t, team, got)
+	testutil.CompareTeam(t, team, got)
 }
 
 func TestUpdateTeam(t *testing.T) {
@@ -171,26 +168,12 @@ func TestUpdateTeam(t *testing.T) {
 	// change the team name and add a new member
 	team.Name = "team2"
 	require.NoError(t, team.AddMember(newMember))
+
 	err := repo.UpdateTeam(context.Background(), team)
 	assert.NoError(t, err)
 
 	got, err := repo.FindTeam(context.Background(), team.ID)
 	require.NoError(t, err)
 
-	compareTeam(t, team, got)
-}
-
-func compareTeam(t *testing.T, want domain.Team, got domain.Team) {
-	t.Helper()
-
-	assert.Equal(t, want.ID, got.ID)
-	assert.Equal(t, want.Name, got.Name)
-	assert.Len(t, want.Members, len(got.Members))
-	// sort members by ID
-	slices.SortFunc(got.Members, func(a, b domain.User) int { return cmp.Compare(a.ID.String(), b.ID.String()) })
-	slices.SortFunc(want.Members, func(a, b domain.User) int { return cmp.Compare(a.ID.String(), b.ID.String()) })
-	for i, member := range want.Members {
-		assert.Equal(t, member.ID, got.Members[i].ID)
-		assert.Equal(t, member.Name, got.Members[i].Name)
-	}
+	testutil.CompareTeam(t, team, got)
 }
