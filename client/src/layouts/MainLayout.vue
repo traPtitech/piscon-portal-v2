@@ -31,7 +31,7 @@ const links = [
         </RouterLink>
       </div>
     </nav>
-    <div>
+    <div class="main-content">
       <slot />
     </div>
   </div>
@@ -84,5 +84,10 @@ const links = [
   font-weight: 700;
   color: var(--ct-slate-800);
   opacity: 1;
+}
+
+.main-content {
+  overflow-y: auto;
+  min-width: 0;
 }
 </style>

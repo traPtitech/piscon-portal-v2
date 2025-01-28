@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import type { components } from '@/api/openapi'
-type Status = components['schemas']['BenchmarkStatus']
+type Status = components['schemas']['InstanceStatus']
 const { status } = defineProps<{ status: Status }>()
 
 const labels: Record<Status, string> = {
-  waiting: 'WAITING',
+  building: 'BUILDING',
+  starting: 'STARTING',
   running: 'RUNNING',
-  finished: 'FINISHED',
+  stopping: 'STOPPING',
+  stopped: 'STOPPED',
+  deleting: 'DELETING',
+  deleted: 'DELETED',
 }
 </script>
 
@@ -25,16 +29,32 @@ const labels: Record<Status, string> = {
   font-size: 0.7rem;
   text-align: center;
 }
-.status-chip.waiting {
+.status-chip.building {
   background-color: #f0ad4e33;
   color: #f0ad4e;
 }
-.status-chip.running {
+.status-chip.starting {
   background-color: #5bc0de33;
   color: #5bc0de;
 }
-.status-chip.finished {
+.status-chip.running {
   background-color: #5cb85c33;
   color: #5cb85c;
+}
+.status-chip.stopping {
+  background-color: #f0ad4e33;
+  color: #f0ad4e;
+}
+.status-chip.stopped {
+  background-color: #de5b5b33;
+  color: #de5b5b;
+}
+.status-chip.deleting {
+  background-color: #f0ad4e33;
+  color: #f0ad4e;
+}
+.status-chip.deleted {
+  background-color: #77777733;
+  color: #777777;
 }
 </style>
