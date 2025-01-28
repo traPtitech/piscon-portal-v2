@@ -11,13 +11,13 @@ type UseCase interface {
 }
 
 type useCaseImpl struct {
-	*teamUseCaseImpl
-	*userUseCaseImpl
+	TeamUseCase
+	UserUseCase
 }
 
 func New(repo repository.Repository) UseCase {
 	return &useCaseImpl{
-		teamUseCaseImpl: NewTeamUseCase(repo),
-		userUseCaseImpl: NewUserUseCase(repo),
+		TeamUseCase: NewTeamUseCase(repo),
+		UserUseCase: NewUserUseCase(repo),
 	}
 }

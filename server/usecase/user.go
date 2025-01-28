@@ -18,7 +18,7 @@ type userUseCaseImpl struct {
 	repo repository.Repository
 }
 
-func NewUserUseCase(repo repository.Repository) *userUseCaseImpl {
+func NewUserUseCase(repo repository.Repository) UserUseCase {
 	return &userUseCaseImpl{
 		repo: repo,
 	}

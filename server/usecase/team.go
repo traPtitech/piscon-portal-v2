@@ -21,7 +21,7 @@ type teamUseCaseImpl struct {
 	repo repository.Repository
 }
 
-func NewTeamUseCase(repo repository.Repository) *teamUseCaseImpl {
+func NewTeamUseCase(repo repository.Repository) TeamUseCase {
 	return &teamUseCaseImpl{
 		repo: repo,
 	}
