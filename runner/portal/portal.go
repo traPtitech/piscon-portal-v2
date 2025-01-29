@@ -16,7 +16,7 @@ type Portal interface {
 	// MakeProgressStreamClient creates a ProgressStreamClient.
 	MakeProgressStreamClient(ctx context.Context) (ProgressStreamClient, error)
 	// PostJobFinished posts the result of the job.
-	PostJobFinished(ctx context.Context, jobID string, finishedAt time.Time, result domain.Result) error
+	PostJobFinished(ctx context.Context, jobID string, finishedAt time.Time, result domain.Result, runnerErr error) error
 }
 
 type ProgressStreamClient interface {

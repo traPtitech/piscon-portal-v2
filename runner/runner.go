@@ -5,12 +5,18 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"strings"
 	"time"
 
 	"github.com/traPtitech/piscon-portal-v2/runner/benchmarker"
 	"github.com/traPtitech/piscon-portal-v2/runner/domain"
 	"github.com/traPtitech/piscon-portal-v2/runner/portal"
+)
+
+const (
+	bufSize              = 1024
+	SendProgressInterval = 5 * time.Second
 )
 
 type Runner struct {
@@ -26,18 +32,13 @@ func Prepare(portal portal.Portal, benchmarker benchmarker.Benchmarker) *Runner 
 }
 
 func (r *Runner) Run() error {
-	ctx := context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	job, err := r.portal.GetJob(ctx)
 	if err != nil {
 		return fmt.Errorf("get benchmark: %w", err)
 	}
-
-	streamClient, err := r.portal.MakeProgressStreamClient(ctx)
-	if err != nil {
-		return fmt.Errorf("create streaming client: %w", err)
-	}
-	defer streamClient.Close()
 
 	stdoutR, stderrR, startedAt, err := r.benchmarker.Start(ctx, job)
 	if err != nil {
@@ -47,43 +48,101 @@ func (r *Runner) Run() error {
 	stdoutBdr := &strings.Builder{}
 	stderrBdr := &strings.Builder{}
 
-	for {
-		if _, err := io.CopyN(stdoutBdr, stdoutR, 1024); err != nil {
-			if errors.Is(err, io.EOF) {
-				break
-			}
-			return fmt.Errorf("read stdout: %w", err)
+	stdoutErrChan, stderrErrChan := make(chan error), make(chan error)
+
+	go func() {
+		if err := captureStreamOutput(ctx, stdoutR, stdoutBdr); err != nil {
+			stdoutErrChan <- err
 		}
-
-		if _, err := io.CopyN(stderrBdr, stderrR, 1024); err != nil {
-			if errors.Is(err, io.EOF) {
-				break
-			}
-			return fmt.Errorf("read stderr: %w", err)
+	}()
+	go func() {
+		if err := captureStreamOutput(ctx, stderrR, stderrBdr); err != nil {
+			stderrErrChan <- err
 		}
+	}()
 
-		score, err := r.benchmarker.CalculateScore(ctx, stdoutBdr.String(), stderrBdr.String())
-		if err != nil {
-			return fmt.Errorf("calculate score: %w", err)
-		}
-
-		err = streamClient.SendProgress(ctx, domain.NewProgress(job.GetID(), stdoutBdr.String(), stderrBdr.String(), score, startedAt))
-		if err != nil {
-			return fmt.Errorf("send progress: %w", err)
-		}
-	}
-
-	finishedAt := time.Now()
-
-	result, err := r.benchmarker.Wait()
+	err = r.streamJobProgress(ctx, job, startedAt, stdoutBdr, stderrBdr, stdoutErrChan, stderrErrChan)
 	if err != nil {
-		return fmt.Errorf("wait: %w", err)
+		log.Printf("collect data: %v", err)
+		err := r.portal.PostJobFinished(ctx, job.GetID(), time.Now(), domain.ResultError, err)
+		if err != nil {
+			return fmt.Errorf("post job finished: %w", err)
+		}
 	}
 
-	err = r.portal.PostJobFinished(ctx, job.GetID(), finishedAt, result)
+	result, finishedAt, err := r.benchmarker.Wait(ctx)
+	err = r.portal.PostJobFinished(ctx, job.GetID(), finishedAt, result, err)
 	if err != nil {
 		return fmt.Errorf("post job finished: %w", err)
 	}
 
 	return nil
+}
+
+func captureStreamOutput(_ context.Context, r io.Reader, bdr *strings.Builder) error {
+	for {
+		if _, err := io.CopyN(bdr, r, bufSize); err != nil {
+			if errors.Is(err, io.EOF) {
+				return nil
+			}
+			return fmt.Errorf("copy: %w", err)
+		}
+	}
+}
+
+// streamJobProgress collects the benchmark job's stdout and stderr and sends the progress to the portal.
+// It returns nil if, and only if both of stdout and stderr reach EOF.
+func (r *Runner) streamJobProgress(
+	ctx context.Context, job *domain.Job, startedAt time.Time,
+	stdoutBdr, stderrBdr *strings.Builder,
+	stdoutErrChan, stderrErrChan chan error,
+) error {
+	streamClient, err := r.portal.MakeProgressStreamClient(ctx)
+	if err != nil {
+		return fmt.Errorf("create streaming client: %w", err)
+	}
+	defer streamClient.Close()
+
+	finished := struct {
+		stdout bool
+		stderr bool
+	}{false, false}
+
+	ticker := time.NewTicker(SendProgressInterval)
+
+	for {
+		select {
+		case <-ticker.C:
+			stdout := stdoutBdr.String()
+			stderr := stderrBdr.String()
+			score, err := r.benchmarker.CalculateScore(ctx, stdout, stderr)
+			if err != nil {
+				return fmt.Errorf("calculate score: %w", err)
+			}
+
+			progress := domain.NewProgress(job.GetID(), stdout, stderr, score, startedAt)
+			err = streamClient.SendProgress(ctx, progress)
+			if err != nil {
+				return fmt.Errorf("send progress: %w", err)
+			}
+
+		case err := <-stdoutErrChan:
+			finished.stdout = true
+			if err != nil {
+				return fmt.Errorf("read stdout: %w", err)
+			}
+			if finished.stderr {
+				return nil
+			}
+
+		case err := <-stderrErrChan:
+			finished.stderr = true
+			if err != nil {
+				return fmt.Errorf("read stderr: %w", err)
+			}
+			if finished.stdout {
+				return nil
+			}
+		}
+	}
 }

@@ -43,3 +43,23 @@ func NewProgress(benchmarkID string, stdout string, stderr string, score int, st
 		startedAt:   startedAt,
 	}
 }
+
+func (p *Progress) GetBenchmarkID() string {
+	return p.benchmarkID
+}
+
+func (p *Progress) GetStdout() string {
+	return p.stdout
+}
+
+func (p *Progress) GetStderr() string {
+	return p.stderr
+}
+
+func (p *Progress) GetScore() int {
+	return p.score
+}
+
+func (p *Progress) GetStartedAt() time.Time {
+	return p.startedAt
+}
