@@ -16,7 +16,7 @@ import (
 
 const (
 	bufSize              = 1024
-	SendProgressInterval = 5 * time.Second
+	sendProgressInterval = 5 * time.Second
 )
 
 type Runner struct {
@@ -51,14 +51,10 @@ func (r *Runner) Run() error {
 	stdoutErrChan, stderrErrChan := make(chan error), make(chan error)
 
 	go func() {
-		if err := captureStreamOutput(ctx, stdoutR, stdoutBdr); err != nil {
-			stdoutErrChan <- err
-		}
+		stdoutErrChan <- captureStreamOutput(ctx, stdoutR, stdoutBdr)
 	}()
 	go func() {
-		if err := captureStreamOutput(ctx, stderrR, stderrBdr); err != nil {
-			stderrErrChan <- err
-		}
+		stderrErrChan <- captureStreamOutput(ctx, stderrR, stderrBdr)
 	}()
 
 	err = r.streamJobProgress(ctx, job, startedAt, stdoutBdr, stderrBdr, stdoutErrChan, stderrErrChan)
@@ -96,36 +92,52 @@ func (r *Runner) streamJobProgress(
 	ctx context.Context, job *domain.Job, startedAt time.Time,
 	stdoutBdr, stderrBdr *strings.Builder,
 	stdoutErrChan, stderrErrChan chan error,
-) error {
+) (err error) {
 	streamClient, err := r.portal.MakeProgressStreamClient(ctx)
 	if err != nil {
 		return fmt.Errorf("create streaming client: %w", err)
 	}
 	defer streamClient.Close()
 
+	calcAndSendProgress := func() error {
+		stdout := stdoutBdr.String()
+		stderr := stderrBdr.String()
+		score, err := r.benchmarker.CalculateScore(ctx, stdout, stderr)
+		if err != nil {
+			return fmt.Errorf("calculate score: %w", err)
+		}
+
+		progress := domain.NewProgress(job.GetID(), stdout, stderr, score, startedAt)
+		err = streamClient.SendProgress(ctx, progress)
+		if err != nil {
+			return fmt.Errorf("send progress: %w", err)
+		}
+		return nil
+	}
+
+	// 最後に必ず結果を計算して送信するようにする
+	defer func() {
+		if err != nil {
+			return
+		}
+		if _err := calcAndSendProgress(); _err != nil {
+			err = _err
+		}
+	}()
+
 	finished := struct {
 		stdout bool
 		stderr bool
 	}{false, false}
 
-	ticker := time.NewTicker(SendProgressInterval)
+	ticker := time.NewTicker(sendProgressInterval)
 
 	for {
 		select {
 		case <-ticker.C:
-			stdout := stdoutBdr.String()
-			stderr := stderrBdr.String()
-			score, err := r.benchmarker.CalculateScore(ctx, stdout, stderr)
-			if err != nil {
-				return fmt.Errorf("calculate score: %w", err)
+			if err := calcAndSendProgress(); err != nil {
+				return fmt.Errorf("calc and send progress: %w", err)
 			}
-
-			progress := domain.NewProgress(job.GetID(), stdout, stderr, score, startedAt)
-			err = streamClient.SendProgress(ctx, progress)
-			if err != nil {
-				return fmt.Errorf("send progress: %w", err)
-			}
-
 		case err := <-stdoutErrChan:
 			finished.stdout = true
 			if err != nil {
