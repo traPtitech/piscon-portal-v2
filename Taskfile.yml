@@ -22,11 +22,19 @@ tasks:
       - server/bobgen.yaml
       - server/ogen.yaml
       - server/schema.sql
-      - runner/benchmarker/**.go
-      - runner/portal/**.go
     generates:
       - server/openapi/*.go
       - server/models/**/*.go
+
+  runner:gen:
+    cmds:
+      - go generate ./runner/...
+    sources:
+      - runner/portal/**.go
+      - runner/benchmarker/**.go
+    generates:
+      - runner/portal/mock/**.go
+      - runner/benchmarker/mock/**.go
 
   proto:gen:
     cmds:
@@ -39,6 +47,7 @@ tasks:
   gen:
     cmds:
       - task: go:gen
+      - task: runner:gen
       - task: proto:gen
 
   up-db:
