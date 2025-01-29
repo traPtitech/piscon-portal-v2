@@ -122,17 +122,17 @@ func (c *MockPortalMakeProgressStreamClientCall) DoAndReturn(f func(context.Cont
 }
 
 // PostJobFinished mocks base method.
-func (m *MockPortal) PostJobFinished(ctx context.Context, jobID string, finishedAt time.Time, result domain.Result) error {
+func (m *MockPortal) PostJobFinished(ctx context.Context, jobID string, finishedAt time.Time, result domain.Result, runnerErr error) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "PostJobFinished", ctx, jobID, finishedAt, result)
+	ret := m.ctrl.Call(m, "PostJobFinished", ctx, jobID, finishedAt, result, runnerErr)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // PostJobFinished indicates an expected call of PostJobFinished.
-func (mr *MockPortalMockRecorder) PostJobFinished(ctx, jobID, finishedAt, result any) *MockPortalPostJobFinishedCall {
+func (mr *MockPortalMockRecorder) PostJobFinished(ctx, jobID, finishedAt, result, runnerErr any) *MockPortalPostJobFinishedCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PostJobFinished", reflect.TypeOf((*MockPortal)(nil).PostJobFinished), ctx, jobID, finishedAt, result)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PostJobFinished", reflect.TypeOf((*MockPortal)(nil).PostJobFinished), ctx, jobID, finishedAt, result, runnerErr)
 	return &MockPortalPostJobFinishedCall{Call: call}
 }
 
@@ -148,13 +148,13 @@ func (c *MockPortalPostJobFinishedCall) Return(arg0 error) *MockPortalPostJobFin
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockPortalPostJobFinishedCall) Do(f func(context.Context, string, time.Time, domain.Result) error) *MockPortalPostJobFinishedCall {
+func (c *MockPortalPostJobFinishedCall) Do(f func(context.Context, string, time.Time, domain.Result, error) error) *MockPortalPostJobFinishedCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockPortalPostJobFinishedCall) DoAndReturn(f func(context.Context, string, time.Time, domain.Result) error) *MockPortalPostJobFinishedCall {
+func (c *MockPortalPostJobFinishedCall) DoAndReturn(f func(context.Context, string, time.Time, domain.Result, error) error) *MockPortalPostJobFinishedCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
