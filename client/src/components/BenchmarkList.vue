@@ -36,10 +36,54 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
 </script>
 
 <template>
-  <div class="bench-list">
-    <div class="list-label">
-      <Icon icon="mdi:score" width="24" height="24" />
-      <span>スコア</span>
+  <div class="bench-list-container">
+    <div class="bench-list">
+      <div class="list-label">
+        <Icon icon="mdi:score" width="24" height="24" />
+        <span>スコア</span>
+      </div>
+      <div class="list-label list-datetime">
+        <Icon icon="mdi:calendar-clock" width="24" height="24" />
+        <span>日時</span>
+      </div>
+      <div class="list-label list-server">
+        <Icon icon="mdi:server-network" width="24" height="24" />
+        <span>対象サーバー</span>
+      </div>
+      <div class="list-label list-user">
+        <Icon icon="mdi:account" width="24" height="24" />
+        <span>実行ユーザー</span>
+      </div>
+      <div class="list-label">
+        <Icon icon="mdi:progress-clock" width="24" height="24" />
+        <span>ステータス</span>
+      </div>
+      <div class="list-label"></div>
+      <template v-for="bench in sortedBenches" :key="bench.id">
+        <div v-if="bench.status === 'running' || bench.status === 'finished'" class="bench-score">
+          {{ formatScore(bench.score) }}
+        </div>
+        <div v-else class="bench-score-loading">計測中</div>
+        <div class="bench-date list-datetime">
+          {{ formatDate(bench.createdAt, 'YYYY/MM/DD hh:mm:ss.SSS') }}
+        </div>
+        <div class="bench-server list-server">
+          サーバー{{ instances?.find((i) => i.id === bench.instanceId)?.serverId ?? '?' }}
+        </div>
+        <div class="bench-user list-user">
+          <UserAvatar :name="getUserName(bench.userId) ?? ''" />
+          <span>@{{ getUserName(bench.userId) }}</span>
+        </div>
+        <div>
+          <BenchmarkStatusChip :status="bench.status" />
+        </div>
+        <div>
+          <RouterLink :to="`/benches/${bench.id}`" class="bench-link">
+            <span>詳細を見る</span>
+            <Icon icon="mdi:chevron-right" width="24" height="24" />
+          </RouterLink>
+        </div>
+      </template>
     </div>
     <div class="list-label">
       <Icon icon="mdi:calendar-clock" width="24" height="24" />
@@ -95,10 +139,14 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
 </template>
 
 <style scoped>
+.bench-list-container {
+  width: 100%;
+  container-type: inline-size;
+}
 .bench-list {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(v-bind(columns), 1fr);
+  grid-template-columns: repeat(v-bind(columns), auto);
 }
 
 .bench-skeleton {
@@ -129,6 +177,13 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
   font-size: 0.8rem;
 }
 
+.bench-date {
+  font-size: 0.9rem;
+}
+.bench-server {
+  font-size: 0.9rem;
+}
+
 .bench-user {
   font-weight: 600;
   font-size: 0.9rem;
@@ -147,5 +202,32 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
 
 .bench-link svg {
   margin-top: 0.15rem;
+}
+
+@container (max-width: 900px) {
+  .bench-list {
+    grid-template-columns: repeat(5, auto);
+  }
+  .list-datetime.list-datetime {
+    display: none;
+  }
+}
+
+@container (max-width: 780px) {
+  .bench-list {
+    grid-template-columns: repeat(4, auto);
+  }
+  .list-server.list-server {
+    display: none;
+  }
+}
+
+@container (max-width: 560px) {
+  .bench-list {
+    grid-template-columns: repeat(3, auto);
+  }
+  .list-user.list-user {
+    display: none;
+  }
 }
 </style>

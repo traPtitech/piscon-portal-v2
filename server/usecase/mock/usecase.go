@@ -160,6 +160,84 @@ func (c *MockUseCaseGetTeamsCall) DoAndReturn(f func(context.Context) ([]domain.
 	return c
 }
 
+// GetUser mocks base method.
+func (m *MockUseCase) GetUser(ctx context.Context, userID uuid.UUID) (domain.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUser", ctx, userID)
+	ret0, _ := ret[0].(domain.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUser indicates an expected call of GetUser.
+func (mr *MockUseCaseMockRecorder) GetUser(ctx, userID any) *MockUseCaseGetUserCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockUseCase)(nil).GetUser), ctx, userID)
+	return &MockUseCaseGetUserCall{Call: call}
+}
+
+// MockUseCaseGetUserCall wrap *gomock.Call
+type MockUseCaseGetUserCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockUseCaseGetUserCall) Return(arg0 domain.User, arg1 error) *MockUseCaseGetUserCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockUseCaseGetUserCall) Do(f func(context.Context, uuid.UUID) (domain.User, error)) *MockUseCaseGetUserCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockUseCaseGetUserCall) DoAndReturn(f func(context.Context, uuid.UUID) (domain.User, error)) *MockUseCaseGetUserCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetUsers mocks base method.
+func (m *MockUseCase) GetUsers(ctx context.Context) ([]domain.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUsers", ctx)
+	ret0, _ := ret[0].([]domain.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUsers indicates an expected call of GetUsers.
+func (mr *MockUseCaseMockRecorder) GetUsers(ctx any) *MockUseCaseGetUsersCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUsers", reflect.TypeOf((*MockUseCase)(nil).GetUsers), ctx)
+	return &MockUseCaseGetUsersCall{Call: call}
+}
+
+// MockUseCaseGetUsersCall wrap *gomock.Call
+type MockUseCaseGetUsersCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockUseCaseGetUsersCall) Return(arg0 []domain.User, arg1 error) *MockUseCaseGetUsersCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockUseCaseGetUsersCall) Do(f func(context.Context) ([]domain.User, error)) *MockUseCaseGetUsersCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockUseCaseGetUsersCall) DoAndReturn(f func(context.Context) ([]domain.User, error)) *MockUseCaseGetUsersCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // UpdateTeam mocks base method.
 func (m *MockUseCase) UpdateTeam(ctx context.Context, input usecase.UpdateTeamInput) (domain.Team, error) {
 	m.ctrl.T.Helper()

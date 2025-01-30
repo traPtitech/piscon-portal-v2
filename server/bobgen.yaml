@@ -1,4 +1,3 @@
-wipe: true
 no_tests: true
 
 mysql:
