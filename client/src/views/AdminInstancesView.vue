@@ -5,6 +5,7 @@ import PageTitle from '@/components/PageTitle.vue'
 import { useAllInstances, useTeams } from '@/lib/useServerData'
 import { useUsers } from '@/lib/useUsers'
 import { ref, computed } from 'vue'
+import { Icon } from '@iconify/vue'
 
 const { data: instances } = useAllInstances()
 const { data: teams } = useTeams()
@@ -21,6 +22,9 @@ const instancesByTeams = computed(() =>
     instances: visibleInstances.value?.filter((i) => i.teamId === team.id) || [],
   })),
 )
+
+// true -> closed, false -> open
+const collapseStates = ref<Record<string, boolean>>({})
 </script>
 
 <template>
@@ -43,8 +47,17 @@ const instancesByTeams = computed(() =>
               :title="getUserById(member)?.name ?? ''"
             />
           </div>
+          <button
+            class="team-accordion-button"
+            :class="{ closed: collapseStates[team.team.id] }"
+            @click="collapseStates[team.team.id] = !collapseStates[team.team.id]"
+          >
+            <Icon icon="mdi:chevron-down" />
+          </button>
         </h2>
-        <InstanceCardList :teamId="team.team.id" :instances="team.instances" />
+        <div class="instance-card-list-wrapper" :class="{ closed: collapseStates[team.team.id] }">
+          <InstanceCardList :teamId="team.team.id" :instances="team.instances" />
+        </div>
       </div>
     </div>
   </main>
@@ -89,5 +102,38 @@ const instancesByTeams = computed(() =>
 .team-members {
   display: flex;
   gap: 0.5rem;
+}
+
+.team-accordion-button {
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ct-slate-800);
+  display: grid;
+  place-content: center;
+  border-radius: 4px;
+  width: 2rem;
+  height: 2rem;
+  transition: background-color 0.1s;
+  font-size: 1.5rem;
+}
+.team-accordion-button:hover {
+  background-color: var(--ct-slate-100);
+}
+.team-accordion-button:active {
+  background-color: var(--ct-slate-200);
+}
+
+.team-accordion-button > svg {
+  transition: transform 0.2s;
+  transform: rotate(0);
+}
+.team-accordion-button.closed > svg {
+  transform: rotate(90deg);
+}
+
+.instance-card-list-wrapper.closed {
+  display: none;
 }
 </style>
