@@ -166,7 +166,7 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
 
 @container (max-width: 900px) {
   .bench-list {
-    grid-template-columns: repeat(5, auto);
+    grid-template-columns: repeat(v-bind(columns-1), auto);
   }
   .list-datetime.list-datetime {
     display: none;
@@ -175,7 +175,7 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
 
 @container (max-width: 780px) {
   .bench-list {
-    grid-template-columns: repeat(4, auto);
+    grid-template-columns: repeat(v-bind(columns-2), auto);
   }
   .list-server.list-server {
     display: none;
@@ -184,7 +184,7 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
 
 @container (max-width: 560px) {
   .bench-list {
-    grid-template-columns: repeat(3, auto);
+    grid-template-columns: repeat(v-bind(columns-3), auto);
   }
   .list-user.list-user {
     display: none;
