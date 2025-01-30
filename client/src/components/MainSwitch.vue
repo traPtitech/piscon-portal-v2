@@ -19,6 +19,9 @@ const id = useId()
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ct-slate-600);
 }
 
 .checkbox-wrapper .switch {
@@ -45,7 +48,7 @@ const id = useId()
 
 .checkbox-wrapper .switch,
 .checkbox-wrapper .switch::after {
-  transition: all 200ms ease;
+  transition: all 200ms;
 }
 
 .checkbox-wrapper .switch::after {
@@ -61,7 +64,6 @@ const id = useId()
 
 .checkbox-wrapper .switch:hover {
   background-color: var(--ct-slate-400);
-  transition-duration: 0s;
 }
 
 .checkbox-wrapper .switch:checked {

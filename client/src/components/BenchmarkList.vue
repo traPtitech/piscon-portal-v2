@@ -1,24 +1,38 @@
 <script setup lang="ts">
-import { useTeamBenches, useTeamInstances, useUsers } from '@/lib/useServerData'
-import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { formatDate } from '@/lib/formatDate'
 import { Icon } from '@iconify/vue'
-import ErrorMessage from '@/components/ErrorMessage.vue'
 import BenchmarkStatusChip from '@/components/BenchmarkStatusChip.vue'
 import { formatScore } from '@/lib/formatScore'
 import UserAvatar from '@/components/UserAvatar.vue'
+import { useUsers } from '@/lib/useUsers'
+import type { components } from '@/api/openapi'
+import { computed } from 'vue'
+import { useTeams } from '@/lib/useServerData'
 
-const { teamId } = defineProps<{ teamId: string }>()
+type Bench = components['schemas']['BenchmarkListItem']
+type Instance = components['schemas']['Instance']
+const { benches, instances, isAdmin } = defineProps<{
+  benches: Bench[]
+  instances: Instance[]
+  isAdmin?: boolean
+}>()
 
-const { data: benches, error: benchesError } = useTeamBenches(teamId)
 const sortedBenches = computed(() =>
-  [...(benches.value ?? [])].sort(
+  [...(benches ?? [])].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   ),
 )
-const { data: instances } = useTeamInstances(teamId)
-const { data: users } = useUsers()
+
+const { getUserById } = useUsers()
+const { data: teams } = useTeams()
+
+const columns = computed(() => (isAdmin ? 7 : 6))
+
+const getTeamName = (teamId: string) => teams.value?.find((t) => t.id === teamId)?.name ?? ''
+const getInstanceServerId = (instanceId: string) =>
+  instances.find((i) => i.id === instanceId)?.serverId ?? '?'
+const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
 </script>
 
 <template>
@@ -31,6 +45,10 @@ const { data: users } = useUsers()
       <div class="list-label list-datetime">
         <Icon icon="mdi:calendar-clock" width="24" height="24" />
         <span>日時</span>
+      </div>
+      <div class="list-label" v-if="isAdmin">
+        <Icon icon="mdi:account-group" width="24" height="24" />
+        <span>チーム</span>
       </div>
       <div class="list-label list-server">
         <Icon icon="mdi:server-network" width="24" height="24" />
@@ -53,25 +71,30 @@ const { data: users } = useUsers()
         <div class="bench-date list-datetime">
           {{ formatDate(bench.createdAt, 'YYYY/MM/DD hh:mm:ss.SSS') }}
         </div>
+        <div v-if="isAdmin" class="bench-team">
+          {{ getTeamName(bench.teamId) }}
+        </div>
         <div class="bench-server list-server">
-          サーバー{{ instances?.find((i) => i.id === bench.instanceId)?.serverId ?? '?' }}
+          サーバー{{ getInstanceServerId(bench.instanceId) }}
         </div>
         <div class="bench-user list-user">
-          <UserAvatar :name="users?.find((u) => u.id === bench.userId)?.name ?? ''" />
-          <span>@{{ users?.find((u) => u.id === bench.userId)?.name }}</span>
+          <UserAvatar :name="getUserName(bench.userId)" />
+          <span>@{{ getUserName(bench.userId) }}</span>
         </div>
         <div>
           <BenchmarkStatusChip :status="bench.status" />
         </div>
         <div>
-          <RouterLink :to="`/benches/${bench.id}`" class="bench-link">
+          <RouterLink
+            :to="isAdmin ? `/admin/benches/${bench.id}` : `/benches/${bench.id}`"
+            class="bench-link"
+          >
             <span>詳細を見る</span>
             <Icon icon="mdi:chevron-right" width="24" height="24" />
           </RouterLink>
         </div>
       </template>
     </div>
-    <ErrorMessage v-if="benchesError" />
   </div>
 </template>
 
@@ -83,7 +106,7 @@ const { data: users } = useUsers()
 .bench-list {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(6, auto);
+  grid-template-columns: repeat(v-bind(columns), auto);
 }
 
 .bench-skeleton {
@@ -143,7 +166,7 @@ const { data: users } = useUsers()
 
 @container (max-width: 900px) {
   .bench-list {
-    grid-template-columns: repeat(5, auto);
+    grid-template-columns: repeat(v-bind(columns-1), auto);
   }
   .list-datetime.list-datetime {
     display: none;
@@ -152,7 +175,7 @@ const { data: users } = useUsers()
 
 @container (max-width: 780px) {
   .bench-list {
-    grid-template-columns: repeat(4, auto);
+    grid-template-columns: repeat(v-bind(columns-2), auto);
   }
   .list-server.list-server {
     display: none;
@@ -161,7 +184,7 @@ const { data: users } = useUsers()
 
 @container (max-width: 560px) {
   .bench-list {
-    grid-template-columns: repeat(3, auto);
+    grid-template-columns: repeat(v-bind(columns-3), auto);
   }
   .list-user.list-user {
     display: none;

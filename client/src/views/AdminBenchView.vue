@@ -1,28 +1,25 @@
 <script setup lang="ts">
-import { useMe } from '@/lib/useServerData'
 import { Icon } from '@iconify/vue'
 import { RouterLink, useRoute } from 'vue-router'
-import TeamBenchmarkDetail from '@/components/TeamBenchmarkDetail.vue'
+import BenchmarkDetail from '@/components/BenchmarkDetail.vue'
+import { useAllInstances, useBench } from '@/lib/useServerData'
 
-const { data: me } = useMe()
 const { params } = useRoute()
 const benchId = params.id as string
+
+const { data: bench } = useBench(benchId)
+const { data: instances } = useAllInstances()
 </script>
 
 <template>
   <main class="bench-container">
     <div>
-      <RouterLink to="/benches" class="back-button">
+      <RouterLink to="/admin/benches" class="back-button">
         <Icon icon="mdi:chevron-left" width="24" height="24" />
         <span>ベンチマーク一覧に戻る</span>
       </RouterLink>
     </div>
-    <div v-if="me?.teamId !== undefined">
-      <TeamBenchmarkDetail :teamId="me.teamId" :benchId="benchId" />
-    </div>
-    <div v-if="me !== undefined && me?.teamId === undefined">
-      <p>チームに所属していません</p>
-    </div>
+    <BenchmarkDetail v-if="bench !== undefined" :bench="bench" :instances="instances ?? []" />
   </main>
 </template>
 
