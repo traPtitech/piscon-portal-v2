@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type InstanceCardList from '@/components/InstanceCardList.vue'
 import { useTeamInstances } from '@/lib/useServerData'
 import { computed, ref } from 'vue'
 
