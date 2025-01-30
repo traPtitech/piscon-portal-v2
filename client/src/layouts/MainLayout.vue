@@ -43,8 +43,8 @@ const isActive = (link: string) =>
             {{ link.name }}
           </span>
         </RouterLink>
-        <div class="for-admins-label">管理者向け</div>
         <template v-if="me?.isAdmin">
+          <div class="for-admins-label">管理者向け</div>
           <RouterLink
             v-for="link in adminLinks"
             class="nav-link"
