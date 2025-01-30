@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type ErrorMessage from '@/components/ErrorMessage.vue'
 import { useTeamBench, useTeamInstances } from '@/lib/useServerData'
 import { watch } from 'vue'
 
