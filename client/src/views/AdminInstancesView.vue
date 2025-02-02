@@ -130,7 +130,7 @@ const collapseStates = ref<Record<string, boolean>>({})
   transform: rotate(0);
 }
 .team-accordion-button.closed > svg {
-  transform: rotate(90deg);
+  transform: rotate(-90deg);
 }
 
 .instance-card-list-wrapper.closed {
