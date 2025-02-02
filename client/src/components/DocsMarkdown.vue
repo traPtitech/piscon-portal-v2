@@ -8,7 +8,7 @@ const rendered = computed(() => renderMarkdown(markdown))
 </script>
 
 <template>
-  <div v-html="rendered.renderedText" class="docs-markdown-root"></div>
+  <div v-html="rendered" class="docs-markdown-root"></div>
 </template>
 
 <style scoped>

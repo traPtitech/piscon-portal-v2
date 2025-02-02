@@ -18,7 +18,7 @@
   "dependencies": {
     "@primevue/themes": "^4.2.5",
     "@tanstack/vue-query": "^5.62.16",
-    "@traptitech/traq-markdown-it": "^6.3.0",
+    "micromark": "^4.0.1",
     "openapi-fetch": "^0.13.4",
     "primevue": "^4.2.5",
     "uuidv7": "^1.0.2",
