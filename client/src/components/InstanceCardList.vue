@@ -1,47 +1,26 @@
 <script setup lang="ts">
+import type { components } from '@/api/openapi'
 import CopyToClipboardButton from '@/components/CopyToClipboardButton.vue'
 import InstanceStatusChip from '@/components/InstanceStatusChip.vue'
 import MainButton from '@/components/MainButton.vue'
-import MainSwitch from '@/components/MainSwitch.vue'
 import {
   useCreateTeamInstance,
   useDeleteTeamInstance,
   useEnqueueBenchmark,
   useStartTeamInstance,
   useStopTeamInstance,
-  useTeamInstances,
 } from '@/lib/useServerData'
 import { Icon } from '@iconify/vue'
-import { ref, computed } from 'vue'
+import notfoundImage from '@/assets/not-found.png'
 
-const { teamId } = defineProps<{ teamId: string }>()
+type Instance = components['schemas']['Instance']
+const { teamId, instances } = defineProps<{ teamId: string; instances: Instance[] }>()
 
-const showDeleted = ref(false)
-
-const { data: instances, refetch } = useTeamInstances(teamId)
 const { mutate: createInstance } = useCreateTeamInstance()
 const { mutate: startInstance } = useStartTeamInstance()
 const { mutate: stopInstance } = useStopTeamInstance()
 const { mutate: deleteInstance } = useDeleteTeamInstance()
 const { mutate: enqueueBenchmark } = useEnqueueBenchmark({ redirect: true })
-
-const visibleInstances = computed(() =>
-  instances.value?.filter((i) => showDeleted.value || i.status !== 'deleted'),
-)
-
-setInterval(() => {
-  if (
-    instances.value?.some(
-      (i) =>
-        i.status === 'building' ||
-        i.status === 'starting' ||
-        i.status === 'stopping' ||
-        i.status === 'deleting',
-    )
-  ) {
-    refetch()
-  }
-}, 500)
 
 const enqueueBenchmarkHandler = (instanceId: string) => {
   enqueueBenchmark({ teamId, instanceId })
@@ -50,14 +29,12 @@ const enqueueBenchmarkHandler = (instanceId: string) => {
 
 <template>
   <div class="instance-card-list-container">
-    <div class="instance-card-list-header">
-      <MainSwitch v-model="showDeleted">削除済みのインスタンスも表示する</MainSwitch>
-    </div>
-    <div v-if="visibleInstances?.length === 0" class="no-instances">
-      現在インスタンスはありません
+    <div v-if="instances?.length === 0" class="no-instances">
+      <img :src="notfoundImage" alt="" width="192" height="192" />
+      <div>現在インスタンスはありません</div>
     </div>
     <div class="instance-card-list">
-      <div v-for="instance in visibleInstances" :key="instance.id" class="instance-card">
+      <div v-for="instance in instances" :key="instance.id" class="instance-card">
         <div class="instance-info">
           <div class="card-title">
             <Icon icon="mdi:server-network" width="24" height="24" />
@@ -138,20 +115,13 @@ const enqueueBenchmarkHandler = (instanceId: string) => {
   gap: 1rem;
 }
 
-.instance-card-list-header {
-  display: flex;
-  justify-content: flex-end;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--ct-slate-600);
-}
-
 .no-instances {
   padding: 1rem;
   border: 1px dashed var(--ct-slate-300);
   border-radius: 4px;
   text-align: center;
   color: var(--ct-slate-400);
+  font-weight: 600;
 }
 
 .instance-card-list {

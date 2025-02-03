@@ -2,7 +2,7 @@ import { api } from '@/api'
 import router from '@/router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 
-export const useUsers = () =>
+export const useUsersData = () =>
   useQuery({
     queryKey: ['users'],
     queryFn: () => api.GET('/users').then((r) => r.data),
@@ -150,8 +150,62 @@ export const useEnqueueBenchmark = (options?: { redirect?: boolean }) => {
   })
 }
 
+export const useAllInstances = () =>
+  useQuery({
+    queryKey: ['instances'],
+    queryFn: () => api.GET('/instances').then((r) => r.data),
+  })
+
+export const useTeams = () =>
+  useQuery({
+    queryKey: ['teams'],
+    queryFn: () => api.GET('/teams').then((r) => r.data),
+  })
+
+export const useAllBenches = () =>
+  useQuery({
+    queryKey: ['benches'],
+    queryFn: () => api.GET('/benchmarks').then((r) => r.data),
+  })
+
+export const useBench = (benchmarkId: string) =>
+  useQuery({
+    queryKey: ['bench', benchmarkId],
+    queryFn: () =>
+      api
+        .GET('/benchmarks/{benchmarkId}', { params: { path: { benchmarkId } } })
+        .then((r) => r.data),
+  })
+
 export const useDocs = () =>
   useQuery({
     queryKey: ['docs'],
     queryFn: () => api.GET('/docs').then((r) => r.data),
   })
+
+export const useUpdateDocs = () => {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (params: { body: string }) =>
+      api.PATCH('/docs', {
+        body: params,
+      }),
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: ['docs'] })
+    },
+  })
+}
+
+export const useUpdateAdmins = () => {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (params: string[]) =>
+      api.PUT('/admins', {
+        body: params,
+      }),
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: ['admins'] })
+      client.invalidateQueries({ queryKey: ['users'] })
+    },
+  })
+}

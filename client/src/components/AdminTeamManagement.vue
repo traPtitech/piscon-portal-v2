@@ -3,14 +3,13 @@ import UserAvatar from '@/components/UserAvatar.vue'
 import { useMe, useTeam, useUpdateTeam } from '@/lib/useServerData'
 import { Icon } from '@iconify/vue'
 import MainButton from '@/components/MainButton.vue'
-import ActionFormCard from '@/components/ActionFormCard.vue'
 import { useUsers } from '@/lib/useUsers'
-import ErrorMessage from '@/components/ErrorMessage.vue'
+import { ref } from 'vue'
 
 const { teamId } = defineProps<{ teamId: string }>()
 
 const { data: me } = useMe()
-const { data: team, error } = useTeam(teamId)
+const { data: team } = useTeam(teamId)
 const { getUserById, getUserByName } = useUsers()
 const { mutate: updateTeam } = useUpdateTeam()
 
@@ -35,29 +34,27 @@ const addMember = (memberId: string) => {
   updateTeam({ teamId: team.value.id, name: team.value.name, members: newMembers })
 }
 
-const addNewMemberHandler = (newMemberName: string) => {
-  const user = getUserByName(newMemberName)
+const newMemberName = ref('')
+const addNewMemberHandler = () => {
+  if (newMemberName.value === '') return
+  const user = getUserByName(newMemberName.value)
   if (user === undefined) return
   addMember(user.id)
+  newMemberName.value = ''
+}
+
+const newTeamName = ref('')
+const changeTeamNameHandler = () => {
+  if (newTeamName.value === '') return
+  changeTeamName(newTeamName.value)
+  newTeamName.value = ''
 }
 </script>
 
 <template>
-  <div>
-    <ErrorMessage v-if="error" />
-    <div v-if="team !== undefined" class="team-management-container">
-      <div class="team-info">
-        <div class="team-name">チーム: {{ team.name }}</div>
-        <MainButton
-          v-if="me"
-          @click="removeMember(me.id)"
-          variant="destructive"
-          class="leave-team-button"
-        >
-          <Icon icon="mdi:exit-run" width="20" height="20" />
-          <span>チームを抜ける</span>
-        </MainButton>
-      </div>
+  <div class="team-management-container">
+    <template v-if="team !== undefined">
+      <div class="team-name">チーム: {{ team.name }}</div>
       <div class="members-list">
         <div v-for="member in team.members" :key="member" class="member-container">
           <UserAvatar :name="getUserById(member)?.name ?? ''" />
@@ -74,24 +71,42 @@ const addNewMemberHandler = (newMemberName: string) => {
         </div>
       </div>
       <div class="team-management-forms">
-        <ActionFormCard
-          icon="mdi:account-plus"
-          title="メンバー追加"
-          inputPlaceholder="メンバー名 (例: cp20)"
-          :action="addNewMemberHandler"
-          actionIcon="mdi:account-plus"
-          actionLabel="追加"
-        />
-        <ActionFormCard
-          icon="mdi:rename"
-          title="チーム名変更"
-          inputPlaceholder="新しいチーム名"
-          :action="changeTeamName"
-          actionIcon="mdi:content-save"
-          actionLabel="保存"
-        />
+        <div class="team-management-form">
+          <div class="team-management-form-header">
+            <Icon icon="mdi:account-plus" width="20" height="20" />
+            <span>メンバー追加</span>
+          </div>
+          <form class="team-management-form-body" @submit.prevent="addNewMemberHandler">
+            <InputText
+              v-model="newMemberName"
+              placeholder="メンバー名 (例: cp20)"
+              class="team-management-form-input"
+            />
+            <MainButton type="submit">
+              <Icon icon="mdi:account-plus" width="20" height="20" />
+              <span>追加</span>
+            </MainButton>
+          </form>
+        </div>
+        <div class="team-management-form">
+          <div class="team-management-form-header">
+            <Icon icon="mdi:rename" width="20" height="20" />
+            <span>チーム名変更</span>
+          </div>
+          <form class="team-management-form-body" @submit.prevent="changeTeamNameHandler">
+            <InputText
+              v-model="newMemberName"
+              placeholder="新しいチーム名"
+              class="team-management-form-input"
+            />
+            <MainButton type="submit">
+              <Icon icon="mdi:content-save" width="20" height="20" />
+              <span>保存</span>
+            </MainButton>
+          </form>
+        </div>
       </div>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -99,18 +114,15 @@ const addNewMemberHandler = (newMemberName: string) => {
 .team-management-container {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.5rem;
   container-type: inline-size;
-}
-
-.team-info {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+  border: 1px solid var(--ct-slate-300);
+  border-radius: 4px;
+  padding: 1rem;
 }
 
 .team-name {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: bold;
 }
 
@@ -141,36 +153,29 @@ const addNewMemberHandler = (newMemberName: string) => {
 .team-management-forms {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 0.5rem;
+  gap: 1.5rem;
 }
 
-.add-member-form,
-.team-name-form {
+.team-management-form {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  border: 1px solid var(--ct-slate-300);
-  border-radius: 4px;
-  padding: 1rem;
+  gap: 0.25rem;
 }
 
-.add-member-form-header,
-.team-name-form-header {
+.team-management-form-header {
   display: flex;
   align-items: center;
   gap: 0.25rem;
   font-weight: 600;
 }
 
-.add-member-form-body,
-.team-name-form-body {
+.team-management-form-body {
   display: flex;
   gap: 0.5rem;
   align-items: center;
 }
 
-.add-member-input,
-.team-name-input {
+.team-management-form-input {
   flex: 1;
   font-size: 0.8rem;
 }

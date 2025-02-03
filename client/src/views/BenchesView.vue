@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import BenchmarkList from '@/components/BenchmarkList.vue'
 import PageTitle from '@/components/PageTitle.vue'
+import TeamBenchmarkList from '@/components/TeamBenchmarkList.vue'
 import { useMe } from '@/lib/useServerData'
 
 const { data: me } = useMe()
@@ -10,7 +10,7 @@ const { data: me } = useMe()
   <main class="benches-container">
     <PageTitle icon="mdi:thunder">ベンチマーク</PageTitle>
     <div v-if="me?.teamId !== undefined">
-      <BenchmarkList :teamId="me.teamId" />
+      <TeamBenchmarkList :teamId="me.teamId" />
     </div>
     <div v-if="me !== undefined && me?.teamId === undefined">
       <p>チームに所属していません</p>
