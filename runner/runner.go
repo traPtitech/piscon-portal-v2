@@ -2,7 +2,6 @@ package runner
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -77,11 +76,12 @@ func (r *Runner) Run() error {
 
 func captureStreamOutput(_ context.Context, r io.Reader, bdr *strings.Builder) error {
 	for {
-		if _, err := io.CopyN(bdr, r, bufSize); err != nil {
-			if errors.Is(err, io.EOF) {
-				return nil
-			}
+		n, err := io.Copy(bdr, io.LimitReader(r, bufSize))
+		if err != nil {
 			return fmt.Errorf("copy: %w", err)
+		}
+		if n == 0 {
+			return nil
 		}
 	}
 }
