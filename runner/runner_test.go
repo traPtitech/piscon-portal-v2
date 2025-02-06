@@ -26,11 +26,12 @@ func Test_captureStreamOutput(t *testing.T) {
 	}{
 		"ok": {
 			writeFunc: func(t *testing.T, w io.WriteCloser, b *runner.Builder) {
-				t.Helper()
 				for i := range 10 {
 					_, err := w.Write(bytes.Repeat([]byte("a"), runner.BufSizeExported))
 					require.NoError(t, err)
-					assert.Equal(t, string(bytes.Repeat([]byte("a"), runner.BufSizeExported*i)), b.String())
+					time.Sleep(1 * time.Millisecond)                        // 速すぎるとテストが通らないので適当に待つ
+					assert.Len(t, b.String(), runner.BufSizeExported*(i+1)) // 文字列が長いので、長さを表示するようにするため
+					assert.Equal(t, string(bytes.Repeat([]byte("a"), runner.BufSizeExported*(i+1))), b.String())
 				}
 				w.Close()
 			},
