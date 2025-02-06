@@ -2,6 +2,7 @@ package runner
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -117,11 +118,8 @@ func (r *Runner) streamJobProgress(
 
 	// 最後に必ず結果を計算して送信するようにする
 	defer func() {
-		if err != nil {
-			return
-		}
-		if _err := calcAndSendProgress(); _err != nil {
-			err = _err
+		if calcErr := calcAndSendProgress(); calcErr != nil {
+			err = errors.Join(err, fmt.Errorf("defer: calcAndSendProgress%w", calcErr))
 		}
 	}()
 
@@ -131,6 +129,7 @@ func (r *Runner) streamJobProgress(
 	}{false, false}
 
 	ticker := time.NewTicker(sendProgressInterval)
+	defer ticker.Stop()
 
 	for {
 		select {
