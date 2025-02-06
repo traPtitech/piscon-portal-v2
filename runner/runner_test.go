@@ -347,3 +347,42 @@ func Test_streamJobProgress(t *testing.T) {
 		})
 	}
 }
+
+// 他のコンポーネントで十分テストが書かれているため、Runは一番シンプルな、すぐに入力がおわるケースのみ書く
+func TestRun(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	portal := mock.NewMockPortal(ctrl)
+	benchmarker := benchmarkerMock.NewMockBenchmarker(ctrl)
+	streamClient := mock.NewMockProgressStreamClient(ctrl)
+
+	portal.EXPECT().MakeProgressStreamClient(gomock.Any()).Return(streamClient, nil)
+	portal.EXPECT().GetJob(gomock.Any()).Return(domain.NewJob("id", "target"), nil)
+
+	startedAt := time.Now()
+	stdout := strings.Repeat("a", runner.BufSizeExported*3)
+	stderr := strings.Repeat("b", runner.BufSizeExported)
+	benchmarker.EXPECT().Start(gomock.Any(), gomock.Any()).
+		Return(io.NopCloser(strings.NewReader(stdout)), io.NopCloser(strings.NewReader(stderr)), startedAt, nil)
+
+	streamClient.EXPECT().Close().Return(nil)
+
+	benchmarker.EXPECT().CalculateScore(gomock.Any(), stdout, stderr).Return(100, nil)
+
+	streamClient.EXPECT().
+		SendProgress(gomock.Any(),
+			domain.NewProgress("id", stdout, stderr, 100, startedAt)).
+		Return(nil)
+
+	benchmarker.EXPECT().Wait(gomock.Any()).Return(domain.ResultPassed, time.Now(), nil)
+
+	portal.EXPECT().PostJobFinished(gomock.Any(), "id", gomock.Any(), domain.ResultPassed, nil).Return(nil)
+
+	// テスト対象の関数を用意
+	r := runner.Prepare(portal, benchmarker)
+
+	// テスト対象の関数を呼び出す
+	err := r.Run()
+	assert.NoError(t, err)
+}
