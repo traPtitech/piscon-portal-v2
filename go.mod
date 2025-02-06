@@ -1,6 +1,6 @@
 module github.com/traPtitech/piscon-portal-v2
 
-go 1.23
+go 1.24rc3
 
 require (
 	github.com/aarondl/opt v0.0.0-20240623220848-083f18ab9536
@@ -22,6 +22,7 @@ require (
 	github.com/testcontainers/testcontainers-go/modules/mysql v0.35.0
 	go.uber.org/mock v0.5.0
 	golang.org/x/oauth2 v0.25.0
+	golang.org/x/sync v0.10.0
 	google.golang.org/grpc v1.70.0
 	google.golang.org/protobuf v1.36.4
 )
@@ -90,7 +91,6 @@ require (
 	golang.org/x/crypto v0.32.0 // indirect
 	golang.org/x/exp v0.0.0-20250106191152-7588d65b2ba8 // indirect
 	golang.org/x/net v0.34.0 // indirect
-	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/time v0.8.0 // indirect
