@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/traPtitech/piscon-portal-v2/runner/benchmarker"
@@ -45,8 +44,8 @@ func (r *Runner) Run() error {
 		return fmt.Errorf("execute: %w", err)
 	}
 
-	stdoutBdr := &strings.Builder{}
-	stderrBdr := &strings.Builder{}
+	stdoutBdr := &Builder{}
+	stderrBdr := &Builder{}
 
 	stdoutErrChan, stderrErrChan := make(chan error), make(chan error)
 
@@ -75,7 +74,7 @@ func (r *Runner) Run() error {
 	return nil
 }
 
-func captureStreamOutput(_ context.Context, r io.Reader, bdr *strings.Builder) error {
+func captureStreamOutput(_ context.Context, r io.Reader, bdr *Builder) error {
 	for {
 		n, err := io.Copy(bdr, io.LimitReader(r, bufSize))
 		if err != nil {
@@ -91,7 +90,7 @@ func captureStreamOutput(_ context.Context, r io.Reader, bdr *strings.Builder) e
 // It returns nil if, and only if both of stdout and stderr reach EOF.
 func (r *Runner) streamJobProgress(
 	ctx context.Context, job *domain.Job, startedAt time.Time,
-	stdoutBdr, stderrBdr *strings.Builder,
+	stdoutBdr, stderrBdr *Builder,
 	stdoutErrChan, stderrErrChan chan error,
 ) (err error) {
 	streamClient, err := r.portal.MakeProgressStreamClient(ctx)
