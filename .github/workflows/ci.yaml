@@ -14,10 +14,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.23"
+          go-version: "1.23" #TODO: 1.24が出たら消す
           # go-version-file: go.mod
-      - run: go install golang.org/dl/go1.24rc3@latest && go1.24rc3 download
-      - run: go1.24rc3 build -o out/server ./cmd/server
+      - run: go install golang.org/dl/go1.24rc3@latest && go1.24rc3 download #TODO: 1.24が出たら消す
+      - run: go1.24rc3 build -o out/server ./cmd/server #TODO: 1.24が出たら消す
       # - run: go build -o out/server ./cmd/server
 
   lint:
@@ -27,13 +27,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.23"
+          go-version: "1.23" #TODO: 1.24が出たら消す
           # go-version-file: go.mod
-      - run: go install golang.org/dl/go1.24rc3@latest && go1.24rc3 download
+      - run: go install golang.org/dl/go1.24rc3@latest && go1.24rc3 download #TODO: 1.24が出たら消す
       - uses: golangci/golangci-lint-action@v6
         with:
           version: v1.62
-          install-mode: goinstall
+          install-mode: goinstall #TODO: 1.24が出たら消す
 
   test:
     name: Test
@@ -42,8 +42,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.23"
+          go-version: "1.23" #TODO: 1.24が出たら消す
           # go-version-file: go.mod
-      - run: go install golang.org/dl/go1.24rc3@latest && go1.24rc3 download
-      - run: go1.24rc3 test -cover -race ./...
+      - run: go install golang.org/dl/go1.24rc3@latest && go1.24rc3 download #TODO: 1.24が出たら消す
+      - run: go1.24rc3 test -cover -race ./... #TODO: 1.24が出たら消す
       # - run: go test -cover -race ./...
