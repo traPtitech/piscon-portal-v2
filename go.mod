@@ -15,7 +15,7 @@ require (
 	github.com/jellydator/ttlcache/v3 v3.3.0
 	github.com/labstack/echo-contrib v0.17.2
 	github.com/labstack/echo/v4 v4.13.3
-	github.com/ogen-go/ogen v1.9.0
+	github.com/ogen-go/ogen v1.10.0
 	github.com/samber/lo v1.49.1
 	github.com/stephenafamo/bob v0.30.0
 	github.com/stretchr/testify v1.10.0
@@ -90,9 +90,9 @@ require (
 	golang.org/x/crypto v0.32.0 // indirect
 	golang.org/x/exp v0.0.0-20250106191152-7588d65b2ba8 // indirect
 	golang.org/x/net v0.34.0 // indirect
-	golang.org/x/sync v0.10.0 // indirect
+	golang.org/x/sync v0.11.0 // indirect
 	golang.org/x/sys v0.29.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/text v0.22.0 // indirect
 	golang.org/x/time v0.8.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20241202173237-19429a94021a // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
