@@ -1,0 +1,40 @@
+name: Dependabot auto-approve
+on: pull_request
+
+permissions:
+  pull-requests: write
+
+# dependabot の PR に対して動く。
+# Go のパッチバージョンアップデートであれば approve して auto merge を有効にする。
+# それ以外であれば、レビューをリクエストする。
+
+jobs:
+  dependabot:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'traPtitech/piscon-portal-v2'
+    steps:
+      - name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@d7267f607e9d3fb96fc2fbe83e0af444713e90b7
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Approve and merge a PR
+        run: gh pr review --approve "$PR_URL" && gh pr merge --auto --squash "$PR_URL"
+        if: |
+          contains(steps.metadata.outputs.dependency-names, 'gomod') &&
+          steps.metadata.outputs.update-type == 'version-update:semver-patch'
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Request review for a PR
+        run: gh pr request-reviewers --reviewer traPtitech/piscon-portal "$PR_URL"
+        if: |
+          ${{ !(
+            contains(steps.metadata.outputs.dependency-names , 'gomod') && 
+            steps.metadata.outputs.update-type != 'version-update:semver-patch'
+          ) }}
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
