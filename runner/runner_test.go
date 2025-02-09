@@ -21,11 +21,11 @@ import (
 
 func Test_captureStreamOutput(t *testing.T) {
 	testCases := map[string]struct {
-		writeFunc func(*testing.T, io.WriteCloser, *runner.Builder)
+		writeFunc func(*testing.T, io.WriteCloser, *runner.SyncStringBuilder)
 		result    string
 	}{
 		"ok": {
-			writeFunc: func(t *testing.T, w io.WriteCloser, b *runner.Builder) {
+			writeFunc: func(t *testing.T, w io.WriteCloser, b *runner.SyncStringBuilder) {
 				for i := range 10 {
 					_, err := w.Write(bytes.Repeat([]byte("a"), runner.BufSizeExported))
 					require.NoError(t, err)
@@ -38,7 +38,7 @@ func Test_captureStreamOutput(t *testing.T) {
 			result: strings.Repeat("a", runner.BufSizeExported*10),
 		},
 		"短くてもエラー無し": {
-			writeFunc: func(t *testing.T, w io.WriteCloser, _ *runner.Builder) {
+			writeFunc: func(t *testing.T, w io.WriteCloser, _ *runner.SyncStringBuilder) {
 				t.Helper()
 				_, err := w.Write([]byte("abc"))
 				require.NoError(t, err)
@@ -47,7 +47,7 @@ func Test_captureStreamOutput(t *testing.T) {
 			result: "abc",
 		},
 		"0文字でもエラー無し": {
-			writeFunc: func(t *testing.T, w io.WriteCloser, _ *runner.Builder) {
+			writeFunc: func(t *testing.T, w io.WriteCloser, _ *runner.SyncStringBuilder) {
 				t.Helper()
 				w.Close()
 			},
@@ -62,7 +62,7 @@ func Test_captureStreamOutput(t *testing.T) {
 
 			// パイプを用意して、writerの方に書き込むことでテスト対象関数のreaderにデータを流す
 			pr, pw := io.Pipe()
-			bdr := &runner.Builder{}
+			bdr := &runner.SyncStringBuilder{}
 
 			eg := &errgroup.Group{}
 			eg.Go(func() error {
@@ -96,12 +96,12 @@ func Test_streamJobProgress(t *testing.T) {
 		return r, portal, streamClient, benchmarker
 	}
 
-	setupArgs := func(t *testing.T) (*domain.Job, time.Time, *runner.Builder, *runner.Builder, chan error, chan error) {
+	setupArgs := func(t *testing.T) (*domain.Job, time.Time, *runner.SyncStringBuilder, *runner.SyncStringBuilder, chan error, chan error) {
 		t.Helper()
 		job := domain.NewJob("id", "target")
 		startedAt := time.Now()
-		stdoutBdr := &runner.Builder{}
-		stderrBdr := &runner.Builder{}
+		stdoutBdr := &runner.SyncStringBuilder{}
+		stderrBdr := &runner.SyncStringBuilder{}
 		stdoutErrChan := make(chan error, 1)
 		stderrErrChan := make(chan error, 1)
 		return job, startedAt, stdoutBdr, stderrBdr, stdoutErrChan, stderrErrChan
@@ -110,7 +110,7 @@ func Test_streamJobProgress(t *testing.T) {
 	type testCase struct {
 		useSynctest bool
 		setupMocks  func(sc *mock.MockProgressStreamClient, bm *benchmarkerMock.MockBenchmarker, startedAt time.Time)
-		writeFunc   func(stdoutBdr, stderrBdr *runner.Builder, stdoutErrChan, stderrErrChan chan error)
+		writeFunc   func(stdoutBdr, stderrBdr *runner.SyncStringBuilder, stdoutErrChan, stderrErrChan chan error)
 		expectedErr error
 	}
 
@@ -121,7 +121,7 @@ func Test_streamJobProgress(t *testing.T) {
 				bm.EXPECT().CalculateScore(gomock.Any(), "", "").Return(0, nil)
 				sc.EXPECT().SendProgress(gomock.Any(), domain.NewProgress("id", "", "", 0, startedAt)).Return(nil)
 			},
-			writeFunc: func(_, _ *runner.Builder, stdoutErrChan, stderrErrChan chan error) {
+			writeFunc: func(_, _ *runner.SyncStringBuilder, stdoutErrChan, stderrErrChan chan error) {
 				go func() {
 					stdoutErrChan <- nil
 					stderrErrChan <- nil
@@ -135,7 +135,7 @@ func Test_streamJobProgress(t *testing.T) {
 				bm.EXPECT().CalculateScore(gomock.Any(), "abc", "").Return(0, nil)
 				sc.EXPECT().SendProgress(gomock.Any(), domain.NewProgress("id", "abc", "", 0, startedAt)).Return(nil)
 			},
-			writeFunc: func(stdoutBdr, _ *runner.Builder, stdoutErrChan, stderrErrChan chan error) {
+			writeFunc: func(stdoutBdr, _ *runner.SyncStringBuilder, stdoutErrChan, stderrErrChan chan error) {
 				go func() {
 					_, err := stdoutBdr.WriteString("abc")
 					require.NoError(t, err)
@@ -151,7 +151,7 @@ func Test_streamJobProgress(t *testing.T) {
 				bm.EXPECT().CalculateScore(gomock.Any(), "", "abc").Return(0, nil)
 				sc.EXPECT().SendProgress(gomock.Any(), domain.NewProgress("id", "", "abc", 0, startedAt)).Return(nil)
 			},
-			writeFunc: func(_, stderrBdr *runner.Builder, stdoutErrChan, stderrErrChan chan error) {
+			writeFunc: func(_, stderrBdr *runner.SyncStringBuilder, stdoutErrChan, stderrErrChan chan error) {
 				go func() {
 					_, err := stderrBdr.WriteString("abc")
 					require.NoError(t, err)
@@ -167,7 +167,7 @@ func Test_streamJobProgress(t *testing.T) {
 				bm.EXPECT().CalculateScore(gomock.Any(), "abc", "def").Return(0, nil)
 				sc.EXPECT().SendProgress(gomock.Any(), domain.NewProgress("id", "abc", "def", 0, startedAt)).Return(nil)
 			},
-			writeFunc: func(stdoutBdr, stderrBdr *runner.Builder, stdoutErrChan, stderrErrChan chan error) {
+			writeFunc: func(stdoutBdr, stderrBdr *runner.SyncStringBuilder, stdoutErrChan, stderrErrChan chan error) {
 				go func() {
 					_, err := stdoutBdr.WriteString("abc")
 					require.NoError(t, err)
@@ -185,7 +185,7 @@ func Test_streamJobProgress(t *testing.T) {
 				bm.EXPECT().CalculateScore(gomock.Any(), "abc", "def").Return(0, nil)
 				sc.EXPECT().SendProgress(gomock.Any(), domain.NewProgress("id", "abc", "def", 0, startedAt)).Return(nil)
 			},
-			writeFunc: func(stdoutBdr, stderrBdr *runner.Builder, stdoutErrChan, stderrErrChan chan error) {
+			writeFunc: func(stdoutBdr, stderrBdr *runner.SyncStringBuilder, stdoutErrChan, stderrErrChan chan error) {
 				go func() {
 					_, err := stdoutBdr.WriteString("abc")
 					require.NoError(t, err)
@@ -203,7 +203,7 @@ func Test_streamJobProgress(t *testing.T) {
 				bm.EXPECT().CalculateScore(gomock.Any(), "abc", "def").Return(0, nil)
 				sc.EXPECT().SendProgress(gomock.Any(), domain.NewProgress("id", "abc", "def", 0, startedAt)).Return(nil)
 			},
-			writeFunc: func(stdoutBdr, stderrBdr *runner.Builder, stdoutErrChan, stderrErrChan chan error) {
+			writeFunc: func(stdoutBdr, stderrBdr *runner.SyncStringBuilder, stdoutErrChan, stderrErrChan chan error) {
 				go func() {
 					_, err := stdoutBdr.WriteString("abc")
 					require.NoError(t, err)
@@ -225,7 +225,7 @@ func Test_streamJobProgress(t *testing.T) {
 					sc.EXPECT().SendProgress(gomock.Any(), domain.NewProgress("id", "abcdef", "defghi", 100, startedAt)).Return(nil).Call,
 				)
 			},
-			writeFunc: func(stdoutBdr, stderrBdr *runner.Builder, stdoutErrChan, stderrErrChan chan error) {
+			writeFunc: func(stdoutBdr, stderrBdr *runner.SyncStringBuilder, stdoutErrChan, stderrErrChan chan error) {
 				go func() {
 					_, err := stdoutBdr.WriteString("abc")
 					require.NoError(t, err)
@@ -251,7 +251,7 @@ func Test_streamJobProgress(t *testing.T) {
 					bm.EXPECT().CalculateScore(gomock.Any(), "abcdef", "defghi").Return(100, assert.AnError).Call,
 				)
 			},
-			writeFunc: func(stdoutBdr, stderrBdr *runner.Builder, stdoutErrChan, stderrErrChan chan error) {
+			writeFunc: func(stdoutBdr, stderrBdr *runner.SyncStringBuilder, stdoutErrChan, stderrErrChan chan error) {
 				go func() {
 					_, err := stdoutBdr.WriteString("abc")
 					require.NoError(t, err)
@@ -278,7 +278,7 @@ func Test_streamJobProgress(t *testing.T) {
 					sc.EXPECT().SendProgress(gomock.Any(), domain.NewProgress("id", "abcdef", "defghi", 100, startedAt)).Return(assert.AnError).Call,
 				)
 			},
-			writeFunc: func(stdoutBdr, stderrBdr *runner.Builder, stdoutErrChan, stderrErrChan chan error) {
+			writeFunc: func(stdoutBdr, stderrBdr *runner.SyncStringBuilder, stdoutErrChan, stderrErrChan chan error) {
 				go func() {
 					_, err := stdoutBdr.WriteString("abc")
 					require.NoError(t, err)
@@ -305,7 +305,7 @@ func Test_streamJobProgress(t *testing.T) {
 					sc.EXPECT().SendProgress(gomock.Any(), domain.NewProgress("id", "abc", "def", 100, startedAt)).Return(nil).Call,
 				)
 			},
-			writeFunc: func(stdoutBdr, stderrBdr *runner.Builder, _ chan error, _ chan error) {
+			writeFunc: func(stdoutBdr, stderrBdr *runner.SyncStringBuilder, _ chan error, _ chan error) {
 				go func() {
 					_, err := stdoutBdr.WriteString("abc")
 					require.NoError(t, err)

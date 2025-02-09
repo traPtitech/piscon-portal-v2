@@ -44,8 +44,8 @@ func (r *Runner) Run() error {
 		return fmt.Errorf("execute: %w", err)
 	}
 
-	stdoutBdr := &Builder{}
-	stderrBdr := &Builder{}
+	stdoutBdr := &SyncStringBuilder{}
+	stderrBdr := &SyncStringBuilder{}
 
 	stdoutErrChan, stderrErrChan := make(chan error), make(chan error)
 
@@ -74,7 +74,7 @@ func (r *Runner) Run() error {
 	return nil
 }
 
-func captureStreamOutput(_ context.Context, r io.Reader, bdr *Builder) error {
+func captureStreamOutput(_ context.Context, r io.Reader, bdr *SyncStringBuilder) error {
 	for {
 		n, err := io.Copy(bdr, io.LimitReader(r, bufSize))
 		if err != nil {
@@ -90,7 +90,7 @@ func captureStreamOutput(_ context.Context, r io.Reader, bdr *Builder) error {
 // It returns nil if, and only if both of stdout and stderr reach EOF.
 func (r *Runner) streamJobProgress(
 	ctx context.Context, job *domain.Job, startedAt time.Time,
-	stdoutBdr, stderrBdr *Builder,
+	stdoutBdr, stderrBdr *SyncStringBuilder,
 	stdoutErrChan, stderrErrChan chan error,
 ) (err error) {
 	streamClient, err := r.portal.MakeProgressStreamClient(ctx)

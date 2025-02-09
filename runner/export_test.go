@@ -18,7 +18,7 @@ var (
 
 func (r *Runner) StreamJobProgressExported(
 	ctx context.Context, job *domain.Job, startedAt time.Time,
-	stdoutBdr, stderrBdr *Builder,
+	stdoutBdr, stderrBdr *SyncStringBuilder,
 	stdoutErrChan, stderrErrChan chan error,
 ) error {
 	return r.streamJobProgress(ctx, job, startedAt, stdoutBdr, stderrBdr, stdoutErrChan, stderrErrChan)
