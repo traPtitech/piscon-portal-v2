@@ -134,7 +134,7 @@ func (r *Runner) streamJobProgress(
 		select {
 		case <-ticker.C:
 			if err := calcAndSendProgress(); err != nil {
-				return fmt.Errorf("calc and send progress: %w", err)
+				return fmt.Errorf("calc and send progress in tick: %w", err)
 			}
 		case err := <-stdoutErrChan:
 			finished.stdout = true
