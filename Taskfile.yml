@@ -12,8 +12,8 @@ tasks:
   test:
     cmds:
       - go test -cover -race ./...
-    env:
-      GOEXPERIMENT: "synctest"
+    # env:
+    #   GOEXPERIMENT: "synctest"
 
   go:gen:
     cmds:
