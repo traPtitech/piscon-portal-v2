@@ -18,9 +18,14 @@ type Benchmarker interface {
 	// If ctx is canceled, the job must be stopped.
 	//
 	// After a successful call to Start the [Benchmarker.Wait] method must be called in order to release associated system resources.
-	Start(ctx context.Context, job *domain.Job) (stdout io.Reader, stderr io.Reader, startedAt time.Time, err error)
+	Start(ctx context.Context, job *domain.Job) (out Outputs, startedAt time.Time, err error)
 	// Wait waits for the job to complete and returns an error if the job failed.
 	Wait(ctx context.Context) (domain.Result, time.Time, error)
 	// CalculateScore calculates the score of the benchmark job based on stdout and stderr content.
 	CalculateScore(ctx context.Context, allStdout, allStderr string) (int, error)
+}
+
+type Outputs struct {
+	Stdout io.Reader
+	Stderr io.Reader
 }

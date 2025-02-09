@@ -11,10 +11,10 @@ package mock
 
 import (
 	context "context"
-	io "io"
 	reflect "reflect"
 	time "time"
 
+	benchmarker "github.com/traPtitech/piscon-portal-v2/runner/benchmarker"
 	domain "github.com/traPtitech/piscon-portal-v2/runner/domain"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -83,14 +83,13 @@ func (c *MockBenchmarkerCalculateScoreCall) DoAndReturn(f func(context.Context, 
 }
 
 // Start mocks base method.
-func (m *MockBenchmarker) Start(ctx context.Context, job *domain.Job) (io.Reader, io.Reader, time.Time, error) {
+func (m *MockBenchmarker) Start(ctx context.Context, job *domain.Job) (benchmarker.Outputs, time.Time, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Start", ctx, job)
-	ret0, _ := ret[0].(io.Reader)
-	ret1, _ := ret[1].(io.Reader)
-	ret2, _ := ret[2].(time.Time)
-	ret3, _ := ret[3].(error)
-	return ret0, ret1, ret2, ret3
+	ret0, _ := ret[0].(benchmarker.Outputs)
+	ret1, _ := ret[1].(time.Time)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // Start indicates an expected call of Start.
@@ -106,19 +105,19 @@ type MockBenchmarkerStartCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockBenchmarkerStartCall) Return(stdout, stderr io.Reader, startedAt time.Time, err error) *MockBenchmarkerStartCall {
-	c.Call = c.Call.Return(stdout, stderr, startedAt, err)
+func (c *MockBenchmarkerStartCall) Return(out benchmarker.Outputs, startedAt time.Time, err error) *MockBenchmarkerStartCall {
+	c.Call = c.Call.Return(out, startedAt, err)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockBenchmarkerStartCall) Do(f func(context.Context, *domain.Job) (io.Reader, io.Reader, time.Time, error)) *MockBenchmarkerStartCall {
+func (c *MockBenchmarkerStartCall) Do(f func(context.Context, *domain.Job) (benchmarker.Outputs, time.Time, error)) *MockBenchmarkerStartCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockBenchmarkerStartCall) DoAndReturn(f func(context.Context, *domain.Job) (io.Reader, io.Reader, time.Time, error)) *MockBenchmarkerStartCall {
+func (c *MockBenchmarkerStartCall) DoAndReturn(f func(context.Context, *domain.Job) (benchmarker.Outputs, time.Time, error)) *MockBenchmarkerStartCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

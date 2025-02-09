@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/piscon-portal-v2/runner"
+	"github.com/traPtitech/piscon-portal-v2/runner/benchmarker"
 	benchmarkerMock "github.com/traPtitech/piscon-portal-v2/runner/benchmarker/mock"
 	"github.com/traPtitech/piscon-portal-v2/runner/domain"
 	"github.com/traPtitech/piscon-portal-v2/runner/portal/mock"
@@ -355,7 +356,7 @@ func TestRun(t *testing.T) {
 	defer ctrl.Finish()
 
 	portal := mock.NewMockPortal(ctrl)
-	benchmarker := benchmarkerMock.NewMockBenchmarker(ctrl)
+	mockBenchmarker := benchmarkerMock.NewMockBenchmarker(ctrl)
 	streamClient := mock.NewMockProgressStreamClient(ctrl)
 
 	portal.EXPECT().MakeProgressStreamClient(gomock.Any()).Return(streamClient, nil)
@@ -364,24 +365,27 @@ func TestRun(t *testing.T) {
 	startedAt := time.Now()
 	stdout := strings.Repeat("a", runner.BufSizeExported*3)
 	stderr := strings.Repeat("b", runner.BufSizeExported)
-	benchmarker.EXPECT().Start(gomock.Any(), gomock.Any()).
-		Return(io.NopCloser(strings.NewReader(stdout)), io.NopCloser(strings.NewReader(stderr)), startedAt, nil)
+	mockBenchmarker.EXPECT().Start(gomock.Any(), gomock.Any()).
+		Return(benchmarker.Outputs{
+			Stdout: strings.NewReader(stdout),
+			Stderr: strings.NewReader(stderr),
+		}, startedAt, nil)
 
 	streamClient.EXPECT().Close().Return(nil)
 
-	benchmarker.EXPECT().CalculateScore(gomock.Any(), stdout, stderr).Return(100, nil)
+	mockBenchmarker.EXPECT().CalculateScore(gomock.Any(), stdout, stderr).Return(100, nil)
 
 	streamClient.EXPECT().
 		SendProgress(gomock.Any(),
 			domain.NewProgress("id", stdout, stderr, 100, startedAt)).
 		Return(nil)
 
-	benchmarker.EXPECT().Wait(gomock.Any()).Return(domain.ResultPassed, time.Now(), nil)
+	mockBenchmarker.EXPECT().Wait(gomock.Any()).Return(domain.ResultPassed, time.Now(), nil)
 
 	portal.EXPECT().PostJobFinished(gomock.Any(), "id", gomock.Any(), domain.ResultPassed, nil).Return(nil)
 
 	// テスト対象の関数を用意
-	r := runner.Prepare(portal, benchmarker)
+	r := runner.Prepare(portal, mockBenchmarker)
 
 	// テスト対象の関数を呼び出す
 	err := r.Run()

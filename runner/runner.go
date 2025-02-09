@@ -39,10 +39,12 @@ func (r *Runner) Run() error {
 		return fmt.Errorf("get benchmark: %w", err)
 	}
 
-	stdoutR, stderrR, startedAt, err := r.benchmarker.Start(ctx, job)
+	out, startedAt, err := r.benchmarker.Start(ctx, job)
 	if err != nil {
 		return fmt.Errorf("execute: %w", err)
 	}
+	stdoutR := out.Stdout
+	stderrR := out.Stderr
 
 	stdoutBdr := &SyncStringBuilder{}
 	stderrBdr := &SyncStringBuilder{}
