@@ -103,3 +103,41 @@ func TestGetJob(t *testing.T) {
 	}
 
 }
+
+func TestMakeProgressStreamClient(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		MakeProgressStreamClientErr error
+		expectedErr                 error
+	}{
+		"success": {},
+		"error": {
+			MakeProgressStreamClientErr: assert.AnError,
+			expectedErr:                 assert.AnError,
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			client := mock.NewMockBenchmarkServiceClient(ctrl)
+
+			client.EXPECT().SendBenchmarkProgress(gomock.Any()).Return(nil, testCase.MakeProgressStreamClientErr)
+
+			portal := grpc.NewPortal(client, 0)
+
+			ctx := context.Background()
+			streamClient, err := portal.MakeProgressStreamClient(ctx)
+
+			if testCase.expectedErr != nil {
+				assert.ErrorIs(t, err, testCase.expectedErr)
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, streamClient)
+			}
+		})
+	}
+}
