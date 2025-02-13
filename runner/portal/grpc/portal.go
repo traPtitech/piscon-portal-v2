@@ -8,6 +8,7 @@ import (
 	portalv1 "github.com/traPtitech/piscon-portal-v2/gen/portal/v1"
 	"github.com/traPtitech/piscon-portal-v2/runner/domain"
 	"github.com/traPtitech/piscon-portal-v2/runner/portal"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type Portal struct {
@@ -50,5 +51,32 @@ func (p *Portal) MakeProgressStreamClient(ctx context.Context) (portal.ProgressS
 }
 
 func (p *Portal) PostJobFinished(ctx context.Context, jobID string, finishedAt time.Time, result domain.Result, runnerErr error) error {
+	var benchResult portalv1.BenchmarkResult
+	switch result {
+	case domain.ResultPassed:
+		benchResult = portalv1.BenchmarkResult_BENCHMARK_RESULT_PASSED
+	case domain.ResultFailed:
+		benchResult = portalv1.BenchmarkResult_BENCHMARK_RESULT_FAILED
+	case domain.ResultError:
+		benchResult = portalv1.BenchmarkResult_BENCHMARK_RESULT_ERROR
+	default:
+		return fmt.Errorf("unknown result: %v", result)
+	}
+
+	var runnerErrStr string
+	if runnerErr != nil {
+		runnerErrStr = runnerErr.Error()
+	}
+
+	_, err := p.cl.PostJobFinished(ctx, &portalv1.PostJobFinishedRequest{
+		BenchmarkId: jobID,
+		FinishedAt:  timestamppb.New(finishedAt),
+		Result:      benchResult,
+		RunnerError: runnerErrStr,
+	})
+	if err != nil {
+		return fmt.Errorf("grpc post job finished: %w", err)
+	}
+
 	return nil
 }
