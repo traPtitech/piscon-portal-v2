@@ -15,6 +15,10 @@ type ProgressStreamClient struct {
 	cl grpc.ClientStreamingClient[portalv1.SendBenchmarkProgressRequest, portalv1.SendBenchmarkProgressResponse]
 }
 
+func NewProgressStreamClient(cl grpc.ClientStreamingClient[portalv1.SendBenchmarkProgressRequest, portalv1.SendBenchmarkProgressResponse]) *ProgressStreamClient {
+	return &ProgressStreamClient{cl: cl}
+}
+
 var _ portal.ProgressStreamClient = (*ProgressStreamClient)(nil)
 
 func (c *ProgressStreamClient) SendProgress(_ context.Context, progress *domain.Progress) error {
