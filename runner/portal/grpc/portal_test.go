@@ -2,7 +2,9 @@ package grpc_test
 
 import (
 	"context"
+	"errors"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	portalv1 "github.com/traPtitech/piscon-portal-v2/gen/portal/v1"
@@ -10,6 +12,7 @@ import (
 	"github.com/traPtitech/piscon-portal-v2/runner/domain"
 	"github.com/traPtitech/piscon-portal-v2/runner/portal/grpc"
 	"go.uber.org/mock/gomock"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func TestGetJob(t *testing.T) {
@@ -137,6 +140,108 @@ func TestMakeProgressStreamClient(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				assert.NotNil(t, streamClient)
+			}
+		})
+	}
+}
+func TestPostJobFinished(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		execPostJobFinished bool
+		jobID               string
+		finishedAt          time.Time
+		result              domain.Result
+		runnerErr           error
+		PostJobFinishedErr  error
+		isError             bool
+		expectedErr         error
+	}{
+		"結果がpassed": {
+			jobID:               "job-id",
+			finishedAt:          time.Now(),
+			result:              domain.ResultPassed,
+			runnerErr:           nil,
+			execPostJobFinished: true,
+		},
+		"結果がfailed": {
+			jobID:               "job-id",
+			finishedAt:          time.Now(),
+			result:              domain.ResultFailed,
+			runnerErr:           nil,
+			execPostJobFinished: true,
+		},
+		"結果がerror": {
+			jobID:               "job-id",
+			finishedAt:          time.Now(),
+			result:              domain.ResultError,
+			runnerErr:           errors.New("error"),
+			execPostJobFinished: true,
+		},
+		"結果が不正なのでエラー": {
+			jobID:               "job-id",
+			finishedAt:          time.Now(),
+			result:              100,
+			runnerErr:           nil,
+			isError:             true,
+			execPostJobFinished: false,
+		},
+		"PostJobFinishedでエラー": {
+			jobID:               "job-id",
+			finishedAt:          time.Now(),
+			result:              domain.ResultPassed,
+			runnerErr:           nil,
+			execPostJobFinished: true,
+			isError:             true,
+			PostJobFinishedErr:  assert.AnError,
+			expectedErr:         assert.AnError,
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			client := mock.NewMockBenchmarkServiceClient(ctrl)
+
+			if testCase.execPostJobFinished {
+				var result portalv1.BenchmarkResult
+				switch testCase.result {
+				case domain.ResultPassed:
+					result = portalv1.BenchmarkResult_BENCHMARK_RESULT_PASSED
+				case domain.ResultFailed:
+					result = portalv1.BenchmarkResult_BENCHMARK_RESULT_FAILED
+				case domain.ResultError:
+					result = portalv1.BenchmarkResult_BENCHMARK_RESULT_ERROR
+				default:
+					t.Fatalf("unknown result: %v", testCase.result)
+				}
+				var runnerError string
+				if testCase.runnerErr != nil {
+					runnerError = testCase.runnerErr.Error()
+				}
+				client.EXPECT().PostJobFinished(gomock.Any(), &portalv1.PostJobFinishedRequest{
+					BenchmarkId: testCase.jobID,
+					FinishedAt:  timestamppb.New(testCase.finishedAt),
+					Result:      result,
+					RunnerError: runnerError,
+				}).Return(nil, testCase.expectedErr)
+			}
+
+			portal := grpc.NewPortal(client, 0)
+
+			ctx := context.Background()
+			err := portal.PostJobFinished(ctx, testCase.jobID, testCase.finishedAt, testCase.result, testCase.runnerErr)
+
+			if testCase.isError {
+				if testCase.expectedErr != nil {
+					assert.ErrorIs(t, err, testCase.expectedErr)
+				} else {
+					assert.Error(t, err)
+				}
+			} else {
+				assert.NoError(t, err)
 			}
 		})
 	}
