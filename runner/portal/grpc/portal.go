@@ -41,7 +41,12 @@ func (p *Portal) GetJob(ctx context.Context) (*domain.Job, error) {
 }
 
 func (p *Portal) MakeProgressStreamClient(ctx context.Context) (portal.ProgressStreamClient, error) {
-	return nil, nil
+	streamClient, err := p.cl.SendBenchmarkProgress(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("send benchmark progress: %w", err)
+	}
+
+	return &ProgressStreamClient{cl: streamClient}, nil
 }
 
 func (p *Portal) PostJobFinished(ctx context.Context, jobID string, finishedAt time.Time, result domain.Result, runnerErr error) error {
