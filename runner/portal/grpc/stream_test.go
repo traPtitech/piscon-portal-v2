@@ -60,3 +60,39 @@ func TestSendProgress(t *testing.T) {
 		})
 	}
 }
+
+func TestClose(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		CloseErr error
+		err      error
+	}{
+		"正しくクローズできる": {},
+		"エラーが返ってくる": {
+			CloseErr: assert.AnError,
+			err:      assert.AnError,
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			streamClient := mock.NewMockClientStreamingClient[portalv1.SendBenchmarkProgressRequest, portalv1.SendBenchmarkProgressResponse](ctrl)
+
+			streamClient.EXPECT().CloseAndRecv().Return(nil, testCase.CloseErr)
+
+			client := grpc.NewProgressStreamClient(streamClient)
+
+			err := client.Close()
+
+			if testCase.err != nil {
+				assert.ErrorIs(t, err, testCase.err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
