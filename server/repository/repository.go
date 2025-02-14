@@ -36,6 +36,18 @@ type Repository interface {
 	CreateTeam(ctx context.Context, team domain.Team) error
 	// UpdateTeam updates a team.
 	UpdateTeam(ctx context.Context, team domain.Team) error
+
+	// CreateInstance creates an instance.
+	CreateBenchmark(ctx context.Context, benchmark domain.Benchmark) error
+	// GetBenchmarks returns all benchmarks.
+	GetBenchmarks(ctx context.Context) (domain.Benchmarks, error)
+	// FindBenchmark finds a benchmark by id. If the benchmark is not found, it returns [ErrNotFound].
+	FindBenchmark(ctx context.Context, id uuid.UUID) (domain.Benchmark, error)
+	// GetBenchmarkLog returns a benchmark log.
+	GetBenchmarkLog(ctx context.Context, benchmarkID uuid.UUID) (domain.BenchmarkLog, error)
+
+	// FindInstance finds an instance by id. If the instance is not found, it returns [ErrNotFound].
+	FindInstance(ctx context.Context, id uuid.UUID) (domain.Instance, error)
 }
 
 var (
