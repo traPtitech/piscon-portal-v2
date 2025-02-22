@@ -29,7 +29,7 @@ jobs:
           GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
       - name: Request review for a PR
-        run: gh pr request-reviewers --reviewer traPtitech/piscon-portal "$PR_URL"
+        run: gh pr edit "$PR_URL" --add-reviewer traPtitech/piscon-portal
         if: |
           ${{ !(
             contains(steps.metadata.outputs.dependency-names , 'gomod') && 
