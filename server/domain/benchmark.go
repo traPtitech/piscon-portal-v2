@@ -26,7 +26,6 @@ type Benchmark struct {
 	StartedAt  *time.Time
 	FinishedAt *time.Time
 	Score      int64
-	Log        *BenchmarkLog
 	Result     *BenchmarkResult
 }
 
@@ -56,12 +55,11 @@ func (b *Benchmark) Start() {
 	b.StartedAt = ptr.Of(time.Now())
 }
 
-func (b *Benchmark) Finish(score int64, result BenchmarkResult, log BenchmarkLog) {
+func (b *Benchmark) Finish(score int64, result BenchmarkResult) {
 	b.Status = BenchmarkStatusFinished
 	b.Score = score
 	b.FinishedAt = ptr.Of(time.Now())
 	b.Result = &result
-	b.Log = &log
 }
 
 func (b *Benchmark) IsFinished() bool {
