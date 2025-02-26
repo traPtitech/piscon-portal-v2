@@ -1,6 +1,8 @@
 module github.com/traPtitech/piscon-portal-v2
 
-go 1.23
+go 1.23.0
+
+toolchain go1.23.5
 
 require (
 	github.com/aarondl/opt v0.0.0-20240623220848-083f18ab9536
@@ -21,7 +23,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/testcontainers/testcontainers-go/modules/mysql v0.35.0
 	go.uber.org/mock v0.5.0
-	golang.org/x/oauth2 v0.26.0
+	golang.org/x/oauth2 v0.27.0
 	golang.org/x/sync v0.11.0
 	google.golang.org/grpc v1.70.0
 	google.golang.org/protobuf v1.36.5
