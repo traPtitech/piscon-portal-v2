@@ -14,7 +14,7 @@ func main() {
 	client := portalv1.NewBenchmarkServiceClient(nil) //TODO: Implement
 	p := portalGrpc.NewPortal(client, time.Second)
 
-	benchmarker := benchImpl.Example() //TODO: 設定を読み込んで動的に変えるようにする
+	benchmarker := benchImpl.NewExample() //TODO: 設定を読み込んで動的に変えるようにする
 
 	r := runner.Prepare(p, benchmarker)
 

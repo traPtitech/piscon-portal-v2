@@ -13,21 +13,21 @@ import (
 	"github.com/traPtitech/piscon-portal-v2/runner/domain"
 )
 
-// example is the example implementation of [github.com/traPtitech/piscon-portal-v2/runner/benchmarker.Benchmarker].
-// It runs the benchmark script example.sh with the target URL as an argument.
-type example struct {
+// Example is the Example implementation of [github.com/traPtitech/piscon-portal-v2/runner/benchmarker.Benchmarker].
+// It runs the benchmark script Example.sh with the target URL as an argument.
+type Example struct {
 	cmd    *exec.Cmd
 	stdout string
 	stderr string
 }
 
-func Example() *example {
-	return &example{}
+func NewExample() *Example {
+	return &Example{}
 }
 
-var _ benchmarker.Benchmarker = (*example)(nil)
+var _ benchmarker.Benchmarker = (*Example)(nil)
 
-func (b *example) Start(ctx context.Context, job *domain.Job) (benchmarker.Outputs, time.Time, error) {
+func (b *Example) Start(ctx context.Context, job *domain.Job) (benchmarker.Outputs, time.Time, error) {
 	cmd := exec.CommandContext(ctx, "./example.sh", job.GetTargetURL())
 
 	stdout, err := cmd.StdoutPipe()
@@ -54,7 +54,7 @@ func (b *example) Start(ctx context.Context, job *domain.Job) (benchmarker.Outpu
 	}, startedAt, nil
 }
 
-func (b *example) Wait(_ context.Context) (domain.Result, time.Time, error) {
+func (b *Example) Wait(_ context.Context) (domain.Result, time.Time, error) {
 	if err := b.cmd.Wait(); err != nil {
 		return domain.ResultError, time.Now(), fmt.Errorf("wait command: %w", err)
 	}
@@ -69,7 +69,7 @@ func (b *example) Wait(_ context.Context) (domain.Result, time.Time, error) {
 	return domain.ResultPassed, endTime, nil
 }
 
-func (b *example) CalculateScore(_ context.Context, allStdout, allStderr string) (int, error) {
+func (b *Example) CalculateScore(_ context.Context, allStdout, allStderr string) (int, error) {
 	b.stdout, b.stderr = allStdout, allStderr
 
 	for _, line := range slices.Backward(strings.Split(allStdout, "\n")) {
