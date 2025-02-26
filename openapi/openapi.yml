@@ -980,12 +980,7 @@ components:
       type: "object"
       description: "ベンチマーク結果"
       allOf:
-        - discriminator:
-            propertyName: status
-          oneOf:
-            - $ref: "#/components/schemas/WaitingBenchmark"
-            - $ref: "#/components/schemas/RunningBenchmark"
-            - $ref: "#/components/schemas/FinishedBenchmark"
+        - $ref: "#/components/schemas/BenchmarkListItem"
         - properties:
             log:
               type: "string"
@@ -998,12 +993,7 @@ components:
       type: "object"
       description: "Adminが見ることができるベンチマーク結果"
       allOf:
-        - discriminator:
-            propertyName: status
-          oneOf:
-            - $ref: "#/components/schemas/WaitingBenchmark"
-            - $ref: "#/components/schemas/RunningBenchmark"
-            - $ref: "#/components/schemas/FinishedBenchmark"
+        - $ref: "#/components/schemas/BenchmarkListItem"
         - properties:
             log:
               type: "string"

@@ -75,197 +75,171 @@ func (s *BenchScore) SetCreatedAt(val CreatedAt) {
 
 // Merged schema.
 // Ref: #/components/schemas/Benchmark
-// Benchmark represents sum type.
 type Benchmark struct {
-	Type              BenchmarkType // switch on this field
-	WaitingBenchmark  WaitingBenchmark
-	RunningBenchmark  RunningBenchmark
-	FinishedBenchmark FinishedBenchmark
+	// ベンチマークの競技者用ログ（標準出力）.
+	Log   string `json:"log"`
+	OneOf BenchmarkSum
 }
 
-// BenchmarkType is oneOf type of Benchmark.
-type BenchmarkType string
-
-// Possible values for BenchmarkType.
-const (
-	WaitingBenchmarkBenchmark  BenchmarkType = "WaitingBenchmark"
-	RunningBenchmarkBenchmark  BenchmarkType = "RunningBenchmark"
-	FinishedBenchmarkBenchmark BenchmarkType = "FinishedBenchmark"
-)
-
-// IsWaitingBenchmark reports whether Benchmark is WaitingBenchmark.
-func (s Benchmark) IsWaitingBenchmark() bool { return s.Type == WaitingBenchmarkBenchmark }
-
-// IsRunningBenchmark reports whether Benchmark is RunningBenchmark.
-func (s Benchmark) IsRunningBenchmark() bool { return s.Type == RunningBenchmarkBenchmark }
-
-// IsFinishedBenchmark reports whether Benchmark is FinishedBenchmark.
-func (s Benchmark) IsFinishedBenchmark() bool { return s.Type == FinishedBenchmarkBenchmark }
-
-// SetWaitingBenchmark sets Benchmark to WaitingBenchmark.
-func (s *Benchmark) SetWaitingBenchmark(v WaitingBenchmark) {
-	s.Type = WaitingBenchmarkBenchmark
-	s.WaitingBenchmark = v
+// GetLog returns the value of Log.
+func (s *Benchmark) GetLog() string {
+	return s.Log
 }
 
-// GetWaitingBenchmark returns WaitingBenchmark and true boolean if Benchmark is WaitingBenchmark.
-func (s Benchmark) GetWaitingBenchmark() (v WaitingBenchmark, ok bool) {
-	if !s.IsWaitingBenchmark() {
-		return v, false
-	}
-	return s.WaitingBenchmark, true
+// GetOneOf returns the value of OneOf.
+func (s *Benchmark) GetOneOf() BenchmarkSum {
+	return s.OneOf
 }
 
-// NewWaitingBenchmarkBenchmark returns new Benchmark from WaitingBenchmark.
-func NewWaitingBenchmarkBenchmark(v WaitingBenchmark) Benchmark {
-	var s Benchmark
-	s.SetWaitingBenchmark(v)
-	return s
+// SetLog sets the value of Log.
+func (s *Benchmark) SetLog(val string) {
+	s.Log = val
 }
 
-// SetRunningBenchmark sets Benchmark to RunningBenchmark.
-func (s *Benchmark) SetRunningBenchmark(v RunningBenchmark) {
-	s.Type = RunningBenchmarkBenchmark
-	s.RunningBenchmark = v
-}
-
-// GetRunningBenchmark returns RunningBenchmark and true boolean if Benchmark is RunningBenchmark.
-func (s Benchmark) GetRunningBenchmark() (v RunningBenchmark, ok bool) {
-	if !s.IsRunningBenchmark() {
-		return v, false
-	}
-	return s.RunningBenchmark, true
-}
-
-// NewRunningBenchmarkBenchmark returns new Benchmark from RunningBenchmark.
-func NewRunningBenchmarkBenchmark(v RunningBenchmark) Benchmark {
-	var s Benchmark
-	s.SetRunningBenchmark(v)
-	return s
-}
-
-// SetFinishedBenchmark sets Benchmark to FinishedBenchmark.
-func (s *Benchmark) SetFinishedBenchmark(v FinishedBenchmark) {
-	s.Type = FinishedBenchmarkBenchmark
-	s.FinishedBenchmark = v
-}
-
-// GetFinishedBenchmark returns FinishedBenchmark and true boolean if Benchmark is FinishedBenchmark.
-func (s Benchmark) GetFinishedBenchmark() (v FinishedBenchmark, ok bool) {
-	if !s.IsFinishedBenchmark() {
-		return v, false
-	}
-	return s.FinishedBenchmark, true
-}
-
-// NewFinishedBenchmarkBenchmark returns new Benchmark from FinishedBenchmark.
-func NewFinishedBenchmarkBenchmark(v FinishedBenchmark) Benchmark {
-	var s Benchmark
-	s.SetFinishedBenchmark(v)
-	return s
+// SetOneOf sets the value of OneOf.
+func (s *Benchmark) SetOneOf(val BenchmarkSum) {
+	s.OneOf = val
 }
 
 func (*Benchmark) getTeamBenchmarkResultRes() {}
 
 // Merged schema.
 // Ref: #/components/schemas/BenchmarkAdminResult
-// BenchmarkAdminResult represents sum type.
 type BenchmarkAdminResult struct {
-	Type              BenchmarkAdminResultType // switch on this field
+	// ベンチマークの競技者用ログ（標準出力）.
+	Log string `json:"log"`
+	// ベンチマークの管理者用ログ（標準エラー出力）.
+	AdminLog string `json:"adminLog"`
+	OneOf    BenchmarkAdminResultSum
+}
+
+// GetLog returns the value of Log.
+func (s *BenchmarkAdminResult) GetLog() string {
+	return s.Log
+}
+
+// GetAdminLog returns the value of AdminLog.
+func (s *BenchmarkAdminResult) GetAdminLog() string {
+	return s.AdminLog
+}
+
+// GetOneOf returns the value of OneOf.
+func (s *BenchmarkAdminResult) GetOneOf() BenchmarkAdminResultSum {
+	return s.OneOf
+}
+
+// SetLog sets the value of Log.
+func (s *BenchmarkAdminResult) SetLog(val string) {
+	s.Log = val
+}
+
+// SetAdminLog sets the value of AdminLog.
+func (s *BenchmarkAdminResult) SetAdminLog(val string) {
+	s.AdminLog = val
+}
+
+// SetOneOf sets the value of OneOf.
+func (s *BenchmarkAdminResult) SetOneOf(val BenchmarkAdminResultSum) {
+	s.OneOf = val
+}
+
+func (*BenchmarkAdminResult) getBenchmarkResultRes() {}
+
+// BenchmarkAdminResultSum represents sum type.
+type BenchmarkAdminResultSum struct {
+	Type              BenchmarkAdminResultSumType // switch on this field
 	WaitingBenchmark  WaitingBenchmark
 	RunningBenchmark  RunningBenchmark
 	FinishedBenchmark FinishedBenchmark
 }
 
-// BenchmarkAdminResultType is oneOf type of BenchmarkAdminResult.
-type BenchmarkAdminResultType string
+// BenchmarkAdminResultSumType is oneOf type of BenchmarkAdminResultSum.
+type BenchmarkAdminResultSumType string
 
-// Possible values for BenchmarkAdminResultType.
+// Possible values for BenchmarkAdminResultSumType.
 const (
-	WaitingBenchmarkBenchmarkAdminResult  BenchmarkAdminResultType = "WaitingBenchmark"
-	RunningBenchmarkBenchmarkAdminResult  BenchmarkAdminResultType = "RunningBenchmark"
-	FinishedBenchmarkBenchmarkAdminResult BenchmarkAdminResultType = "FinishedBenchmark"
+	WaitingBenchmarkBenchmarkAdminResultSum  BenchmarkAdminResultSumType = "WaitingBenchmark"
+	RunningBenchmarkBenchmarkAdminResultSum  BenchmarkAdminResultSumType = "RunningBenchmark"
+	FinishedBenchmarkBenchmarkAdminResultSum BenchmarkAdminResultSumType = "FinishedBenchmark"
 )
 
-// IsWaitingBenchmark reports whether BenchmarkAdminResult is WaitingBenchmark.
-func (s BenchmarkAdminResult) IsWaitingBenchmark() bool {
-	return s.Type == WaitingBenchmarkBenchmarkAdminResult
+// IsWaitingBenchmark reports whether BenchmarkAdminResultSum is WaitingBenchmark.
+func (s BenchmarkAdminResultSum) IsWaitingBenchmark() bool {
+	return s.Type == WaitingBenchmarkBenchmarkAdminResultSum
 }
 
-// IsRunningBenchmark reports whether BenchmarkAdminResult is RunningBenchmark.
-func (s BenchmarkAdminResult) IsRunningBenchmark() bool {
-	return s.Type == RunningBenchmarkBenchmarkAdminResult
+// IsRunningBenchmark reports whether BenchmarkAdminResultSum is RunningBenchmark.
+func (s BenchmarkAdminResultSum) IsRunningBenchmark() bool {
+	return s.Type == RunningBenchmarkBenchmarkAdminResultSum
 }
 
-// IsFinishedBenchmark reports whether BenchmarkAdminResult is FinishedBenchmark.
-func (s BenchmarkAdminResult) IsFinishedBenchmark() bool {
-	return s.Type == FinishedBenchmarkBenchmarkAdminResult
+// IsFinishedBenchmark reports whether BenchmarkAdminResultSum is FinishedBenchmark.
+func (s BenchmarkAdminResultSum) IsFinishedBenchmark() bool {
+	return s.Type == FinishedBenchmarkBenchmarkAdminResultSum
 }
 
-// SetWaitingBenchmark sets BenchmarkAdminResult to WaitingBenchmark.
-func (s *BenchmarkAdminResult) SetWaitingBenchmark(v WaitingBenchmark) {
-	s.Type = WaitingBenchmarkBenchmarkAdminResult
+// SetWaitingBenchmark sets BenchmarkAdminResultSum to WaitingBenchmark.
+func (s *BenchmarkAdminResultSum) SetWaitingBenchmark(v WaitingBenchmark) {
+	s.Type = WaitingBenchmarkBenchmarkAdminResultSum
 	s.WaitingBenchmark = v
 }
 
-// GetWaitingBenchmark returns WaitingBenchmark and true boolean if BenchmarkAdminResult is WaitingBenchmark.
-func (s BenchmarkAdminResult) GetWaitingBenchmark() (v WaitingBenchmark, ok bool) {
+// GetWaitingBenchmark returns WaitingBenchmark and true boolean if BenchmarkAdminResultSum is WaitingBenchmark.
+func (s BenchmarkAdminResultSum) GetWaitingBenchmark() (v WaitingBenchmark, ok bool) {
 	if !s.IsWaitingBenchmark() {
 		return v, false
 	}
 	return s.WaitingBenchmark, true
 }
 
-// NewWaitingBenchmarkBenchmarkAdminResult returns new BenchmarkAdminResult from WaitingBenchmark.
-func NewWaitingBenchmarkBenchmarkAdminResult(v WaitingBenchmark) BenchmarkAdminResult {
-	var s BenchmarkAdminResult
+// NewWaitingBenchmarkBenchmarkAdminResultSum returns new BenchmarkAdminResultSum from WaitingBenchmark.
+func NewWaitingBenchmarkBenchmarkAdminResultSum(v WaitingBenchmark) BenchmarkAdminResultSum {
+	var s BenchmarkAdminResultSum
 	s.SetWaitingBenchmark(v)
 	return s
 }
 
-// SetRunningBenchmark sets BenchmarkAdminResult to RunningBenchmark.
-func (s *BenchmarkAdminResult) SetRunningBenchmark(v RunningBenchmark) {
-	s.Type = RunningBenchmarkBenchmarkAdminResult
+// SetRunningBenchmark sets BenchmarkAdminResultSum to RunningBenchmark.
+func (s *BenchmarkAdminResultSum) SetRunningBenchmark(v RunningBenchmark) {
+	s.Type = RunningBenchmarkBenchmarkAdminResultSum
 	s.RunningBenchmark = v
 }
 
-// GetRunningBenchmark returns RunningBenchmark and true boolean if BenchmarkAdminResult is RunningBenchmark.
-func (s BenchmarkAdminResult) GetRunningBenchmark() (v RunningBenchmark, ok bool) {
+// GetRunningBenchmark returns RunningBenchmark and true boolean if BenchmarkAdminResultSum is RunningBenchmark.
+func (s BenchmarkAdminResultSum) GetRunningBenchmark() (v RunningBenchmark, ok bool) {
 	if !s.IsRunningBenchmark() {
 		return v, false
 	}
 	return s.RunningBenchmark, true
 }
 
-// NewRunningBenchmarkBenchmarkAdminResult returns new BenchmarkAdminResult from RunningBenchmark.
-func NewRunningBenchmarkBenchmarkAdminResult(v RunningBenchmark) BenchmarkAdminResult {
-	var s BenchmarkAdminResult
+// NewRunningBenchmarkBenchmarkAdminResultSum returns new BenchmarkAdminResultSum from RunningBenchmark.
+func NewRunningBenchmarkBenchmarkAdminResultSum(v RunningBenchmark) BenchmarkAdminResultSum {
+	var s BenchmarkAdminResultSum
 	s.SetRunningBenchmark(v)
 	return s
 }
 
-// SetFinishedBenchmark sets BenchmarkAdminResult to FinishedBenchmark.
-func (s *BenchmarkAdminResult) SetFinishedBenchmark(v FinishedBenchmark) {
-	s.Type = FinishedBenchmarkBenchmarkAdminResult
+// SetFinishedBenchmark sets BenchmarkAdminResultSum to FinishedBenchmark.
+func (s *BenchmarkAdminResultSum) SetFinishedBenchmark(v FinishedBenchmark) {
+	s.Type = FinishedBenchmarkBenchmarkAdminResultSum
 	s.FinishedBenchmark = v
 }
 
-// GetFinishedBenchmark returns FinishedBenchmark and true boolean if BenchmarkAdminResult is FinishedBenchmark.
-func (s BenchmarkAdminResult) GetFinishedBenchmark() (v FinishedBenchmark, ok bool) {
+// GetFinishedBenchmark returns FinishedBenchmark and true boolean if BenchmarkAdminResultSum is FinishedBenchmark.
+func (s BenchmarkAdminResultSum) GetFinishedBenchmark() (v FinishedBenchmark, ok bool) {
 	if !s.IsFinishedBenchmark() {
 		return v, false
 	}
 	return s.FinishedBenchmark, true
 }
 
-// NewFinishedBenchmarkBenchmarkAdminResult returns new BenchmarkAdminResult from FinishedBenchmark.
-func NewFinishedBenchmarkBenchmarkAdminResult(v FinishedBenchmark) BenchmarkAdminResult {
-	var s BenchmarkAdminResult
+// NewFinishedBenchmarkBenchmarkAdminResultSum returns new BenchmarkAdminResultSum from FinishedBenchmark.
+func NewFinishedBenchmarkBenchmarkAdminResultSum(v FinishedBenchmark) BenchmarkAdminResultSum {
+	var s BenchmarkAdminResultSum
 	s.SetFinishedBenchmark(v)
 	return s
 }
-
-func (*BenchmarkAdminResult) getBenchmarkResultRes() {}
 
 type BenchmarkId uuid.UUID
 
@@ -430,6 +404,96 @@ func (s *BenchmarkStatus) UnmarshalText(data []byte) error {
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
+}
+
+// BenchmarkSum represents sum type.
+type BenchmarkSum struct {
+	Type              BenchmarkSumType // switch on this field
+	WaitingBenchmark  WaitingBenchmark
+	RunningBenchmark  RunningBenchmark
+	FinishedBenchmark FinishedBenchmark
+}
+
+// BenchmarkSumType is oneOf type of BenchmarkSum.
+type BenchmarkSumType string
+
+// Possible values for BenchmarkSumType.
+const (
+	WaitingBenchmarkBenchmarkSum  BenchmarkSumType = "WaitingBenchmark"
+	RunningBenchmarkBenchmarkSum  BenchmarkSumType = "RunningBenchmark"
+	FinishedBenchmarkBenchmarkSum BenchmarkSumType = "FinishedBenchmark"
+)
+
+// IsWaitingBenchmark reports whether BenchmarkSum is WaitingBenchmark.
+func (s BenchmarkSum) IsWaitingBenchmark() bool { return s.Type == WaitingBenchmarkBenchmarkSum }
+
+// IsRunningBenchmark reports whether BenchmarkSum is RunningBenchmark.
+func (s BenchmarkSum) IsRunningBenchmark() bool { return s.Type == RunningBenchmarkBenchmarkSum }
+
+// IsFinishedBenchmark reports whether BenchmarkSum is FinishedBenchmark.
+func (s BenchmarkSum) IsFinishedBenchmark() bool { return s.Type == FinishedBenchmarkBenchmarkSum }
+
+// SetWaitingBenchmark sets BenchmarkSum to WaitingBenchmark.
+func (s *BenchmarkSum) SetWaitingBenchmark(v WaitingBenchmark) {
+	s.Type = WaitingBenchmarkBenchmarkSum
+	s.WaitingBenchmark = v
+}
+
+// GetWaitingBenchmark returns WaitingBenchmark and true boolean if BenchmarkSum is WaitingBenchmark.
+func (s BenchmarkSum) GetWaitingBenchmark() (v WaitingBenchmark, ok bool) {
+	if !s.IsWaitingBenchmark() {
+		return v, false
+	}
+	return s.WaitingBenchmark, true
+}
+
+// NewWaitingBenchmarkBenchmarkSum returns new BenchmarkSum from WaitingBenchmark.
+func NewWaitingBenchmarkBenchmarkSum(v WaitingBenchmark) BenchmarkSum {
+	var s BenchmarkSum
+	s.SetWaitingBenchmark(v)
+	return s
+}
+
+// SetRunningBenchmark sets BenchmarkSum to RunningBenchmark.
+func (s *BenchmarkSum) SetRunningBenchmark(v RunningBenchmark) {
+	s.Type = RunningBenchmarkBenchmarkSum
+	s.RunningBenchmark = v
+}
+
+// GetRunningBenchmark returns RunningBenchmark and true boolean if BenchmarkSum is RunningBenchmark.
+func (s BenchmarkSum) GetRunningBenchmark() (v RunningBenchmark, ok bool) {
+	if !s.IsRunningBenchmark() {
+		return v, false
+	}
+	return s.RunningBenchmark, true
+}
+
+// NewRunningBenchmarkBenchmarkSum returns new BenchmarkSum from RunningBenchmark.
+func NewRunningBenchmarkBenchmarkSum(v RunningBenchmark) BenchmarkSum {
+	var s BenchmarkSum
+	s.SetRunningBenchmark(v)
+	return s
+}
+
+// SetFinishedBenchmark sets BenchmarkSum to FinishedBenchmark.
+func (s *BenchmarkSum) SetFinishedBenchmark(v FinishedBenchmark) {
+	s.Type = FinishedBenchmarkBenchmarkSum
+	s.FinishedBenchmark = v
+}
+
+// GetFinishedBenchmark returns FinishedBenchmark and true boolean if BenchmarkSum is FinishedBenchmark.
+func (s BenchmarkSum) GetFinishedBenchmark() (v FinishedBenchmark, ok bool) {
+	if !s.IsFinishedBenchmark() {
+		return v, false
+	}
+	return s.FinishedBenchmark, true
+}
+
+// NewFinishedBenchmarkBenchmarkSum returns new BenchmarkSum from FinishedBenchmark.
+func NewFinishedBenchmarkBenchmarkSum(v FinishedBenchmark) BenchmarkSum {
+	var s BenchmarkSum
+	s.SetFinishedBenchmark(v)
+	return s
 }
 
 type CreatedAt time.Time

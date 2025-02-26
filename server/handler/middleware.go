@@ -66,6 +66,18 @@ func (h *Handler) TeamAuthMiddleware() echo.MiddlewareFunc {
 				return c.NoContent(http.StatusBadRequest)
 			}
 
+			user, err := h.repo.FindUser(ctx, userID)
+			if err != nil {
+				if errors.Is(err, repository.ErrNotFound) {
+					return unauthorizedResponse(c, "user not found")
+				}
+				return internalServerErrorResponse(c, err)
+			}
+			if user.IsAdmin {
+				// admins are able to access even if they are not members of the team
+				return next(c)
+			}
+
 			team, err := h.repo.FindTeam(ctx, teamID)
 			if err != nil {
 				if errors.Is(err, repository.ErrNotFound) {
@@ -77,6 +89,30 @@ func (h *Handler) TeamAuthMiddleware() echo.MiddlewareFunc {
 			isMember := slices.ContainsFunc(team.Members, func(m domain.User) bool { return m.ID == userID })
 			if !isMember {
 				return c.NoContent(http.StatusForbidden)
+			}
+
+			return next(c)
+		}
+	}
+}
+
+func (h *Handler) AdminAuthMiddleware() echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			ctx := c.Request().Context()
+
+			userID := getUserIDFromSession(c)
+
+			user, err := h.repo.FindUser(ctx, userID)
+			if err != nil {
+				if errors.Is(err, repository.ErrNotFound) {
+					return unauthorizedResponse(c, "user not found")
+				}
+				return internalServerErrorResponse(c, err)
+			}
+
+			if !user.IsAdmin {
+				return unauthorizedResponse(c, "you are not an admin")
 			}
 
 			return next(c)

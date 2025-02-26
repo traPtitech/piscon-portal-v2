@@ -2,11 +2,13 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 
 	"github.com/aarondl/opt/omit"
 	"github.com/google/uuid"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
+	"github.com/traPtitech/piscon-portal-v2/server/repository"
 	"github.com/traPtitech/piscon-portal-v2/server/repository/db/models"
 	"github.com/traPtitech/piscon-portal-v2/server/utils/ptr"
 )
@@ -61,6 +63,9 @@ func (r *Repository) GetBenchmarks(ctx context.Context) (domain.Benchmarks, erro
 func (r *Repository) GetBenchmarkLog(ctx context.Context, benchmarkID uuid.UUID) (domain.BenchmarkLog, error) {
 	benchmarkLogs, err := models.FindBenchmarkLog(ctx, r.executor(ctx), benchmarkID.String())
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.BenchmarkLog{}, repository.ErrNotFound
+		}
 		return domain.BenchmarkLog{}, err
 	}
 
