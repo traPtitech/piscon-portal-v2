@@ -18,6 +18,10 @@ func (j *Job) GetID() string {
 	return j.id
 }
 
+func (j *Job) GetTargetURL() string {
+	return j.targetURL
+}
+
 type Result int
 
 const (
