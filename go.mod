@@ -1,6 +1,6 @@
 module github.com/traPtitech/piscon-portal-v2
 
-go 1.23
+go 1.24
 
 require (
 	github.com/aarondl/opt v0.0.0-20240623220848-083f18ab9536
