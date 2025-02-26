@@ -20,10 +20,11 @@ func TestCreateBenchmark(t *testing.T) {
 	instanceID := uuid.New()
 
 	tests := []struct {
-		name        string
-		user        domain.User
-		instance    domain.Instance
-		expectError bool
+		name             string
+		user             domain.User
+		instance         domain.Instance
+		queuedBenchmarks []domain.Benchmark
+		expectError      bool
 	}{
 		{
 			name: "Valid",
@@ -62,6 +63,22 @@ func TestCreateBenchmark(t *testing.T) {
 			},
 			expectError: true,
 		},
+		{
+			name: "BenchmarkAlreadyQueued",
+			user: domain.User{
+				ID:     userID,
+				TeamID: uuid.NullUUID{Valid: true, UUID: teamID},
+			},
+			instance: domain.Instance{
+				ID:     instanceID,
+				TeamID: teamID,
+				Status: domain.InstanceStatusRunning,
+			},
+			queuedBenchmarks: []domain.Benchmark{
+				{ID: uuid.New(), Instance: domain.Instance{ID: instanceID}, Status: domain.BenchmarkStatusWaiting},
+			},
+			expectError: true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -77,14 +94,13 @@ func TestCreateBenchmark(t *testing.T) {
 
 			mockRepo.EXPECT().
 				FindUser(gomock.Any(), gomock.Eq(userID)).
-				DoAndReturn(func(ctx context.Context, id uuid.UUID) (domain.User, error) {
-					return tt.user, nil
-				})
+				Return(tt.user, nil)
 			mockRepo.EXPECT().
 				FindInstance(gomock.Any(), gomock.Eq(instanceID)).
-				DoAndReturn(func(ctx context.Context, id uuid.UUID) (domain.Instance, error) {
-					return tt.instance, nil
-				})
+				Return(tt.instance, nil)
+			mockRepo.EXPECT().
+				GetBenchmarks(gomock.Any(), gomock.Any()).
+				Return(tt.queuedBenchmarks, nil)
 			mockRepo.EXPECT().CreateBenchmark(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
 
 			_, err := useCase.CreateBenchmark(context.Background(), instanceID, userID)

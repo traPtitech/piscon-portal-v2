@@ -109,6 +109,7 @@ func TestTeamAuthMiddleware(t *testing.T) {
 		{
 			name: "ok",
 			setup: func() {
+				repoMock.EXPECT().FindUser(gomock.Any(), userID).Return(domain.User{ID: userID}, nil)
 				repoMock.EXPECT().FindTeam(gomock.Any(), teamID).Return(domain.Team{
 					ID: teamID,
 					Members: []domain.User{
@@ -121,12 +122,20 @@ func TestTeamAuthMiddleware(t *testing.T) {
 		{
 			name: "user is not a member of the team",
 			setup: func() {
+				repoMock.EXPECT().FindUser(gomock.Any(), userID).Return(domain.User{ID: userID}, nil)
 				repoMock.EXPECT().FindTeam(gomock.Any(), teamID).Return(domain.Team{
 					ID:      uuid.New(),
 					Members: []domain.User{{ID: uuid.New()}},
 				}, nil)
 			},
 			expectStatus: http.StatusForbidden,
+		},
+		{
+			name: "user is admin: no error",
+			setup: func() {
+				repoMock.EXPECT().FindUser(gomock.Any(), userID).Return(domain.User{ID: userID, IsAdmin: true}, nil)
+			},
+			expectStatus: http.StatusOK,
 		},
 	}
 
