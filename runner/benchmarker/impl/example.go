@@ -73,7 +73,7 @@ func (b *Example) CalculateScore(_ context.Context, allStdout, allStderr string)
 	b.stdout, b.stderr = allStdout, allStderr
 
 	for _, line := range slices.Backward(strings.Split(allStdout, "\n")) {
-		if strings.HasPrefix("Score: ", line) {
+		if strings.HasPrefix(line, "Score: ") {
 			score, err := strconv.Atoi(strings.Split(line, " ")[1])
 			if err != nil {
 				return 0, fmt.Errorf("invalid score format: %w", err)
