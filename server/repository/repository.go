@@ -8,7 +8,7 @@ import (
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 )
 
-//go:generate go run go.uber.org/mock/mockgen@v0.5.0 -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed=true
+//go:generate go tool mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed=true
 type Repository interface {
 	// Transaction starts a transaction and calls f with the transaction.
 	// If f returns an error, the transaction is rolled back and the error is returned.
