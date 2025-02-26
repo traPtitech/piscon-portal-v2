@@ -7,6 +7,9 @@ import (
 
 	"github.com/aarondl/opt/omit"
 	"github.com/google/uuid"
+	"github.com/stephenafamo/bob"
+	"github.com/stephenafamo/bob/dialect/mysql/dialect"
+	"github.com/stephenafamo/bob/dialect/mysql/sm"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
 	"github.com/traPtitech/piscon-portal-v2/server/repository/db/models"
@@ -42,13 +45,31 @@ func (r *Repository) CreateBenchmark(ctx context.Context, benchmark domain.Bench
 	return nil
 }
 
-func (r *Repository) GetBenchmarks(ctx context.Context) (domain.Benchmarks, error) {
-	benchmarks, err := models.Benchmarks.Query(models.PreloadBenchmarkInstance()).All(ctx, r.executor(ctx))
+func (r *Repository) GetBenchmarks(ctx context.Context, query repository.BenchmarkQuery) ([]domain.Benchmark, error) {
+	where := models.SelectWhere.Benchmarks
+
+	mods := bob.Mods[*dialect.SelectQuery]{
+		models.PreloadBenchmarkInstance(),
+		sm.OrderBy(models.BenchmarkColumns.CreatedAt).Asc(),
+	}
+	if query.TeamID.IsSet() {
+		teamID := query.TeamID.Get().String()
+		mods = append(mods, where.TeamID.EQ(teamID))
+	}
+	if query.StatusIn.IsSet() {
+		var statuses []models.BenchmarksStatus
+		for _, status := range query.StatusIn.Get() {
+			statuses = append(statuses, fromDomainBenchmarkStatus(status))
+		}
+		mods = append(mods, where.Status.In(statuses...))
+	}
+
+	benchmarks, err := models.Benchmarks.Query(mods...).All(ctx, r.executor(ctx))
 	if err != nil {
 		return nil, err
 	}
 
-	res := make(domain.Benchmarks, 0, len(benchmarks))
+	res := make([]domain.Benchmark, 0, len(benchmarks))
 	for _, b := range benchmarks {
 		benchmark, err := toDomainBenchmark(b)
 		if err != nil {

@@ -6,8 +6,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
+	"github.com/traPtitech/piscon-portal-v2/server/repository"
+	"github.com/traPtitech/piscon-portal-v2/server/utils/optional"
 	"github.com/traPtitech/piscon-portal-v2/server/utils/ptr"
 	"github.com/traPtitech/piscon-portal-v2/server/utils/testutil"
 )
@@ -38,34 +40,28 @@ func TestFindBenchmark(t *testing.T) {
 	mustMakeBenchmark(t, db, benchmark)
 
 	got, err := repo.FindBenchmark(context.Background(), id)
-	require.NoError(t, err)
+	assert.NoError(t, err)
 
 	testutil.CompareBenchmark(t, benchmark, got)
 }
 
-func TestGetBenchmarks(t *testing.T) {
+func TestGetAllBenchmarks(t *testing.T) {
 	t.Parallel()
 
 	repo, db := setupRepository(t)
 
 	teamID := uuid.New()
 	userID := uuid.New()
-
-	instances := []domain.Instance{
-		{
-			ID:     uuid.New(),
-			Status: domain.InstanceStatusRunning,
-		},
-		{
-			ID:     uuid.New(),
-			Status: domain.InstanceStatusRunning,
-		},
+	instance := domain.Instance{
+		ID:     uuid.New(),
+		TeamID: teamID,
+		Status: domain.InstanceStatusRunning,
 	}
 
 	benchmarks := []domain.Benchmark{
 		{
 			ID:         uuid.New(),
-			Instance:   instances[0],
+			Instance:   instance,
 			TeamID:     teamID,
 			UserID:     userID,
 			Status:     domain.BenchmarkStatusWaiting,
@@ -75,7 +71,7 @@ func TestGetBenchmarks(t *testing.T) {
 		},
 		{
 			ID:         uuid.New(),
-			Instance:   instances[1],
+			Instance:   instance,
 			TeamID:     teamID,
 			UserID:     userID,
 			Status:     domain.BenchmarkStatusFinished,
@@ -86,17 +82,65 @@ func TestGetBenchmarks(t *testing.T) {
 			Result:     ptr.Of(domain.BenchmarkResultStatusPassed),
 		},
 	}
-	for _, instance := range instances {
-		mustMakeInstance(t, db, instance)
-	}
+	mustMakeInstance(t, db, instance)
 	for _, benchmark := range benchmarks {
 		mustMakeBenchmark(t, db, benchmark)
 	}
 
-	got, err := repo.GetBenchmarks(context.Background())
-	require.NoError(t, err)
+	got, err := repo.GetBenchmarks(context.Background(), repository.BenchmarkQuery{})
+	assert.NoError(t, err)
 
 	testutil.CompareBenchmarks(t, benchmarks, got)
+}
+
+func TestGetQueuedBenchmarks(t *testing.T) {
+	t.Parallel()
+
+	repo, db := setupRepository(t)
+
+	teamID := uuid.New()
+	userID := uuid.New()
+	instance := domain.Instance{
+		ID:     uuid.New(),
+		TeamID: teamID,
+		Status: domain.InstanceStatusRunning,
+	}
+
+	benchmarks := []domain.Benchmark{
+		{
+			ID:         uuid.New(),
+			Instance:   instance,
+			TeamID:     teamID,
+			UserID:     userID,
+			Status:     domain.BenchmarkStatusWaiting,
+			CreatedAt:  time.Now(),
+			StartedAt:  nil,
+			FinishedAt: nil,
+		},
+		{
+			ID:         uuid.New(),
+			Instance:   instance,
+			TeamID:     teamID,
+			UserID:     userID,
+			Status:     domain.BenchmarkStatusFinished,
+			CreatedAt:  time.Now(),
+			StartedAt:  ptr.Of(time.Now()),
+			FinishedAt: ptr.Of(time.Now()),
+			Score:      100,
+			Result:     ptr.Of(domain.BenchmarkResultStatusPassed),
+		},
+	}
+	mustMakeInstance(t, db, instance)
+	for _, benchmark := range benchmarks {
+		mustMakeBenchmark(t, db, benchmark)
+	}
+
+	got, err := repo.GetBenchmarks(context.Background(), repository.BenchmarkQuery{
+		StatusIn: optional.From([]domain.BenchmarkStatus{domain.BenchmarkStatusWaiting, domain.BenchmarkStatusRunning}),
+	})
+	assert.NoError(t, err)
+
+	testutil.CompareBenchmarks(t, benchmarks[:1], got)
 }
 
 func TestGetBenchmarkLog(t *testing.T) {
@@ -123,7 +167,7 @@ func TestGetBenchmarkLog(t *testing.T) {
 	mustMakeBenchmarkLog(t, db, benchmarkID, benchmarkLog)
 
 	got, err := repo.GetBenchmarkLog(context.Background(), benchmarkID)
-	require.NoError(t, err)
+	assert.NoError(t, err)
 
 	testutil.CompareBenchmarkLog(t, benchmarkLog, got)
 }

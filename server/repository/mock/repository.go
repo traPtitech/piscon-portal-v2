@@ -468,18 +468,18 @@ func (c *MockRepositoryGetBenchmarkLogCall) DoAndReturn(f func(context.Context, 
 }
 
 // GetBenchmarks mocks base method.
-func (m *MockRepository) GetBenchmarks(ctx context.Context) (domain.Benchmarks, error) {
+func (m *MockRepository) GetBenchmarks(ctx context.Context, query repository.BenchmarkQuery) ([]domain.Benchmark, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetBenchmarks", ctx)
-	ret0, _ := ret[0].(domain.Benchmarks)
+	ret := m.ctrl.Call(m, "GetBenchmarks", ctx, query)
+	ret0, _ := ret[0].([]domain.Benchmark)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetBenchmarks indicates an expected call of GetBenchmarks.
-func (mr *MockRepositoryMockRecorder) GetBenchmarks(ctx any) *MockRepositoryGetBenchmarksCall {
+func (mr *MockRepositoryMockRecorder) GetBenchmarks(ctx, query any) *MockRepositoryGetBenchmarksCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBenchmarks", reflect.TypeOf((*MockRepository)(nil).GetBenchmarks), ctx)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBenchmarks", reflect.TypeOf((*MockRepository)(nil).GetBenchmarks), ctx, query)
 	return &MockRepositoryGetBenchmarksCall{Call: call}
 }
 
@@ -489,19 +489,19 @@ type MockRepositoryGetBenchmarksCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockRepositoryGetBenchmarksCall) Return(arg0 domain.Benchmarks, arg1 error) *MockRepositoryGetBenchmarksCall {
+func (c *MockRepositoryGetBenchmarksCall) Return(arg0 []domain.Benchmark, arg1 error) *MockRepositoryGetBenchmarksCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockRepositoryGetBenchmarksCall) Do(f func(context.Context) (domain.Benchmarks, error)) *MockRepositoryGetBenchmarksCall {
+func (c *MockRepositoryGetBenchmarksCall) Do(f func(context.Context, repository.BenchmarkQuery) ([]domain.Benchmark, error)) *MockRepositoryGetBenchmarksCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockRepositoryGetBenchmarksCall) DoAndReturn(f func(context.Context) (domain.Benchmarks, error)) *MockRepositoryGetBenchmarksCall {
+func (c *MockRepositoryGetBenchmarksCall) DoAndReturn(f func(context.Context, repository.BenchmarkQuery) ([]domain.Benchmark, error)) *MockRepositoryGetBenchmarksCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

@@ -78,15 +78,3 @@ type BenchmarkLog struct {
 	UserLog  string
 	AdminLog string
 }
-
-type Benchmarks []Benchmark
-
-func (b Benchmarks) Filter(f func(b Benchmark) bool) Benchmarks {
-	var res Benchmarks
-	for _, b := range b {
-		if f(b) {
-			res = append(res, b)
-		}
-	}
-	return res
-}
