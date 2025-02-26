@@ -112,7 +112,7 @@ func (h *Handler) AdminAuthMiddleware() echo.MiddlewareFunc {
 			}
 
 			if !user.IsAdmin {
-				return unauthorizedResponse(c, "you are not an admin")
+				return forbiddenResponse(c)
 			}
 
 			return next(c)
