@@ -27,7 +27,7 @@ func TestCreateBenchmark(t *testing.T) {
 		expectError      bool
 	}{
 		{
-			name: "Valid",
+			name: "success: valid",
 			user: domain.User{
 				ID:     userID,
 				TeamID: uuid.NullUUID{Valid: true, UUID: teamID},
@@ -40,7 +40,7 @@ func TestCreateBenchmark(t *testing.T) {
 			expectError: false,
 		},
 		{
-			name: "InstanceNotRunning",
+			name: "failure: instance is not running",
 			user: domain.User{ID: userID,
 				TeamID: uuid.NullUUID{Valid: true, UUID: teamID},
 			},
@@ -51,7 +51,7 @@ func TestCreateBenchmark(t *testing.T) {
 			expectError: true,
 		},
 		{
-			name: "InvalidInstance",
+			name: "failure: user's teamID does not match instance's teamID",
 			user: domain.User{
 				ID:     userID,
 				TeamID: uuid.NullUUID{Valid: true, UUID: teamID},
@@ -64,7 +64,7 @@ func TestCreateBenchmark(t *testing.T) {
 			expectError: true,
 		},
 		{
-			name: "BenchmarkAlreadyQueued",
+			name: "failure: benchmark already queued",
 			user: domain.User{
 				ID:     userID,
 				TeamID: uuid.NullUUID{Valid: true, UUID: teamID},
@@ -82,12 +82,10 @@ func TestCreateBenchmark(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt // capture range variable
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
 			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
 
 			mockRepo := mock.NewMockRepository(ctrl)
 			useCase := usecase.NewBenchmarkUseCase(mockRepo)
