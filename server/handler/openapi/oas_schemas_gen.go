@@ -158,9 +158,9 @@ type BenchmarkAdminResultSumType string
 
 // Possible values for BenchmarkAdminResultSumType.
 const (
-	WaitingBenchmarkBenchmarkAdminResultSum  BenchmarkAdminResultSumType = "WaitingBenchmark"
-	RunningBenchmarkBenchmarkAdminResultSum  BenchmarkAdminResultSumType = "RunningBenchmark"
-	FinishedBenchmarkBenchmarkAdminResultSum BenchmarkAdminResultSumType = "FinishedBenchmark"
+	WaitingBenchmarkBenchmarkAdminResultSum  BenchmarkAdminResultSumType = "waiting"
+	RunningBenchmarkBenchmarkAdminResultSum  BenchmarkAdminResultSumType = "running"
+	FinishedBenchmarkBenchmarkAdminResultSum BenchmarkAdminResultSumType = "finished"
 )
 
 // IsWaitingBenchmark reports whether BenchmarkAdminResultSum is WaitingBenchmark.
@@ -274,9 +274,9 @@ type BenchmarkListItemSumType string
 
 // Possible values for BenchmarkListItemSumType.
 const (
-	WaitingBenchmarkBenchmarkListItemSum  BenchmarkListItemSumType = "WaitingBenchmark"
-	RunningBenchmarkBenchmarkListItemSum  BenchmarkListItemSumType = "RunningBenchmark"
-	FinishedBenchmarkBenchmarkListItemSum BenchmarkListItemSumType = "FinishedBenchmark"
+	WaitingBenchmarkBenchmarkListItemSum  BenchmarkListItemSumType = "waiting"
+	RunningBenchmarkBenchmarkListItemSum  BenchmarkListItemSumType = "running"
+	FinishedBenchmarkBenchmarkListItemSum BenchmarkListItemSumType = "finished"
 )
 
 // IsWaitingBenchmark reports whether BenchmarkListItemSum is WaitingBenchmark.
@@ -419,9 +419,9 @@ type BenchmarkSumType string
 
 // Possible values for BenchmarkSumType.
 const (
-	WaitingBenchmarkBenchmarkSum  BenchmarkSumType = "WaitingBenchmark"
-	RunningBenchmarkBenchmarkSum  BenchmarkSumType = "RunningBenchmark"
-	FinishedBenchmarkBenchmarkSum BenchmarkSumType = "FinishedBenchmark"
+	WaitingBenchmarkBenchmarkSum  BenchmarkSumType = "waiting"
+	RunningBenchmarkBenchmarkSum  BenchmarkSumType = "running"
+	FinishedBenchmarkBenchmarkSum BenchmarkSumType = "finished"
 )
 
 // IsWaitingBenchmark reports whether BenchmarkSum is WaitingBenchmark.

@@ -388,7 +388,7 @@ func (s BenchmarkAdminResultSum) encodeFields(e *jx.Encoder) {
 	switch s.Type {
 	case FinishedBenchmarkBenchmarkAdminResultSum:
 		e.FieldStart("status")
-		e.Str("FinishedBenchmark")
+		e.Str("finished")
 		{
 			s := s.FinishedBenchmark
 			{
@@ -430,7 +430,7 @@ func (s BenchmarkAdminResultSum) encodeFields(e *jx.Encoder) {
 		}
 	case RunningBenchmarkBenchmarkAdminResultSum:
 		e.FieldStart("status")
-		e.Str("RunningBenchmark")
+		e.Str("running")
 		{
 			s := s.RunningBenchmark
 			{
@@ -464,7 +464,7 @@ func (s BenchmarkAdminResultSum) encodeFields(e *jx.Encoder) {
 		}
 	case WaitingBenchmarkBenchmarkAdminResultSum:
 		e.FieldStart("status")
-		e.Str("WaitingBenchmark")
+		e.Str("waiting")
 		{
 			s := s.WaitingBenchmark
 			{
@@ -514,13 +514,13 @@ func (s *BenchmarkAdminResultSum) Decode(d *jx.Decoder) error {
 					return err
 				}
 				switch typ {
-				case "FinishedBenchmark":
+				case "finished":
 					s.Type = FinishedBenchmarkBenchmarkAdminResultSum
 					found = true
-				case "RunningBenchmark":
+				case "running":
 					s.Type = RunningBenchmarkBenchmarkAdminResultSum
 					found = true
-				case "WaitingBenchmark":
+				case "waiting":
 					s.Type = WaitingBenchmarkBenchmarkAdminResultSum
 					found = true
 				default:
@@ -669,7 +669,7 @@ func (s BenchmarkListItemSum) encodeFields(e *jx.Encoder) {
 	switch s.Type {
 	case FinishedBenchmarkBenchmarkListItemSum:
 		e.FieldStart("status")
-		e.Str("FinishedBenchmark")
+		e.Str("finished")
 		{
 			s := s.FinishedBenchmark
 			{
@@ -711,7 +711,7 @@ func (s BenchmarkListItemSum) encodeFields(e *jx.Encoder) {
 		}
 	case RunningBenchmarkBenchmarkListItemSum:
 		e.FieldStart("status")
-		e.Str("RunningBenchmark")
+		e.Str("running")
 		{
 			s := s.RunningBenchmark
 			{
@@ -745,7 +745,7 @@ func (s BenchmarkListItemSum) encodeFields(e *jx.Encoder) {
 		}
 	case WaitingBenchmarkBenchmarkListItemSum:
 		e.FieldStart("status")
-		e.Str("WaitingBenchmark")
+		e.Str("waiting")
 		{
 			s := s.WaitingBenchmark
 			{
@@ -795,13 +795,13 @@ func (s *BenchmarkListItemSum) Decode(d *jx.Decoder) error {
 					return err
 				}
 				switch typ {
-				case "FinishedBenchmark":
+				case "finished":
 					s.Type = FinishedBenchmarkBenchmarkListItemSum
 					found = true
-				case "RunningBenchmark":
+				case "running":
 					s.Type = RunningBenchmarkBenchmarkListItemSum
 					found = true
-				case "WaitingBenchmark":
+				case "waiting":
 					s.Type = WaitingBenchmarkBenchmarkListItemSum
 					found = true
 				default:
@@ -860,7 +860,7 @@ func (s BenchmarkSum) encodeFields(e *jx.Encoder) {
 	switch s.Type {
 	case FinishedBenchmarkBenchmarkSum:
 		e.FieldStart("status")
-		e.Str("FinishedBenchmark")
+		e.Str("finished")
 		{
 			s := s.FinishedBenchmark
 			{
@@ -902,7 +902,7 @@ func (s BenchmarkSum) encodeFields(e *jx.Encoder) {
 		}
 	case RunningBenchmarkBenchmarkSum:
 		e.FieldStart("status")
-		e.Str("RunningBenchmark")
+		e.Str("running")
 		{
 			s := s.RunningBenchmark
 			{
@@ -936,7 +936,7 @@ func (s BenchmarkSum) encodeFields(e *jx.Encoder) {
 		}
 	case WaitingBenchmarkBenchmarkSum:
 		e.FieldStart("status")
-		e.Str("WaitingBenchmark")
+		e.Str("waiting")
 		{
 			s := s.WaitingBenchmark
 			{
@@ -986,13 +986,13 @@ func (s *BenchmarkSum) Decode(d *jx.Decoder) error {
 					return err
 				}
 				switch typ {
-				case "FinishedBenchmark":
+				case "finished":
 					s.Type = FinishedBenchmarkBenchmarkSum
 					found = true
-				case "RunningBenchmark":
+				case "running":
 					s.Type = RunningBenchmarkBenchmarkSum
 					found = true
-				case "WaitingBenchmark":
+				case "waiting":
 					s.Type = WaitingBenchmarkBenchmarkSum
 					found = true
 				default:

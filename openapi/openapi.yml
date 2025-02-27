@@ -971,6 +971,10 @@ components:
       description: "ベンチマーク"
       discriminator:
         propertyName: status
+        mapping:
+          waiting: "#/components/schemas/WaitingBenchmark"
+          running: "#/components/schemas/RunningBenchmark"
+          finished: "#/components/schemas/FinishedBenchmark"
       oneOf:
         - $ref: "#/components/schemas/WaitingBenchmark"
         - $ref: "#/components/schemas/RunningBenchmark"
