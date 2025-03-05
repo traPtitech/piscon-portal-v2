@@ -37,11 +37,13 @@ func mustMakeTeam(t *testing.T, executor bob.Executor, team domain.Team) {
 
 func mustMakeInstance(t *testing.T, executor bob.Executor, instance domain.Instance) {
 	t.Helper()
-	_, err := models.Instances.Insert(&models.InstanceSetter{
+	status, err := db.FromDomainInstanceStatus(instance.Status)
+	require.NoError(t, err)
+	_, err = models.Instances.Insert(&models.InstanceSetter{
 		ID:             omit.From(instance.ID.String()),
 		TeamID:         omit.From(instance.TeamID.String()),
 		InstanceNumber: omit.From(int32(instance.InstanceNumber)),
-		Status:         omit.From(db.FromDomainInstanceStatus(instance.Status)),
+		Status:         omit.From(status),
 		PrivateIP:      omitnull.From(instance.PrivateIP),
 		PublicIP:       omitnull.From(instance.PublicIP),
 	}).Exec(context.Background(), executor)
@@ -50,17 +52,21 @@ func mustMakeInstance(t *testing.T, executor bob.Executor, instance domain.Insta
 
 func mustMakeBenchmark(t *testing.T, executor bob.Executor, benchmark domain.Benchmark) {
 	t.Helper()
-	_, err := models.Benchmarks.Insert(&models.BenchmarkSetter{
+	status, err := db.FromDomainBenchmarkStatus(benchmark.Status)
+	require.NoError(t, err)
+	result, err := db.FromDomainBenchmarkResult(benchmark.Result)
+	require.NoError(t, err)
+	_, err = models.Benchmarks.Insert(&models.BenchmarkSetter{
 		ID:         omit.From(benchmark.ID.String()),
 		InstanceID: omit.From(benchmark.Instance.ID.String()),
 		TeamID:     omit.From(benchmark.TeamID.String()),
 		UserID:     omit.From(benchmark.UserID.String()),
-		Status:     omit.From(db.FromDomainBenchmarkStatus(benchmark.Status)),
+		Status:     omit.From(status),
 		CreatedAt:  omit.From(benchmark.CreatedAt),
 		StartedAt:  omitnull.FromPtr(benchmark.StartedAt),
 		FinishedAt: omitnull.FromPtr(benchmark.FinishedAt),
 		Score:      omit.From(benchmark.Score),
-		Result:     omitnull.FromPtr(db.FromDomainBenchmarkResult(benchmark.Result)),
+		Result:     omitnull.FromPtr(result),
 	}).Exec(context.Background(), executor)
 	require.NoError(t, err)
 }

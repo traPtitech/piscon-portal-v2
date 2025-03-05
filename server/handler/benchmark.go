@@ -36,7 +36,10 @@ func (h *Handler) GetBenchmark(c echo.Context) error {
 		}
 	}
 
-	res := toOpenAPIBenchmarkAdminResult(benchmark, log)
+	res, err := toOpenAPIBenchmarkAdminResult(benchmark, log)
+	if err != nil {
+		return internalServerErrorResponse(c, err)
+	}
 
 	return c.JSON(http.StatusOK, res)
 }
@@ -58,7 +61,10 @@ func (h *Handler) EnqueueBenchmark(c echo.Context) error {
 		return internalServerErrorResponse(c, err)
 	}
 
-	res := toOpenAPIBenchmarkListItem(benchmark)
+	res, err := toOpenAPIBenchmarkListItem(benchmark)
+	if err != nil {
+		return internalServerErrorResponse(c, err)
+	}
 
 	return c.JSON(http.StatusCreated, res)
 }
@@ -71,7 +77,11 @@ func (h *Handler) GetBenchmarks(c echo.Context) error {
 
 	res := make([]*openapi.BenchmarkListItem, 0, len(benchmarks))
 	for _, benchmark := range benchmarks {
-		res = append(res, &openapi.BenchmarkListItem{OneOf: toOpenAPIBenchmarkListItem(benchmark)})
+		item, err := toOpenAPIBenchmarkListItem(benchmark)
+		if err != nil {
+			return internalServerErrorResponse(c, err)
+		}
+		res = append(res, &openapi.BenchmarkListItem{OneOf: item})
 	}
 
 	return c.JSON(http.StatusOK, res)
@@ -85,7 +95,11 @@ func (h *Handler) GetQueuedBenchmarks(c echo.Context) error {
 
 	res := make([]*openapi.BenchmarkListItem, 0, len(benchmarks))
 	for _, benchmark := range benchmarks {
-		res = append(res, &openapi.BenchmarkListItem{OneOf: toOpenAPIBenchmarkListItem(benchmark)})
+		item, err := toOpenAPIBenchmarkListItem(benchmark)
+		if err != nil {
+			return internalServerErrorResponse(c, err)
+		}
+		res = append(res, &openapi.BenchmarkListItem{OneOf: item})
 	}
 
 	return c.JSON(http.StatusOK, res)
@@ -104,7 +118,11 @@ func (h *Handler) GetAllTeamBenchmarks(c echo.Context) error {
 
 	res := make([]*openapi.BenchmarkListItem, 0, len(benchmarks))
 	for _, benchmark := range benchmarks {
-		res = append(res, &openapi.BenchmarkListItem{OneOf: toOpenAPIBenchmarkListItem(benchmark)})
+		item, err := toOpenAPIBenchmarkListItem(benchmark)
+		if err != nil {
+			return internalServerErrorResponse(c, err)
+		}
+		res = append(res, &openapi.BenchmarkListItem{OneOf: item})
 	}
 
 	return c.JSON(http.StatusOK, res)
@@ -123,7 +141,11 @@ func (h *Handler) GetTeamBenchmarks(c echo.Context) error {
 
 	res := make([]*openapi.BenchmarkListItem, 0, len(benchmarks))
 	for _, benchmark := range benchmarks {
-		res = append(res, &openapi.BenchmarkListItem{OneOf: toOpenAPIBenchmarkListItem(benchmark)})
+		item, err := toOpenAPIBenchmarkListItem(benchmark)
+		if err != nil {
+			return internalServerErrorResponse(c, err)
+		}
+		res = append(res, &openapi.BenchmarkListItem{OneOf: item})
 	}
 
 	return c.JSON(http.StatusOK, res)
@@ -160,12 +182,15 @@ func (h *Handler) GetTeamBenchmark(c echo.Context) error {
 		}
 	}
 
-	res := toOpenAPIBenchmark(benchmark, log)
+	res, err := toOpenAPIBenchmark(benchmark, log)
+	if err != nil {
+		return internalServerErrorResponse(c, err)
+	}
 
 	return c.JSON(http.StatusOK, res)
 }
 
-func toOpenAPIBenchmarkListItem(benchmark domain.Benchmark) openapi.BenchmarkListItemSum {
+func toOpenAPIBenchmarkListItem(benchmark domain.Benchmark) (openapi.BenchmarkListItemSum, error) {
 	switch benchmark.Status {
 	case domain.BenchmarkStatusWaiting:
 		return openapi.NewWaitingBenchmarkBenchmarkListItemSum(openapi.WaitingBenchmark{
@@ -175,7 +200,7 @@ func toOpenAPIBenchmarkListItem(benchmark domain.Benchmark) openapi.BenchmarkLis
 			UserId:     openapi.UserId(benchmark.UserID),
 			Status:     openapi.WaitingBenchmarkStatusWaiting,
 			CreatedAt:  openapi.CreatedAt(benchmark.CreatedAt),
-		})
+		}), nil
 	case domain.BenchmarkStatusRunning:
 		return openapi.NewRunningBenchmarkBenchmarkListItemSum(openapi.RunningBenchmark{
 			ID:         openapi.BenchmarkId(benchmark.ID),
@@ -186,8 +211,12 @@ func toOpenAPIBenchmarkListItem(benchmark domain.Benchmark) openapi.BenchmarkLis
 			CreatedAt:  openapi.CreatedAt(benchmark.CreatedAt),
 			StartedAt:  openapi.StartedAt(*benchmark.StartedAt),
 			Score:      openapi.Score(benchmark.Score),
-		})
+		}), nil
 	case domain.BenchmarkStatusFinished:
+		result, err := toOpenAPIBenchmarkResult(*benchmark.Result)
+		if err != nil {
+			return openapi.BenchmarkListItemSum{}, err
+		}
 		return openapi.NewFinishedBenchmarkBenchmarkListItemSum(openapi.FinishedBenchmark{
 			ID:         openapi.BenchmarkId(benchmark.ID),
 			InstanceId: openapi.InstanceId(benchmark.Instance.ID),
@@ -197,16 +226,18 @@ func toOpenAPIBenchmarkListItem(benchmark domain.Benchmark) openapi.BenchmarkLis
 			CreatedAt:  openapi.CreatedAt(benchmark.CreatedAt),
 			FinishedAt: openapi.FinishedAt(*benchmark.FinishedAt),
 			Score:      openapi.Score(benchmark.Score),
-			Result:     toOpenAPIBenchmarkResult(*benchmark.Result),
-		})
+			Result:     result,
+		}), nil
 	default:
-		// unreachable
-		panic(fmt.Sprintf("unexpected status: %v", benchmark.Status))
+		return openapi.BenchmarkListItemSum{}, fmt.Errorf("unexpected benchmark status: %v", benchmark.Status)
 	}
 }
 
-func toOpenAPIBenchmark(benchmark domain.Benchmark, log domain.BenchmarkLog) *openapi.Benchmark {
-	listItem := toOpenAPIBenchmarkListItem(benchmark)
+func toOpenAPIBenchmark(benchmark domain.Benchmark, log domain.BenchmarkLog) (*openapi.Benchmark, error) {
+	listItem, err := toOpenAPIBenchmarkListItem(benchmark)
+	if err != nil {
+		return nil, err
+	}
 	return &openapi.Benchmark{
 		Log: log.UserLog,
 		OneOf: openapi.BenchmarkSum{
@@ -215,25 +246,27 @@ func toOpenAPIBenchmark(benchmark domain.Benchmark, log domain.BenchmarkLog) *op
 			RunningBenchmark:  listItem.RunningBenchmark,
 			FinishedBenchmark: listItem.FinishedBenchmark,
 		},
-	}
+	}, nil
 }
 
-func toOpenAPIBenchmarkResult(result domain.BenchmarkResult) openapi.FinishedBenchmarkResult {
+func toOpenAPIBenchmarkResult(result domain.BenchmarkResult) (openapi.FinishedBenchmarkResult, error) {
 	switch result {
 	case domain.BenchmarkResultStatusError:
-		return openapi.FinishedBenchmarkResultError
+		return openapi.FinishedBenchmarkResultError, nil
 	case domain.BenchmarkResultStatusPassed:
-		return openapi.FinishedBenchmarkResultPassed
+		return openapi.FinishedBenchmarkResultPassed, nil
 	case domain.BenchmarkResultStatusFailed:
-		return openapi.FinishedBenchmarkResultFailed
+		return openapi.FinishedBenchmarkResultFailed, nil
 	default:
-		// unreachable
-		panic(fmt.Sprintf("unexpected result: %v", result))
+		return "", fmt.Errorf("unexpected benchmark result: %v", result)
 	}
 }
 
-func toOpenAPIBenchmarkAdminResult(benchmark domain.Benchmark, log domain.BenchmarkLog) *openapi.BenchmarkAdminResult {
-	listItem := toOpenAPIBenchmarkListItem(benchmark)
+func toOpenAPIBenchmarkAdminResult(benchmark domain.Benchmark, log domain.BenchmarkLog) (*openapi.BenchmarkAdminResult, error) {
+	listItem, err := toOpenAPIBenchmarkListItem(benchmark)
+	if err != nil {
+		return nil, err
+	}
 	return &openapi.BenchmarkAdminResult{
 		Log:      log.UserLog,
 		AdminLog: log.AdminLog,
@@ -243,5 +276,5 @@ func toOpenAPIBenchmarkAdminResult(benchmark domain.Benchmark, log domain.Benchm
 			RunningBenchmark:  listItem.RunningBenchmark,
 			FinishedBenchmark: listItem.FinishedBenchmark,
 		},
-	}
+	}, nil
 }

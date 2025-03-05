@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/aarondl/opt/omit"
 	"github.com/google/uuid"
@@ -31,12 +32,16 @@ func (r *Repository) FindBenchmark(ctx context.Context, id uuid.UUID) (domain.Be
 }
 
 func (r *Repository) CreateBenchmark(ctx context.Context, benchmark domain.Benchmark) error {
-	_, err := models.Benchmarks.Insert(&models.BenchmarkSetter{
+	status, err := fromDomainBenchmarkStatus(benchmark.Status)
+	if err != nil {
+		return err
+	}
+	_, err = models.Benchmarks.Insert(&models.BenchmarkSetter{
 		ID:         omit.From(benchmark.ID.String()),
 		InstanceID: omit.From(benchmark.Instance.ID.String()),
 		TeamID:     omit.From(benchmark.TeamID.String()),
 		UserID:     omit.From(benchmark.UserID.String()),
-		Status:     omit.From(fromDomainBenchmarkStatus(benchmark.Status)),
+		Status:     omit.From(status),
 		CreatedAt:  omit.From(benchmark.CreatedAt),
 	}).Exec(ctx, r.executor(ctx))
 	if err != nil {
@@ -59,7 +64,11 @@ func (r *Repository) GetBenchmarks(ctx context.Context, query repository.Benchma
 	if query.StatusIn.IsSet() {
 		var statuses []models.BenchmarksStatus
 		for _, status := range query.StatusIn.Get() {
-			statuses = append(statuses, fromDomainBenchmarkStatus(status))
+			dbModelStatus, err := fromDomainBenchmarkStatus(status)
+			if err != nil {
+				return nil, err
+			}
+			statuses = append(statuses, dbModelStatus)
 		}
 		mods = append(mods, where.Status.In(statuses...))
 	}
@@ -93,16 +102,16 @@ func (r *Repository) GetBenchmarkLog(ctx context.Context, benchmarkID uuid.UUID)
 	return toDomainBenchmarkLog(benchmarkLogs)
 }
 
-func fromDomainBenchmarkStatus(status domain.BenchmarkStatus) models.BenchmarksStatus {
+func fromDomainBenchmarkStatus(status domain.BenchmarkStatus) (models.BenchmarksStatus, error) {
 	switch status {
 	case domain.BenchmarkStatusWaiting:
-		return models.BenchmarksStatusWaiting
+		return models.BenchmarksStatusWaiting, nil
 	case domain.BenchmarkStatusRunning:
-		return models.BenchmarksStatusRunning
+		return models.BenchmarksStatusRunning, nil
 	case domain.BenchmarkStatusFinished:
-		return models.BenchmarksStatusFinished
+		return models.BenchmarksStatusFinished, nil
 	default:
-		panic("unknown benchmark status")
+		return "", errors.New("unknown benchmark status")
 	}
 }
 
@@ -178,22 +187,22 @@ func toDomainBenchmarkResult(result *models.BenchmarksResult) (*domain.Benchmark
 	case models.BenchmarksResultError:
 		return ptr.Of(domain.BenchmarkResultStatusError), nil
 	default:
-		return nil, errors.New("unknown benchmark result")
+		return nil, fmt.Errorf("unknown benchmark result: %v", *result)
 	}
 }
 
-func fromDomainBenchmarkResult(result *domain.BenchmarkResult) *models.BenchmarksResult {
+func fromDomainBenchmarkResult(result *domain.BenchmarkResult) (*models.BenchmarksResult, error) {
 	if result == nil {
-		return nil
+		return nil, nil
 	}
 	switch *result {
 	case domain.BenchmarkResultStatusPassed:
-		return ptr.Of(models.BenchmarksResultPassed)
+		return ptr.Of(models.BenchmarksResultPassed), nil
 	case domain.BenchmarkResultStatusFailed:
-		return ptr.Of(models.BenchmarksResultFailed)
+		return ptr.Of(models.BenchmarksResultFailed), nil
 	case domain.BenchmarkResultStatusError:
-		return ptr.Of(models.BenchmarksResultError)
+		return ptr.Of(models.BenchmarksResultError), nil
 	default:
-		panic("unknown benchmark result")
+		return nil, fmt.Errorf("unknown benchmark result: %v", *result)
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
@@ -68,23 +69,23 @@ func toDomainInstanceStatus(status models.InstancesStatus) (domain.InstanceStatu
 	}
 }
 
-func fromDomainInstanceStatus(status domain.InstanceStatus) models.InstancesStatus {
+func fromDomainInstanceStatus(status domain.InstanceStatus) (models.InstancesStatus, error) {
 	switch status {
 	case domain.InstanceStatusRunning:
-		return models.InstancesStatusRunning
+		return models.InstancesStatusRunning, nil
 	case domain.InstanceStatusBuilding:
-		return models.InstancesStatusBuilding
+		return models.InstancesStatusBuilding, nil
 	case domain.InstanceStatusStarting:
-		return models.InstancesStatusStarting
+		return models.InstancesStatusStarting, nil
 	case domain.InstanceStatusStopping:
-		return models.InstancesStatusStopping
+		return models.InstancesStatusStopping, nil
 	case domain.InstanceStatusStopped:
-		return models.InstancesStatusStopped
+		return models.InstancesStatusStopped, nil
 	case domain.InstanceStatusDeleting:
-		return models.InstancesStatusDeleting
+		return models.InstancesStatusDeleting, nil
 	case domain.InstanceStatusDeleted:
-		return models.InstancesStatusDeleted
+		return models.InstancesStatusDeleted, nil
 	default:
-		panic("unknown instance status")
+		return "", fmt.Errorf("unknown instance status: %v", status)
 	}
 }
