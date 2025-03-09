@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-//go:generate go run go.uber.org/mock/mockgen@v0.5.0 -source=$GOFILE -destination=internal/mock/$GOFILE -package=mock -typed=true
+//go:generate go tool mockgen -source=$GOFILE -destination=internal/mock/$GOFILE -package=mock -typed=true
 type SessionManager interface {
 	Init(e *echo.Group)
 

@@ -1,5 +1,3 @@
-//go:build 1.24
-
 package runner_test
 
 import (

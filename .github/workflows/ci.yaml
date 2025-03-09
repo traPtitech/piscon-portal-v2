@@ -6,6 +6,9 @@ on:
       - main
   pull_request:
 
+env:
+  GOEXPERIMENT: "synctest"
+
 jobs:
   build:
     name: Build
@@ -27,7 +30,7 @@ jobs:
           go-version-file: go.mod
       - uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.62
+          version: latest
 
   test:
     name: Test
