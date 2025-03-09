@@ -43,6 +43,44 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
 }
 
+// CreateBenchmark mocks base method.
+func (m *MockRepository) CreateBenchmark(ctx context.Context, benchmark domain.Benchmark) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateBenchmark", ctx, benchmark)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateBenchmark indicates an expected call of CreateBenchmark.
+func (mr *MockRepositoryMockRecorder) CreateBenchmark(ctx, benchmark any) *MockRepositoryCreateBenchmarkCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBenchmark", reflect.TypeOf((*MockRepository)(nil).CreateBenchmark), ctx, benchmark)
+	return &MockRepositoryCreateBenchmarkCall{Call: call}
+}
+
+// MockRepositoryCreateBenchmarkCall wrap *gomock.Call
+type MockRepositoryCreateBenchmarkCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockRepositoryCreateBenchmarkCall) Return(arg0 error) *MockRepositoryCreateBenchmarkCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockRepositoryCreateBenchmarkCall) Do(f func(context.Context, domain.Benchmark) error) *MockRepositoryCreateBenchmarkCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockRepositoryCreateBenchmarkCall) DoAndReturn(f func(context.Context, domain.Benchmark) error) *MockRepositoryCreateBenchmarkCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // CreateSession mocks base method.
 func (m *MockRepository) CreateSession(ctx context.Context, session domain.Session) error {
 	m.ctrl.T.Helper()
@@ -195,6 +233,84 @@ func (c *MockRepositoryDeleteSessionCall) DoAndReturn(f func(context.Context, st
 	return c
 }
 
+// FindBenchmark mocks base method.
+func (m *MockRepository) FindBenchmark(ctx context.Context, id uuid.UUID) (domain.Benchmark, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindBenchmark", ctx, id)
+	ret0, _ := ret[0].(domain.Benchmark)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindBenchmark indicates an expected call of FindBenchmark.
+func (mr *MockRepositoryMockRecorder) FindBenchmark(ctx, id any) *MockRepositoryFindBenchmarkCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindBenchmark", reflect.TypeOf((*MockRepository)(nil).FindBenchmark), ctx, id)
+	return &MockRepositoryFindBenchmarkCall{Call: call}
+}
+
+// MockRepositoryFindBenchmarkCall wrap *gomock.Call
+type MockRepositoryFindBenchmarkCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockRepositoryFindBenchmarkCall) Return(arg0 domain.Benchmark, arg1 error) *MockRepositoryFindBenchmarkCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockRepositoryFindBenchmarkCall) Do(f func(context.Context, uuid.UUID) (domain.Benchmark, error)) *MockRepositoryFindBenchmarkCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockRepositoryFindBenchmarkCall) DoAndReturn(f func(context.Context, uuid.UUID) (domain.Benchmark, error)) *MockRepositoryFindBenchmarkCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// FindInstance mocks base method.
+func (m *MockRepository) FindInstance(ctx context.Context, id uuid.UUID) (domain.Instance, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindInstance", ctx, id)
+	ret0, _ := ret[0].(domain.Instance)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindInstance indicates an expected call of FindInstance.
+func (mr *MockRepositoryMockRecorder) FindInstance(ctx, id any) *MockRepositoryFindInstanceCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindInstance", reflect.TypeOf((*MockRepository)(nil).FindInstance), ctx, id)
+	return &MockRepositoryFindInstanceCall{Call: call}
+}
+
+// MockRepositoryFindInstanceCall wrap *gomock.Call
+type MockRepositoryFindInstanceCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockRepositoryFindInstanceCall) Return(arg0 domain.Instance, arg1 error) *MockRepositoryFindInstanceCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockRepositoryFindInstanceCall) Do(f func(context.Context, uuid.UUID) (domain.Instance, error)) *MockRepositoryFindInstanceCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockRepositoryFindInstanceCall) DoAndReturn(f func(context.Context, uuid.UUID) (domain.Instance, error)) *MockRepositoryFindInstanceCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // FindSession mocks base method.
 func (m *MockRepository) FindSession(ctx context.Context, id string) (domain.Session, error) {
 	m.ctrl.T.Helper()
@@ -308,6 +424,84 @@ func (c *MockRepositoryFindUserCall) Do(f func(context.Context, uuid.UUID) (doma
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockRepositoryFindUserCall) DoAndReturn(f func(context.Context, uuid.UUID) (domain.User, error)) *MockRepositoryFindUserCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetBenchmarkLog mocks base method.
+func (m *MockRepository) GetBenchmarkLog(ctx context.Context, benchmarkID uuid.UUID) (domain.BenchmarkLog, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBenchmarkLog", ctx, benchmarkID)
+	ret0, _ := ret[0].(domain.BenchmarkLog)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBenchmarkLog indicates an expected call of GetBenchmarkLog.
+func (mr *MockRepositoryMockRecorder) GetBenchmarkLog(ctx, benchmarkID any) *MockRepositoryGetBenchmarkLogCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBenchmarkLog", reflect.TypeOf((*MockRepository)(nil).GetBenchmarkLog), ctx, benchmarkID)
+	return &MockRepositoryGetBenchmarkLogCall{Call: call}
+}
+
+// MockRepositoryGetBenchmarkLogCall wrap *gomock.Call
+type MockRepositoryGetBenchmarkLogCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockRepositoryGetBenchmarkLogCall) Return(arg0 domain.BenchmarkLog, arg1 error) *MockRepositoryGetBenchmarkLogCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockRepositoryGetBenchmarkLogCall) Do(f func(context.Context, uuid.UUID) (domain.BenchmarkLog, error)) *MockRepositoryGetBenchmarkLogCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockRepositoryGetBenchmarkLogCall) DoAndReturn(f func(context.Context, uuid.UUID) (domain.BenchmarkLog, error)) *MockRepositoryGetBenchmarkLogCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetBenchmarks mocks base method.
+func (m *MockRepository) GetBenchmarks(ctx context.Context, query repository.BenchmarkQuery) ([]domain.Benchmark, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBenchmarks", ctx, query)
+	ret0, _ := ret[0].([]domain.Benchmark)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBenchmarks indicates an expected call of GetBenchmarks.
+func (mr *MockRepositoryMockRecorder) GetBenchmarks(ctx, query any) *MockRepositoryGetBenchmarksCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBenchmarks", reflect.TypeOf((*MockRepository)(nil).GetBenchmarks), ctx, query)
+	return &MockRepositoryGetBenchmarksCall{Call: call}
+}
+
+// MockRepositoryGetBenchmarksCall wrap *gomock.Call
+type MockRepositoryGetBenchmarksCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockRepositoryGetBenchmarksCall) Return(arg0 []domain.Benchmark, arg1 error) *MockRepositoryGetBenchmarksCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockRepositoryGetBenchmarksCall) Do(f func(context.Context, repository.BenchmarkQuery) ([]domain.Benchmark, error)) *MockRepositoryGetBenchmarksCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockRepositoryGetBenchmarksCall) DoAndReturn(f func(context.Context, repository.BenchmarkQuery) ([]domain.Benchmark, error)) *MockRepositoryGetBenchmarksCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

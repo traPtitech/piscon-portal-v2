@@ -4,13 +4,52 @@
 package factory
 
 type Factory struct {
-	baseSessionMods SessionModSlice
-	baseTeamMods    TeamModSlice
-	baseUserMods    UserModSlice
+	baseBenchmarkLogMods BenchmarkLogModSlice
+	baseBenchmarkMods    BenchmarkModSlice
+	baseInstanceMods     InstanceModSlice
+	baseSessionMods      SessionModSlice
+	baseTeamMods         TeamModSlice
+	baseUserMods         UserModSlice
 }
 
 func New() *Factory {
 	return &Factory{}
+}
+
+func (f *Factory) NewBenchmarkLog(mods ...BenchmarkLogMod) *BenchmarkLogTemplate {
+	o := &BenchmarkLogTemplate{f: f}
+
+	if f != nil {
+		f.baseBenchmarkLogMods.Apply(o)
+	}
+
+	BenchmarkLogModSlice(mods).Apply(o)
+
+	return o
+}
+
+func (f *Factory) NewBenchmark(mods ...BenchmarkMod) *BenchmarkTemplate {
+	o := &BenchmarkTemplate{f: f}
+
+	if f != nil {
+		f.baseBenchmarkMods.Apply(o)
+	}
+
+	BenchmarkModSlice(mods).Apply(o)
+
+	return o
+}
+
+func (f *Factory) NewInstance(mods ...InstanceMod) *InstanceTemplate {
+	o := &InstanceTemplate{f: f}
+
+	if f != nil {
+		f.baseInstanceMods.Apply(o)
+	}
+
+	InstanceModSlice(mods).Apply(o)
+
+	return o
 }
 
 func (f *Factory) NewSession(mods ...SessionMod) *SessionTemplate {
@@ -47,6 +86,30 @@ func (f *Factory) NewUser(mods ...UserMod) *UserTemplate {
 	UserModSlice(mods).Apply(o)
 
 	return o
+}
+
+func (f *Factory) ClearBaseBenchmarkLogMods() {
+	f.baseBenchmarkLogMods = nil
+}
+
+func (f *Factory) AddBaseBenchmarkLogMod(mods ...BenchmarkLogMod) {
+	f.baseBenchmarkLogMods = append(f.baseBenchmarkLogMods, mods...)
+}
+
+func (f *Factory) ClearBaseBenchmarkMods() {
+	f.baseBenchmarkMods = nil
+}
+
+func (f *Factory) AddBaseBenchmarkMod(mods ...BenchmarkMod) {
+	f.baseBenchmarkMods = append(f.baseBenchmarkMods, mods...)
+}
+
+func (f *Factory) ClearBaseInstanceMods() {
+	f.baseInstanceMods = nil
+}
+
+func (f *Factory) AddBaseInstanceMod(mods ...InstanceMod) {
+	f.baseInstanceMods = append(f.baseInstanceMods, mods...)
 }
 
 func (f *Factory) ClearBaseSessionMods() {
