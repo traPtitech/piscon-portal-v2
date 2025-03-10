@@ -53,9 +53,10 @@ func (h *Handler) AuthMiddleware() echo.MiddlewareFunc {
 	}
 }
 
-// TeamAuthMiddleware is a middleware that checks if the user is a member of the team.
+// TeamOrAdminAuthMiddleware is a middleware that checks if the user is a member of the team.
+// Admins are able to access even if they are not members of the team.
 // The team ID is taken from the URL parameter.
-func (h *Handler) TeamAuthMiddleware() echo.MiddlewareFunc {
+func (h *Handler) TeamOrAdminAuthMiddleware() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			ctx := c.Request().Context()

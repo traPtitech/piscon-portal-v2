@@ -97,7 +97,7 @@ func TestTeamAuthMiddleware(t *testing.T) {
 	userID := uuid.New()
 	teamID := uuid.New()
 
-	needAuthorize := h.TeamAuthMiddleware()(func(c echo.Context) error {
+	needAuthorize := h.TeamOrAdminAuthMiddleware()(func(c echo.Context) error {
 		return c.NoContent(http.StatusOK)
 	})
 
