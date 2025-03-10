@@ -3,7 +3,6 @@ package handler
 import (
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -28,10 +27,10 @@ func (h *Handler) GetBenchmark(c echo.Context) error {
 	}
 	log, err := h.useCase.GetBenchmarkLog(c.Request().Context(), benchmarkID)
 	if err != nil {
-		if errors.Is(err, usecase.ErrNotFound) {
-			// log has not been created yet
-			// no need to return 404
-		} else {
+		// if err is usecase.ErrNotFound, then log has not been created yet
+		// no need to return 404
+
+		if !errors.Is(err, usecase.ErrNotFound) {
 			return internalServerErrorResponse(c, err)
 		}
 	}
