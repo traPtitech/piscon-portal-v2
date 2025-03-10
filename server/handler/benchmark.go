@@ -49,7 +49,6 @@ func (h *Handler) EnqueueBenchmark(c echo.Context) error {
 
 	var req openapi.PostBenchmarkReq
 	if err := c.Bind(&req); err != nil {
-		log.Println(err)
 		return badRequestResponse(c, err.Error())
 	}
 
