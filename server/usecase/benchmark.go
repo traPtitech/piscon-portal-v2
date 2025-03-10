@@ -54,24 +54,32 @@ func (u *benchmarkUseCaseImpl) CreateBenchmark(ctx context.Context, instanceID u
 		return domain.Benchmark{}, fmt.Errorf("find instance: %v", err)
 	}
 
-	benchmarks, err := u.repo.GetBenchmarks(ctx, repository.BenchmarkQuery{
-		TeamID:   optional.From(user.TeamID.UUID),
-		StatusIn: optional.From([]domain.BenchmarkStatus{domain.BenchmarkStatusWaiting, domain.BenchmarkStatusRunning}),
-	})
-	if err != nil {
-		return domain.Benchmark{}, fmt.Errorf("get benchmarks: %v", err)
-	}
-	if len(benchmarks) > 0 {
-		return domain.Benchmark{}, NewUseCaseErrorFromMsg("already exists benchmark")
-	}
-
 	benchmark, err := domain.NewBenchmark(instance, user)
 	if err != nil {
 		return domain.Benchmark{}, NewUseCaseError(err)
 	}
-	err = u.repo.CreateBenchmark(ctx, benchmark)
+
+	err = u.repo.Transaction(ctx, func(ctx context.Context, r repository.Repository) error {
+		benchmarks, err := u.repo.GetBenchmarks(ctx, repository.BenchmarkQuery{
+			TeamID:   optional.From(user.TeamID.UUID),
+			StatusIn: optional.From([]domain.BenchmarkStatus{domain.BenchmarkStatusWaiting, domain.BenchmarkStatusRunning}),
+		})
+		if err != nil {
+			return fmt.Errorf("get benchmarks: %v", err)
+		}
+		if len(benchmarks) > 0 {
+			return NewUseCaseErrorFromMsg("already exists benchmark")
+		}
+
+		err = u.repo.CreateBenchmark(ctx, benchmark)
+		if err != nil {
+			return fmt.Errorf("create benchmark: %v", err)
+		}
+
+		return nil
+	})
 	if err != nil {
-		return domain.Benchmark{}, fmt.Errorf("create benchmark: %v", err)
+		return domain.Benchmark{}, err
 	}
 
 	return benchmark, nil
