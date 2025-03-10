@@ -42,6 +42,7 @@ func TestGetBenchmark(t *testing.T) {
 		UserID:     uuid.New(),
 		Status:     domain.BenchmarkStatusFinished,
 		CreatedAt:  time.Now(),
+		StartedAt:  ptr.Of(time.Now()),
 		FinishedAt: ptr.Of(time.Now()),
 		Score:      100,
 		Result:     ptr.Of(domain.BenchmarkResultStatusPassed),
@@ -263,6 +264,7 @@ func TestGetTeamBenchmark(t *testing.T) {
 		UserID:     uuid.New(),
 		Status:     domain.BenchmarkStatusFinished,
 		CreatedAt:  time.Now(),
+		StartedAt:  ptr.Of(time.Now()),
 		FinishedAt: ptr.Of(time.Now()),
 		Score:      100,
 		Result:     ptr.Of(domain.BenchmarkResultStatusPassed),
@@ -316,6 +318,7 @@ func compareFinishedBenchmark(t *testing.T, expected domain.Benchmark, actual op
 	assert.Equal(t, expected.UserID, uuid.UUID(actual.UserId))
 	assert.Equal(t, string(expected.Status), string(actual.Status))
 	assert.WithinDuration(t, expected.CreatedAt, time.Time(actual.CreatedAt), time.Second)
+	assert.WithinDuration(t, *expected.StartedAt, time.Time(actual.StartedAt), time.Second)
 	assert.WithinDuration(t, *expected.FinishedAt, time.Time(actual.FinishedAt), time.Second)
 	assert.Equal(t, expected.Score, int64(actual.Score))
 	assert.Equal(t, string(*expected.Result), string(actual.Result))

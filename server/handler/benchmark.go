@@ -222,6 +222,7 @@ func toOpenAPIBenchmarkListItem(benchmark domain.Benchmark) (openapi.BenchmarkLi
 			UserId:     openapi.UserId(benchmark.UserID),
 			Status:     openapi.FinishedBenchmarkStatusFinished,
 			CreatedAt:  openapi.CreatedAt(benchmark.CreatedAt),
+			StartedAt:  openapi.StartedAt(*benchmark.StartedAt),
 			FinishedAt: openapi.FinishedAt(*benchmark.FinishedAt),
 			Score:      openapi.Score(benchmark.Score),
 			Result:     result,
