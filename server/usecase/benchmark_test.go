@@ -73,6 +73,21 @@ func TestCreateBenchmark(t *testing.T) {
 			expectError: true,
 		},
 		{
+			name: "failure: instance not found",
+			setup: func(mockRepo *mock.MockRepository) {
+				mockRepo.EXPECT().
+					FindUser(gomock.Any(), gomock.Eq(userID)).
+					Return(domain.User{
+						ID:     userID,
+						TeamID: uuid.NullUUID{Valid: true, UUID: teamID},
+					}, nil)
+				mockRepo.EXPECT().
+					FindInstance(gomock.Any(), gomock.Eq(instanceID)).
+					Return(domain.Instance{}, repository.ErrNotFound)
+			},
+			expectError: true,
+		},
+		{
 			name: "failure: user's teamID does not match instance's teamID",
 			setup: func(mockRepo *mock.MockRepository) {
 				mockRepo.EXPECT().
