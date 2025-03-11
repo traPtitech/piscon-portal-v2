@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/traPtitech/piscon-portal-v2/server/utils/ptr"
 )
 
 type BenchmarkStatus string
@@ -48,22 +47,6 @@ func NewBenchmark(instance Instance, user User) (Benchmark, error) {
 		Status:    BenchmarkStatusWaiting,
 		CreatedAt: time.Now(),
 	}, nil
-}
-
-func (b *Benchmark) Start() {
-	b.Status = BenchmarkStatusRunning
-	b.StartedAt = ptr.Of(time.Now())
-}
-
-func (b *Benchmark) Finish(score int64, result BenchmarkResult) {
-	b.Status = BenchmarkStatusFinished
-	b.Score = score
-	b.FinishedAt = ptr.Of(time.Now())
-	b.Result = &result
-}
-
-func (b *Benchmark) IsFinished() bool {
-	return b.Status == BenchmarkStatusFinished
 }
 
 type BenchmarkResult string
