@@ -35,7 +35,7 @@ func (u *benchmarkUseCaseImpl) GetBenchmark(ctx context.Context, id uuid.UUID) (
 		if errors.Is(err, repository.ErrNotFound) {
 			return domain.Benchmark{}, ErrNotFound
 		}
-		return domain.Benchmark{}, err
+		return domain.Benchmark{}, fmt.Errorf("find benchmark: %v", err)
 	}
 
 	return benchmark, nil
@@ -88,7 +88,7 @@ func (u *benchmarkUseCaseImpl) CreateBenchmark(ctx context.Context, instanceID u
 func (u *benchmarkUseCaseImpl) GetBenchmarks(ctx context.Context) ([]domain.Benchmark, error) {
 	benchmarks, err := u.repo.GetBenchmarks(ctx, repository.BenchmarkQuery{})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get benchmarks: %v", err)
 	}
 	return benchmarks, nil
 }
@@ -98,7 +98,7 @@ func (u *benchmarkUseCaseImpl) GetQueuedBenchmarks(ctx context.Context) ([]domai
 		StatusIn: optional.From([]domain.BenchmarkStatus{domain.BenchmarkStatusWaiting, domain.BenchmarkStatusRunning}),
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get benchmarks: %v", err)
 	}
 
 	return benchmarks, nil
@@ -109,7 +109,7 @@ func (u *benchmarkUseCaseImpl) GetTeamBenchmarks(ctx context.Context, teamID uui
 		TeamID: optional.From(teamID),
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get benchmarks: %v", err)
 	}
 
 	return benchmarks, nil
@@ -121,7 +121,7 @@ func (u *benchmarkUseCaseImpl) GetBenchmarkLog(ctx context.Context, benchmarkID 
 		if errors.Is(err, repository.ErrNotFound) {
 			return domain.BenchmarkLog{}, ErrNotFound
 		}
-		return domain.BenchmarkLog{}, err
+		return domain.BenchmarkLog{}, fmt.Errorf("get benchmark log: %v", err)
 	}
 
 	return log, nil
