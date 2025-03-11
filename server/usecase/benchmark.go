@@ -60,7 +60,7 @@ func (u *benchmarkUseCaseImpl) CreateBenchmark(ctx context.Context, instanceID u
 	}
 
 	err = u.repo.Transaction(ctx, func(ctx context.Context, r repository.Repository) error {
-		benchmarks, err := u.repo.GetBenchmarks(ctx, repository.BenchmarkQuery{
+		benchmarks, err := r.GetBenchmarks(ctx, repository.BenchmarkQuery{
 			TeamID:   optional.From(user.TeamID.UUID),
 			StatusIn: optional.From([]domain.BenchmarkStatus{domain.BenchmarkStatusWaiting, domain.BenchmarkStatusRunning}),
 		})
@@ -71,7 +71,7 @@ func (u *benchmarkUseCaseImpl) CreateBenchmark(ctx context.Context, instanceID u
 			return NewUseCaseErrorFromMsg("already exists benchmark")
 		}
 
-		err = u.repo.CreateBenchmark(ctx, benchmark)
+		err = r.CreateBenchmark(ctx, benchmark)
 		if err != nil {
 			return fmt.Errorf("create benchmark: %v", err)
 		}
