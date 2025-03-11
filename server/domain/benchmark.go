@@ -37,7 +37,7 @@ func NewBenchmark(instance Instance, user User) (Benchmark, error) {
 		return Benchmark{}, errors.New("instance is not running")
 	}
 	if instance.TeamID != user.TeamID.UUID {
-		return Benchmark{}, errors.New("teamID is not match")
+		return Benchmark{}, errors.New("teamID does not match")
 	}
 
 	return Benchmark{
