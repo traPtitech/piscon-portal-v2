@@ -58,7 +58,7 @@ func TestGetBenchmark(t *testing.T) {
 
 	_ = h.GetBenchmark(c)
 
-	if !assert.Equal(t, http.StatusOK, rec.Code) {
+	if !assert.Equal(t, http.StatusOK, rec.Code, "status code") {
 		t.Log(rec.Body.String())
 	}
 	var res openapi.BenchmarkAdminResult
@@ -85,7 +85,7 @@ func TestGetBenchmark_NotFound(t *testing.T) {
 
 	_ = h.GetBenchmark(c)
 
-	if !assert.Equal(t, http.StatusNotFound, rec.Code) {
+	if !assert.Equal(t, http.StatusNotFound, rec.Code, "status code") {
 		t.Log(rec.Body.String())
 	}
 }
@@ -120,7 +120,7 @@ func TestEnqueueBenchmark(t *testing.T) {
 
 	_ = h.EnqueueBenchmark(c)
 
-	if !assert.Equal(t, http.StatusCreated, rec.Code) {
+	if !assert.Equal(t, http.StatusCreated, rec.Code, "status code") {
 		t.Log(rec.Body.String())
 	}
 	var res openapi.BenchmarkListItem
@@ -163,7 +163,7 @@ func TestGetBenchmarks(t *testing.T) {
 
 	_ = h.GetBenchmarks(c)
 
-	if !assert.Equal(t, http.StatusOK, rec.Code) {
+	if !assert.Equal(t, http.StatusOK, rec.Code, "status code") {
 		t.Log(rec.Body.String())
 	}
 	var res []*openapi.BenchmarkListItem
@@ -197,7 +197,7 @@ func TestGetQueuedBenchmarks(t *testing.T) {
 
 	_ = h.GetQueuedBenchmarks(c)
 
-	if !assert.Equal(t, http.StatusOK, rec.Code) {
+	if !assert.Equal(t, http.StatusOK, rec.Code, "status code") {
 		t.Log(rec.Body.String())
 	}
 	var res []*openapi.BenchmarkListItem
@@ -234,7 +234,7 @@ func TestGetAllTeamBenchmarks(t *testing.T) {
 
 	_ = h.GetAllTeamBenchmarks(c)
 
-	if !assert.Equal(t, http.StatusOK, rec.Code) {
+	if !assert.Equal(t, http.StatusOK, rec.Code, "status code") {
 		t.Log(rec.Body.String())
 	}
 	var res []*openapi.BenchmarkListItem
@@ -280,7 +280,7 @@ func TestGetTeamBenchmark(t *testing.T) {
 
 	_ = h.GetTeamBenchmark(c)
 
-	if !assert.Equal(t, http.StatusOK, rec.Code) {
+	if !assert.Equal(t, http.StatusOK, rec.Code, "status code") {
 		t.Log(rec.Body.String())
 	}
 	var res openapi.Benchmark
