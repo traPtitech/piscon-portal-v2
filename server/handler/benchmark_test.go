@@ -2,6 +2,7 @@ package handler_test
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -90,6 +91,30 @@ func TestGetBenchmark_NotFound(t *testing.T) {
 	}
 }
 
+func TestGetBenchmark_UseCaseError(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	repoMock := repomock.NewMockRepository(ctrl)
+	useCaseMock := usecasemock.NewMockUseCase(ctrl)
+
+	e := echo.New()
+	benchmarkID := uuid.New()
+	req := httptest.NewRequest(http.MethodGet, "/benchmarks/"+benchmarkID.String(), nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetParamNames("benchmarkID")
+	c.SetParamValues(benchmarkID.String())
+	h := NewHandler(useCaseMock, repoMock, nil)
+
+	useCaseMock.EXPECT().GetBenchmark(gomock.Any(), benchmarkID).Return(domain.Benchmark{}, errors.New("usecase error"))
+
+	_ = h.GetBenchmark(c)
+
+	if !assert.Equal(t, http.StatusInternalServerError, rec.Code, "status code") {
+		t.Log(rec.Body.String())
+	}
+}
+
 func TestEnqueueBenchmark(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
@@ -126,6 +151,33 @@ func TestEnqueueBenchmark(t *testing.T) {
 	var res openapi.BenchmarkListItem
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &res))
 	assert.Equal(t, benchmarkID, uuid.UUID(res.OneOf.WaitingBenchmark.ID))
+}
+
+func TestEnqueueBenchmark_UseCaseError(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	repoMock := repomock.NewMockRepository(ctrl)
+	useCaseMock := usecasemock.NewMockUseCase(ctrl)
+
+	userID := uuid.New()
+
+	e := echo.New()
+	req := &openapi.PostBenchmarkReq{
+		InstanceId: openapi.InstanceId(uuid.New()),
+	}
+	httpReq := newJSONRequest(http.MethodPost, "/benchmarks", req)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(httpReq, rec)
+	c.Set(handler.UserIDKey, userID)
+	h := NewHandler(useCaseMock, repoMock, nil)
+
+	useCaseMock.EXPECT().CreateBenchmark(gomock.Any(), uuid.UUID(req.InstanceId), userID).Return(domain.Benchmark{}, errors.New("usecase error"))
+
+	_ = h.EnqueueBenchmark(c)
+
+	if !assert.Equal(t, http.StatusInternalServerError, rec.Code, "status code") {
+		t.Log(rec.Body.String())
+	}
 }
 
 func TestGetBenchmarks(t *testing.T) {
@@ -171,6 +223,27 @@ func TestGetBenchmarks(t *testing.T) {
 	compareBenchmarks(t, benchmarks, res)
 }
 
+func TestGetBenchmarks_UseCaseError(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	repoMock := repomock.NewMockRepository(ctrl)
+	useCaseMock := usecasemock.NewMockUseCase(ctrl)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/benchmarks", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	h := NewHandler(useCaseMock, repoMock, nil)
+
+	useCaseMock.EXPECT().GetBenchmarks(gomock.Any()).Return(nil, errors.New("usecase error"))
+
+	_ = h.GetBenchmarks(c)
+
+	if !assert.Equal(t, http.StatusInternalServerError, rec.Code, "status code") {
+		t.Log(rec.Body.String())
+	}
+}
+
 func TestGetQueuedBenchmarks(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
@@ -203,6 +276,27 @@ func TestGetQueuedBenchmarks(t *testing.T) {
 	var res []*openapi.BenchmarkListItem
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &res))
 	compareBenchmarks(t, benchmarks, res)
+}
+
+func TestGetQueuedBenchmarks_UseCaseError(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	repoMock := repomock.NewMockRepository(ctrl)
+	useCaseMock := usecasemock.NewMockUseCase(ctrl)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/benchmarks/queued", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	h := NewHandler(useCaseMock, repoMock, nil)
+
+	useCaseMock.EXPECT().GetQueuedBenchmarks(gomock.Any()).Return(nil, errors.New("usecase error"))
+
+	_ = h.GetQueuedBenchmarks(c)
+
+	if !assert.Equal(t, http.StatusInternalServerError, rec.Code, "status code") {
+		t.Log(rec.Body.String())
+	}
 }
 
 func TestGetAllTeamBenchmarks(t *testing.T) {
@@ -240,6 +334,75 @@ func TestGetAllTeamBenchmarks(t *testing.T) {
 	var res []*openapi.BenchmarkListItem
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &res))
 	compareBenchmarks(t, benchmarks, res)
+}
+
+func TestGetTeamBenchmarks(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	repoMock := repomock.NewMockRepository(ctrl)
+	useCaseMock := usecasemock.NewMockUseCase(ctrl)
+
+	e := echo.New()
+	teamID := uuid.New()
+	req := httptest.NewRequest(http.MethodGet, "/teams/"+teamID.String()+"/benchmarks", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetParamNames("teamID")
+	c.SetParamValues(teamID.String())
+	h := NewHandler(useCaseMock, repoMock, nil)
+
+	benchmarks := []domain.Benchmark{
+		{
+			ID:        uuid.New(),
+			TeamID:    teamID,
+			UserID:    uuid.New(),
+			Status:    domain.BenchmarkStatusWaiting,
+			CreatedAt: time.Now(),
+		},
+		{
+			ID:        uuid.New(),
+			TeamID:    teamID,
+			UserID:    uuid.New(),
+			Status:    domain.BenchmarkStatusRunning,
+			CreatedAt: time.Now(),
+			StartedAt: ptr.Of(time.Now()),
+		},
+	}
+
+	useCaseMock.EXPECT().GetTeamBenchmarks(gomock.Any(), teamID).Return(benchmarks, nil)
+
+	_ = h.GetTeamBenchmarks(c)
+
+	if !assert.Equal(t, http.StatusOK, rec.Code, "status code") {
+		t.Log(rec.Body.String())
+	}
+	var res []*openapi.BenchmarkListItem
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &res))
+	compareBenchmarks(t, benchmarks, res)
+}
+
+func TestGetTeamBenchmarks_UseCaseError(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	repoMock := repomock.NewMockRepository(ctrl)
+	useCaseMock := usecasemock.NewMockUseCase(ctrl)
+
+	e := echo.New()
+	teamID := uuid.New()
+	req := httptest.NewRequest(http.MethodGet, "/teams/"+teamID.String()+"/benchmarks", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetParamNames("teamID")
+	c.SetParamValues(teamID.String())
+	h := NewHandler(useCaseMock, repoMock, nil)
+
+	useCaseMock.EXPECT().GetTeamBenchmarks(gomock.Any(), teamID).Return(nil, errors.New("usecase error"))
+
+	_ = h.GetTeamBenchmarks(c)
+
+	if !assert.Equal(t, http.StatusInternalServerError, rec.Code, "status code") {
+		t.Log(rec.Body.String())
+	}
 }
 
 func TestGetTeamBenchmark(t *testing.T) {
@@ -286,6 +449,56 @@ func TestGetTeamBenchmark(t *testing.T) {
 	var res openapi.Benchmark
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &res))
 	assert.Equal(t, benchmarkID, uuid.UUID(res.OneOf.FinishedBenchmark.ID))
+}
+
+func TestGetTeamBenchmark_NotFound(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	repoMock := repomock.NewMockRepository(ctrl)
+	useCaseMock := usecasemock.NewMockUseCase(ctrl)
+
+	e := echo.New()
+	teamID := uuid.New()
+	benchmarkID := uuid.New()
+	req := httptest.NewRequest(http.MethodGet, "/teams/"+teamID.String()+"/benchmarks/"+benchmarkID.String(), nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetParamNames("teamID", "benchmarkID")
+	c.SetParamValues(teamID.String(), benchmarkID.String())
+	h := NewHandler(useCaseMock, repoMock, nil)
+
+	useCaseMock.EXPECT().GetBenchmark(gomock.Any(), benchmarkID).Return(domain.Benchmark{}, usecase.ErrNotFound)
+
+	_ = h.GetTeamBenchmark(c)
+
+	if !assert.Equal(t, http.StatusNotFound, rec.Code, "status code") {
+		t.Log(rec.Body.String())
+	}
+}
+
+func TestGetTeamBenchmark_UseCaseError(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	repoMock := repomock.NewMockRepository(ctrl)
+	useCaseMock := usecasemock.NewMockUseCase(ctrl)
+
+	e := echo.New()
+	teamID := uuid.New()
+	benchmarkID := uuid.New()
+	req := httptest.NewRequest(http.MethodGet, "/teams/"+teamID.String()+"/benchmarks/"+benchmarkID.String(), nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetParamNames("teamID", "benchmarkID")
+	c.SetParamValues(teamID.String(), benchmarkID.String())
+	h := NewHandler(useCaseMock, repoMock, nil)
+
+	useCaseMock.EXPECT().GetBenchmark(gomock.Any(), benchmarkID).Return(domain.Benchmark{}, errors.New("usecase error"))
+
+	_ = h.GetTeamBenchmark(c)
+
+	if !assert.Equal(t, http.StatusInternalServerError, rec.Code, "status code") {
+		t.Log(rec.Body.String())
+	}
 }
 
 func compareWaitingBenchmark(t *testing.T, expected domain.Benchmark, actual openapi.WaitingBenchmark) {
