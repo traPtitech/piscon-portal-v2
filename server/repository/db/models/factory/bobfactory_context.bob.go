@@ -12,9 +12,12 @@ import (
 type contextKey string
 
 var (
-	sessionCtx = newContextual[*models.Session]("session")
-	teamCtx    = newContextual[*models.Team]("team")
-	userCtx    = newContextual[*models.User]("user")
+	benchmarkLogCtx = newContextual[*models.BenchmarkLog]("benchmarkLog")
+	benchmarkCtx    = newContextual[*models.Benchmark]("benchmark")
+	instanceCtx     = newContextual[*models.Instance]("instance")
+	sessionCtx      = newContextual[*models.Session]("session")
+	teamCtx         = newContextual[*models.Team]("team")
+	userCtx         = newContextual[*models.User]("user")
 )
 
 // Contextual is a convienience wrapper around context.WithValue and context.Value

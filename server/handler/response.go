@@ -26,6 +26,10 @@ func unauthorizedResponse(c echo.Context, msg string) error {
 	})
 }
 
+func forbiddenResponse(c echo.Context) error {
+	return c.NoContent(http.StatusForbidden)
+}
+
 func notFoundResponse(c echo.Context) error {
 	return c.JSON(http.StatusNotFound, openapi.NotFound{
 		Message: openapi.NewOptString("Not Found"),

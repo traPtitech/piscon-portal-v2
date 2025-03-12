@@ -8,16 +8,19 @@ import (
 type UseCase interface {
 	TeamUseCase
 	UserUseCase
+	BenchmarkUseCase
 }
 
 type useCaseImpl struct {
 	TeamUseCase
 	UserUseCase
+	BenchmarkUseCase
 }
 
 func New(repo repository.Repository) UseCase {
 	return &useCaseImpl{
-		TeamUseCase: NewTeamUseCase(repo),
-		UserUseCase: NewUserUseCase(repo),
+		TeamUseCase:      NewTeamUseCase(repo),
+		UserUseCase:      NewUserUseCase(repo),
+		BenchmarkUseCase: NewBenchmarkUseCase(repo),
 	}
 }

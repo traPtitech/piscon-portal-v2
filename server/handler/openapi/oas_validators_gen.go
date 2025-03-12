@@ -33,41 +33,65 @@ func (s *BenchScore) Validate() error {
 	return nil
 }
 
-func (s Benchmark) Validate() error {
-	switch s.Type {
-	case WaitingBenchmarkBenchmark:
-		if err := s.WaitingBenchmark.Validate(); err != nil {
-			return err
-		}
-		return nil
-	case RunningBenchmarkBenchmark:
-		if err := s.RunningBenchmark.Validate(); err != nil {
-			return err
-		}
-		return nil
-	case FinishedBenchmarkBenchmark:
-		if err := s.FinishedBenchmark.Validate(); err != nil {
-			return err
-		}
-		return nil
-	default:
-		return errors.Errorf("invalid type %q", s.Type)
+func (s *Benchmark) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
 	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.OneOf.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "OneOf",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
 }
 
-func (s BenchmarkAdminResult) Validate() error {
+func (s *BenchmarkAdminResult) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.OneOf.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "OneOf",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s BenchmarkAdminResultSum) Validate() error {
 	switch s.Type {
-	case WaitingBenchmarkBenchmarkAdminResult:
+	case WaitingBenchmarkBenchmarkAdminResultSum:
 		if err := s.WaitingBenchmark.Validate(); err != nil {
 			return err
 		}
 		return nil
-	case RunningBenchmarkBenchmarkAdminResult:
+	case RunningBenchmarkBenchmarkAdminResultSum:
 		if err := s.RunningBenchmark.Validate(); err != nil {
 			return err
 		}
 		return nil
-	case FinishedBenchmarkBenchmarkAdminResult:
+	case FinishedBenchmarkBenchmarkAdminResultSum:
 		if err := s.FinishedBenchmark.Validate(); err != nil {
 			return err
 		}
@@ -132,6 +156,28 @@ func (s BenchmarkStatus) Validate() error {
 		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s BenchmarkSum) Validate() error {
+	switch s.Type {
+	case WaitingBenchmarkBenchmarkSum:
+		if err := s.WaitingBenchmark.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case RunningBenchmarkBenchmarkSum:
+		if err := s.RunningBenchmark.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case FinishedBenchmarkBenchmarkSum:
+		if err := s.FinishedBenchmark.Validate(); err != nil {
+			return err
+		}
+		return nil
+	default:
+		return errors.Errorf("invalid type %q", s.Type)
 	}
 }
 

@@ -68,7 +68,7 @@ func TestGetTeams(t *testing.T) {
 
 			_ = h.GetTeams(c)
 
-			if !assert.Equal(t, http.StatusOK, rec.Code) {
+			if !assert.Equal(t, http.StatusOK, rec.Code, "status code") {
 				t.Log(rec.Body.String())
 			}
 			var res openapi.GetTeamsOKApplicationJSON
@@ -113,7 +113,7 @@ func TestCreateTeam(t *testing.T) {
 
 	_ = h.CreateTeam(c)
 
-	if !assert.Equal(t, http.StatusCreated, rec.Code) {
+	if !assert.Equal(t, http.StatusCreated, rec.Code, "status code") {
 		t.Log(rec.Body.String())
 	}
 	var res openapi.Team
@@ -148,7 +148,7 @@ func TestCreateTeam_Error(t *testing.T) {
 
 	_ = h.CreateTeam(c)
 
-	if !assert.Equal(t, http.StatusBadRequest, rec.Code) {
+	if !assert.Equal(t, http.StatusBadRequest, rec.Code, "status code") {
 		t.Log(rec.Body.String())
 	}
 }
@@ -180,7 +180,7 @@ func TestGetTeam(t *testing.T) {
 
 	_ = h.GetTeam(c)
 
-	if !assert.Equal(t, http.StatusOK, rec.Code) {
+	if !assert.Equal(t, http.StatusOK, rec.Code, "status code") {
 		t.Log(rec.Body.String())
 	}
 	var res openapi.Team
@@ -207,7 +207,7 @@ func TestGetTeam_NotFound(t *testing.T) {
 
 	_ = h.GetTeam(c)
 
-	if !assert.Equal(t, http.StatusNotFound, rec.Code) {
+	if !assert.Equal(t, http.StatusNotFound, rec.Code, "status code") {
 		t.Log(rec.Body.String())
 	}
 }
@@ -244,7 +244,7 @@ func TestUpdateTeam(t *testing.T) {
 
 	_ = h.UpdateTeam(c)
 
-	if !assert.Equal(t, http.StatusOK, rec.Code) {
+	if !assert.Equal(t, http.StatusOK, rec.Code, "status code") {
 		t.Log(rec.Body.String())
 	}
 	var res openapi.Team
@@ -280,7 +280,7 @@ func TestUpdateTeam_Error(t *testing.T) {
 
 	_ = h.UpdateTeam(c)
 
-	if !assert.Equal(t, http.StatusBadRequest, rec.Code) {
+	if !assert.Equal(t, http.StatusBadRequest, rec.Code, "status code") {
 		t.Log(rec.Body.String())
 	}
 }
