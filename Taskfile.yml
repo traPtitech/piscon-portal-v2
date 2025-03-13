@@ -1,5 +1,8 @@
 version: "3"
 
+env:
+  GOEXPERIMENT: "synctest"
+
 tasks:
   run-server:
     dotenv:
@@ -12,8 +15,6 @@ tasks:
   test:
     cmds:
       - go test -cover -race ./...
-    env:
-      GOEXPERIMENT: "synctest"
 
   go:gen:
     cmds:
@@ -59,3 +60,9 @@ tasks:
   down-db:
     cmds:
       - docker compose down db
+
+  lint:
+    cmd: golangci-lint run ./...
+
+  lint:fix:
+    cmd: golangci-lint run --fix ./...
