@@ -2,8 +2,14 @@ linters:
   enable:
     - gofmt
     - revive
+    - wrapcheck
 
 issues:
   exclude-dirs:
     - server/handler/openapi
     - ".*/mock$"
+
+linters-settings:
+  wrapcheck:
+    extra-ignore-sigs:
+      - (github.com/labstack/echo/v4.Context).
