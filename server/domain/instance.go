@@ -1,6 +1,9 @@
 package domain
 
 import (
+	"cmp"
+	"slices"
+
 	"github.com/google/uuid"
 )
 
@@ -28,24 +31,11 @@ const (
 type Instances []Instance
 
 func NewInstance(teamID uuid.UUID, existing Instances) Instance {
-	n := maxInstanceNumber(existing)
+	m := slices.MaxFunc(existing, func(a, b Instance) int { return cmp.Compare(a.InstanceNumber, b.InstanceNumber) })
 	return Instance{
 		ID:             uuid.New(),
 		TeamID:         teamID,
-		InstanceNumber: n + 1,
+		InstanceNumber: m.InstanceNumber + 1,
 		Status:         InstanceStatusStopping,
 	}
-}
-
-func maxInstanceNumber(instances Instances) int {
-	if len(instances) < 1 {
-		return 0
-	}
-	m := instances[0].InstanceNumber
-	for _, i := range instances {
-		if i.InstanceNumber > m {
-			m = i.InstanceNumber
-		}
-	}
-	return m
 }
