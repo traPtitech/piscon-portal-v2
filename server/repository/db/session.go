@@ -61,7 +61,7 @@ func deleteSession(ctx context.Context, executor bob.Executor, id string) error 
 func toDomainSession(session *models.Session) (domain.Session, error) {
 	userID, err := uuid.Parse(session.UserID)
 	if err != nil {
-		return domain.Session{}, err
+		return domain.Session{}, fmt.Errorf("parse user uuid: %w", err)
 	}
 	return domain.Session{
 		ID:        session.ID,

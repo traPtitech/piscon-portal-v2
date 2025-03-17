@@ -3,6 +3,7 @@ package oauth2
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
@@ -41,7 +42,7 @@ func NewService(config Config, redirectURL string) (*Service, error) {
 
 	provider, err := oidc.NewProvider(context.Background(), config.Issuer)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("new oidc provider: %w", err)
 	}
 	verifier := provider.Verifier(&oidc.Config{ClientID: config.ClientID})
 
@@ -85,7 +86,12 @@ func (s *Service) Exchange(ctx context.Context, sessionID, code string) (*oauth2
 	if !found {
 		return nil, errors.New("code verifier not found")
 	}
-	return s.config.Exchange(ctx, code, oauth2.VerifierOption(codeVerifier.Value()))
+	token, err := s.config.Exchange(ctx, code, oauth2.VerifierOption(codeVerifier.Value()))
+	if err != nil {
+		return nil, fmt.Errorf("exchange token: %w", err)
+	}
+
+	return token, nil
 }
 
 type UserInfo struct {
@@ -100,7 +106,7 @@ func (s *Service) GetUserInfo(ctx context.Context, token *oauth2.Token) (*UserIn
 	}
 	idToken, err := s.verifier.Verify(ctx, rawIDToken)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("verify id_token: %w", err)
 	}
 
 	type Payload struct {
@@ -112,12 +118,12 @@ func (s *Service) GetUserInfo(ctx context.Context, token *oauth2.Token) (*UserIn
 	// ref: https://github.com/traPtitech/traQ/blob/v3.21.0/service/oidc/userinfo.go#L57
 	var payload Payload
 	if err := idToken.Claims(&payload); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("parse id_token claims: %w", err)
 	}
 
 	id, err := uuid.Parse(payload.Sub)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("parse user uuid: %w", err)
 	}
 
 	return &UserInfo{ID: id, Name: payload.Name}, nil

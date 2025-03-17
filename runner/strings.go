@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"fmt"
 	"strings"
 	"sync"
 )
@@ -10,16 +11,24 @@ type SyncStringBuilder struct {
 	mu sync.Mutex
 }
 
-func (b *SyncStringBuilder) Write(p []byte) (n int, err error) {
+func (b *SyncStringBuilder) Write(p []byte) (int, error) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
-	return b.b.Write(p)
+	n, err := b.b.Write(p)
+	if err != nil {
+		return 0, fmt.Errorf("write: %w", err)
+	}
+	return n, nil
 }
 
-func (b *SyncStringBuilder) WriteString(s string) (n int, err error) {
+func (b *SyncStringBuilder) WriteString(s string) (int, error) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
-	return b.b.WriteString(s)
+	n, err := b.b.WriteString(s)
+	if err != nil {
+		return 0, fmt.Errorf("write string: %w", err)
+	}
+	return n, nil
 }
 
 func (b *SyncStringBuilder) String() string {

@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/gorilla/sessions"
@@ -29,7 +30,11 @@ func (sm *SessionManager) Init(e *echo.Group) {
 }
 
 func getSession(c echo.Context) (*sessions.Session, error) {
-	return session.Get(sessionName, c)
+	sess, err := session.Get(sessionName, c)
+	if err != nil {
+		return nil, fmt.Errorf("get session: %w", err)
+	}
+	return sess, nil
 }
 
 func (sm *SessionManager) GetSessionID(c echo.Context) (string, error) {
@@ -58,7 +63,7 @@ func (sm *SessionManager) SetSessionID(c echo.Context, maxAge time.Duration) (st
 		Secure:   !sm.debug,
 	}
 	if err := sess.Save(c.Request(), c.Response()); err != nil {
-		return "", err
+		return "", fmt.Errorf("save session: %w", err)
 	}
 	return sessID, nil
 }
@@ -69,5 +74,10 @@ func (sm *SessionManager) ClearSessionID(c echo.Context) error {
 		return err
 	}
 	delete(sess.Values, sessionIDKey)
-	return sess.Save(c.Request(), c.Response())
+
+	err = sess.Save(c.Request(), c.Response())
+	if err != nil {
+		return fmt.Errorf("save session: %w", err)
+	}
+	return nil
 }

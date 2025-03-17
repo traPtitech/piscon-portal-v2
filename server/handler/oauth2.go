@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -51,25 +52,25 @@ func (h *Handler) Oauth2Callback(c echo.Context) error {
 	err = h.repo.Transaction(ctx, func(ctx context.Context, r repository.Repository) error {
 		user, err := r.FindUser(ctx, userInfo.ID)
 		if err != nil && !errors.Is(err, repository.ErrNotFound) {
-			return err
+			return fmt.Errorf("find user: %w", err)
 		}
 		if errors.Is(err, repository.ErrNotFound) {
 			// create new newUser
 			user = domain.NewUser(userInfo.ID, userInfo.Name)
 			if err := r.CreateUser(ctx, user); err != nil {
-				return err
+				return fmt.Errorf("create user: %w", err)
 			}
 		}
 
 		// create new session to prevent session fixation
 		sessionID, err := h.sessionManager.SetSessionID(c, 7*24*time.Hour) // max age 1 week
 		if err != nil {
-			return err
+			return fmt.Errorf("set session ID: %w", err)
 		}
 		session := domain.NewSession(sessionID, user.ID, time.Now().Add(7*24*time.Hour))
 		err = r.CreateSession(ctx, session)
 		if err != nil {
-			return err
+			return fmt.Errorf("create session: %w", err)
 		}
 
 		return nil

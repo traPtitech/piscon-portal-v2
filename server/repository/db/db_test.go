@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	_ "embed"
+	"fmt"
 	"math/rand/v2"
 	"os"
 	"testing"
@@ -67,24 +68,27 @@ func createDatabase(name string) error {
 	connection := mysqlContainer.MustConnectionString(context.Background(), "multiStatements=true")
 	db, err := sql.Open("mysql", connection)
 	if err != nil {
-		return err
+		return fmt.Errorf("open db: %w", err)
 	}
 	defer db.Close()
 
 	_, err = db.Exec("CREATE DATABASE " + name)
 	if err != nil {
-		return err
+		return fmt.Errorf("create database %s: %w", name, err)
 	}
 	schema, err := os.ReadFile("testdata/schema.sql")
 	if err != nil {
-		return err
+		return fmt.Errorf("read schema file: %w", err)
 	}
 
 	if _, err := db.Exec("USE " + name); err != nil {
-		return err
+		return fmt.Errorf("use database %s: %w", name, err)
 	}
 	_, err = db.Exec(string(schema))
-	return err
+	if err != nil {
+		return fmt.Errorf("exec schema: %w", err)
+	}
+	return nil
 }
 
 // retry retries f until it returns nil or n retries are reached. panic if n retries are reached.

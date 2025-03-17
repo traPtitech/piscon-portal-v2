@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/url"
 
 	"github.com/labstack/echo/v4"
@@ -37,11 +38,11 @@ func New(useCase usecase.UseCase, repo repository.Repository, config Config) (*H
 
 	redirectURI, err := url.JoinPath(config.RootURL, "/api/oauth2/callback")
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("join callback URL: %w", err)
 	}
 	oauth2Service, err := oauth2.NewService(config.Oauth2, redirectURI)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("create oauth2 service: %w", err)
 	}
 	return &Handler{
 		repo:           repo,
