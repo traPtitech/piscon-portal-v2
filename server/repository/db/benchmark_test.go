@@ -45,6 +45,41 @@ func TestFindBenchmark(t *testing.T) {
 	testutil.CompareBenchmark(t, benchmark, got)
 }
 
+func TestCreateBenchmark(t *testing.T) {
+	t.Parallel()
+
+	repo, db := setupRepository(t)
+
+	id := uuid.New()
+	teamID := uuid.New()
+	instanceID := uuid.New()
+	userID := uuid.New()
+	instance := domain.Instance{
+		ID:     instanceID,
+		Status: domain.InstanceStatusRunning,
+	}
+	benchmark := domain.Benchmark{
+		ID:         id,
+		Instance:   instance,
+		TeamID:     teamID,
+		UserID:     userID,
+		Status:     domain.BenchmarkStatusWaiting,
+		CreatedAt:  time.Now(),
+		StartedAt:  nil,
+		FinishedAt: nil,
+	}
+
+	mustMakeInstance(t, db, instance)
+
+	err := repo.CreateBenchmark(context.Background(), benchmark)
+	assert.NoError(t, err)
+
+	got, err := repo.FindBenchmark(context.Background(), id)
+	assert.NoError(t, err)
+
+	testutil.CompareBenchmark(t, benchmark, got)
+}
+
 func TestGetAllBenchmarks(t *testing.T) {
 	t.Parallel()
 
