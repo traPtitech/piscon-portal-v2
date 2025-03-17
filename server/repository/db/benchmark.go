@@ -25,6 +25,9 @@ func (r *Repository) FindBenchmark(ctx context.Context, id uuid.UUID) (domain.Be
 		).
 		One(ctx, r.executor(ctx))
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.Benchmark{}, repository.ErrNotFound
+		}
 		return domain.Benchmark{}, err
 	}
 
