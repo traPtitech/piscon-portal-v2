@@ -102,7 +102,7 @@ func Login(t *testing.T, server *httptest.Server, client *http.Client, userID uu
 	codeRes, err := client.Get(joinPath(t, server.URL, "/api/oauth2/code"))
 	if err != nil {
 		t.Error(err)
-		return err
+		return fmt.Errorf("get authorization URL: %w", err)
 	}
 	defer codeRes.Body.Close()
 	if codeRes.StatusCode != http.StatusSeeOther {
@@ -114,7 +114,7 @@ func Login(t *testing.T, server *httptest.Server, client *http.Client, userID uu
 	authURL, err := url.Parse(codeRes.Header.Get("Location"))
 	if err != nil {
 		t.Error(err)
-		return err
+		return fmt.Errorf("parse authorization URL: %w", err)
 	}
 	q := authURL.Query()
 	q.Add("user", userID.String())
@@ -125,7 +125,7 @@ func Login(t *testing.T, server *httptest.Server, client *http.Client, userID uu
 	res, err := client.Get(authURL.String())
 	if err != nil {
 		t.Error(err)
-		return err
+		return fmt.Errorf("get authorization URL: %w", err)
 	}
 	defer res.Body.Close()
 	// status code should be 200 or 404 (redirected to root page of frontend)

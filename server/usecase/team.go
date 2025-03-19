@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"errors"
+	"fmt"
 	"slices"
 
 	"github.com/google/uuid"
@@ -28,7 +29,11 @@ func NewTeamUseCase(repo repository.Repository) TeamUseCase {
 }
 
 func (u *teamUseCaseImpl) GetTeams(ctx context.Context) ([]domain.Team, error) {
-	return u.repo.GetTeams(ctx)
+	teams, err := u.repo.GetTeams(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("get teams: %w", err)
+	}
+	return teams, nil
 }
 
 func (u *teamUseCaseImpl) GetTeam(ctx context.Context, id uuid.UUID) (domain.Team, error) {
@@ -37,7 +42,7 @@ func (u *teamUseCaseImpl) GetTeam(ctx context.Context, id uuid.UUID) (domain.Tea
 		if errors.Is(err, repository.ErrNotFound) {
 			return domain.Team{}, ErrNotFound
 		}
-		return domain.Team{}, err
+		return domain.Team{}, fmt.Errorf("find team: %w", err)
 	}
 	return team, nil
 }
@@ -63,7 +68,7 @@ func (u *teamUseCaseImpl) CreateTeam(ctx context.Context, input CreateTeamInput)
 			if errors.Is(err, repository.ErrNotFound) {
 				return domain.Team{}, NewUseCaseErrorFromMsg("member not found")
 			}
-			return domain.Team{}, err
+			return domain.Team{}, fmt.Errorf("find user: %w", err)
 		}
 		if err := team.AddMember(user); err != nil {
 			return domain.Team{}, NewUseCaseError(err)
@@ -71,7 +76,7 @@ func (u *teamUseCaseImpl) CreateTeam(ctx context.Context, input CreateTeamInput)
 	}
 
 	if err := u.repo.CreateTeam(ctx, team); err != nil {
-		return domain.Team{}, err
+		return domain.Team{}, fmt.Errorf("create team: %w", err)
 	}
 
 	return team, nil
@@ -86,7 +91,7 @@ type UpdateTeamInput struct {
 func (u *teamUseCaseImpl) UpdateTeam(ctx context.Context, input UpdateTeamInput) (domain.Team, error) {
 	team, err := u.repo.FindTeam(ctx, input.ID)
 	if err != nil {
-		return domain.Team{}, err
+		return domain.Team{}, fmt.Errorf("find team: %w", err)
 	}
 
 	if input.Name != "" {
@@ -96,16 +101,16 @@ func (u *teamUseCaseImpl) UpdateTeam(ctx context.Context, input UpdateTeamInput)
 	for _, memberID := range input.MemberIDs {
 		user, err := u.repo.FindUser(ctx, memberID)
 		if err != nil {
-			return domain.Team{}, err
+			return domain.Team{}, fmt.Errorf("find user: %w", err)
 		}
 		if err := team.AddMember(user); err != nil {
-			return domain.Team{}, err
+			return domain.Team{}, fmt.Errorf("add member: %w", err)
 		}
 	}
 
 	err = u.repo.UpdateTeam(ctx, team)
 	if err != nil {
-		return domain.Team{}, err
+		return domain.Team{}, fmt.Errorf("update team: %w", err)
 	}
 
 	return team, nil

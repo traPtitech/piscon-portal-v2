@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
@@ -30,7 +31,7 @@ func (u *userUseCaseImpl) GetUser(ctx context.Context, userID uuid.UUID) (domain
 		if errors.Is(err, repository.ErrNotFound) {
 			return domain.User{}, ErrNotFound
 		}
-		return domain.User{}, err
+		return domain.User{}, fmt.Errorf("find user: %w", err)
 	}
 	return user, nil
 }
@@ -38,7 +39,7 @@ func (u *userUseCaseImpl) GetUser(ctx context.Context, userID uuid.UUID) (domain
 func (u *userUseCaseImpl) GetUsers(ctx context.Context) ([]domain.User, error) {
 	users, err := u.repo.GetUsers(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get users: %w", err)
 	}
 
 	return users, nil
