@@ -28,7 +28,7 @@ func (r *Repository) FindBenchmark(ctx context.Context, id uuid.UUID) (domain.Be
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Benchmark{}, repository.ErrNotFound
 		}
-		return domain.Benchmark{}, err
+		return domain.Benchmark{}, fmt.Errorf("find benchmark: %w", err)
 	}
 
 	return toDomainBenchmark(benchmark)
@@ -48,7 +48,7 @@ func (r *Repository) CreateBenchmark(ctx context.Context, benchmark domain.Bench
 		CreatedAt:  omit.From(benchmark.CreatedAt),
 	}).Exec(ctx, r.executor(ctx))
 	if err != nil {
-		return err
+		return fmt.Errorf("create benchmark: %w", err)
 	}
 	return nil
 }
@@ -78,7 +78,7 @@ func (r *Repository) GetBenchmarks(ctx context.Context, query repository.Benchma
 
 	benchmarks, err := models.Benchmarks.Query(mods...).All(ctx, r.executor(ctx))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get benchmarks: %w", err)
 	}
 
 	res := make([]domain.Benchmark, 0, len(benchmarks))
@@ -99,7 +99,7 @@ func (r *Repository) GetBenchmarkLog(ctx context.Context, benchmarkID uuid.UUID)
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.BenchmarkLog{}, repository.ErrNotFound
 		}
-		return domain.BenchmarkLog{}, err
+		return domain.BenchmarkLog{}, fmt.Errorf("get benchmark log: %w", err)
 	}
 
 	return toDomainBenchmarkLog(benchmarkLogs)
@@ -134,27 +134,27 @@ func toDomainBenchmarkStatus(status models.BenchmarksStatus) (domain.BenchmarkSt
 func toDomainBenchmark(benchmark *models.Benchmark) (domain.Benchmark, error) {
 	id, err := uuid.Parse(benchmark.ID)
 	if err != nil {
-		return domain.Benchmark{}, err
+		return domain.Benchmark{}, fmt.Errorf("parse benchmark id: %w", err)
 	}
 	instance, err := toDomainInstance(benchmark.R.Instance)
 	if err != nil {
-		return domain.Benchmark{}, err
+		return domain.Benchmark{}, fmt.Errorf("parse benchmark instance: %w", err)
 	}
 	teamID, err := uuid.Parse(benchmark.TeamID)
 	if err != nil {
-		return domain.Benchmark{}, err
+		return domain.Benchmark{}, fmt.Errorf("parse benchmark team id: %w", err)
 	}
 	userID, err := uuid.Parse(benchmark.UserID)
 	if err != nil {
-		return domain.Benchmark{}, err
+		return domain.Benchmark{}, fmt.Errorf("parse benchmark user id: %w", err)
 	}
 	result, err := toDomainBenchmarkResult(benchmark.Result.Ptr())
 	if err != nil {
-		return domain.Benchmark{}, err
+		return domain.Benchmark{}, fmt.Errorf("parse benchmark result: %w", err)
 	}
 	status, err := toDomainBenchmarkStatus(benchmark.Status)
 	if err != nil {
-		return domain.Benchmark{}, err
+		return domain.Benchmark{}, fmt.Errorf("parse benchmark status: %w", err)
 	}
 
 	return domain.Benchmark{

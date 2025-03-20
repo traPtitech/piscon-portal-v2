@@ -18,7 +18,7 @@ func (r *Repository) FindInstance(ctx context.Context, id uuid.UUID) (domain.Ins
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Instance{}, repository.ErrNotFound
 		}
-		return domain.Instance{}, err
+		return domain.Instance{}, fmt.Errorf("find instance: %w", err)
 	}
 
 	return toDomainInstance(instance)
@@ -27,15 +27,15 @@ func (r *Repository) FindInstance(ctx context.Context, id uuid.UUID) (domain.Ins
 func toDomainInstance(instance *models.Instance) (domain.Instance, error) {
 	id, err := uuid.Parse(instance.ID)
 	if err != nil {
-		return domain.Instance{}, err
+		return domain.Instance{}, fmt.Errorf("parse instance id: %w", err)
 	}
 	teamID, err := uuid.Parse(instance.TeamID)
 	if err != nil {
-		return domain.Instance{}, err
+		return domain.Instance{}, fmt.Errorf("parse team id: %w", err)
 	}
 	status, err := toDomainInstanceStatus(instance.Status)
 	if err != nil {
-		return domain.Instance{}, err
+		return domain.Instance{}, fmt.Errorf("parse instance status: %w", err)
 	}
 
 	return domain.Instance{

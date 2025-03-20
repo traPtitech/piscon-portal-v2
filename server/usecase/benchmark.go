@@ -81,7 +81,7 @@ func (u *benchmarkUseCaseImpl) CreateBenchmark(ctx context.Context, instanceID u
 		return nil
 	})
 	if err != nil {
-		return domain.Benchmark{}, err
+		return domain.Benchmark{}, fmt.Errorf("transaction: %v", err)
 	}
 
 	return benchmark, nil
