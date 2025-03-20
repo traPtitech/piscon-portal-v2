@@ -91,7 +91,7 @@ func TestGetBenchmark_NotFound(t *testing.T) {
 	}
 }
 
-func TestGetBenchmark_UseCaseError(t *testing.T) {
+func TestGetBenchmark_GetBenchmarkError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	repoMock := repomock.NewMockRepository(ctrl)
@@ -153,7 +153,7 @@ func TestEnqueueBenchmark(t *testing.T) {
 	assert.Equal(t, benchmarkID, uuid.UUID(res.OneOf.WaitingBenchmark.ID))
 }
 
-func TestEnqueueBenchmark_UseCaseError(t *testing.T) {
+func TestEnqueueBenchmark_CreateBenchmarkError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	repoMock := repomock.NewMockRepository(ctrl)
@@ -223,7 +223,7 @@ func TestGetBenchmarks(t *testing.T) {
 	compareBenchmarks(t, benchmarks, res)
 }
 
-func TestGetBenchmarks_UseCaseError(t *testing.T) {
+func TestGetBenchmarks_GetBenchmarksError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	repoMock := repomock.NewMockRepository(ctrl)
@@ -278,7 +278,7 @@ func TestGetQueuedBenchmarks(t *testing.T) {
 	compareBenchmarks(t, benchmarks, res)
 }
 
-func TestGetQueuedBenchmarks_UseCaseError(t *testing.T) {
+func TestGetQueuedBenchmarks_GetQueuedBenchmarksError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	repoMock := repomock.NewMockRepository(ctrl)
@@ -381,7 +381,7 @@ func TestGetTeamBenchmarks(t *testing.T) {
 	compareBenchmarks(t, benchmarks, res)
 }
 
-func TestGetTeamBenchmarks_UseCaseError(t *testing.T) {
+func TestGetTeamBenchmarks_GetTeamBenchmarksError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	repoMock := repomock.NewMockRepository(ctrl)
@@ -476,7 +476,7 @@ func TestGetTeamBenchmark_NotFound(t *testing.T) {
 	}
 }
 
-func TestGetTeamBenchmark_UseCaseError(t *testing.T) {
+func TestGetTeamBenchmark_GetBenchmarkError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	repoMock := repomock.NewMockRepository(ctrl)
