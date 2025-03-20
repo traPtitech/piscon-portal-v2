@@ -42,24 +42,26 @@ func (u *benchmarkUseCaseImpl) GetBenchmark(ctx context.Context, id uuid.UUID) (
 }
 
 func (u *benchmarkUseCaseImpl) CreateBenchmark(ctx context.Context, instanceID uuid.UUID, userID uuid.UUID) (domain.Benchmark, error) {
-	user, err := u.repo.FindUser(ctx, userID)
-	if err != nil {
-		return domain.Benchmark{}, fmt.Errorf("find user: %v", err)
-	}
-	instance, err := u.repo.FindInstance(ctx, instanceID)
-	if err != nil {
-		if errors.Is(err, repository.ErrNotFound) {
-			return domain.Benchmark{}, NewUseCaseErrorFromMsg("instance not found")
+	var benchmark domain.Benchmark
+
+	err := u.repo.Transaction(ctx, func(ctx context.Context, r repository.Repository) error {
+		user, err := r.FindUser(ctx, userID)
+		if err != nil {
+			return fmt.Errorf("find user: %v", err)
 		}
-		return domain.Benchmark{}, fmt.Errorf("find instance: %v", err)
-	}
+		instance, err := r.FindInstance(ctx, instanceID)
+		if err != nil {
+			if errors.Is(err, repository.ErrNotFound) {
+				return NewUseCaseErrorFromMsg("instance not found")
+			}
+			return fmt.Errorf("find instance: %v", err)
+		}
 
-	benchmark, err := domain.NewBenchmark(instance, user)
-	if err != nil {
-		return domain.Benchmark{}, NewUseCaseError(err)
-	}
+		benchmark, err = domain.NewBenchmark(instance, user)
+		if err != nil {
+			return NewUseCaseError(err)
+		}
 
-	err = u.repo.Transaction(ctx, func(ctx context.Context, r repository.Repository) error {
 		benchmarks, err := r.GetBenchmarks(ctx, repository.BenchmarkQuery{
 			TeamID:   optional.From(user.TeamID.UUID),
 			StatusIn: optional.From([]domain.BenchmarkStatus{domain.BenchmarkStatusWaiting, domain.BenchmarkStatusRunning}),

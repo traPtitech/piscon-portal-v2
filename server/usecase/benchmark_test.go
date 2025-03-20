@@ -57,6 +57,11 @@ func TestCreateBenchmark(t *testing.T) {
 			name: "failure: instance is not running",
 			setup: func(mockRepo *mock.MockRepository) {
 				mockRepo.EXPECT().
+					Transaction(gomock.Any(), gomock.Any()).
+					DoAndReturn(func(ctx context.Context, f func(context.Context, repository.Repository) error) error {
+						return f(ctx, mockRepo)
+					})
+				mockRepo.EXPECT().
 					FindUser(gomock.Any(), gomock.Eq(userID)).
 					Return(domain.User{
 						ID:     userID,
@@ -76,6 +81,11 @@ func TestCreateBenchmark(t *testing.T) {
 			name: "failure: instance not found",
 			setup: func(mockRepo *mock.MockRepository) {
 				mockRepo.EXPECT().
+					Transaction(gomock.Any(), gomock.Any()).
+					DoAndReturn(func(ctx context.Context, f func(context.Context, repository.Repository) error) error {
+						return f(ctx, mockRepo)
+					})
+				mockRepo.EXPECT().
 					FindUser(gomock.Any(), gomock.Eq(userID)).
 					Return(domain.User{
 						ID:     userID,
@@ -90,6 +100,11 @@ func TestCreateBenchmark(t *testing.T) {
 		{
 			name: "failure: user's teamID does not match instance's teamID",
 			setup: func(mockRepo *mock.MockRepository) {
+				mockRepo.EXPECT().
+					Transaction(gomock.Any(), gomock.Any()).
+					DoAndReturn(func(ctx context.Context, f func(context.Context, repository.Repository) error) error {
+						return f(ctx, mockRepo)
+					})
 				mockRepo.EXPECT().
 					FindUser(gomock.Any(), gomock.Eq(userID)).
 					Return(domain.User{
