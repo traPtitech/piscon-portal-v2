@@ -30,7 +30,11 @@ func (c *ProgressStreamClient) SendProgress(_ context.Context, progress *domain.
 		Score:       int64(progress.GetScore()),
 	}
 
-	return c.cl.Send(req)
+	if err := c.cl.Send(req); err != nil {
+		return fmt.Errorf("send progress: %w", err)
+	}
+
+	return nil
 }
 
 func (c *ProgressStreamClient) Close() error {

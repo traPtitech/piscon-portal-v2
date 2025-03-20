@@ -19,6 +19,18 @@ CLIENT_SECRET=my-client-secret
 traQで作成するClientは リダイレクトURL に `http://localhost:8080/api/oauth2/callback`、スコープに `openid`, `profile` を指定します。
 `task run-server` で portal server が 8080番 ポートで起動します。
 
+Go 1.24で入った experimental な機能である `testing/synctest` を [runner/runner_test.go](runner/runner_test.go) で使っています。2025/2/26時点でこれを動かすためには、環境変数で `GOEXPERIMENT=synctest` を設定する必要があります。VSCode であれば、 `.vscode/settings.json` に
+
+```json
+{
+  "go.toolsEnvVars": {
+    "GOEXPERIMENT": "synctest"
+  }
+}
+```
+
+を書き込むことで環境変数を設定できます。
+
 ## protobuf について
 
 [proto/README.md](proto/README.md) を参照してください。

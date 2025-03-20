@@ -66,7 +66,11 @@ func (r *Repository) CreateTeam(ctx context.Context, team domain.Team) error {
 		}.UpdateMod(),
 	).Exec(ctx, r.executor(ctx))
 
-	return err
+	if err != nil {
+		return fmt.Errorf("update users: %w", err)
+	}
+
+	return nil
 }
 
 func (r *Repository) UpdateTeam(ctx context.Context, team domain.Team) error {
@@ -94,7 +98,11 @@ func (r *Repository) UpdateTeam(ctx context.Context, team domain.Team) error {
 		}.UpdateMod(),
 	).Exec(ctx, r.executor(ctx))
 
-	return err
+	if err != nil {
+		return fmt.Errorf("update users: %w", err)
+	}
+
+	return nil
 }
 
 func toDomainTeam(team *models.Team) (domain.Team, error) {

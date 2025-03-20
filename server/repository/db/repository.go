@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/stephenafamo/bob"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
@@ -43,7 +44,7 @@ func NewRepository(db *sql.DB) *Repository {
 func (r *Repository) Transaction(ctx context.Context, f func(ctx context.Context, r repository.Repository) error) error {
 	tx, err := r._db.BeginTx(ctx, nil)
 	if err != nil {
-		return err
+		return fmt.Errorf("begin transaction: %w", err)
 	}
 	defer tx.Rollback() //nolint errcheck
 
@@ -54,5 +55,8 @@ func (r *Repository) Transaction(ctx context.Context, f func(ctx context.Context
 		return err
 	}
 
-	return tx.Commit()
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("commit transaction: %w", err)
+	}
+	return nil
 }

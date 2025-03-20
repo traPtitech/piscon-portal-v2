@@ -6,7 +6,6 @@ permissions:
 
 # dependabot の PR に対して動く。
 # Go のパッチバージョンアップデートであれば approve して auto merge を有効にする。
-# それ以外であれば、レビューをリクエストする。
 
 jobs:
   dependabot:
@@ -24,17 +23,6 @@ jobs:
         if: |
           contains(steps.metadata.outputs.dependency-names, 'gomod') &&
           steps.metadata.outputs.update-type == 'version-update:semver-patch'
-        env:
-          PR_URL: ${{github.event.pull_request.html_url}}
-          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-
-      - name: Request review for a PR
-        run: gh pr edit "$PR_URL" --add-reviewer traPtitech/piscon-portal
-        if: |
-          ${{ !(
-            contains(steps.metadata.outputs.dependency-names , 'gomod') && 
-            steps.metadata.outputs.update-type != 'version-update:semver-patch'
-          ) }}
         env:
           PR_URL: ${{github.event.pull_request.html_url}}
           GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
