@@ -68,6 +68,13 @@ func (h *Handler) SetupRoutes(e *echo.Echo) {
 	teams.GET("", h.GetTeams)
 	teams.POST("", h.CreateTeam)
 	teams.GET("/:teamID", h.GetTeam)
-	// TODO: Admins can access even if they are not members of the team.
-	teams.PATCH("/:teamID", h.UpdateTeam, h.TeamAuthMiddleware())
+	teams.PATCH("/:teamID", h.UpdateTeam, h.TeamOrAdminAuthMiddleware())
+	teams.GET("/:teamID/benchmarks", h.GetTeamBenchmarks, h.TeamOrAdminAuthMiddleware())
+	teams.GET("/:teamID/benchmarks/:benchmarkID", h.GetTeamBenchmark, h.TeamOrAdminAuthMiddleware())
+
+	benchmarks := api.Group("/benchmarks", h.AuthMiddleware())
+	benchmarks.GET("", h.GetBenchmarks, h.AdminAuthMiddleware())
+	benchmarks.POST("", h.EnqueueBenchmark)
+	benchmarks.GET("/queue", h.GetQueuedBenchmarks)
+	benchmarks.GET("/:benchmarkID", h.GetBenchmark, h.AdminAuthMiddleware())
 }

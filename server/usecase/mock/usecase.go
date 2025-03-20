@@ -43,6 +43,45 @@ func (m *MockUseCase) EXPECT() *MockUseCaseMockRecorder {
 	return m.recorder
 }
 
+// CreateBenchmark mocks base method.
+func (m *MockUseCase) CreateBenchmark(ctx context.Context, instanceID, userID uuid.UUID) (domain.Benchmark, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateBenchmark", ctx, instanceID, userID)
+	ret0, _ := ret[0].(domain.Benchmark)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateBenchmark indicates an expected call of CreateBenchmark.
+func (mr *MockUseCaseMockRecorder) CreateBenchmark(ctx, instanceID, userID any) *MockUseCaseCreateBenchmarkCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBenchmark", reflect.TypeOf((*MockUseCase)(nil).CreateBenchmark), ctx, instanceID, userID)
+	return &MockUseCaseCreateBenchmarkCall{Call: call}
+}
+
+// MockUseCaseCreateBenchmarkCall wrap *gomock.Call
+type MockUseCaseCreateBenchmarkCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockUseCaseCreateBenchmarkCall) Return(arg0 domain.Benchmark, arg1 error) *MockUseCaseCreateBenchmarkCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockUseCaseCreateBenchmarkCall) Do(f func(context.Context, uuid.UUID, uuid.UUID) (domain.Benchmark, error)) *MockUseCaseCreateBenchmarkCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockUseCaseCreateBenchmarkCall) DoAndReturn(f func(context.Context, uuid.UUID, uuid.UUID) (domain.Benchmark, error)) *MockUseCaseCreateBenchmarkCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // CreateTeam mocks base method.
 func (m *MockUseCase) CreateTeam(ctx context.Context, input usecase.CreateTeamInput) (domain.Team, error) {
 	m.ctrl.T.Helper()
@@ -82,6 +121,162 @@ func (c *MockUseCaseCreateTeamCall) DoAndReturn(f func(context.Context, usecase.
 	return c
 }
 
+// GetBenchmark mocks base method.
+func (m *MockUseCase) GetBenchmark(ctx context.Context, id uuid.UUID) (domain.Benchmark, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBenchmark", ctx, id)
+	ret0, _ := ret[0].(domain.Benchmark)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBenchmark indicates an expected call of GetBenchmark.
+func (mr *MockUseCaseMockRecorder) GetBenchmark(ctx, id any) *MockUseCaseGetBenchmarkCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBenchmark", reflect.TypeOf((*MockUseCase)(nil).GetBenchmark), ctx, id)
+	return &MockUseCaseGetBenchmarkCall{Call: call}
+}
+
+// MockUseCaseGetBenchmarkCall wrap *gomock.Call
+type MockUseCaseGetBenchmarkCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockUseCaseGetBenchmarkCall) Return(arg0 domain.Benchmark, arg1 error) *MockUseCaseGetBenchmarkCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockUseCaseGetBenchmarkCall) Do(f func(context.Context, uuid.UUID) (domain.Benchmark, error)) *MockUseCaseGetBenchmarkCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockUseCaseGetBenchmarkCall) DoAndReturn(f func(context.Context, uuid.UUID) (domain.Benchmark, error)) *MockUseCaseGetBenchmarkCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetBenchmarkLog mocks base method.
+func (m *MockUseCase) GetBenchmarkLog(ctx context.Context, benchmarkID uuid.UUID) (domain.BenchmarkLog, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBenchmarkLog", ctx, benchmarkID)
+	ret0, _ := ret[0].(domain.BenchmarkLog)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBenchmarkLog indicates an expected call of GetBenchmarkLog.
+func (mr *MockUseCaseMockRecorder) GetBenchmarkLog(ctx, benchmarkID any) *MockUseCaseGetBenchmarkLogCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBenchmarkLog", reflect.TypeOf((*MockUseCase)(nil).GetBenchmarkLog), ctx, benchmarkID)
+	return &MockUseCaseGetBenchmarkLogCall{Call: call}
+}
+
+// MockUseCaseGetBenchmarkLogCall wrap *gomock.Call
+type MockUseCaseGetBenchmarkLogCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockUseCaseGetBenchmarkLogCall) Return(arg0 domain.BenchmarkLog, arg1 error) *MockUseCaseGetBenchmarkLogCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockUseCaseGetBenchmarkLogCall) Do(f func(context.Context, uuid.UUID) (domain.BenchmarkLog, error)) *MockUseCaseGetBenchmarkLogCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockUseCaseGetBenchmarkLogCall) DoAndReturn(f func(context.Context, uuid.UUID) (domain.BenchmarkLog, error)) *MockUseCaseGetBenchmarkLogCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetBenchmarks mocks base method.
+func (m *MockUseCase) GetBenchmarks(ctx context.Context) ([]domain.Benchmark, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBenchmarks", ctx)
+	ret0, _ := ret[0].([]domain.Benchmark)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBenchmarks indicates an expected call of GetBenchmarks.
+func (mr *MockUseCaseMockRecorder) GetBenchmarks(ctx any) *MockUseCaseGetBenchmarksCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBenchmarks", reflect.TypeOf((*MockUseCase)(nil).GetBenchmarks), ctx)
+	return &MockUseCaseGetBenchmarksCall{Call: call}
+}
+
+// MockUseCaseGetBenchmarksCall wrap *gomock.Call
+type MockUseCaseGetBenchmarksCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockUseCaseGetBenchmarksCall) Return(arg0 []domain.Benchmark, arg1 error) *MockUseCaseGetBenchmarksCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockUseCaseGetBenchmarksCall) Do(f func(context.Context) ([]domain.Benchmark, error)) *MockUseCaseGetBenchmarksCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockUseCaseGetBenchmarksCall) DoAndReturn(f func(context.Context) ([]domain.Benchmark, error)) *MockUseCaseGetBenchmarksCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetQueuedBenchmarks mocks base method.
+func (m *MockUseCase) GetQueuedBenchmarks(ctx context.Context) ([]domain.Benchmark, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetQueuedBenchmarks", ctx)
+	ret0, _ := ret[0].([]domain.Benchmark)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetQueuedBenchmarks indicates an expected call of GetQueuedBenchmarks.
+func (mr *MockUseCaseMockRecorder) GetQueuedBenchmarks(ctx any) *MockUseCaseGetQueuedBenchmarksCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetQueuedBenchmarks", reflect.TypeOf((*MockUseCase)(nil).GetQueuedBenchmarks), ctx)
+	return &MockUseCaseGetQueuedBenchmarksCall{Call: call}
+}
+
+// MockUseCaseGetQueuedBenchmarksCall wrap *gomock.Call
+type MockUseCaseGetQueuedBenchmarksCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockUseCaseGetQueuedBenchmarksCall) Return(arg0 []domain.Benchmark, arg1 error) *MockUseCaseGetQueuedBenchmarksCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockUseCaseGetQueuedBenchmarksCall) Do(f func(context.Context) ([]domain.Benchmark, error)) *MockUseCaseGetQueuedBenchmarksCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockUseCaseGetQueuedBenchmarksCall) DoAndReturn(f func(context.Context) ([]domain.Benchmark, error)) *MockUseCaseGetQueuedBenchmarksCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetTeam mocks base method.
 func (m *MockUseCase) GetTeam(ctx context.Context, id uuid.UUID) (domain.Team, error) {
 	m.ctrl.T.Helper()
@@ -117,6 +312,45 @@ func (c *MockUseCaseGetTeamCall) Do(f func(context.Context, uuid.UUID) (domain.T
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockUseCaseGetTeamCall) DoAndReturn(f func(context.Context, uuid.UUID) (domain.Team, error)) *MockUseCaseGetTeamCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetTeamBenchmarks mocks base method.
+func (m *MockUseCase) GetTeamBenchmarks(ctx context.Context, teamID uuid.UUID) ([]domain.Benchmark, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTeamBenchmarks", ctx, teamID)
+	ret0, _ := ret[0].([]domain.Benchmark)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTeamBenchmarks indicates an expected call of GetTeamBenchmarks.
+func (mr *MockUseCaseMockRecorder) GetTeamBenchmarks(ctx, teamID any) *MockUseCaseGetTeamBenchmarksCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTeamBenchmarks", reflect.TypeOf((*MockUseCase)(nil).GetTeamBenchmarks), ctx, teamID)
+	return &MockUseCaseGetTeamBenchmarksCall{Call: call}
+}
+
+// MockUseCaseGetTeamBenchmarksCall wrap *gomock.Call
+type MockUseCaseGetTeamBenchmarksCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockUseCaseGetTeamBenchmarksCall) Return(arg0 []domain.Benchmark, arg1 error) *MockUseCaseGetTeamBenchmarksCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockUseCaseGetTeamBenchmarksCall) Do(f func(context.Context, uuid.UUID) ([]domain.Benchmark, error)) *MockUseCaseGetTeamBenchmarksCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockUseCaseGetTeamBenchmarksCall) DoAndReturn(f func(context.Context, uuid.UUID) ([]domain.Benchmark, error)) *MockUseCaseGetTeamBenchmarksCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

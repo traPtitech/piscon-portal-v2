@@ -93,7 +93,7 @@ func TestCreateTeam(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.setup()
-			_, err := useCase.CreateTeam(context.Background(), tt.input)
+			_, err := useCase.CreateTeam(t.Context(), tt.input)
 			if err != nil && !tt.expectError {
 				t.Errorf("unexpected error: %v", err)
 			} else if err == nil && tt.expectError {
@@ -183,7 +183,7 @@ func TestUpdateTeam(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.setup()
-			_, err := useCase.UpdateTeam(context.Background(), tt.input)
+			_, err := useCase.UpdateTeam(t.Context(), tt.input)
 			if err != nil && !tt.expectError {
 				t.Errorf("unexpected error: %v", err)
 			} else if err == nil && tt.expectError {

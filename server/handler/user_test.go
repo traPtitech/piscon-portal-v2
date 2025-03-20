@@ -42,7 +42,9 @@ func TestGetUserMe(t *testing.T) {
 
 	_ = h.GetUserMe(c)
 
-	assert.Equal(t, http.StatusOK, rec.Code)
+	if !assert.Equal(t, http.StatusOK, rec.Code, "status code") {
+		t.Log(rec.Body.String())
+	}
 	var res openapi.User
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &res))
 	compareUser(t, user, res)
@@ -81,7 +83,9 @@ func TestGetUsers(t *testing.T) {
 
 	_ = h.GetUsers(c)
 
-	assert.Equal(t, http.StatusOK, rec.Code)
+	if !assert.Equal(t, http.StatusOK, rec.Code, "status code") {
+		t.Log(rec.Body.String())
+	}
 	var res []openapi.User
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &res))
 

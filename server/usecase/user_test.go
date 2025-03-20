@@ -1,7 +1,6 @@
 package usecase_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/google/uuid"
@@ -29,7 +28,7 @@ func TestGetUsers(t *testing.T) {
 
 	mockRepo.EXPECT().GetUsers(gomock.Any()).Return(users, nil)
 
-	got, err := usecase.GetUsers(context.Background())
+	got, err := usecase.GetUsers(t.Context())
 	assert.NoError(t, err)
 
 	testutil.CompareUsers(t, users, got)

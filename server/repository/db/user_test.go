@@ -1,7 +1,6 @@
 package db_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/google/uuid"
@@ -25,7 +24,7 @@ func TestFindUser(t *testing.T) {
 	mustMakeTeam(t, db, team)
 	mustMakeUser(t, db, user)
 
-	got, err := repo.FindUser(context.Background(), user.ID)
+	got, err := repo.FindUser(t.Context(), user.ID)
 	assert.NoError(t, err)
 
 	testutil.CompareUser(t, user, got)
@@ -55,7 +54,7 @@ func TestGetUsers(t *testing.T) {
 		mustMakeUser(t, db, user)
 	}
 
-	got, err := repo.GetUsers(context.Background())
+	got, err := repo.GetUsers(t.Context())
 	assert.NoError(t, err)
 
 	testutil.CompareUsers(t, users, got)

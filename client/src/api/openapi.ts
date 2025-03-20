@@ -72,8 +72,8 @@ export interface paths {
       cookie?: never
     }
     /**
-     * 部員一覧取得
-     * @description 凍結されていない部員一覧を取得します
+     * ユーザー一覧取得
+     * @description ユーザー一覧を取得します
      */
     get: operations['getUsers']
     put?: never
@@ -556,11 +556,7 @@ export interface components {
       | components['schemas']['RunningBenchmark']
       | components['schemas']['FinishedBenchmark']
     /** @description ベンチマーク結果 */
-    Benchmark: (
-      | components['schemas']['WaitingBenchmark']
-      | components['schemas']['RunningBenchmark']
-      | components['schemas']['FinishedBenchmark']
-    ) & {
+    Benchmark: components['schemas']['BenchmarkListItem'] & {
       /**
        * @description ベンチマークの競技者用ログ（標準出力）
        * @example log
@@ -568,11 +564,7 @@ export interface components {
       log: string
     }
     /** @description Adminが見ることができるベンチマーク結果 */
-    BenchmarkAdminResult: (
-      | components['schemas']['WaitingBenchmark']
-      | components['schemas']['RunningBenchmark']
-      | components['schemas']['FinishedBenchmark']
-    ) & {
+    BenchmarkAdminResult: components['schemas']['BenchmarkListItem'] & {
       /**
        * @description ベンチマークの競技者用ログ（標準出力）
        * @example log
