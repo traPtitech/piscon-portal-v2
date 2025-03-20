@@ -1,7 +1,6 @@
 package db_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/google/uuid"
@@ -27,7 +26,7 @@ func TestFindInstance(t *testing.T) {
 	}
 	mustMakeInstance(t, db, instance)
 
-	got, err := repo.FindInstance(context.Background(), instance.ID)
+	got, err := repo.FindInstance(t.Context(), instance.ID)
 	assert.NoError(t, err)
 
 	testutil.CompareInstance(t, instance, got)

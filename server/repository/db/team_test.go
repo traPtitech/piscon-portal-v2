@@ -1,7 +1,6 @@
 package db_test
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -41,7 +40,7 @@ func TestGetTeam(t *testing.T) {
 		mustMakeUser(t, db, member)
 	}
 
-	got, err := repo.FindTeam(context.Background(), team.ID)
+	got, err := repo.FindTeam(t.Context(), team.ID)
 	require.NoError(t, err)
 
 	testutil.CompareTeam(t, team, got)
@@ -100,7 +99,7 @@ func TestGetTeams(t *testing.T) {
 		}
 	}
 
-	got, err := repo.GetTeams(context.Background())
+	got, err := repo.GetTeams(t.Context())
 	require.NoError(t, err)
 
 	testutil.CompareTeams(t, teams, got)
@@ -136,12 +135,12 @@ func TestCreateTeam(t *testing.T) {
 		team.Members[i].TeamID = uuid.NullUUID{UUID: team.ID, Valid: true}
 	}
 
-	err := repo.CreateTeam(context.Background(), team)
+	err := repo.CreateTeam(t.Context(), team)
 	if !assert.NoError(t, err) {
 		return
 	}
 
-	got, err := repo.FindTeam(context.Background(), team.ID)
+	got, err := repo.FindTeam(t.Context(), team.ID)
 	require.NoError(t, err)
 
 	testutil.CompareTeam(t, team, got)
@@ -169,10 +168,10 @@ func TestUpdateTeam(t *testing.T) {
 	team.Name = "team2"
 	require.NoError(t, team.AddMember(newMember))
 
-	err := repo.UpdateTeam(context.Background(), team)
+	err := repo.UpdateTeam(t.Context(), team)
 	assert.NoError(t, err)
 
-	got, err := repo.FindTeam(context.Background(), team.ID)
+	got, err := repo.FindTeam(t.Context(), team.ID)
 	require.NoError(t, err)
 
 	testutil.CompareTeam(t, team, got)

@@ -1,7 +1,6 @@
 package db_test
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -39,7 +38,7 @@ func TestFindBenchmark(t *testing.T) {
 	mustMakeInstance(t, db, benchmark.Instance)
 	mustMakeBenchmark(t, db, benchmark)
 
-	got, err := repo.FindBenchmark(context.Background(), id)
+	got, err := repo.FindBenchmark(t.Context(), id)
 	assert.NoError(t, err)
 
 	testutil.CompareBenchmark(t, benchmark, got)
@@ -71,10 +70,10 @@ func TestCreateBenchmark(t *testing.T) {
 
 	mustMakeInstance(t, db, instance)
 
-	err := repo.CreateBenchmark(context.Background(), benchmark)
+	err := repo.CreateBenchmark(t.Context(), benchmark)
 	assert.NoError(t, err)
 
-	got, err := repo.FindBenchmark(context.Background(), id)
+	got, err := repo.FindBenchmark(t.Context(), id)
 	assert.NoError(t, err)
 
 	testutil.CompareBenchmark(t, benchmark, got)
@@ -122,7 +121,7 @@ func TestGetAllBenchmarks(t *testing.T) {
 		mustMakeBenchmark(t, db, benchmark)
 	}
 
-	got, err := repo.GetBenchmarks(context.Background(), repository.BenchmarkQuery{})
+	got, err := repo.GetBenchmarks(t.Context(), repository.BenchmarkQuery{})
 	assert.NoError(t, err)
 
 	testutil.CompareBenchmarks(t, benchmarks, got)
@@ -170,7 +169,7 @@ func TestGetQueuedBenchmarks(t *testing.T) {
 		mustMakeBenchmark(t, db, benchmark)
 	}
 
-	got, err := repo.GetBenchmarks(context.Background(), repository.BenchmarkQuery{
+	got, err := repo.GetBenchmarks(t.Context(), repository.BenchmarkQuery{
 		StatusIn: optional.From([]domain.BenchmarkStatus{domain.BenchmarkStatusWaiting, domain.BenchmarkStatusRunning}),
 	})
 	assert.NoError(t, err)
@@ -201,7 +200,7 @@ func TestGetBenchmarkLog(t *testing.T) {
 	mustMakeBenchmark(t, db, benchmark)
 	mustMakeBenchmarkLog(t, db, benchmarkID, benchmarkLog)
 
-	got, err := repo.GetBenchmarkLog(context.Background(), benchmarkID)
+	got, err := repo.GetBenchmarkLog(t.Context(), benchmarkID)
 	assert.NoError(t, err)
 
 	testutil.CompareBenchmarkLog(t, benchmarkLog, got)

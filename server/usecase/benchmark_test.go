@@ -151,7 +151,7 @@ func TestCreateBenchmark(t *testing.T) {
 				tt.setup(mockRepo)
 			}
 
-			_, err := useCase.CreateBenchmark(context.Background(), instanceID, userID)
+			_, err := useCase.CreateBenchmark(t.Context(), instanceID, userID)
 			if tt.expectError {
 				assert.Error(t, err)
 			} else {
