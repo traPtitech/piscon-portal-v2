@@ -97,7 +97,7 @@ func TestTeamAuthMiddleware(t *testing.T) {
 	userID := uuid.New()
 	teamID := uuid.New()
 
-	needAuthorize := h.TeamAuthMiddleware()(func(c echo.Context) error {
+	needAuthorize := h.TeamOrAdminAuthMiddleware()(func(c echo.Context) error {
 		return c.NoContent(http.StatusOK)
 	})
 
@@ -109,6 +109,7 @@ func TestTeamAuthMiddleware(t *testing.T) {
 		{
 			name: "ok",
 			setup: func() {
+				repoMock.EXPECT().FindUser(gomock.Any(), userID).Return(domain.User{ID: userID}, nil)
 				repoMock.EXPECT().FindTeam(gomock.Any(), teamID).Return(domain.Team{
 					ID: teamID,
 					Members: []domain.User{
@@ -121,12 +122,20 @@ func TestTeamAuthMiddleware(t *testing.T) {
 		{
 			name: "user is not a member of the team",
 			setup: func() {
+				repoMock.EXPECT().FindUser(gomock.Any(), userID).Return(domain.User{ID: userID}, nil)
 				repoMock.EXPECT().FindTeam(gomock.Any(), teamID).Return(domain.Team{
 					ID:      uuid.New(),
 					Members: []domain.User{{ID: uuid.New()}},
 				}, nil)
 			},
 			expectStatus: http.StatusForbidden,
+		},
+		{
+			name: "user is admin: no error",
+			setup: func() {
+				repoMock.EXPECT().FindUser(gomock.Any(), userID).Return(domain.User{ID: userID, IsAdmin: true}, nil)
+			},
+			expectStatus: http.StatusOK,
 		},
 	}
 
@@ -138,6 +147,61 @@ func TestTeamAuthMiddleware(t *testing.T) {
 			c := echo.New().NewContext(req, rec)
 			c.SetParamNames("teamID")
 			c.SetParamValues(teamID.String())
+			c.Set(handler.UserIDKey, userID)
+
+			tt.setup()
+
+			_ = needAuthorize(c)
+			if rec.Code != tt.expectStatus {
+				t.Errorf("unexpected status code: expected=%d, got=%d", tt.expectStatus, rec.Code)
+			}
+		})
+	}
+}
+
+func TestAdminAuthMiddleware(t *testing.T) {
+	t.Parallel()
+
+	ctrl := gomock.NewController(t)
+
+	repoMock := repomock.NewMockRepository(ctrl)
+	sessMock := sessmock.NewMockSessionManager(ctrl)
+	usecaseMock := usecasemock.NewMockUseCase(ctrl)
+	h := NewHandler(usecaseMock, repoMock, sessMock)
+
+	userID := uuid.New()
+
+	needAuthorize := h.AdminAuthMiddleware()(func(c echo.Context) error {
+		return c.NoContent(http.StatusOK)
+	})
+
+	tests := []struct {
+		name         string
+		setup        func()
+		expectStatus int
+	}{
+		{
+			name: "ok",
+			setup: func() {
+				repoMock.EXPECT().FindUser(gomock.Any(), userID).Return(domain.User{ID: userID, IsAdmin: true}, nil)
+			},
+			expectStatus: http.StatusOK,
+		},
+		{
+			name: "not admin",
+			setup: func() {
+				repoMock.EXPECT().FindUser(gomock.Any(), userID).Return(domain.User{ID: userID, IsAdmin: false}, nil)
+			},
+			expectStatus: http.StatusForbidden,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, "/", nil)
+			rec := httptest.NewRecorder()
+
+			c := echo.New().NewContext(req, rec)
 			c.Set(handler.UserIDKey, userID)
 
 			tt.setup()

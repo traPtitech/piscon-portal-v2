@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
+	"github.com/traPtitech/piscon-portal-v2/server/utils/optional"
 )
 
 //go:generate go tool mockgen -source=$GOFILE -destination=mock/$GOFILE -package=mock -typed=true
@@ -36,8 +37,26 @@ type Repository interface {
 	CreateTeam(ctx context.Context, team domain.Team) error
 	// UpdateTeam updates a team.
 	UpdateTeam(ctx context.Context, team domain.Team) error
+
+	// CreateInstance creates an instance.
+	CreateBenchmark(ctx context.Context, benchmark domain.Benchmark) error
+	// GetBenchmarks returns all benchmarks. If query is set, it filters the benchmarks.
+	// The returned benchmarks are sorted by CreatedAt in ascending order.
+	GetBenchmarks(ctx context.Context, query BenchmarkQuery) ([]domain.Benchmark, error)
+	// FindBenchmark finds a benchmark by id. If the benchmark is not found, it returns [ErrNotFound].
+	FindBenchmark(ctx context.Context, id uuid.UUID) (domain.Benchmark, error)
+	// GetBenchmarkLog returns a benchmark log.
+	GetBenchmarkLog(ctx context.Context, benchmarkID uuid.UUID) (domain.BenchmarkLog, error)
+
+	// FindInstance finds an instance by id. If the instance is not found, it returns [ErrNotFound].
+	FindInstance(ctx context.Context, id uuid.UUID) (domain.Instance, error)
 }
 
 var (
 	ErrNotFound = errors.New("not found")
 )
+
+type BenchmarkQuery struct {
+	TeamID   optional.Of[uuid.UUID]
+	StatusIn optional.Of[[]domain.BenchmarkStatus]
+}

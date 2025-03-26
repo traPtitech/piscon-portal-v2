@@ -12,12 +12,55 @@ import (
 
 var defaultFaker = faker.New()
 
+func random_BenchmarksResult(f *faker.Faker) BenchmarksResult {
+	if f == nil {
+		f = &defaultFaker
+	}
+
+	all := allBenchmarksResult()
+	return all[f.IntBetween(0, len(all)-1)]
+}
+
+func random_BenchmarksStatus(f *faker.Faker) BenchmarksStatus {
+	if f == nil {
+		f = &defaultFaker
+	}
+
+	all := allBenchmarksStatus()
+	return all[f.IntBetween(0, len(all)-1)]
+}
+
+func random_InstancesStatus(f *faker.Faker) InstancesStatus {
+	if f == nil {
+		f = &defaultFaker
+	}
+
+	all := allInstancesStatus()
+	return all[f.IntBetween(0, len(all)-1)]
+}
+
 func random_bool(f *faker.Faker) bool {
 	if f == nil {
 		f = &defaultFaker
 	}
 
 	return f.Bool()
+}
+
+func random_int32(f *faker.Faker) int32 {
+	if f == nil {
+		f = &defaultFaker
+	}
+
+	return f.Int32()
+}
+
+func random_int64(f *faker.Faker) int64 {
+	if f == nil {
+		f = &defaultFaker
+	}
+
+	return f.Int64()
 }
 
 func random_string(f *faker.Faker) string {

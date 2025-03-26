@@ -15,20 +15,55 @@ import (
 )
 
 var TableNames = struct {
-	Sessions string
-	Teams    string
-	Users    string
+	BenchmarkLogs string
+	Benchmarks    string
+	Instances     string
+	Sessions      string
+	Teams         string
+	Users         string
 }{
-	Sessions: "sessions",
-	Teams:    "teams",
-	Users:    "users",
+	BenchmarkLogs: "benchmark_logs",
+	Benchmarks:    "benchmarks",
+	Instances:     "instances",
+	Sessions:      "sessions",
+	Teams:         "teams",
+	Users:         "users",
 }
 
 var ColumnNames = struct {
-	Sessions sessionColumnNames
-	Teams    teamColumnNames
-	Users    userColumnNames
+	BenchmarkLogs benchmarkLogColumnNames
+	Benchmarks    benchmarkColumnNames
+	Instances     instanceColumnNames
+	Sessions      sessionColumnNames
+	Teams         teamColumnNames
+	Users         userColumnNames
 }{
+	BenchmarkLogs: benchmarkLogColumnNames{
+		BenchmarkID: "benchmark_id",
+		UserLog:     "user_log",
+		AdminLog:    "admin_log",
+	},
+	Benchmarks: benchmarkColumnNames{
+		ID:         "id",
+		InstanceID: "instance_id",
+		TeamID:     "team_id",
+		UserID:     "user_id",
+		Status:     "status",
+		CreatedAt:  "created_at",
+		StartedAt:  "started_at",
+		FinishedAt: "finished_at",
+		Score:      "score",
+		Result:     "result",
+	},
+	Instances: instanceColumnNames{
+		ID:             "id",
+		TeamID:         "team_id",
+		InstanceNumber: "instance_number",
+		Status:         "status",
+		CreatedAt:      "created_at",
+		PublicIP:       "public_ip",
+		PrivateIP:      "private_ip",
+	},
 	Sessions: sessionColumnNames{
 		ID:        "id",
 		UserID:    "user_id",
@@ -55,18 +90,27 @@ var (
 )
 
 func Where[Q mysql.Filterable]() struct {
-	Sessions sessionWhere[Q]
-	Teams    teamWhere[Q]
-	Users    userWhere[Q]
+	BenchmarkLogs benchmarkLogWhere[Q]
+	Benchmarks    benchmarkWhere[Q]
+	Instances     instanceWhere[Q]
+	Sessions      sessionWhere[Q]
+	Teams         teamWhere[Q]
+	Users         userWhere[Q]
 } {
 	return struct {
-		Sessions sessionWhere[Q]
-		Teams    teamWhere[Q]
-		Users    userWhere[Q]
+		BenchmarkLogs benchmarkLogWhere[Q]
+		Benchmarks    benchmarkWhere[Q]
+		Instances     instanceWhere[Q]
+		Sessions      sessionWhere[Q]
+		Teams         teamWhere[Q]
+		Users         userWhere[Q]
 	}{
-		Sessions: buildSessionWhere[Q](SessionColumns),
-		Teams:    buildTeamWhere[Q](TeamColumns),
-		Users:    buildUserWhere[Q](UserColumns),
+		BenchmarkLogs: buildBenchmarkLogWhere[Q](BenchmarkLogColumns),
+		Benchmarks:    buildBenchmarkWhere[Q](BenchmarkColumns),
+		Instances:     buildInstanceWhere[Q](InstanceColumns),
+		Sessions:      buildSessionWhere[Q](SessionColumns),
+		Teams:         buildTeamWhere[Q](TeamColumns),
+		Users:         buildUserWhere[Q](UserColumns),
 	}
 }
 
@@ -91,9 +135,12 @@ func (j joinSet[Q]) AliasedAs(alias string) joinSet[Q] {
 }
 
 type joins[Q dialect.Joinable] struct {
-	Sessions joinSet[sessionJoins[Q]]
-	Teams    joinSet[teamJoins[Q]]
-	Users    joinSet[userJoins[Q]]
+	BenchmarkLogs joinSet[benchmarkLogJoins[Q]]
+	Benchmarks    joinSet[benchmarkJoins[Q]]
+	Instances     joinSet[instanceJoins[Q]]
+	Sessions      joinSet[sessionJoins[Q]]
+	Teams         joinSet[teamJoins[Q]]
+	Users         joinSet[userJoins[Q]]
 }
 
 func buildJoinSet[Q interface{ aliasedAs(string) Q }, C any, F func(C, string) Q](c C, f F) joinSet[Q] {
@@ -106,9 +153,12 @@ func buildJoinSet[Q interface{ aliasedAs(string) Q }, C any, F func(C, string) Q
 
 func getJoins[Q dialect.Joinable]() joins[Q] {
 	return joins[Q]{
-		Sessions: buildJoinSet[sessionJoins[Q]](SessionColumns, buildSessionJoins),
-		Teams:    buildJoinSet[teamJoins[Q]](TeamColumns, buildTeamJoins),
-		Users:    buildJoinSet[userJoins[Q]](UserColumns, buildUserJoins),
+		BenchmarkLogs: buildJoinSet[benchmarkLogJoins[Q]](BenchmarkLogColumns, buildBenchmarkLogJoins),
+		Benchmarks:    buildJoinSet[benchmarkJoins[Q]](BenchmarkColumns, buildBenchmarkJoins),
+		Instances:     buildJoinSet[instanceJoins[Q]](InstanceColumns, buildInstanceJoins),
+		Sessions:      buildJoinSet[sessionJoins[Q]](SessionColumns, buildSessionJoins),
+		Teams:         buildJoinSet[teamJoins[Q]](TeamColumns, buildTeamJoins),
+		Users:         buildJoinSet[userJoins[Q]](UserColumns, buildUserJoins),
 	}
 }
 
