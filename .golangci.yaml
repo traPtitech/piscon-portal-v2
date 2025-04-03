@@ -1,15 +1,33 @@
+version: "2"
 linters:
   enable:
-    - gofmt
     - revive
     - wrapcheck
-
-issues:
-  exclude-dirs:
-    - server/handler/openapi
-    - ".*/mock$"
-
-linters-settings:
-  wrapcheck:
-    extra-ignore-sigs:
-      - (github.com/labstack/echo/v4.Context).
+  settings:
+    wrapcheck:
+      extra-ignore-sigs:
+        - (github.com/labstack/echo/v4.Context).
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - server/handler/openapi
+      - .*/mock$
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+  exclusions:
+    generated: lax
+    paths:
+      - server/handler/openapi
+      - .*/mock$
+      - third_party$
+      - builtin$
+      - examples$
