@@ -12,6 +12,7 @@ package mock
 import (
 	context "context"
 	reflect "reflect"
+	time "time"
 
 	uuid "github.com/google/uuid"
 	domain "github.com/traPtitech/piscon-portal-v2/server/domain"
@@ -117,6 +118,44 @@ func (c *MockUseCaseCreateTeamCall) Do(f func(context.Context, usecase.CreateTea
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockUseCaseCreateTeamCall) DoAndReturn(f func(context.Context, usecase.CreateTeamInput) (domain.Team, error)) *MockUseCaseCreateTeamCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// FinalizeBenchmark mocks base method.
+func (m *MockUseCase) FinalizeBenchmark(ctx context.Context, benchmarkID uuid.UUID, result domain.BenchmarkResult, finishedAt time.Time, errorMessage string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FinalizeBenchmark", ctx, benchmarkID, result, finishedAt, errorMessage)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// FinalizeBenchmark indicates an expected call of FinalizeBenchmark.
+func (mr *MockUseCaseMockRecorder) FinalizeBenchmark(ctx, benchmarkID, result, finishedAt, errorMessage any) *MockUseCaseFinalizeBenchmarkCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FinalizeBenchmark", reflect.TypeOf((*MockUseCase)(nil).FinalizeBenchmark), ctx, benchmarkID, result, finishedAt, errorMessage)
+	return &MockUseCaseFinalizeBenchmarkCall{Call: call}
+}
+
+// MockUseCaseFinalizeBenchmarkCall wrap *gomock.Call
+type MockUseCaseFinalizeBenchmarkCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockUseCaseFinalizeBenchmarkCall) Return(arg0 error) *MockUseCaseFinalizeBenchmarkCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockUseCaseFinalizeBenchmarkCall) Do(f func(context.Context, uuid.UUID, domain.BenchmarkResult, time.Time, string) error) *MockUseCaseFinalizeBenchmarkCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockUseCaseFinalizeBenchmarkCall) DoAndReturn(f func(context.Context, uuid.UUID, domain.BenchmarkResult, time.Time, string) error) *MockUseCaseFinalizeBenchmarkCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -468,6 +507,83 @@ func (c *MockUseCaseGetUsersCall) Do(f func(context.Context) ([]domain.User, err
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockUseCaseGetUsersCall) DoAndReturn(f func(context.Context) ([]domain.User, error)) *MockUseCaseGetUsersCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// SaveBenchmarkProgress mocks base method.
+func (m *MockUseCase) SaveBenchmarkProgress(ctx context.Context, benchmarkID uuid.UUID, benchLog domain.BenchmarkLog, score int64, startedAt time.Time) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SaveBenchmarkProgress", ctx, benchmarkID, benchLog, score, startedAt)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SaveBenchmarkProgress indicates an expected call of SaveBenchmarkProgress.
+func (mr *MockUseCaseMockRecorder) SaveBenchmarkProgress(ctx, benchmarkID, benchLog, score, startedAt any) *MockUseCaseSaveBenchmarkProgressCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveBenchmarkProgress", reflect.TypeOf((*MockUseCase)(nil).SaveBenchmarkProgress), ctx, benchmarkID, benchLog, score, startedAt)
+	return &MockUseCaseSaveBenchmarkProgressCall{Call: call}
+}
+
+// MockUseCaseSaveBenchmarkProgressCall wrap *gomock.Call
+type MockUseCaseSaveBenchmarkProgressCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockUseCaseSaveBenchmarkProgressCall) Return(arg0 error) *MockUseCaseSaveBenchmarkProgressCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockUseCaseSaveBenchmarkProgressCall) Do(f func(context.Context, uuid.UUID, domain.BenchmarkLog, int64, time.Time) error) *MockUseCaseSaveBenchmarkProgressCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockUseCaseSaveBenchmarkProgressCall) DoAndReturn(f func(context.Context, uuid.UUID, domain.BenchmarkLog, int64, time.Time) error) *MockUseCaseSaveBenchmarkProgressCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// StartBenchmark mocks base method.
+func (m *MockUseCase) StartBenchmark(ctx context.Context) (domain.Benchmark, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "StartBenchmark", ctx)
+	ret0, _ := ret[0].(domain.Benchmark)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// StartBenchmark indicates an expected call of StartBenchmark.
+func (mr *MockUseCaseMockRecorder) StartBenchmark(ctx any) *MockUseCaseStartBenchmarkCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StartBenchmark", reflect.TypeOf((*MockUseCase)(nil).StartBenchmark), ctx)
+	return &MockUseCaseStartBenchmarkCall{Call: call}
+}
+
+// MockUseCaseStartBenchmarkCall wrap *gomock.Call
+type MockUseCaseStartBenchmarkCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockUseCaseStartBenchmarkCall) Return(arg0 domain.Benchmark, arg1 error) *MockUseCaseStartBenchmarkCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockUseCaseStartBenchmarkCall) Do(f func(context.Context) (domain.Benchmark, error)) *MockUseCaseStartBenchmarkCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockUseCaseStartBenchmarkCall) DoAndReturn(f func(context.Context) (domain.Benchmark, error)) *MockUseCaseStartBenchmarkCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
