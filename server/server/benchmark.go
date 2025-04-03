@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	portalv1 "github.com/traPtitech/piscon-portal-v2/gen/portal/v1"
 	"github.com/traPtitech/piscon-portal-v2/server/usecase"
@@ -31,7 +30,7 @@ func (bs *BenchmarkService) GetBenchmarkJob(ctx context.Context, _ *portalv1.Get
 		}, nil
 	}
 	if err != nil {
-		return nil, fmt.Errorf("start benchmark: %w", err)
+		return nil, handleError("failed to start benchmark", err)
 	}
 
 	return &portalv1.GetBenchmarkJobResponse{
