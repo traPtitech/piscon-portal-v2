@@ -93,6 +93,27 @@ func (r *Repository) GetBenchmarks(ctx context.Context, query repository.Benchma
 	return res, nil
 }
 
+func (r *Repository) GetOldestQueuedBenchmark(ctx context.Context) (domain.Benchmark, error) {
+	statusWaiting := models.SelectWhere.Benchmarks.Status.EQ(models.BenchmarksStatusWaiting)
+	orderByCreatedAtAsc := sm.OrderBy(models.BenchmarkColumns.CreatedAt).Asc()
+	limit1 := sm.Limit(1)
+	benchmark, err := models.Benchmarks.Query(
+		models.PreloadBenchmarkInstance(),
+		statusWaiting, orderByCreatedAtAsc, limit1).One(ctx, r.executor(ctx))
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.Benchmark{}, repository.ErrNotFound
+	}
+	if err != nil {
+		return domain.Benchmark{}, fmt.Errorf("get benchmark: %w", err)
+	}
+
+	return toDomainBenchmark(benchmark)
+}
+
+func (r *Repository) UpdateBenchmark(ctx context.Context, id uuid.UUID, benchmark domain.Benchmark) error {
+	return nil
+}
+
 func (r *Repository) GetBenchmarkLog(ctx context.Context, benchmarkID uuid.UUID) (domain.BenchmarkLog, error) {
 	benchmarkLogs, err := models.FindBenchmarkLog(ctx, r.executor(ctx), benchmarkID.String())
 	if err != nil {
