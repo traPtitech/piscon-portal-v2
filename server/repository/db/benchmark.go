@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/aarondl/opt/omit"
+	"github.com/aarondl/opt/omitnull"
 	"github.com/google/uuid"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/mysql/dialect"
@@ -111,6 +112,34 @@ func (r *Repository) GetOldestQueuedBenchmark(ctx context.Context) (domain.Bench
 }
 
 func (r *Repository) UpdateBenchmark(ctx context.Context, id uuid.UUID, benchmark domain.Benchmark) error {
+	status, err := fromDomainBenchmarkStatus(benchmark.Status)
+	if err != nil {
+		return err
+	}
+	result, err := fromDomainBenchmarkResult(benchmark.Result)
+	if err != nil {
+		return err
+	}
+
+	whereID := models.UpdateWhere.Benchmarks.ID.EQ(id.String())
+	newBenchmark := models.BenchmarkSetter{
+		ID:         omit.From(id.String()),
+		InstanceID: omit.From(benchmark.Instance.ID.String()),
+		TeamID:     omit.From(benchmark.TeamID.String()),
+		UserID:     omit.From(benchmark.UserID.String()),
+		Status:     omit.From(status),
+		CreatedAt:  omit.From(benchmark.CreatedAt),
+		StartedAt:  omitnull.FromPtr(benchmark.StartedAt),
+		FinishedAt: omitnull.FromPtr(benchmark.FinishedAt),
+		Score:      omit.From(benchmark.Score),
+		Result:     omitnull.FromPtr(result),
+	}
+
+	_, err = models.Benchmarks.Update(whereID, newBenchmark.UpdateMod()).Exec(ctx, r.executor(ctx))
+	if err != nil {
+		return fmt.Errorf("update benchmark: %w", err)
+	}
+
 	return nil
 }
 

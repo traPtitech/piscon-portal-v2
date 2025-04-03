@@ -51,7 +51,6 @@ type Repository interface {
 	// If there are no queued benchmarks, it returns [ErrNotFound].
 	GetOldestQueuedBenchmark(ctx context.Context) (domain.Benchmark, error)
 	// UpdateBenchmark updates a benchmark record.
-	// If the benchmark is not found, it returns [ErrNotFound].
 	UpdateBenchmark(ctx context.Context, id uuid.UUID, benchmark domain.Benchmark) error
 
 	// FindInstance finds an instance by id. If the instance is not found, it returns [ErrNotFound].

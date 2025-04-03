@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
+	"github.com/traPtitech/piscon-portal-v2/server/repository/db"
 	"github.com/traPtitech/piscon-portal-v2/server/repository/db/models"
 	"github.com/traPtitech/piscon-portal-v2/server/utils/optional"
 	"github.com/traPtitech/piscon-portal-v2/server/utils/ptr"
@@ -278,8 +279,6 @@ func TestGetOldestQueuedBenchmark(t *testing.T) {
 
 	for name, testCase := range testCases {
 		t.Run(name, func(t *testing.T) {
-			// テーブル全体を見るようなテストなので、t.Paralle()はできない
-
 			instances := make([]domain.Instance, 0, len(testCase.benchmarks))
 			for _, bench := range testCase.benchmarks {
 				instances = append(instances, bench.Instance)
@@ -329,6 +328,122 @@ func TestGetOldestQueuedBenchmark(t *testing.T) {
 			}
 
 			testutil.CompareBenchmark(t, testCase.expected, got)
+		})
+	}
+}
+
+func TestUpdateBenchmark(t *testing.T) {
+	t.Parallel()
+
+	repo, testDB := setupRepository(t)
+
+	benchID := uuid.New()
+	benchID2 := uuid.New()
+	instance := domain.Instance{
+		ID:             uuid.New(),
+		Status:         domain.InstanceStatusRunning,
+		TeamID:         uuid.New(),
+		InstanceNumber: 1,
+		PrivateIP:      "0.0.0.0",
+		PublicIP:       "0.0.0.0",
+	}
+
+	createdAt := time.Now()
+	startedAt := time.Now().Add(time.Minute)
+	finishedAt := time.Now().Add(time.Hour)
+
+	testCases := map[string]struct {
+		id          uuid.UUID
+		beforeBench domain.Benchmark
+		afterBench  domain.Benchmark
+		err         error
+	}{
+		"startedAtとScoreを更新できる": {
+			id: benchID,
+			beforeBench: domain.Benchmark{
+				ID:        benchID,
+				Instance:  instance,
+				TeamID:    uuid.New(),
+				UserID:    uuid.New(),
+				Status:    domain.BenchmarkStatusWaiting,
+				CreatedAt: createdAt,
+			},
+			afterBench: domain.Benchmark{
+				ID:        benchID,
+				Instance:  instance,
+				TeamID:    uuid.New(),
+				UserID:    uuid.New(),
+				Status:    domain.BenchmarkStatusRunning,
+				CreatedAt: time.Now(),
+				StartedAt: &startedAt,
+				Score:     100,
+			},
+		},
+		"finishedAtとResultを更新できる": {
+			id: benchID2,
+			beforeBench: domain.Benchmark{
+				ID:        benchID2,
+				Instance:  instance,
+				TeamID:    uuid.New(),
+				UserID:    uuid.New(),
+				Status:    domain.BenchmarkStatusRunning,
+				CreatedAt: time.Now(),
+				StartedAt: &startedAt,
+				Score:     100,
+			},
+			afterBench: domain.Benchmark{
+				ID:         benchID2,
+				Instance:   instance,
+				TeamID:     uuid.New(),
+				UserID:     uuid.New(),
+				Status:     domain.BenchmarkStatusRunning,
+				CreatedAt:  time.Now(),
+				StartedAt:  &startedAt,
+				FinishedAt: &finishedAt,
+				Score:      300,
+				Result:     ptr.Of(domain.BenchmarkResultStatusPassed),
+			},
+		},
+	}
+
+	mustMakeInstance(t, testDB, instance)
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+
+			mustMakeBenchmark(t, testDB, testCase.beforeBench)
+
+			err := repo.UpdateBenchmark(t.Context(), testCase.beforeBench.ID, testCase.afterBench)
+
+			if testCase.err != nil {
+				assert.ErrorIs(t, err, testCase.err)
+			} else {
+				assert.NoError(t, err)
+			}
+
+			bench, err := models.Benchmarks.Query(models.SelectWhere.Benchmarks.ID.EQ(testCase.beforeBench.ID.String())).One(t.Context(), testDB)
+			assert.NoError(t, err)
+
+			assert.Equal(t, testCase.afterBench.ID.String(), bench.ID)
+			assert.Equal(t, testCase.afterBench.Instance.ID.String(), bench.InstanceID)
+			assert.Equal(t, testCase.afterBench.TeamID.String(), bench.TeamID)
+			assert.Equal(t, testCase.afterBench.UserID.String(), bench.UserID)
+			status, err := db.FromDomainBenchmarkStatus(testCase.afterBench.Status)
+			require.NoError(t, err)
+			assert.Equal(t, status, bench.Status)
+			result, err := db.FromDomainBenchmarkResult(testCase.afterBench.Result)
+			require.NoError(t, err)
+			assert.Equal(t, result, bench.Result.Ptr())
+			assert.WithinDuration(t, testCase.afterBench.CreatedAt, bench.CreatedAt, time.Second)
+			if testCase.afterBench.StartedAt != nil {
+				assert.WithinDuration(t, *testCase.afterBench.StartedAt, bench.StartedAt.GetOrZero(), time.Second)
+			} else {
+				assert.Nil(t, bench.StartedAt.Ptr())
+			}
+			if testCase.afterBench.FinishedAt != nil {
+				assert.WithinDuration(t, *testCase.afterBench.FinishedAt, bench.FinishedAt.GetOrZero(), time.Second)
+			} else {
+				assert.Nil(t, bench.FinishedAt.Ptr())
+			}
 		})
 	}
 }
