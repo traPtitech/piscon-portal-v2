@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
@@ -17,6 +18,18 @@ type BenchmarkUseCase interface {
 	GetBenchmarks(ctx context.Context) ([]domain.Benchmark, error)
 	GetQueuedBenchmarks(ctx context.Context) ([]domain.Benchmark, error)
 	GetTeamBenchmarks(ctx context.Context, teamID uuid.UUID) ([]domain.Benchmark, error)
+	// StartBenchmark
+	// キューの先頭のベンチマークを取得し、ステータスを更新する。
+	// 先頭のベンチマークを返すが、キューが空の場合はusecase.ErrNotFoundを返す。
+	StartBenchmark(ctx context.Context) (domain.Benchmark, error)
+	// SaveBenchmarkProgress
+	// ベンチマーク実行中のログやスコアを更新して保存する。
+	// 該当のベンチマークが存在しなかった場合、usecase.ErrNotFoundを返す。
+	SaveBenchmarkProgress(ctx context.Context, benchmarkID uuid.UUID, benchLog domain.BenchmarkLog, score int64, startedAt time.Time) error
+	// FinalizeBenchmark
+	// ベンチマークを終了させ、結果を保存してステータスを更新する。
+	// 該当のベンチマークが存在しなかった場合、usecase.ErrNotFoundを返す。
+	FinalizeBenchmark(ctx context.Context, benchmarkID uuid.UUID, result domain.BenchmarkResult, finishedAt time.Time, errorMessage string) error
 
 	GetBenchmarkLog(ctx context.Context, benchmarkID uuid.UUID) (domain.BenchmarkLog, error)
 }
@@ -127,4 +140,50 @@ func (u *benchmarkUseCaseImpl) GetBenchmarkLog(ctx context.Context, benchmarkID 
 	}
 
 	return log, nil
+}
+
+func (u *benchmarkUseCaseImpl) StartBenchmark(ctx context.Context) (domain.Benchmark, error) {
+	var startedBenchmark domain.Benchmark
+	err := u.repo.Transaction(ctx, func(ctx context.Context, r repository.Repository) error {
+		bench, err := r.GetOldestQueuedBenchmark(ctx)
+		if errors.Is(err, repository.ErrNotFound) {
+			return ErrNotFound
+		}
+		if err != nil {
+			return fmt.Errorf("get oldest queued benchmark: %v", err)
+		}
+
+		startedBenchmark = domain.Benchmark{
+			ID:        bench.ID,
+			Instance:  bench.Instance,
+			TeamID:    bench.TeamID,
+			UserID:    bench.UserID,
+			Status:    domain.BenchmarkStatusRunning,
+			CreatedAt: bench.CreatedAt,
+		}
+		err = r.UpdateBenchmark(ctx, bench.ID, startedBenchmark)
+		if errors.Is(err, repository.ErrNotFound) {
+			return ErrNotFound
+		}
+		if err != nil {
+			return fmt.Errorf("update benchmark: %v", err)
+		}
+
+		return nil
+	})
+	if err != nil {
+		return domain.Benchmark{}, fmt.Errorf("transaction: %w", err)
+	}
+
+	return startedBenchmark, nil
+}
+
+func (u *benchmarkUseCaseImpl) SaveBenchmarkProgress(_ context.Context, _ uuid.UUID, _ domain.BenchmarkLog, _ int64, _ time.Time) error {
+	// TODO
+	return nil
+}
+
+func (u *benchmarkUseCaseImpl) FinalizeBenchmark(_ context.Context, _ uuid.UUID, _ domain.BenchmarkResult, _ time.Time, _ string) error {
+	// TODO
+	return nil
 }
