@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"log"
 	"os"
 
 	"github.com/go-sql-driver/mysql"
@@ -9,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/traPtitech/piscon-portal-v2/server/handler"
 	dbrepo "github.com/traPtitech/piscon-portal-v2/server/repository/db"
+	"github.com/traPtitech/piscon-portal-v2/server/server"
 	"github.com/traPtitech/piscon-portal-v2/server/services/oauth2"
 	"github.com/traPtitech/piscon-portal-v2/server/usecase"
 )
@@ -49,6 +51,11 @@ func main() {
 		panic(err)
 	}
 	handler.SetupRoutes(e)
+
+	benchService := server.NewBenchmarkService(useCase)
+	go func() {
+		log.Fatal("error in bench service.", server.Start(50051, benchService))
+	}()
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
