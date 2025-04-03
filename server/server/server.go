@@ -30,7 +30,9 @@ func Start(port int, benchmarkSvc portalv1.BenchmarkServiceServer) error {
 	return nil
 }
 
+var internalError = status.Error(codes.Internal, "internal error")
+
 func handleError(msg string, err error) error {
 	log.Println(msg, err)
-	return status.Error(codes.Internal, "internal error")
+	return internalError
 }

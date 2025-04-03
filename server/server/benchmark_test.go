@@ -43,7 +43,7 @@ func TestGetBenchmarkJob(t *testing.T) {
 		},
 		"StartBenchmarkがエラー": {
 			StartBenchmarkErr: assert.AnError,
-			err:               assert.AnError,
+			err:               server.ExportedInternalError,
 		},
 	}
 
