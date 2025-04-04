@@ -47,6 +47,11 @@ type Repository interface {
 	FindBenchmark(ctx context.Context, id uuid.UUID) (domain.Benchmark, error)
 	// GetBenchmarkLog returns a benchmark log.
 	GetBenchmarkLog(ctx context.Context, benchmarkID uuid.UUID) (domain.BenchmarkLog, error)
+	// GetOldestQueuedBenchmark returns the oldest queued benchmark.
+	// If there are no queued benchmarks, it returns [ErrNotFound].
+	GetOldestQueuedBenchmark(ctx context.Context) (domain.Benchmark, error)
+	// UpdateBenchmark updates a benchmark record.
+	UpdateBenchmark(ctx context.Context, id uuid.UUID, benchmark domain.Benchmark) error
 
 	// FindInstance finds an instance by id. If the instance is not found, it returns [ErrNotFound].
 	FindInstance(ctx context.Context, id uuid.UUID) (domain.Instance, error)
