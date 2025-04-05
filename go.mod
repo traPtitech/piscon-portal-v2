@@ -4,7 +4,7 @@ go 1.24
 
 require (
 	github.com/aarondl/opt v0.0.0-20240623220848-083f18ab9536
-	github.com/coreos/go-oidc/v3 v3.13.0
+	github.com/coreos/go-oidc/v3 v3.14.1
 	github.com/go-faster/errors v0.7.1
 	github.com/go-faster/jx v1.1.0
 	github.com/go-sql-driver/mysql v1.9.1
