@@ -624,7 +624,7 @@ func (c *MockRepositoryGetUsersCall) DoAndReturn(f func(context.Context) ([]doma
 }
 
 // Transaction mocks base method.
-func (m *MockRepository) Transaction(ctx context.Context, f func(context.Context, repository.Repository) error) error {
+func (m *MockRepository) Transaction(ctx context.Context, f func(context.Context) error) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Transaction", ctx, f)
 	ret0, _ := ret[0].(error)
@@ -650,13 +650,13 @@ func (c *MockRepositoryTransactionCall) Return(arg0 error) *MockRepositoryTransa
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockRepositoryTransactionCall) Do(f func(context.Context, func(context.Context, repository.Repository) error) error) *MockRepositoryTransactionCall {
+func (c *MockRepositoryTransactionCall) Do(f func(context.Context, func(context.Context) error) error) *MockRepositoryTransactionCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockRepositoryTransactionCall) DoAndReturn(f func(context.Context, func(context.Context, repository.Repository) error) error) *MockRepositoryTransactionCall {
+func (c *MockRepositoryTransactionCall) DoAndReturn(f func(context.Context, func(context.Context) error) error) *MockRepositoryTransactionCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

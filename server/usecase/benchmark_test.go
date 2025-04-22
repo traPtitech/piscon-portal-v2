@@ -43,8 +43,8 @@ func TestCreateBenchmark(t *testing.T) {
 					}, nil)
 				mockRepo.EXPECT().
 					Transaction(gomock.Any(), gomock.Any()).
-					DoAndReturn(func(ctx context.Context, f func(context.Context, repository.Repository) error) error {
-						return f(ctx, mockRepo)
+					DoAndReturn(func(ctx context.Context, f func(context.Context) error) error {
+						return f(ctx)
 					})
 				mockRepo.EXPECT().
 					GetBenchmarks(gomock.Any(), gomock.Any()).
@@ -58,8 +58,8 @@ func TestCreateBenchmark(t *testing.T) {
 			setup: func(mockRepo *mock.MockRepository) {
 				mockRepo.EXPECT().
 					Transaction(gomock.Any(), gomock.Any()).
-					DoAndReturn(func(ctx context.Context, f func(context.Context, repository.Repository) error) error {
-						return f(ctx, mockRepo)
+					DoAndReturn(func(ctx context.Context, f func(context.Context) error) error {
+						return f(ctx)
 					})
 				mockRepo.EXPECT().
 					FindUser(gomock.Any(), gomock.Eq(userID)).
@@ -82,8 +82,8 @@ func TestCreateBenchmark(t *testing.T) {
 			setup: func(mockRepo *mock.MockRepository) {
 				mockRepo.EXPECT().
 					Transaction(gomock.Any(), gomock.Any()).
-					DoAndReturn(func(ctx context.Context, f func(context.Context, repository.Repository) error) error {
-						return f(ctx, mockRepo)
+					DoAndReturn(func(ctx context.Context, f func(context.Context) error) error {
+						return f(ctx)
 					})
 				mockRepo.EXPECT().
 					FindUser(gomock.Any(), gomock.Eq(userID)).
@@ -102,8 +102,8 @@ func TestCreateBenchmark(t *testing.T) {
 			setup: func(mockRepo *mock.MockRepository) {
 				mockRepo.EXPECT().
 					Transaction(gomock.Any(), gomock.Any()).
-					DoAndReturn(func(ctx context.Context, f func(context.Context, repository.Repository) error) error {
-						return f(ctx, mockRepo)
+					DoAndReturn(func(ctx context.Context, f func(context.Context) error) error {
+						return f(ctx)
 					})
 				mockRepo.EXPECT().
 					FindUser(gomock.Any(), gomock.Eq(userID)).
@@ -139,8 +139,8 @@ func TestCreateBenchmark(t *testing.T) {
 					}, nil)
 				mockRepo.EXPECT().
 					Transaction(gomock.Any(), gomock.Any()).
-					DoAndReturn(func(ctx context.Context, f func(context.Context, repository.Repository) error) error {
-						return f(ctx, mockRepo)
+					DoAndReturn(func(ctx context.Context, f func(context.Context) error) error {
+						return f(ctx)
 					})
 				mockRepo.EXPECT().
 					GetBenchmarks(gomock.Any(), gomock.Any()).

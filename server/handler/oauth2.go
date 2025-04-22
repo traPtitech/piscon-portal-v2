@@ -49,15 +49,15 @@ func (h *Handler) Oauth2Callback(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "invalid token")
 	}
 
-	err = h.repo.Transaction(ctx, func(ctx context.Context, r repository.Repository) error {
-		user, err := r.FindUser(ctx, userInfo.ID)
+	err = h.repo.Transaction(ctx, func(ctx context.Context) error {
+		user, err := h.repo.FindUser(ctx, userInfo.ID)
 		if err != nil && !errors.Is(err, repository.ErrNotFound) {
 			return fmt.Errorf("find user: %w", err)
 		}
 		if errors.Is(err, repository.ErrNotFound) {
 			// create new newUser
 			user = domain.NewUser(userInfo.ID, userInfo.Name)
-			if err := r.CreateUser(ctx, user); err != nil {
+			if err := h.repo.CreateUser(ctx, user); err != nil {
 				return fmt.Errorf("create user: %w", err)
 			}
 		}
@@ -68,7 +68,7 @@ func (h *Handler) Oauth2Callback(c echo.Context) error {
 			return fmt.Errorf("set session ID: %w", err)
 		}
 		session := domain.NewSession(sessionID, user.ID, time.Now().Add(7*24*time.Hour))
-		err = r.CreateSession(ctx, session)
+		err = h.repo.CreateSession(ctx, session)
 		if err != nil {
 			return fmt.Errorf("create session: %w", err)
 		}

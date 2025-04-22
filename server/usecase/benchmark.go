@@ -57,12 +57,12 @@ func (u *benchmarkUseCaseImpl) GetBenchmark(ctx context.Context, id uuid.UUID) (
 func (u *benchmarkUseCaseImpl) CreateBenchmark(ctx context.Context, instanceID uuid.UUID, userID uuid.UUID) (domain.Benchmark, error) {
 	var benchmark domain.Benchmark
 
-	err := u.repo.Transaction(ctx, func(ctx context.Context, r repository.Repository) error {
-		user, err := r.FindUser(ctx, userID)
+	err := u.repo.Transaction(ctx, func(ctx context.Context) error {
+		user, err := u.repo.FindUser(ctx, userID)
 		if err != nil {
 			return fmt.Errorf("find user: %v", err)
 		}
-		instance, err := r.FindInstance(ctx, instanceID)
+		instance, err := u.repo.FindInstance(ctx, instanceID)
 		if err != nil {
 			if errors.Is(err, repository.ErrNotFound) {
 				return NewUseCaseErrorFromMsg("instance not found")
@@ -75,7 +75,7 @@ func (u *benchmarkUseCaseImpl) CreateBenchmark(ctx context.Context, instanceID u
 			return NewUseCaseError(err)
 		}
 
-		benchmarks, err := r.GetBenchmarks(ctx, repository.BenchmarkQuery{
+		benchmarks, err := u.repo.GetBenchmarks(ctx, repository.BenchmarkQuery{
 			TeamID:   optional.From(user.TeamID.UUID),
 			StatusIn: optional.From([]domain.BenchmarkStatus{domain.BenchmarkStatusWaiting, domain.BenchmarkStatusRunning}),
 		})
@@ -86,7 +86,7 @@ func (u *benchmarkUseCaseImpl) CreateBenchmark(ctx context.Context, instanceID u
 			return NewUseCaseErrorFromMsg("already exists benchmark")
 		}
 
-		err = r.CreateBenchmark(ctx, benchmark)
+		err = u.repo.CreateBenchmark(ctx, benchmark)
 		if err != nil {
 			return fmt.Errorf("create benchmark: %v", err)
 		}
@@ -144,8 +144,8 @@ func (u *benchmarkUseCaseImpl) GetBenchmarkLog(ctx context.Context, benchmarkID 
 
 func (u *benchmarkUseCaseImpl) StartBenchmark(ctx context.Context) (domain.Benchmark, error) {
 	var startedBenchmark domain.Benchmark
-	err := u.repo.Transaction(ctx, func(ctx context.Context, r repository.Repository) error {
-		bench, err := r.GetOldestQueuedBenchmark(ctx)
+	err := u.repo.Transaction(ctx, func(ctx context.Context) error {
+		bench, err := u.repo.GetOldestQueuedBenchmark(ctx)
 		if errors.Is(err, repository.ErrNotFound) {
 			return ErrNotFound
 		}
@@ -161,7 +161,7 @@ func (u *benchmarkUseCaseImpl) StartBenchmark(ctx context.Context) (domain.Bench
 			Status:    domain.BenchmarkStatusRunning,
 			CreatedAt: bench.CreatedAt,
 		}
-		err = r.UpdateBenchmark(ctx, bench.ID, startedBenchmark)
+		err = u.repo.UpdateBenchmark(ctx, bench.ID, startedBenchmark)
 		if errors.Is(err, repository.ErrNotFound) {
 			return ErrNotFound
 		}
