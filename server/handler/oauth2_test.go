@@ -41,8 +41,8 @@ func TestLoginAsExistingUser(t *testing.T) {
 
 	// user already exists, so only create session
 	mockRepo.EXPECT().Transaction(gomock.Any(), gomock.Any()).
-		DoAndReturn(func(ctx context.Context, f func(context.Context, repository.Repository) error) error {
-			return f(ctx, mockRepo)
+		DoAndReturn(func(ctx context.Context, f func(context.Context) error) error {
+			return f(ctx)
 		})
 	mockRepo.EXPECT().FindUser(gomock.Any(), gomock.Any()).Return(domain.User{ID: userID}, nil)
 	mockRepo.EXPECT().
@@ -91,8 +91,8 @@ func TestLogout(t *testing.T) {
 func testFirstLogin(t *testing.T, mockRepo *repomock.MockRepository, server *httptest.Server, client *http.Client, userID uuid.UUID) {
 	// create user and session
 	mockRepo.EXPECT().Transaction(gomock.Any(), gomock.Any()).
-		DoAndReturn(func(ctx context.Context, f func(context.Context, repository.Repository) error) error {
-			return f(ctx, mockRepo)
+		DoAndReturn(func(ctx context.Context, f func(context.Context) error) error {
+			return f(ctx)
 		})
 	mockRepo.EXPECT().FindUser(gomock.Any(), gomock.Eq(userID)).Return(domain.User{}, repository.ErrNotFound)
 	mockRepo.EXPECT().

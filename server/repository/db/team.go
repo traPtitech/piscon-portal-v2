@@ -44,7 +44,7 @@ func (r *Repository) GetTeams(ctx context.Context) ([]domain.Team, error) {
 
 func (r *Repository) CreateTeam(ctx context.Context, team domain.Team) error {
 	if ctx.Value(executorCtxKey) == nil {
-		return r.Transaction(ctx, func(ctx context.Context, r repository.Repository) error {
+		return r.Transaction(ctx, func(ctx context.Context) error {
 			return r.CreateTeam(ctx, team)
 		})
 	}
@@ -75,7 +75,7 @@ func (r *Repository) CreateTeam(ctx context.Context, team domain.Team) error {
 
 func (r *Repository) UpdateTeam(ctx context.Context, team domain.Team) error {
 	if ctx.Value(executorCtxKey) == nil {
-		return r.Transaction(ctx, func(ctx context.Context, r repository.Repository) error {
+		return r.Transaction(ctx, func(ctx context.Context) error {
 			return r.UpdateTeam(ctx, team)
 		})
 	}

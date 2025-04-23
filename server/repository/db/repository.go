@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/stephenafamo/bob"
-	"github.com/traPtitech/piscon-portal-v2/server/repository"
 )
 
 type repoDB struct {
@@ -41,7 +40,7 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) Transaction(ctx context.Context, f func(ctx context.Context, r repository.Repository) error) error {
+func (r *Repository) Transaction(ctx context.Context, f func(ctx context.Context) error) error {
 	tx, err := r._db.BeginTx(ctx, nil)
 	if err != nil {
 		return fmt.Errorf("begin transaction: %w", err)
@@ -50,7 +49,7 @@ func (r *Repository) Transaction(ctx context.Context, f func(ctx context.Context
 
 	ctx = context.WithValue(ctx, executorCtxKey, tx)
 
-	err = f(ctx, r)
+	err = f(ctx)
 	if err != nil {
 		return err
 	}

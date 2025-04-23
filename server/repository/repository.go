@@ -13,7 +13,7 @@ import (
 type Repository interface {
 	// Transaction starts a transaction and calls f with the transaction.
 	// If f returns an error, the transaction is rolled back and the error is returned.
-	Transaction(ctx context.Context, f func(ctx context.Context, r Repository) error) error
+	Transaction(ctx context.Context, f func(ctx context.Context) error) error
 
 	// FindUser finds a user by id. If the user is not found, it returns [ErrNotFound].
 	FindUser(ctx context.Context, id uuid.UUID) (domain.User, error)
