@@ -15,7 +15,7 @@ require (
 	github.com/jellydator/ttlcache/v3 v3.3.0
 	github.com/labstack/echo-contrib v0.17.3
 	github.com/labstack/echo/v4 v4.13.3
-	github.com/ogen-go/ogen v1.11.0
+	github.com/ogen-go/ogen v1.12.0
 	github.com/samber/lo v1.49.1
 	github.com/spf13/pflag v1.0.6
 	github.com/stephenafamo/bob v0.31.0
