@@ -18,7 +18,7 @@ require (
 	github.com/ogen-go/ogen v1.12.0
 	github.com/samber/lo v1.49.1
 	github.com/spf13/pflag v1.0.6
-	github.com/stephenafamo/bob v0.31.0
+	github.com/stephenafamo/bob v0.33.1
 	github.com/stretchr/testify v1.10.0
 	github.com/testcontainers/testcontainers-go/modules/mysql v0.37.0
 	go.uber.org/mock v0.5.1
@@ -33,8 +33,8 @@ require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
-	github.com/Masterminds/semver/v3 v3.1.1 // indirect
-	github.com/Masterminds/sprig/v3 v3.2.2 // indirect
+	github.com/Masterminds/semver/v3 v3.3.0 // indirect
+	github.com/Masterminds/sprig/v3 v3.3.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/aarondl/json v0.0.0-20221020222930-8b0db17ef1bf // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
@@ -64,8 +64,7 @@ require (
 	github.com/gorilla/context v1.1.2 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0 // indirect
-	github.com/huandu/xstrings v1.3.1 // indirect
-	github.com/imdario/mergo v0.3.13 // indirect
+	github.com/huandu/xstrings v1.5.0 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/knadh/koanf/maps v0.1.1 // indirect
 	github.com/knadh/koanf/parsers/yaml v0.1.0 // indirect
@@ -96,10 +95,10 @@ require (
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
 	github.com/shirou/gopsutil/v4 v4.25.1 // indirect
-	github.com/shopspring/decimal v1.3.1 // indirect
+	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
-	github.com/spf13/cast v1.5.0 // indirect
-	github.com/stephenafamo/scan v0.6.1 // indirect
+	github.com/spf13/cast v1.7.0 // indirect
+	github.com/stephenafamo/scan v0.6.2 // indirect
 	github.com/testcontainers/testcontainers-go v0.37.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.14 // indirect
 	github.com/tklauser/numcpus v0.9.0 // indirect
@@ -118,7 +117,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
 	golang.org/x/crypto v0.37.0 // indirect
-	golang.org/x/exp v0.0.0-20250106191152-7588d65b2ba8 // indirect
+	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394 // indirect
 	golang.org/x/mod v0.24.0 // indirect
 	golang.org/x/net v0.39.0 // indirect
 	golang.org/x/sys v0.32.0 // indirect
@@ -128,7 +127,7 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250218202821-56aae31c358a // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	mvdan.cc/gofumpt v0.5.0 // indirect
+	mvdan.cc/gofumpt v0.7.0 // indirect
 )
 
 tool (
