@@ -20,7 +20,7 @@ require (
 	github.com/spf13/pflag v1.0.6
 	github.com/stephenafamo/bob v0.31.0
 	github.com/stretchr/testify v1.10.0
-	github.com/testcontainers/testcontainers-go/modules/mysql v0.36.0
+	github.com/testcontainers/testcontainers-go/modules/mysql v0.37.0
 	go.uber.org/mock v0.5.1
 	golang.org/x/oauth2 v0.29.0
 	golang.org/x/sync v0.13.0
@@ -75,7 +75,7 @@ require (
 	github.com/knadh/koanf/v2 v2.1.0 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/lufia/plan9stats v0.0.0-20240909124753-873cd0166683 // indirect
-	github.com/magiconair/properties v1.8.9 // indirect
+	github.com/magiconair/properties v1.8.10 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
@@ -100,7 +100,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/stephenafamo/scan v0.6.1 // indirect
-	github.com/testcontainers/testcontainers-go v0.36.0 // indirect
+	github.com/testcontainers/testcontainers-go v0.37.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.14 // indirect
 	github.com/tklauser/numcpus v0.9.0 // indirect
 	github.com/urfave/cli/v2 v2.23.7 // indirect
