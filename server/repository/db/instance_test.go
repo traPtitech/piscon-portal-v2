@@ -17,12 +17,14 @@ func TestFindInstance(t *testing.T) {
 	instanceID := uuid.New()
 	teamID := uuid.New()
 	instance := domain.Instance{
-		ID:             instanceID,
-		TeamID:         teamID,
-		InstanceNumber: 1,
-		Status:         domain.InstanceStatusRunning,
-		PrivateIP:      "192.0.2.0",
-		PublicIP:       "192.0.2.0",
+		ID:     instanceID,
+		TeamID: teamID,
+		Index:  1,
+		Status: domain.InstanceStatusRunning,
+		Infra: domain.InfraInstance{
+			PrivateIP: "192.0.2.0",
+			PublicIP:  "192.0.2.0",
+		},
 	}
 	mustMakeInstance(t, db, instance)
 

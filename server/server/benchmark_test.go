@@ -29,7 +29,9 @@ func TestGetBenchmarkJob(t *testing.T) {
 			bench: domain.Benchmark{
 				ID: benchID,
 				Instance: domain.Instance{
-					PrivateIP: targetIP,
+					Infra: domain.InfraInstance{
+						PrivateIP: targetIP,
+					},
 				},
 			},
 			job: &portalv1.BenchmarkJob{

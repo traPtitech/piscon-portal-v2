@@ -1,19 +1,23 @@
 package domain
 
 import (
-	"cmp"
-	"slices"
+	"errors"
 
 	"github.com/google/uuid"
 )
 
 type Instance struct {
-	ID             uuid.UUID
-	TeamID         uuid.UUID
-	InstanceNumber int
-	Status         InstanceStatus
-	PrivateIP      string
-	PublicIP       string
+	ID     uuid.UUID
+	TeamID uuid.UUID
+	Index  int
+	Status InstanceStatus
+	Infra  InfraInstance
+}
+
+type InfraInstance struct {
+	ProviderInstanceID string
+	PrivateIP          string
+	PublicIP           string
 }
 
 type InstanceStatus string
@@ -28,14 +32,48 @@ const (
 	InstanceStatusDeleted  InstanceStatus = "deleted"
 )
 
-type Instances []Instance
+type InstanceOperation int
 
-func NewInstance(teamID uuid.UUID, existing Instances) Instance {
-	m := slices.MaxFunc(existing, func(a, b Instance) int { return cmp.Compare(a.InstanceNumber, b.InstanceNumber) })
-	return Instance{
-		ID:             uuid.New(),
-		TeamID:         teamID,
-		InstanceNumber: m.InstanceNumber + 1,
-		Status:         InstanceStatusStopping,
+const (
+	InstanceOperationStart InstanceOperation = iota
+	InstanceOperationStop
+)
+
+type InstanceFactory struct {
+	limit int
+}
+
+var ErrInstanceLimitExceeded = errors.New("instance limit exceeded")
+
+func NewInstanceFactory(limit int) *InstanceFactory {
+	return &InstanceFactory{
+		limit: limit,
 	}
+}
+
+func (f *InstanceFactory) Create(teamID uuid.UUID, existing []Instance) (Instance, error) {
+	if len(existing) >= f.limit {
+		return Instance{}, ErrInstanceLimitExceeded
+	}
+	// use the next available index
+	used := make(map[int]struct{})
+	for _, instance := range existing {
+		used[instance.Index] = struct{}{}
+	}
+	var index int
+	for i := range f.limit {
+		if _, ok := used[i+1]; !ok {
+			index = i + 1
+			break
+		}
+	}
+
+	instance := Instance{
+		ID:     uuid.New(),
+		TeamID: teamID,
+		Index:  index,
+		Status: InstanceStatusStarting,
+		Infra:  InfraInstance{}, // initialize with empty InfraInstance
+	}
+	return instance, nil
 }

@@ -217,12 +217,14 @@ func TestGetOldestQueuedBenchmark(t *testing.T) {
 	repo, db := setupRepository(t)
 
 	instance := domain.Instance{
-		ID:             uuid.New(),
-		Status:         domain.InstanceStatusRunning,
-		PublicIP:       "192.168.1.1",
-		PrivateIP:      "10.0.0.1",
-		TeamID:         uuid.New(),
-		InstanceNumber: 1,
+		ID:     uuid.New(),
+		Status: domain.InstanceStatusRunning,
+		TeamID: uuid.New(),
+		Index:  1,
+		Infra: domain.InfraInstance{
+			PublicIP:  "192.168.1.1",
+			PrivateIP: "10.0.0.1",
+		},
 	}
 	waitingBench := domain.Benchmark{
 		ID:        uuid.New(),
@@ -340,12 +342,14 @@ func TestUpdateBenchmark(t *testing.T) {
 	benchID := uuid.New()
 	benchID2 := uuid.New()
 	instance := domain.Instance{
-		ID:             uuid.New(),
-		Status:         domain.InstanceStatusRunning,
-		TeamID:         uuid.New(),
-		InstanceNumber: 1,
-		PrivateIP:      "0.0.0.0",
-		PublicIP:       "0.0.0.0",
+		ID:     uuid.New(),
+		Status: domain.InstanceStatusRunning,
+		TeamID: uuid.New(),
+		Index:  1,
+		Infra: domain.InfraInstance{
+			PrivateIP: "0.0.0.0",
+			PublicIP:  "0.0.0.0",
+		},
 	}
 
 	createdAt := time.Now()
