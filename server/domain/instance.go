@@ -61,9 +61,9 @@ func (f *InstanceFactory) Create(teamID uuid.UUID, existing []Instance) (Instanc
 		used[instance.Index] = struct{}{}
 	}
 	var index int
-	for i := range f.limit {
-		if _, ok := used[i+1]; !ok {
-			index = i + 1
+	for i := 1; i <= f.limit; i++ {
+		if _, ok := used[i]; !ok {
+			index = i
 			break
 		}
 	}
