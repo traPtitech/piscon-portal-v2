@@ -11,7 +11,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/sessions v1.4.0
-	github.com/jaswdr/faker/v2 v2.3.3
+	github.com/jaswdr/faker/v2 v2.4.0
 	github.com/jellydator/ttlcache/v3 v3.3.0
 	github.com/labstack/echo-contrib v0.17.3
 	github.com/labstack/echo/v4 v4.13.3
