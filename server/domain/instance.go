@@ -10,12 +10,12 @@ type Instance struct {
 	ID     uuid.UUID
 	TeamID uuid.UUID
 	Index  int
-	Status InstanceStatus
 	Infra  InfraInstance
 }
 
 type InfraInstance struct {
 	ProviderInstanceID string
+	Status             InstanceStatus
 	PrivateIP          string
 	PublicIP           string
 }
@@ -56,7 +56,7 @@ func (f *InstanceFactory) Create(teamID uuid.UUID, existing []Instance) (Instanc
 		return Instance{}, ErrInstanceLimitExceeded
 	}
 	// use the next available index
-	used := make(map[int]struct{})
+	used := make(map[int]struct{}, len(existing))
 	for _, instance := range existing {
 		used[instance.Index] = struct{}{}
 	}
@@ -72,7 +72,6 @@ func (f *InstanceFactory) Create(teamID uuid.UUID, existing []Instance) (Instanc
 		ID:     uuid.New(),
 		TeamID: teamID,
 		Index:  index,
-		Status: InstanceStatusStarting,
 		Infra:  InfraInstance{}, // initialize with empty InfraInstance
 	}
 	return instance, nil

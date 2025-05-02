@@ -37,7 +37,7 @@ func mustMakeTeam(t *testing.T, executor bob.Executor, team domain.Team) {
 
 func mustMakeInstance(t *testing.T, executor bob.Executor, instance domain.Instance) {
 	t.Helper()
-	status, err := db.FromDomainInstanceStatus(instance.Status)
+	status, err := db.FromDomainInstanceStatus(instance.Infra.Status)
 	require.NoError(t, err)
 	_, err = models.Instances.Insert(&models.InstanceSetter{
 		ID:             omit.From(instance.ID.String()),

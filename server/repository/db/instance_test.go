@@ -20,8 +20,8 @@ func TestFindInstance(t *testing.T) {
 		ID:     instanceID,
 		TeamID: teamID,
 		Index:  1,
-		Status: domain.InstanceStatusRunning,
 		Infra: domain.InfraInstance{
+			Status:    domain.InstanceStatusRunning,
 			PrivateIP: "192.0.2.0",
 			PublicIP:  "192.0.2.0",
 		},

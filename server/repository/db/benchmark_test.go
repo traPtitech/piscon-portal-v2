@@ -30,8 +30,10 @@ func TestFindBenchmark(t *testing.T) {
 	benchmark := domain.Benchmark{
 		ID: id,
 		Instance: domain.Instance{
-			ID:     instanceID,
-			Status: domain.InstanceStatusRunning,
+			ID: instanceID,
+			Infra: domain.InfraInstance{
+				Status: domain.InstanceStatusRunning,
+			},
 		},
 		TeamID:     teamID,
 		UserID:     userID,
@@ -59,8 +61,10 @@ func TestCreateBenchmark(t *testing.T) {
 	instanceID := uuid.New()
 	userID := uuid.New()
 	instance := domain.Instance{
-		ID:     instanceID,
-		Status: domain.InstanceStatusRunning,
+		ID: instanceID,
+		Infra: domain.InfraInstance{
+			Status: domain.InstanceStatusRunning,
+		},
 	}
 	benchmark := domain.Benchmark{
 		ID:         id,
@@ -94,7 +98,9 @@ func TestGetAllBenchmarks(t *testing.T) {
 	instance := domain.Instance{
 		ID:     uuid.New(),
 		TeamID: teamID,
-		Status: domain.InstanceStatusRunning,
+		Infra: domain.InfraInstance{
+			Status: domain.InstanceStatusRunning,
+		},
 	}
 
 	benchmarks := []domain.Benchmark{
@@ -142,7 +148,9 @@ func TestGetQueuedBenchmarks(t *testing.T) {
 	instance := domain.Instance{
 		ID:     uuid.New(),
 		TeamID: teamID,
-		Status: domain.InstanceStatusRunning,
+		Infra: domain.InfraInstance{
+			Status: domain.InstanceStatusRunning,
+		},
 	}
 
 	benchmarks := []domain.Benchmark{
@@ -192,8 +200,10 @@ func TestGetBenchmarkLog(t *testing.T) {
 		ID:     benchmarkID,
 		Status: domain.BenchmarkStatusFinished,
 		Instance: domain.Instance{
-			ID:     uuid.New(),
-			Status: domain.InstanceStatusRunning,
+			ID: uuid.New(),
+			Infra: domain.InfraInstance{
+				Status: domain.InstanceStatusRunning,
+			},
 		},
 		CreatedAt: time.Now(),
 	}
@@ -218,10 +228,10 @@ func TestGetOldestQueuedBenchmark(t *testing.T) {
 
 	instance := domain.Instance{
 		ID:     uuid.New(),
-		Status: domain.InstanceStatusRunning,
 		TeamID: uuid.New(),
 		Index:  1,
 		Infra: domain.InfraInstance{
+			Status:    domain.InstanceStatusRunning,
 			PublicIP:  "192.168.1.1",
 			PrivateIP: "10.0.0.1",
 		},
@@ -343,10 +353,10 @@ func TestUpdateBenchmark(t *testing.T) {
 	benchID2 := uuid.New()
 	instance := domain.Instance{
 		ID:     uuid.New(),
-		Status: domain.InstanceStatusRunning,
 		TeamID: uuid.New(),
 		Index:  1,
 		Infra: domain.InfraInstance{
+			Status:    domain.InstanceStatusRunning,
 			PrivateIP: "0.0.0.0",
 			PublicIP:  "0.0.0.0",
 		},
