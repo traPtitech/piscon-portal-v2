@@ -32,7 +32,7 @@ func NewBenchmark(instance Instance, user User) (Benchmark, error) {
 	if !user.TeamID.Valid {
 		return Benchmark{}, errors.New("user is not in a team")
 	}
-	if instance.Status != InstanceStatusRunning {
+	if instance.Infra.Status != InstanceStatusRunning {
 		return Benchmark{}, errors.New("instance is not running")
 	}
 	if instance.TeamID != user.TeamID.UUID {

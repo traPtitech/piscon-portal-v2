@@ -39,7 +39,9 @@ func TestCreateBenchmark(t *testing.T) {
 					Return(domain.Instance{
 						ID:     instanceID,
 						TeamID: teamID,
-						Status: domain.InstanceStatusRunning,
+						Infra: domain.InfraInstance{
+							Status: domain.InstanceStatusRunning,
+						},
 					}, nil)
 				mockRepo.EXPECT().
 					Transaction(gomock.Any(), gomock.Any()).
@@ -72,7 +74,9 @@ func TestCreateBenchmark(t *testing.T) {
 					Return(domain.Instance{
 						ID:     instanceID,
 						TeamID: teamID,
-						Status: domain.InstanceStatusStopped,
+						Infra: domain.InfraInstance{
+							Status: domain.InstanceStatusStopped,
+						},
 					}, nil)
 			},
 			expectError: true,
@@ -116,7 +120,6 @@ func TestCreateBenchmark(t *testing.T) {
 					Return(domain.Instance{
 						ID:     instanceID,
 						TeamID: uuid.New(),
-						Status: domain.InstanceStatusRunning,
 					}, nil)
 			},
 			expectError: true,
@@ -135,7 +138,9 @@ func TestCreateBenchmark(t *testing.T) {
 					Return(domain.Instance{
 						ID:     instanceID,
 						TeamID: teamID,
-						Status: domain.InstanceStatusRunning,
+						Infra: domain.InfraInstance{
+							Status: domain.InstanceStatusRunning,
+						},
 					}, nil)
 				mockRepo.EXPECT().
 					Transaction(gomock.Any(), gomock.Any()).

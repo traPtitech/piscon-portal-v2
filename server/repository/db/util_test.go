@@ -37,15 +37,15 @@ func mustMakeTeam(t *testing.T, executor bob.Executor, team domain.Team) {
 
 func mustMakeInstance(t *testing.T, executor bob.Executor, instance domain.Instance) {
 	t.Helper()
-	status, err := db.FromDomainInstanceStatus(instance.Status)
+	status, err := db.FromDomainInstanceStatus(instance.Infra.Status)
 	require.NoError(t, err)
 	_, err = models.Instances.Insert(&models.InstanceSetter{
 		ID:             omit.From(instance.ID.String()),
 		TeamID:         omit.From(instance.TeamID.String()),
-		InstanceNumber: omit.From(int32(instance.InstanceNumber)),
+		InstanceNumber: omit.From(int32(instance.Index)),
 		Status:         omit.From(status),
-		PrivateIP:      omitnull.From(instance.PrivateIP),
-		PublicIP:       omitnull.From(instance.PublicIP),
+		PrivateIP:      omitnull.From(instance.Infra.PrivateIP),
+		PublicIP:       omitnull.From(instance.Infra.PublicIP),
 	}).Exec(context.Background(), executor)
 	require.NoError(t, err)
 }
