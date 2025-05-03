@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/mysql/dialect"
+	"github.com/stephenafamo/bob/dialect/mysql/im"
 	"github.com/stephenafamo/bob/dialect/mysql/sm"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
@@ -153,6 +154,24 @@ func (r *Repository) GetBenchmarkLog(ctx context.Context, benchmarkID uuid.UUID)
 	}
 
 	return toDomainBenchmarkLog(benchmarkLogs)
+}
+
+func (r *Repository) UpdateBenchmarkLog(ctx context.Context, benchmarkID uuid.UUID, log domain.BenchmarkLog) error {
+	_, err := models.BenchmarkLogs.Insert(
+		&models.BenchmarkLogSetter{
+			BenchmarkID: omit.From(benchmarkID.String()),
+			UserLog:     omit.From(log.UserLog),
+			AdminLog:    omit.From(log.AdminLog),
+		},
+		im.OnDuplicateKeyUpdate(
+			im.UpdateWithValues(models.ColumnNames.BenchmarkLogs.UserLog, models.ColumnNames.BenchmarkLogs.AdminLog),
+		),
+	).Exec(ctx, r.executor(ctx))
+	if err != nil {
+		return fmt.Errorf("update benchmark log: %w", err)
+	}
+
+	return nil
 }
 
 func fromDomainBenchmarkStatus(status domain.BenchmarkStatus) (models.BenchmarksStatus, error) {
