@@ -41,3 +41,39 @@ jobs:
         with:
           go-version-file: go.mod
       - run: go test -cover -race ./...
+
+  go-generate:
+    name: Go Code Generation
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: write
+    services:
+      db:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: portal
+        ports:
+          - 3306:3306
+        volumes:
+          - ./server/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Go generate
+        run: go generate ./...
+
+      - name: Commit and push changes
+        run: |
+          if [[ -z $(git status --porcelain) ]]; then
+            exit 0
+          fi
+          git config --local user.name "github-actions"
+          git config --local user.email "github-actions@github.com"
+          git add .
+          git commit -m "Go code generation"
+          git push
+        shell: bash
