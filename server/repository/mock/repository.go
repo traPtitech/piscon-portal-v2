@@ -699,6 +699,44 @@ func (c *MockRepositoryUpdateBenchmarkCall) DoAndReturn(f func(context.Context, 
 	return c
 }
 
+// UpdateBenchmarkLog mocks base method.
+func (m *MockRepository) UpdateBenchmarkLog(ctx context.Context, benchmarkID uuid.UUID, log domain.BenchmarkLog) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateBenchmarkLog", ctx, benchmarkID, log)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateBenchmarkLog indicates an expected call of UpdateBenchmarkLog.
+func (mr *MockRepositoryMockRecorder) UpdateBenchmarkLog(ctx, benchmarkID, log any) *MockRepositoryUpdateBenchmarkLogCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateBenchmarkLog", reflect.TypeOf((*MockRepository)(nil).UpdateBenchmarkLog), ctx, benchmarkID, log)
+	return &MockRepositoryUpdateBenchmarkLogCall{Call: call}
+}
+
+// MockRepositoryUpdateBenchmarkLogCall wrap *gomock.Call
+type MockRepositoryUpdateBenchmarkLogCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockRepositoryUpdateBenchmarkLogCall) Return(arg0 error) *MockRepositoryUpdateBenchmarkLogCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockRepositoryUpdateBenchmarkLogCall) Do(f func(context.Context, uuid.UUID, domain.BenchmarkLog) error) *MockRepositoryUpdateBenchmarkLogCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockRepositoryUpdateBenchmarkLogCall) DoAndReturn(f func(context.Context, uuid.UUID, domain.BenchmarkLog) error) *MockRepositoryUpdateBenchmarkLogCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // UpdateTeam mocks base method.
 func (m *MockRepository) UpdateTeam(ctx context.Context, team domain.Team) error {
 	m.ctrl.T.Helper()

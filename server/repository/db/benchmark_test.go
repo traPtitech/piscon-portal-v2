@@ -461,3 +461,76 @@ func TestUpdateBenchmark(t *testing.T) {
 		})
 	}
 }
+
+func TestUpdateBenchmarkLog(t *testing.T) {
+	t.Parallel()
+
+	repo, testDB := setupRepository(t)
+
+	benchID := uuid.New()
+	benchID2 := uuid.New()
+
+	benchLog := domain.BenchmarkLog{
+		UserLog:  "user log",
+		AdminLog: "admin log",
+	}
+
+	instanceID := uuid.New()
+
+	mustMakeInstance(t, testDB, domain.Instance{
+		ID: instanceID,
+		Infra: domain.InfraInstance{
+			Status: domain.InstanceStatusRunning,
+		},
+	})
+	mustMakeBenchmark(t, testDB, domain.Benchmark{
+		ID:        benchID,
+		Status:    domain.BenchmarkStatusRunning,
+		CreatedAt: time.Now(),
+		Instance: domain.Instance{
+			ID: instanceID,
+		},
+	})
+	mustMakeBenchmark(t, testDB, domain.Benchmark{
+		ID:        benchID2,
+		Status:    domain.BenchmarkStatusRunning,
+		CreatedAt: time.Now(),
+		Instance: domain.Instance{
+			ID: instanceID,
+		},
+	})
+	mustMakeBenchmarkLog(t, testDB, benchID, benchLog)
+
+	testCases := map[string]struct {
+		benchID  uuid.UUID
+		benchLog domain.BenchmarkLog
+	}{
+		"すでにあるlogを更新する": {
+			benchID: benchID,
+			benchLog: domain.BenchmarkLog{
+				UserLog:  "updated user log",
+				AdminLog: "updated admin log",
+			},
+		},
+		"新しいlogを追加する": {
+			benchID: benchID2,
+			benchLog: domain.BenchmarkLog{
+				UserLog:  "new user log",
+				AdminLog: "new admin log",
+			},
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			err := repo.UpdateBenchmarkLog(t.Context(), testCase.benchID, testCase.benchLog)
+			assert.NoError(t, err)
+
+			got, err := models.FindBenchmarkLog(t.Context(), testDB, testCase.benchID.String())
+			assert.NoError(t, err)
+
+			assert.Equal(t, testCase.benchLog.UserLog, got.UserLog)
+			assert.Equal(t, testCase.benchLog.AdminLog, got.AdminLog)
+		})
+	}
+}

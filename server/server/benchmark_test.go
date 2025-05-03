@@ -1,16 +1,23 @@
 package server_test
 
 import (
+	"io"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	portalv1 "github.com/traPtitech/piscon-portal-v2/gen/portal/v1"
+	mockportalv1 "github.com/traPtitech/piscon-portal-v2/gen/portal/v1/mock"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/server"
 	"github.com/traPtitech/piscon-portal-v2/server/usecase"
 	"github.com/traPtitech/piscon-portal-v2/server/usecase/mock"
 	"go.uber.org/mock/gomock"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func TestGetBenchmarkJob(t *testing.T) {
@@ -79,4 +86,154 @@ func TestGetBenchmarkJob(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestSendBenchmarkProgress(t *testing.T) {
+	t.Parallel()
+
+	ctrl := gomock.NewController(t)
+
+	type (
+		RecvResult struct {
+			req  *portalv1.SendBenchmarkProgressRequest
+			err  error
+			save bool // 保存するもののかどうか
+		}
+		SaveBenchmarkProgressResult struct {
+			err error
+		}
+	)
+
+	benchID := uuid.New()
+	startedAt := time.Now()
+	req1 := &portalv1.SendBenchmarkProgressRequest{
+		BenchmarkId: benchID.String(),
+		Stdout:      "stdout",
+		Stderr:      "stderr",
+		Score:       100,
+		StartedAt:   timestamppb.New(startedAt),
+	}
+	req2 := &portalv1.SendBenchmarkProgressRequest{
+		BenchmarkId: benchID.String(),
+		Stdout:      "stdout 2",
+		Stderr:      "stderr 2",
+		Score:       200,
+		StartedAt:   timestamppb.New(startedAt),
+	}
+
+	testCases := map[string]struct {
+		recvResults                 []RecvResult
+		SaveBenchmarkProgressResult []SaveBenchmarkProgressResult
+		isError                     bool
+		err                         error
+		errCode                     codes.Code
+	}{
+		"1回受信できる": {
+			recvResults: []RecvResult{
+				{req: req1, err: nil, save: true},
+				{req: nil, err: io.EOF, save: false},
+			},
+			SaveBenchmarkProgressResult: []SaveBenchmarkProgressResult{
+				{err: nil},
+			},
+		},
+		"2回受信できる": {
+			recvResults: []RecvResult{
+				{req: req1, err: nil, save: true},
+				{req: req2, err: nil, save: true},
+				{req: nil, err: io.EOF, save: false},
+			},
+			SaveBenchmarkProgressResult: []SaveBenchmarkProgressResult{
+				{err: nil}, {err: nil},
+			},
+		},
+		"Recvがエラー": {
+			recvResults: []RecvResult{{req: nil, err: assert.AnError, save: false}},
+			isError:     true,
+			err:         server.ExportedInternalError,
+		},
+		"idがUUIDでないのでエラー": {
+			recvResults: []RecvResult{
+				{req: &portalv1.SendBenchmarkProgressRequest{
+					BenchmarkId: "invalid id",
+					Stdout:      "stdout",
+					Stderr:      "stderr",
+					Score:       100,
+					StartedAt:   timestamppb.New(startedAt),
+				}, err: nil, save: false},
+			},
+			isError: true,
+			errCode: codes.InvalidArgument,
+		},
+		"SaveBenchmarkProgressがUseCaseError": {
+			recvResults: []RecvResult{{req: req1, err: nil, save: true}},
+			SaveBenchmarkProgressResult: []SaveBenchmarkProgressResult{
+				{err: usecase.NewUseCaseErrorFromMsg("error")},
+			},
+			isError: true,
+			errCode: codes.InvalidArgument,
+		},
+		"SaveBenchmarkProgressがErrNotFound": {
+			recvResults:                 []RecvResult{{req: req1, err: nil, save: true}},
+			SaveBenchmarkProgressResult: []SaveBenchmarkProgressResult{{err: usecase.ErrNotFound}},
+			isError:                     true,
+			errCode:                     codes.NotFound,
+		},
+		"SaveBenchmarkProgressがエラー": {
+			recvResults:                 []RecvResult{{req: req1, err: nil, save: true}},
+			SaveBenchmarkProgressResult: []SaveBenchmarkProgressResult{{err: assert.AnError}},
+			isError:                     true,
+			err:                         server.ExportedInternalError,
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			client := mockportalv1.NewMockClientStreamingServer[portalv1.SendBenchmarkProgressRequest, portalv1.SendBenchmarkProgressResponse](ctrl)
+			u := mock.NewMockUseCase(ctrl)
+
+			client.EXPECT().Context().Return(t.Context()).AnyTimes()
+
+			for i, recvResult := range testCase.recvResults {
+				client.EXPECT().Recv().Return(recvResult.req, recvResult.err)
+
+				if recvResult.save {
+					benchID, err := uuid.Parse(recvResult.req.BenchmarkId)
+					require.NoError(t, err)
+
+					saveResult := testCase.SaveBenchmarkProgressResult[i]
+
+					benchLog := domain.BenchmarkLog{
+						UserLog:  recvResult.req.Stdout,
+						AdminLog: recvResult.req.Stderr,
+					}
+					u.EXPECT().
+						SaveBenchmarkProgress(gomock.Any(), benchID, benchLog, recvResult.req.Score, gomock.Cond(
+							func(t time.Time) bool {
+								return t.Sub(recvResult.req.StartedAt.AsTime()).Abs() < time.Second // timestamppb.Newすると、情報量が減って比較できなくなる
+							},
+						)).
+						Return(saveResult.err)
+				}
+			}
+
+			s := server.NewBenchmarkService(u)
+
+			err := s.SendBenchmarkProgress(client)
+			if testCase.isError {
+				assert.Error(t, err)
+				if testCase.err != nil {
+					assert.ErrorIs(t, err, testCase.err)
+				}
+				if testCase.errCode != codes.Code(0) {
+					assert.Equal(t, testCase.errCode, status.Code(err))
+				}
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+
 }
