@@ -23,6 +23,8 @@ type BenchmarkRepository interface {
 	GetOldestQueuedBenchmark(ctx context.Context) (domain.Benchmark, error)
 	// UpdateBenchmark updates a benchmark record.
 	UpdateBenchmark(ctx context.Context, id uuid.UUID, benchmark domain.Benchmark) error
+	// UpdateBenchmarkLog updates a benchmark log. If not exists, it creates a new one.
+	UpdateBenchmarkLog(ctx context.Context, benchmarkID uuid.UUID, log domain.BenchmarkLog) error
 }
 
 type BenchmarkQuery struct {
