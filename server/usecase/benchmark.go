@@ -189,6 +189,7 @@ func (u *benchmarkUseCaseImpl) SaveBenchmarkProgress(ctx context.Context, benchI
 			return fmt.Errorf("find benchmark: %w", err)
 		}
 
+		// Ensure that progress updates are only applied to benchmarks that are actively running.
 		if bench.Status != domain.BenchmarkStatusRunning {
 			return NewUseCaseErrorFromMsg("benchmark is not running")
 		}
