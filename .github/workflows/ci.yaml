@@ -80,5 +80,13 @@ jobs:
           git config --local user.email "github-actions@github.com"
           git add .
           git commit -m "Go code generation"
-          git push origin HEAD:${{ github.ref }}
+
+          # Handle PR and push events differently
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            # For PRs, push to the PR branch (head ref)
+            git push origin HEAD:${{ github.head_ref }}
+          else
+            # For direct pushes, push to the current branch
+            git push origin HEAD:${{ github.ref_name }}
+          fi
         shell: bash
