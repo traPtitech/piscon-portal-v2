@@ -56,13 +56,18 @@ jobs:
           MYSQL_DATABASE: portal
         ports:
           - 3306:3306
-        volumes:
-          - ./server/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+
+      - name: Init DB
+        run: |
+          docker exec -i $(docker ps -qf "name=ci-db") mysql -u root -ppassword portal < ./server/schema.sql
+        shell: bash
+
       - name: Go generate
         run: go generate ./...
 
