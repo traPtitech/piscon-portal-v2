@@ -80,5 +80,5 @@ jobs:
           git config --local user.email "github-actions@github.com"
           git add .
           git commit -m "Go code generation"
-          git push
+          git push origin HEAD:${{ github.ref_name }}
         shell: bash
