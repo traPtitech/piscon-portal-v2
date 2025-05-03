@@ -3,6 +3,7 @@ package usecase_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -174,6 +175,150 @@ func TestCreateBenchmark(t *testing.T) {
 			_, err := useCase.CreateBenchmark(t.Context(), instanceID, userID)
 			if tt.expectError {
 				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
+func TestSaveBenchmarkProgress(t *testing.T) {
+	t.Parallel()
+
+	type (
+		FindBenchmarkResult struct {
+			benchmark domain.Benchmark
+			err       error
+		}
+		UpdateBenchmarkResult struct {
+			err error
+		}
+		UpdateBenchmarkLogResult struct {
+			err error
+		}
+	)
+
+	benchLog := domain.BenchmarkLog{
+		UserLog:  "user log",
+		AdminLog: "admin log",
+	}
+
+	testCases := map[string]struct {
+		benchmarkID              uuid.UUID
+		benchLog                 domain.BenchmarkLog
+		score                    int64
+		startedAt                time.Time
+		FindBenchmarkResult      *FindBenchmarkResult
+		UpdateBenchmarkResult    *UpdateBenchmarkResult
+		UpdateBenchmarkLogResult *UpdateBenchmarkLogResult
+		isErr                    bool
+		err                      error
+		isUseCaseError           bool
+	}{
+		"FindBenchmarkでErrNotFoundなのでErrNotFound": {
+			benchmarkID:         uuid.New(),
+			benchLog:            benchLog,
+			score:               0,
+			startedAt:           time.Now(),
+			FindBenchmarkResult: &FindBenchmarkResult{err: repository.ErrNotFound},
+			isErr:               true,
+			err:                 usecase.ErrNotFound,
+		},
+		"FindBenchmarkでErrNotFound以外のエラーが返ってきたのでエラー": {
+			benchmarkID:         uuid.New(),
+			benchLog:            benchLog,
+			score:               0,
+			startedAt:           time.Now(),
+			FindBenchmarkResult: &FindBenchmarkResult{err: assert.AnError},
+			isErr:               true,
+			err:                 assert.AnError,
+		},
+		"benchmarkがrunningでないのでUseCaseError": {
+			benchmarkID:         uuid.New(),
+			benchLog:            benchLog,
+			score:               0,
+			startedAt:           time.Now(),
+			FindBenchmarkResult: &FindBenchmarkResult{benchmark: domain.Benchmark{Status: domain.BenchmarkStatusWaiting}},
+			isErr:               true,
+			isUseCaseError:      true,
+		},
+		"UpdateBenchmarkでエラーなのでエラー": {
+			benchmarkID:           uuid.New(),
+			benchLog:              benchLog,
+			score:                 0,
+			startedAt:             time.Now(),
+			FindBenchmarkResult:   &FindBenchmarkResult{benchmark: domain.Benchmark{Status: domain.BenchmarkStatusRunning}},
+			UpdateBenchmarkResult: &UpdateBenchmarkResult{err: assert.AnError},
+			isErr:                 true,
+			err:                   assert.AnError,
+		},
+		"UpdateBenchmarkLogでエラーなのでエラー": {
+			benchmarkID:              uuid.New(),
+			benchLog:                 benchLog,
+			score:                    0,
+			startedAt:                time.Now(),
+			FindBenchmarkResult:      &FindBenchmarkResult{benchmark: domain.Benchmark{Status: domain.BenchmarkStatusRunning}},
+			UpdateBenchmarkResult:    &UpdateBenchmarkResult{},
+			UpdateBenchmarkLogResult: &UpdateBenchmarkLogResult{err: assert.AnError},
+			isErr:                    true,
+			err:                      assert.AnError,
+		},
+		"正しく更新できる": {
+			benchmarkID:              uuid.New(),
+			benchLog:                 benchLog,
+			score:                    0,
+			startedAt:                time.Now(),
+			FindBenchmarkResult:      &FindBenchmarkResult{benchmark: domain.Benchmark{Status: domain.BenchmarkStatusRunning}},
+			UpdateBenchmarkResult:    &UpdateBenchmarkResult{},
+			UpdateBenchmarkLogResult: &UpdateBenchmarkLogResult{},
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+
+			repo := mock.NewMockRepository(ctrl)
+			repo.EXPECT().Transaction(gomock.Any(), gomock.Any()).
+				DoAndReturn(func(ctx context.Context, f func(context.Context) error) error {
+					return f(ctx)
+				})
+			if testCase.FindBenchmarkResult != nil {
+				repo.EXPECT().FindBenchmark(gomock.Any(), testCase.benchmarkID).
+					Return(testCase.FindBenchmarkResult.benchmark, testCase.FindBenchmarkResult.err)
+			}
+			if testCase.UpdateBenchmarkResult != nil {
+				repo.EXPECT().UpdateBenchmark(gomock.Any(), testCase.benchmarkID, domain.Benchmark{
+					ID:        testCase.benchmarkID,
+					Instance:  testCase.FindBenchmarkResult.benchmark.Instance,
+					TeamID:    testCase.FindBenchmarkResult.benchmark.TeamID,
+					UserID:    testCase.FindBenchmarkResult.benchmark.UserID,
+					Status:    domain.BenchmarkStatusRunning,
+					CreatedAt: testCase.FindBenchmarkResult.benchmark.CreatedAt,
+					StartedAt: &testCase.startedAt,
+					Score:     testCase.score,
+				}).
+					Return(testCase.UpdateBenchmarkResult.err)
+			}
+			if testCase.UpdateBenchmarkLogResult != nil {
+				repo.EXPECT().UpdateBenchmarkLog(gomock.Any(), testCase.benchmarkID, testCase.benchLog).
+					Return(testCase.UpdateBenchmarkLogResult.err)
+			}
+
+			uc := usecase.NewBenchmarkUseCase(repo)
+
+			err := uc.SaveBenchmarkProgress(t.Context(), testCase.benchmarkID, testCase.benchLog, testCase.score, testCase.startedAt)
+			if testCase.isErr {
+				if testCase.err != nil {
+					assert.ErrorIs(t, err, testCase.err)
+				} else if testCase.isUseCaseError {
+					assert.True(t, usecase.IsUseCaseError(err))
+				} else {
+					assert.Error(t, err)
+				}
+
 			} else {
 				assert.NoError(t, err)
 			}
