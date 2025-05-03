@@ -65,7 +65,7 @@ jobs:
 
       - name: Init DB
         run: |
-          docker exec ci-db mysql -u root -ppassword portal < ./server/schema.sql
+          docker exec -i $(docker ps -q) mysql -u root -ppass portal < ./server/schema.sql
         shell: bash
 
       - name: Go generate
