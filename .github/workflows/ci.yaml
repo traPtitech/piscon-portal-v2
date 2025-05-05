@@ -5,6 +5,7 @@ on:
     branches:
       - main
   pull_request:
+  workflow_dispatch:
 
 env:
   GOEXPERIMENT: "synctest"
@@ -41,3 +42,54 @@ jobs:
         with:
           go-version-file: go.mod
       - run: go test -cover -race ./...
+
+  go-generate:
+    name: Go Code Generation
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: write
+    services:
+      db:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: portal
+        ports:
+          - 3306:3306
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Init DB
+        run: |
+          docker exec -i $(docker ps -q) mysql -u root -ppassword portal < ./server/schema.sql
+        shell: bash
+
+      - name: Go generate
+        run: go generate ./...
+
+      - name: Commit and push changes
+        run: |
+          if [[ -z $(git status --porcelain) ]]; then
+            exit 0
+          fi
+          git config --local user.name "github-actions"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Go code generation"
+
+          # Handle PR and push events differently
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            # For PRs, push to the PR branch (head ref)
+            git push origin HEAD:${{ github.head_ref }}
+          else
+            # For direct pushes, push to the current branch
+            git push origin HEAD:${{ github.ref_name }}
+          fi
+        shell: bash
