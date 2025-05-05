@@ -18,7 +18,7 @@ require (
 	github.com/ogen-go/ogen v1.12.0
 	github.com/samber/lo v1.50.0
 	github.com/spf13/pflag v1.0.6
-	github.com/stephenafamo/bob v0.33.1
+	github.com/stephenafamo/bob v0.34.2
 	github.com/stretchr/testify v1.10.0
 	github.com/testcontainers/testcontainers-go/modules/mysql v0.37.0
 	go.uber.org/mock v0.5.2
