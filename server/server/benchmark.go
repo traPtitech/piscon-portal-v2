@@ -79,7 +79,35 @@ func (bs *BenchmarkService) SendBenchmarkProgress(stream grpc.ClientStreamingSer
 
 	return nil
 }
-func (bs *BenchmarkService) PostJobFinished(context.Context, *portalv1.PostJobFinishedRequest) (*portalv1.PostJobFinishedResponse, error) {
-	// TODO
-	return nil, nil
+
+func (bs *BenchmarkService) PostJobFinished(ctx context.Context, req *portalv1.PostJobFinishedRequest) (*portalv1.PostJobFinishedResponse, error) {
+	benchID, err := uuid.Parse(req.BenchmarkId)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid benchmark ID")
+	}
+
+	var result domain.BenchmarkResult
+	switch req.Result {
+	case portalv1.BenchmarkResult_BENCHMARK_RESULT_PASSED:
+		result = domain.BenchmarkResultStatusPassed
+	case portalv1.BenchmarkResult_BENCHMARK_RESULT_FAILED:
+		result = domain.BenchmarkResultStatusFailed
+	case portalv1.BenchmarkResult_BENCHMARK_RESULT_ERROR:
+		result = domain.BenchmarkResultStatusError
+	default:
+		return nil, status.Error(codes.InvalidArgument, "invalid benchmark result")
+	}
+
+	err = bs.b.FinalizeBenchmark(ctx, benchID, result, req.FinishedAt.AsTime(), req.RunnerError)
+	if usecase.IsUseCaseError(err) {
+		return nil, status.Error(codes.InvalidArgument, "invalid benchmark status")
+	}
+	if errors.Is(err, usecase.ErrNotFound) {
+		return nil, status.Error(codes.NotFound, "benchmark not found")
+	}
+	if err != nil {
+		return nil, handleError("failed to finalize benchmark", err)
+	}
+
+	return &portalv1.PostJobFinishedResponse{}, nil
 }
