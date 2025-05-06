@@ -124,16 +124,17 @@ func (r *Repository) UpdateBenchmark(ctx context.Context, id uuid.UUID, benchmar
 
 	whereID := models.UpdateWhere.Benchmarks.ID.EQ(id.String())
 	newBenchmark := models.BenchmarkSetter{
-		ID:         omit.From(id.String()),
-		InstanceID: omit.From(benchmark.Instance.ID.String()),
-		TeamID:     omit.From(benchmark.TeamID.String()),
-		UserID:     omit.From(benchmark.UserID.String()),
-		Status:     omit.From(status),
-		CreatedAt:  omit.From(benchmark.CreatedAt),
-		StartedAt:  omitnull.FromPtr(benchmark.StartedAt),
-		FinishedAt: omitnull.FromPtr(benchmark.FinishedAt),
-		Score:      omit.From(benchmark.Score),
-		Result:     omitnull.FromPtr(result),
+		ID:           omit.From(id.String()),
+		InstanceID:   omit.From(benchmark.Instance.ID.String()),
+		TeamID:       omit.From(benchmark.TeamID.String()),
+		UserID:       omit.From(benchmark.UserID.String()),
+		Status:       omit.From(status),
+		CreatedAt:    omit.From(benchmark.CreatedAt),
+		StartedAt:    omitnull.FromPtr(benchmark.StartedAt),
+		FinishedAt:   omitnull.FromPtr(benchmark.FinishedAt),
+		Score:        omit.From(benchmark.Score),
+		Result:       omitnull.FromPtr(result),
+		ErrorMessage: omitnull.FromPtr(benchmark.ErrorMes),
 	}
 
 	_, err = models.Benchmarks.Update(whereID, newBenchmark.UpdateMod()).Exec(ctx, r.executor(ctx))
@@ -237,6 +238,7 @@ func toDomainBenchmark(benchmark *models.Benchmark) (domain.Benchmark, error) {
 		FinishedAt: benchmark.FinishedAt.Ptr(),
 		Score:      benchmark.Score,
 		Result:     result,
+		ErrorMes:   benchmark.ErrorMessage.Ptr(),
 	}, nil
 }
 
