@@ -237,3 +237,107 @@ func TestSendBenchmarkProgress(t *testing.T) {
 	}
 
 }
+
+func TestPostJobFinished(t *testing.T) {
+	t.Parallel()
+
+	ctrl := gomock.NewController(t)
+
+	benchID := uuid.New()
+	req := &portalv1.PostJobFinishedRequest{
+		BenchmarkId: benchID.String(),
+		Result:      portalv1.BenchmarkResult_BENCHMARK_RESULT_PASSED,
+		FinishedAt:  timestamppb.New(time.Now()),
+	}
+
+	testCases := map[string]struct {
+		req                      *portalv1.PostJobFinishedRequest
+		executeFinalizeBenchmark bool
+		FinalizeBenchmarkErr     error
+		isError                  bool
+		err                      error
+		errCode                  codes.Code
+	}{
+		"uuidが無効": {
+			req: &portalv1.PostJobFinishedRequest{
+				BenchmarkId: "invalid id",
+			},
+			isError: true,
+			errCode: codes.InvalidArgument,
+		},
+		"無効なresult": {
+			req: &portalv1.PostJobFinishedRequest{
+				BenchmarkId: benchID.String(),
+				Result:      100,
+			},
+			isError: true,
+			errCode: codes.InvalidArgument,
+		},
+		"FinalizeBenchmarkがUseCaseError": {
+			req:                      req,
+			executeFinalizeBenchmark: true,
+			FinalizeBenchmarkErr:     usecase.NewUseCaseErrorFromMsg("error"),
+			isError:                  true,
+			errCode:                  codes.InvalidArgument,
+		},
+		"FinalizeBenchmarkがErrNotFound": {
+			req:                      req,
+			executeFinalizeBenchmark: true,
+			FinalizeBenchmarkErr:     usecase.ErrNotFound,
+			isError:                  true,
+			errCode:                  codes.NotFound,
+		},
+		"FinalizeBenchmarkがエラー": {
+			req:                      req,
+			executeFinalizeBenchmark: true,
+			FinalizeBenchmarkErr:     assert.AnError,
+			isError:                  true,
+			errCode:                  codes.Internal,
+		},
+		"正常に終了": {
+			req:                      req,
+			executeFinalizeBenchmark: true,
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			u := mock.NewMockUseCase(ctrl)
+			s := server.NewBenchmarkService(u)
+
+			if testCase.executeFinalizeBenchmark {
+				var result domain.BenchmarkResult
+				switch testCase.req.Result {
+				case portalv1.BenchmarkResult_BENCHMARK_RESULT_PASSED:
+					result = domain.BenchmarkResultStatusPassed
+				case portalv1.BenchmarkResult_BENCHMARK_RESULT_FAILED:
+					result = domain.BenchmarkResultStatusFailed
+				case portalv1.BenchmarkResult_BENCHMARK_RESULT_ERROR:
+					result = domain.BenchmarkResultStatusError
+				default:
+					t.Fatalf("invalid benchmark result: %v", testCase.req.Result)
+				}
+				u.EXPECT().
+					FinalizeBenchmark(gomock.Any(), benchID, result, testCase.req.FinishedAt.AsTime(), testCase.req.RunnerError).
+					Return(testCase.FinalizeBenchmarkErr)
+			}
+
+			res, err := s.PostJobFinished(t.Context(), testCase.req)
+			if testCase.isError {
+				assert.Error(t, err)
+				assert.Nil(t, res)
+				if testCase.err != nil {
+					assert.ErrorIs(t, err, testCase.err)
+				}
+				if testCase.errCode != codes.Code(0) {
+					assert.Equal(t, testCase.errCode, status.Code(err))
+				}
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, res)
+			}
+		})
+	}
+}

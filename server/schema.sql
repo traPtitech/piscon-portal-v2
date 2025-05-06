@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS `benchmarks` (
     `finished_at` TIMESTAMP,
     `score` BIGINT NOT NULL DEFAULT 0,
     `result` ENUM('passed', 'failed', 'error'),
+    `error_message` TEXT,
     PRIMARY KEY (`id`),
     FOREIGN KEY (`instance_id`) REFERENCES `instances` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

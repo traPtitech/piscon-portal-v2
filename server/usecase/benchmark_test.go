@@ -11,6 +11,7 @@ import (
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
 	"github.com/traPtitech/piscon-portal-v2/server/repository/mock"
 	"github.com/traPtitech/piscon-portal-v2/server/usecase"
+	"github.com/traPtitech/piscon-portal-v2/server/utils/ptr"
 	"go.uber.org/mock/gomock"
 )
 
@@ -319,6 +320,135 @@ func TestSaveBenchmarkProgress(t *testing.T) {
 					assert.Error(t, err)
 				}
 
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
+func TestFinalizeBenchmark(t *testing.T) {
+	t.Parallel()
+
+	type (
+		FindBenchmarkResult struct {
+			benchmark domain.Benchmark
+			err       error
+		}
+		UpdateBenchmarkResult struct {
+			err error
+		}
+	)
+
+	benchmark := domain.Benchmark{
+		ID:        uuid.New(),
+		Instance:  domain.Instance{ID: uuid.New()},
+		TeamID:    uuid.New(),
+		UserID:    uuid.New(),
+		Status:    domain.BenchmarkStatusRunning,
+		CreatedAt: time.Now(),
+		StartedAt: ptr.Of(time.Now()),
+		Score:     100,
+	}
+
+	testCases := map[string]struct {
+		benchmarkID           uuid.UUID
+		result                domain.BenchmarkResult
+		finishedAt            time.Time
+		errorMes              *string
+		FindBenchmarkResult   *FindBenchmarkResult
+		UpdateBenchmarkResult *UpdateBenchmarkResult
+		isErr                 bool
+		err                   error
+		isUseCaseError        bool
+	}{
+		"FindBenchmarkでErrNotFoundなのでErrNotFound": {
+			benchmarkID:         uuid.New(),
+			result:              domain.BenchmarkResultStatusPassed,
+			finishedAt:          time.Now(),
+			FindBenchmarkResult: &FindBenchmarkResult{err: repository.ErrNotFound},
+			isErr:               true,
+			err:                 usecase.ErrNotFound,
+		},
+		"FindBenchmarkでErrNotFound以外のエラーが返ってきたのでエラー": {
+			benchmarkID:         uuid.New(),
+			result:              domain.BenchmarkResultStatusPassed,
+			finishedAt:          time.Now(),
+			FindBenchmarkResult: &FindBenchmarkResult{err: assert.AnError},
+			isErr:               true,
+			err:                 assert.AnError,
+		},
+		"benchmarkがrunningでないのでUseCaseError": {
+			benchmarkID:         uuid.New(),
+			result:              domain.BenchmarkResultStatusPassed,
+			finishedAt:          time.Now(),
+			FindBenchmarkResult: &FindBenchmarkResult{benchmark: domain.Benchmark{Status: domain.BenchmarkStatusWaiting}},
+			isErr:               true,
+			isUseCaseError:      true,
+		},
+		"UpdateBenchmarkでエラーなのでエラー": {
+			benchmarkID:           uuid.New(),
+			result:                domain.BenchmarkResultStatusPassed,
+			finishedAt:            time.Now(),
+			FindBenchmarkResult:   &FindBenchmarkResult{benchmark: benchmark},
+			UpdateBenchmarkResult: &UpdateBenchmarkResult{err: assert.AnError},
+			isErr:                 true,
+			err:                   assert.AnError,
+		},
+		"正しく更新できる": {
+			benchmarkID:           uuid.New(),
+			result:                domain.BenchmarkResultStatusPassed,
+			finishedAt:            time.Now(),
+			FindBenchmarkResult:   &FindBenchmarkResult{benchmark: benchmark},
+			UpdateBenchmarkResult: &UpdateBenchmarkResult{},
+			isErr:                 false,
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			repo := mock.NewMockRepository(ctrl)
+			repo.EXPECT().Transaction(gomock.Any(), gomock.Any()).
+				DoAndReturn(func(ctx context.Context, f func(context.Context) error) error {
+					return f(ctx)
+				},
+				)
+
+			if testCase.FindBenchmarkResult != nil {
+				repo.EXPECT().FindBenchmark(gomock.Any(), testCase.benchmarkID).
+					Return(testCase.FindBenchmarkResult.benchmark, testCase.FindBenchmarkResult.err)
+			}
+			if testCase.UpdateBenchmarkResult != nil {
+				repo.EXPECT().UpdateBenchmark(gomock.Any(), testCase.benchmarkID, domain.Benchmark{
+					ID:         testCase.benchmarkID,
+					Instance:   testCase.FindBenchmarkResult.benchmark.Instance,
+					TeamID:     testCase.FindBenchmarkResult.benchmark.TeamID,
+					UserID:     testCase.FindBenchmarkResult.benchmark.UserID,
+					Status:     domain.BenchmarkStatusFinished,
+					CreatedAt:  testCase.FindBenchmarkResult.benchmark.CreatedAt,
+					StartedAt:  testCase.FindBenchmarkResult.benchmark.StartedAt,
+					FinishedAt: &testCase.finishedAt,
+					Result:     &testCase.result,
+					ErrorMes:   testCase.errorMes,
+				}).
+					Return(testCase.UpdateBenchmarkResult.err)
+			}
+
+			b := usecase.NewBenchmarkUseCase(repo)
+
+			err := b.FinalizeBenchmark(t.Context(), testCase.benchmarkID, testCase.result, testCase.finishedAt, testCase.errorMes)
+
+			if testCase.isErr {
+				if testCase.err != nil {
+					assert.ErrorIs(t, err, testCase.err)
+				} else if testCase.isUseCaseError {
+					assert.True(t, usecase.IsUseCaseError(err))
+				} else {
+					assert.Error(t, err)
+				}
 			} else {
 				assert.NoError(t, err)
 			}

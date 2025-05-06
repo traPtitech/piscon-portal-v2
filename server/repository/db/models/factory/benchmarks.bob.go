@@ -37,16 +37,17 @@ func (mods BenchmarkModSlice) Apply(n *BenchmarkTemplate) {
 // BenchmarkTemplate is an object representing the database table.
 // all columns are optional and should be set by mods
 type BenchmarkTemplate struct {
-	ID         func() string
-	InstanceID func() string
-	TeamID     func() string
-	UserID     func() string
-	Status     func() BenchmarksStatus
-	CreatedAt  func() time.Time
-	StartedAt  func() null.Val[time.Time]
-	FinishedAt func() null.Val[time.Time]
-	Score      func() int64
-	Result     func() null.Val[BenchmarksResult]
+	ID           func() string
+	InstanceID   func() string
+	TeamID       func() string
+	UserID       func() string
+	Status       func() BenchmarksStatus
+	CreatedAt    func() time.Time
+	StartedAt    func() null.Val[time.Time]
+	FinishedAt   func() null.Val[time.Time]
+	Score        func() int64
+	Result       func() null.Val[BenchmarksResult]
+	ErrorMessage func() null.Val[string]
 
 	r benchmarkR
 	f *Factory
@@ -105,6 +106,9 @@ func (o BenchmarkTemplate) toModel() *models.Benchmark {
 	}
 	if o.Result != nil {
 		m.Result = o.Result()
+	}
+	if o.ErrorMessage != nil {
+		m.ErrorMessage = o.ErrorMessage()
 	}
 
 	return m
@@ -174,6 +178,9 @@ func (o BenchmarkTemplate) BuildSetter() *models.BenchmarkSetter {
 	}
 	if o.Result != nil {
 		m.Result = omitnull.FromNull(o.Result())
+	}
+	if o.ErrorMessage != nil {
+		m.ErrorMessage = omitnull.FromNull(o.ErrorMessage())
 	}
 
 	return m
@@ -382,6 +389,7 @@ func (m benchmarkMods) RandomizeAllColumns(f *faker.Faker) BenchmarkMod {
 		BenchmarkMods.RandomFinishedAt(f),
 		BenchmarkMods.RandomScore(f),
 		BenchmarkMods.RandomResult(f),
+		BenchmarkMods.RandomErrorMessage(f),
 	}
 }
 
@@ -715,6 +723,45 @@ func (m benchmarkMods) RandomResult(f *faker.Faker) BenchmarkMod {
 			}
 
 			return null.From(random_BenchmarksResult(f))
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m benchmarkMods) ErrorMessage(val null.Val[string]) BenchmarkMod {
+	return BenchmarkModFunc(func(o *BenchmarkTemplate) {
+		o.ErrorMessage = func() null.Val[string] { return val }
+	})
+}
+
+// Set the Column from the function
+func (m benchmarkMods) ErrorMessageFunc(f func() null.Val[string]) BenchmarkMod {
+	return BenchmarkModFunc(func(o *BenchmarkTemplate) {
+		o.ErrorMessage = f
+	})
+}
+
+// Clear any values for the column
+func (m benchmarkMods) UnsetErrorMessage() BenchmarkMod {
+	return BenchmarkModFunc(func(o *BenchmarkTemplate) {
+		o.ErrorMessage = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m benchmarkMods) RandomErrorMessage(f *faker.Faker) BenchmarkMod {
+	return BenchmarkModFunc(func(o *BenchmarkTemplate) {
+		o.ErrorMessage = func() null.Val[string] {
+			if f == nil {
+				f = &defaultFaker
+			}
+
+			if f.Bool() {
+				return null.FromPtr[string](nil)
+			}
+
+			return null.From(random_string(f))
 		}
 	})
 }

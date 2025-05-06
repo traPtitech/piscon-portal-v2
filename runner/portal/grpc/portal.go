@@ -63,9 +63,10 @@ func (p *Portal) PostJobFinished(ctx context.Context, jobID string, finishedAt t
 		return fmt.Errorf("unknown result: %v", result)
 	}
 
-	var runnerErrStr string
+	var runnerErrStr *string
 	if runnerErr != nil {
-		runnerErrStr = runnerErr.Error()
+		errStr := runnerErr.Error()
+		runnerErrStr = &errStr
 	}
 
 	_, err := p.cl.PostJobFinished(ctx, &portalv1.PostJobFinishedRequest{

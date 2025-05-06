@@ -123,7 +123,7 @@ func (c *MockUseCaseCreateTeamCall) DoAndReturn(f func(context.Context, usecase.
 }
 
 // FinalizeBenchmark mocks base method.
-func (m *MockUseCase) FinalizeBenchmark(ctx context.Context, benchmarkID uuid.UUID, result domain.BenchmarkResult, finishedAt time.Time, errorMessage string) error {
+func (m *MockUseCase) FinalizeBenchmark(ctx context.Context, benchmarkID uuid.UUID, result domain.BenchmarkResult, finishedAt time.Time, errorMessage *string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FinalizeBenchmark", ctx, benchmarkID, result, finishedAt, errorMessage)
 	ret0, _ := ret[0].(error)
@@ -149,13 +149,13 @@ func (c *MockUseCaseFinalizeBenchmarkCall) Return(arg0 error) *MockUseCaseFinali
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockUseCaseFinalizeBenchmarkCall) Do(f func(context.Context, uuid.UUID, domain.BenchmarkResult, time.Time, string) error) *MockUseCaseFinalizeBenchmarkCall {
+func (c *MockUseCaseFinalizeBenchmarkCall) Do(f func(context.Context, uuid.UUID, domain.BenchmarkResult, time.Time, *string) error) *MockUseCaseFinalizeBenchmarkCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockUseCaseFinalizeBenchmarkCall) DoAndReturn(f func(context.Context, uuid.UUID, domain.BenchmarkResult, time.Time, string) error) *MockUseCaseFinalizeBenchmarkCall {
+func (c *MockUseCaseFinalizeBenchmarkCall) DoAndReturn(f func(context.Context, uuid.UUID, domain.BenchmarkResult, time.Time, *string) error) *MockUseCaseFinalizeBenchmarkCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

@@ -26,6 +26,7 @@ type Benchmark struct {
 	FinishedAt *time.Time
 	Score      int64
 	Result     *BenchmarkResult
+	ErrorMes   *string
 }
 
 func NewBenchmark(instance Instance, user User) (Benchmark, error) {
