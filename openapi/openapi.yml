@@ -1124,6 +1124,7 @@ components:
         createdAt:
           $ref: "#/components/schemas/CreatedAt"
       required:
+        - benchmarkId
         - teamId
         - score
         - createdAt
