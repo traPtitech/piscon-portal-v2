@@ -217,9 +217,10 @@ func TestPostJobFinished(t *testing.T) {
 				default:
 					t.Fatalf("unknown result: %v", testCase.result)
 				}
-				var runnerError string
+				var runnerError *string
 				if testCase.runnerErr != nil {
-					runnerError = testCase.runnerErr.Error()
+					errStr := testCase.runnerErr.Error()
+					runnerError = &errStr
 				}
 				client.EXPECT().PostJobFinished(gomock.Any(), &portalv1.PostJobFinishedRequest{
 					BenchmarkId: testCase.jobID,
