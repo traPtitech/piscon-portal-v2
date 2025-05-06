@@ -36,7 +36,7 @@ message PostJobFinishedRequest {
   string benchmark_id = 1;
   BenchmarkResult result = 2;
   google.protobuf.Timestamp finished_at = 3;
-  string runner_error = 4; // runner内部のエラーメッセージ
+  optional string runner_error = 4; // runner内部のエラーメッセージ
 }
 
 message PostJobFinishedResponse {}
