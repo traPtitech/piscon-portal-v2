@@ -27,16 +27,17 @@ import (
 
 // Benchmark is an object representing the database table.
 type Benchmark struct {
-	ID         string                     `db:"id,pk" `
-	InstanceID string                     `db:"instance_id" `
-	TeamID     string                     `db:"team_id" `
-	UserID     string                     `db:"user_id" `
-	Status     BenchmarksStatus           `db:"status" `
-	CreatedAt  time.Time                  `db:"created_at" `
-	StartedAt  null.Val[time.Time]        `db:"started_at" `
-	FinishedAt null.Val[time.Time]        `db:"finished_at" `
-	Score      int64                      `db:"score" `
-	Result     null.Val[BenchmarksResult] `db:"result" `
+	ID           string                     `db:"id,pk" `
+	InstanceID   string                     `db:"instance_id" `
+	TeamID       string                     `db:"team_id" `
+	UserID       string                     `db:"user_id" `
+	Status       BenchmarksStatus           `db:"status" `
+	CreatedAt    time.Time                  `db:"created_at" `
+	StartedAt    null.Val[time.Time]        `db:"started_at" `
+	FinishedAt   null.Val[time.Time]        `db:"finished_at" `
+	Score        int64                      `db:"score" `
+	Result       null.Val[BenchmarksResult] `db:"result" `
+	ErrorMessage null.Val[string]           `db:"error_message" `
 
 	R benchmarkR `db:"-" `
 }
@@ -58,32 +59,34 @@ type benchmarkR struct {
 }
 
 type benchmarkColumnNames struct {
-	ID         string
-	InstanceID string
-	TeamID     string
-	UserID     string
-	Status     string
-	CreatedAt  string
-	StartedAt  string
-	FinishedAt string
-	Score      string
-	Result     string
+	ID           string
+	InstanceID   string
+	TeamID       string
+	UserID       string
+	Status       string
+	CreatedAt    string
+	StartedAt    string
+	FinishedAt   string
+	Score        string
+	Result       string
+	ErrorMessage string
 }
 
 var BenchmarkColumns = buildBenchmarkColumns("benchmarks")
 
 type benchmarkColumns struct {
-	tableAlias string
-	ID         mysql.Expression
-	InstanceID mysql.Expression
-	TeamID     mysql.Expression
-	UserID     mysql.Expression
-	Status     mysql.Expression
-	CreatedAt  mysql.Expression
-	StartedAt  mysql.Expression
-	FinishedAt mysql.Expression
-	Score      mysql.Expression
-	Result     mysql.Expression
+	tableAlias   string
+	ID           mysql.Expression
+	InstanceID   mysql.Expression
+	TeamID       mysql.Expression
+	UserID       mysql.Expression
+	Status       mysql.Expression
+	CreatedAt    mysql.Expression
+	StartedAt    mysql.Expression
+	FinishedAt   mysql.Expression
+	Score        mysql.Expression
+	Result       mysql.Expression
+	ErrorMessage mysql.Expression
 }
 
 func (c benchmarkColumns) Alias() string {
@@ -96,31 +99,33 @@ func (benchmarkColumns) AliasedAs(alias string) benchmarkColumns {
 
 func buildBenchmarkColumns(alias string) benchmarkColumns {
 	return benchmarkColumns{
-		tableAlias: alias,
-		ID:         mysql.Quote(alias, "id"),
-		InstanceID: mysql.Quote(alias, "instance_id"),
-		TeamID:     mysql.Quote(alias, "team_id"),
-		UserID:     mysql.Quote(alias, "user_id"),
-		Status:     mysql.Quote(alias, "status"),
-		CreatedAt:  mysql.Quote(alias, "created_at"),
-		StartedAt:  mysql.Quote(alias, "started_at"),
-		FinishedAt: mysql.Quote(alias, "finished_at"),
-		Score:      mysql.Quote(alias, "score"),
-		Result:     mysql.Quote(alias, "result"),
+		tableAlias:   alias,
+		ID:           mysql.Quote(alias, "id"),
+		InstanceID:   mysql.Quote(alias, "instance_id"),
+		TeamID:       mysql.Quote(alias, "team_id"),
+		UserID:       mysql.Quote(alias, "user_id"),
+		Status:       mysql.Quote(alias, "status"),
+		CreatedAt:    mysql.Quote(alias, "created_at"),
+		StartedAt:    mysql.Quote(alias, "started_at"),
+		FinishedAt:   mysql.Quote(alias, "finished_at"),
+		Score:        mysql.Quote(alias, "score"),
+		Result:       mysql.Quote(alias, "result"),
+		ErrorMessage: mysql.Quote(alias, "error_message"),
 	}
 }
 
 type benchmarkWhere[Q mysql.Filterable] struct {
-	ID         mysql.WhereMod[Q, string]
-	InstanceID mysql.WhereMod[Q, string]
-	TeamID     mysql.WhereMod[Q, string]
-	UserID     mysql.WhereMod[Q, string]
-	Status     mysql.WhereMod[Q, BenchmarksStatus]
-	CreatedAt  mysql.WhereMod[Q, time.Time]
-	StartedAt  mysql.WhereNullMod[Q, time.Time]
-	FinishedAt mysql.WhereNullMod[Q, time.Time]
-	Score      mysql.WhereMod[Q, int64]
-	Result     mysql.WhereNullMod[Q, BenchmarksResult]
+	ID           mysql.WhereMod[Q, string]
+	InstanceID   mysql.WhereMod[Q, string]
+	TeamID       mysql.WhereMod[Q, string]
+	UserID       mysql.WhereMod[Q, string]
+	Status       mysql.WhereMod[Q, BenchmarksStatus]
+	CreatedAt    mysql.WhereMod[Q, time.Time]
+	StartedAt    mysql.WhereNullMod[Q, time.Time]
+	FinishedAt   mysql.WhereNullMod[Q, time.Time]
+	Score        mysql.WhereMod[Q, int64]
+	Result       mysql.WhereNullMod[Q, BenchmarksResult]
+	ErrorMessage mysql.WhereNullMod[Q, string]
 }
 
 func (benchmarkWhere[Q]) AliasedAs(alias string) benchmarkWhere[Q] {
@@ -129,16 +134,17 @@ func (benchmarkWhere[Q]) AliasedAs(alias string) benchmarkWhere[Q] {
 
 func buildBenchmarkWhere[Q mysql.Filterable](cols benchmarkColumns) benchmarkWhere[Q] {
 	return benchmarkWhere[Q]{
-		ID:         mysql.Where[Q, string](cols.ID),
-		InstanceID: mysql.Where[Q, string](cols.InstanceID),
-		TeamID:     mysql.Where[Q, string](cols.TeamID),
-		UserID:     mysql.Where[Q, string](cols.UserID),
-		Status:     mysql.Where[Q, BenchmarksStatus](cols.Status),
-		CreatedAt:  mysql.Where[Q, time.Time](cols.CreatedAt),
-		StartedAt:  mysql.WhereNull[Q, time.Time](cols.StartedAt),
-		FinishedAt: mysql.WhereNull[Q, time.Time](cols.FinishedAt),
-		Score:      mysql.Where[Q, int64](cols.Score),
-		Result:     mysql.WhereNull[Q, BenchmarksResult](cols.Result),
+		ID:           mysql.Where[Q, string](cols.ID),
+		InstanceID:   mysql.Where[Q, string](cols.InstanceID),
+		TeamID:       mysql.Where[Q, string](cols.TeamID),
+		UserID:       mysql.Where[Q, string](cols.UserID),
+		Status:       mysql.Where[Q, BenchmarksStatus](cols.Status),
+		CreatedAt:    mysql.Where[Q, time.Time](cols.CreatedAt),
+		StartedAt:    mysql.WhereNull[Q, time.Time](cols.StartedAt),
+		FinishedAt:   mysql.WhereNull[Q, time.Time](cols.FinishedAt),
+		Score:        mysql.Where[Q, int64](cols.Score),
+		Result:       mysql.WhereNull[Q, BenchmarksResult](cols.Result),
+		ErrorMessage: mysql.WhereNull[Q, string](cols.ErrorMessage),
 	}
 }
 
@@ -154,20 +160,21 @@ type benchmarkErrors struct {
 // All values are optional, and do not have to be set
 // Generated columns are not included
 type BenchmarkSetter struct {
-	ID         omit.Val[string]               `db:"id,pk" `
-	InstanceID omit.Val[string]               `db:"instance_id" `
-	TeamID     omit.Val[string]               `db:"team_id" `
-	UserID     omit.Val[string]               `db:"user_id" `
-	Status     omit.Val[BenchmarksStatus]     `db:"status" `
-	CreatedAt  omit.Val[time.Time]            `db:"created_at" `
-	StartedAt  omitnull.Val[time.Time]        `db:"started_at" `
-	FinishedAt omitnull.Val[time.Time]        `db:"finished_at" `
-	Score      omit.Val[int64]                `db:"score" `
-	Result     omitnull.Val[BenchmarksResult] `db:"result" `
+	ID           omit.Val[string]               `db:"id,pk" `
+	InstanceID   omit.Val[string]               `db:"instance_id" `
+	TeamID       omit.Val[string]               `db:"team_id" `
+	UserID       omit.Val[string]               `db:"user_id" `
+	Status       omit.Val[BenchmarksStatus]     `db:"status" `
+	CreatedAt    omit.Val[time.Time]            `db:"created_at" `
+	StartedAt    omitnull.Val[time.Time]        `db:"started_at" `
+	FinishedAt   omitnull.Val[time.Time]        `db:"finished_at" `
+	Score        omit.Val[int64]                `db:"score" `
+	Result       omitnull.Val[BenchmarksResult] `db:"result" `
+	ErrorMessage omitnull.Val[string]           `db:"error_message" `
 }
 
 func (s BenchmarkSetter) SetColumns() []string {
-	vals := make([]string, 0, 10)
+	vals := make([]string, 0, 11)
 	if !s.ID.IsUnset() {
 		vals = append(vals, "id")
 	}
@@ -208,6 +215,10 @@ func (s BenchmarkSetter) SetColumns() []string {
 		vals = append(vals, "result")
 	}
 
+	if !s.ErrorMessage.IsUnset() {
+		vals = append(vals, "error_message")
+	}
+
 	return vals
 }
 
@@ -241,6 +252,9 @@ func (s BenchmarkSetter) Overwrite(t *Benchmark) {
 	}
 	if !s.Result.IsUnset() {
 		t.Result, _ = s.Result.GetNull()
+	}
+	if !s.ErrorMessage.IsUnset() {
+		t.ErrorMessage, _ = s.ErrorMessage.GetNull()
 	}
 }
 
@@ -300,6 +314,11 @@ func (s *BenchmarkSetter) Apply(q *dialect.InsertQuery) {
 				return mysql.Raw("DEFAULT").WriteSQL(ctx, w, d, start)
 			}
 			return mysql.Arg(s.Result).WriteSQL(ctx, w, d, start)
+		}), bob.ExpressionFunc(func(ctx context.Context, w io.Writer, d bob.Dialect, start int) ([]any, error) {
+			if s.ErrorMessage.IsUnset() {
+				return mysql.Raw("DEFAULT").WriteSQL(ctx, w, d, start)
+			}
+			return mysql.Arg(s.ErrorMessage).WriteSQL(ctx, w, d, start)
 		}))
 }
 
@@ -308,7 +327,7 @@ func (s BenchmarkSetter) UpdateMod() bob.Mod[*dialect.UpdateQuery] {
 }
 
 func (s BenchmarkSetter) Expressions(prefix ...string) []bob.Expression {
-	exprs := make([]bob.Expression, 0, 10)
+	exprs := make([]bob.Expression, 0, 11)
 
 	if !s.ID.IsUnset() {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
@@ -377,6 +396,13 @@ func (s BenchmarkSetter) Expressions(prefix ...string) []bob.Expression {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
 			mysql.Quote(append(prefix, "result")...),
 			mysql.Arg(s.Result),
+		}})
+	}
+
+	if !s.ErrorMessage.IsUnset() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			mysql.Quote(append(prefix, "error_message")...),
+			mysql.Arg(s.ErrorMessage),
 		}})
 	}
 
