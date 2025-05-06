@@ -30,7 +30,7 @@ type BenchmarkUseCase interface {
 	// FinalizeBenchmark
 	// ベンチマークを終了させ、結果を保存してステータスを更新する。
 	// 該当のベンチマークが存在しなかった場合、usecase.ErrNotFoundを返す。
-	FinalizeBenchmark(ctx context.Context, benchmarkID uuid.UUID, result domain.BenchmarkResult, finishedAt time.Time, errorMessage string) error
+	FinalizeBenchmark(ctx context.Context, benchmarkID uuid.UUID, result domain.BenchmarkResult, finishedAt time.Time, errorMessage *string) error
 
 	GetBenchmarkLog(ctx context.Context, benchmarkID uuid.UUID) (domain.BenchmarkLog, error)
 }
@@ -222,7 +222,41 @@ func (u *benchmarkUseCaseImpl) SaveBenchmarkProgress(ctx context.Context, benchI
 	return nil
 }
 
-func (u *benchmarkUseCaseImpl) FinalizeBenchmark(_ context.Context, _ uuid.UUID, _ domain.BenchmarkResult, _ time.Time, _ string) error {
-	// TODO
+func (u *benchmarkUseCaseImpl) FinalizeBenchmark(ctx context.Context, benchmarkID uuid.UUID, result domain.BenchmarkResult, finishedAt time.Time, errorMes *string) error {
+	err := u.repo.Transaction(ctx, func(ctx context.Context) error {
+		bench, err := u.repo.FindBenchmark(ctx, benchmarkID)
+		if errors.Is(err, repository.ErrNotFound) {
+			return ErrNotFound
+		}
+		if err != nil {
+			return fmt.Errorf("find benchmark: %w", err)
+		}
+
+		if bench.Status != domain.BenchmarkStatusRunning {
+			return NewUseCaseErrorFromMsg("benchmark is not running")
+		}
+
+		err = u.repo.UpdateBenchmark(ctx, benchmarkID, domain.Benchmark{
+			ID:         benchmarkID,
+			Instance:   bench.Instance,
+			TeamID:     bench.TeamID,
+			UserID:     bench.UserID,
+			Status:     domain.BenchmarkStatusFinished, // ステータスを更新
+			CreatedAt:  bench.CreatedAt,
+			StartedAt:  bench.StartedAt,
+			FinishedAt: &finishedAt, // 終了時間を更新
+			Result:     &result,
+			ErrorMes:   errorMes, // エラーメッセージを更新
+		})
+		if err != nil {
+			return fmt.Errorf("update benchmark: %w", err)
+		}
+
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("transaction: %w", err)
+	}
+
 	return nil
 }
