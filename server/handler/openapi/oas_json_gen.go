@@ -25,10 +25,8 @@ func (s *BenchScore) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *BenchScore) encodeFields(e *jx.Encoder) {
 	{
-		if s.BenchmarkId.Set {
-			e.FieldStart("benchmarkId")
-			s.BenchmarkId.Encode(e)
-		}
+		e.FieldStart("benchmarkId")
+		s.BenchmarkId.Encode(e)
 	}
 	{
 		e.FieldStart("teamId")
@@ -61,8 +59,8 @@ func (s *BenchScore) Decode(d *jx.Decoder) error {
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
 		case "benchmarkId":
+			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				s.BenchmarkId.Reset()
 				if err := s.BenchmarkId.Decode(d); err != nil {
 					return err
 				}
@@ -110,7 +108,7 @@ func (s *BenchScore) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00001110,
+		0b00001111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -2692,39 +2690,6 @@ func (s *NotFound) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *NotFound) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes BenchmarkId as json.
-func (o OptBenchmarkId) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	o.Value.Encode(e)
-}
-
-// Decode decodes BenchmarkId from json.
-func (o *OptBenchmarkId) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptBenchmarkId to nil")
-	}
-	o.Set = true
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptBenchmarkId) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptBenchmarkId) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

@@ -27,14 +27,14 @@ func (s *AdminAuth) SetAPIKey(val string) {
 // ベンチマークのスコア.
 // Ref: #/components/schemas/BenchScore
 type BenchScore struct {
-	BenchmarkId OptBenchmarkId `json:"benchmarkId"`
-	TeamId      TeamId         `json:"teamId"`
-	Score       Score          `json:"score"`
-	CreatedAt   CreatedAt      `json:"createdAt"`
+	BenchmarkId BenchmarkId `json:"benchmarkId"`
+	TeamId      TeamId      `json:"teamId"`
+	Score       Score       `json:"score"`
+	CreatedAt   CreatedAt   `json:"createdAt"`
 }
 
 // GetBenchmarkId returns the value of BenchmarkId.
-func (s *BenchScore) GetBenchmarkId() OptBenchmarkId {
+func (s *BenchScore) GetBenchmarkId() BenchmarkId {
 	return s.BenchmarkId
 }
 
@@ -54,7 +54,7 @@ func (s *BenchScore) GetCreatedAt() CreatedAt {
 }
 
 // SetBenchmarkId sets the value of BenchmarkId.
-func (s *BenchScore) SetBenchmarkId(val OptBenchmarkId) {
+func (s *BenchScore) SetBenchmarkId(val BenchmarkId) {
 	s.BenchmarkId = val
 }
 
@@ -1132,52 +1132,6 @@ func (*NotFound) getTeamInstancesRes()       {}
 func (*NotFound) getTeamRes()                {}
 func (*NotFound) patchTeamInstanceRes()      {}
 func (*NotFound) patchTeamRes()              {}
-
-// NewOptBenchmarkId returns new OptBenchmarkId with value set to v.
-func NewOptBenchmarkId(v BenchmarkId) OptBenchmarkId {
-	return OptBenchmarkId{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptBenchmarkId is optional BenchmarkId.
-type OptBenchmarkId struct {
-	Value BenchmarkId
-	Set   bool
-}
-
-// IsSet returns true if OptBenchmarkId was set.
-func (o OptBenchmarkId) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptBenchmarkId) Reset() {
-	var v BenchmarkId
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptBenchmarkId) SetTo(v BenchmarkId) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptBenchmarkId) Get() (v BenchmarkId, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptBenchmarkId) Or(d BenchmarkId) BenchmarkId {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
 
 // NewOptBenchmarkStatus returns new OptBenchmarkStatus with value set to v.
 func NewOptBenchmarkStatus(v BenchmarkStatus) OptBenchmarkStatus {

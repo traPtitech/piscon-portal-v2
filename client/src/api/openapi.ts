@@ -339,7 +339,7 @@ export interface paths {
     }
     /**
      * 全てのスコア取得
-     * @description 全てのベンチマークのスコアをチームごとに取得します (0件の場合も200で空配列が返ります)
+     * @description 全てのベンチマークのスコアをチームごとに取得します (0件の場合も200で空配列が返ります)。スコアは古い順に並んでいます。チームの順番は任意です。
      */
     get: operations['getScores']
     put?: never
@@ -615,7 +615,7 @@ export interface components {
     }
     /** @description ベンチマークのスコア */
     BenchScore: {
-      benchmarkId?: components['schemas']['BenchmarkId']
+      benchmarkId: components['schemas']['BenchmarkId']
       teamId: components['schemas']['TeamId']
       score: components['schemas']['Score']
       createdAt: components['schemas']['CreatedAt']

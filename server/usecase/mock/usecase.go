@@ -316,6 +316,45 @@ func (c *MockUseCaseGetQueuedBenchmarksCall) DoAndReturn(f func(context.Context)
 	return c
 }
 
+// GetScores mocks base method.
+func (m *MockUseCase) GetScores(ctx context.Context) ([]usecase.TeamScores, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetScores", ctx)
+	ret0, _ := ret[0].([]usecase.TeamScores)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetScores indicates an expected call of GetScores.
+func (mr *MockUseCaseMockRecorder) GetScores(ctx any) *MockUseCaseGetScoresCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetScores", reflect.TypeOf((*MockUseCase)(nil).GetScores), ctx)
+	return &MockUseCaseGetScoresCall{Call: call}
+}
+
+// MockUseCaseGetScoresCall wrap *gomock.Call
+type MockUseCaseGetScoresCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockUseCaseGetScoresCall) Return(arg0 []usecase.TeamScores, arg1 error) *MockUseCaseGetScoresCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockUseCaseGetScoresCall) Do(f func(context.Context) ([]usecase.TeamScores, error)) *MockUseCaseGetScoresCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockUseCaseGetScoresCall) DoAndReturn(f func(context.Context) ([]usecase.TeamScores, error)) *MockUseCaseGetScoresCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetTeam mocks base method.
 func (m *MockUseCase) GetTeam(ctx context.Context, id uuid.UUID) (domain.Team, error) {
 	m.ctrl.T.Helper()
