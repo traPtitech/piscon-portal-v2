@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
+	"github.com/traPtitech/piscon-portal-v2/server/services/instance"
 )
 
 type InstanceUseCase interface {
@@ -21,10 +22,10 @@ type InstanceUseCase interface {
 type InstanceUseCaseImpl struct {
 	repo    repository.Repository
 	factory *domain.InstanceFactory
-	manager domain.InstanceManager
+	manager instance.Manager
 }
 
-func NewInstanceUseCase(repo repository.Repository, factory *domain.InstanceFactory, manager domain.InstanceManager) InstanceUseCase {
+func NewInstanceUseCase(repo repository.Repository, factory *domain.InstanceFactory, manager instance.Manager) InstanceUseCase {
 	return &InstanceUseCaseImpl{
 		repo:    repo,
 		factory: factory,

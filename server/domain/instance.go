@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"context"
 	"errors"
 
 	"github.com/google/uuid"
@@ -76,14 +75,4 @@ func (f *InstanceFactory) Create(teamID uuid.UUID, existing []Instance) (Instanc
 		Infra:  InfraInstance{}, // initialize with empty InfraInstance
 	}
 	return instance, nil
-}
-
-// InstanceManager is an interface for managing infrastructure instances.
-type InstanceManager interface {
-	Create(ctx context.Context, name string, sshPubKeys []string) (InfraInstance, error)
-	Get(ctx context.Context, id string) (InfraInstance, error)
-	GetAll(ctx context.Context) ([]InfraInstance, error)
-	Delete(ctx context.Context, instance InfraInstance) (InfraInstance, error)
-	Stop(ctx context.Context, instance InfraInstance) (InfraInstance, error)
-	Start(ctx context.Context, instance InfraInstance) (InfraInstance, error)
 }
