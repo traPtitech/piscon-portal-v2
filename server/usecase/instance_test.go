@@ -7,7 +7,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
-	"github.com/traPtitech/piscon-portal-v2/server/repository/mock"
+	repomock "github.com/traPtitech/piscon-portal-v2/server/repository/mock"
+	instancemock "github.com/traPtitech/piscon-portal-v2/server/services/instance/mock"
 	"github.com/traPtitech/piscon-portal-v2/server/usecase"
 	"go.uber.org/mock/gomock"
 )
@@ -16,8 +17,8 @@ func TestCreateInstance(t *testing.T) {
 	t.Parallel()
 	ctrl := gomock.NewController(t)
 
-	repo := mock.NewMockRepository(ctrl)
-	manager := usecase.NewMockInstanceManager(ctrl)
+	repo := repomock.NewMockRepository(ctrl)
+	manager := instancemock.NewMockManager(ctrl)
 	usecase := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager)
 
 	teamID := uuid.New()
@@ -40,8 +41,8 @@ func TestCreateInstance_tooManyInstances(t *testing.T) {
 	t.Parallel()
 	ctrl := gomock.NewController(t)
 
-	repo := mock.NewMockRepository(ctrl)
-	manager := usecase.NewMockInstanceManager(ctrl)
+	repo := repomock.NewMockRepository(ctrl)
+	manager := instancemock.NewMockManager(ctrl)
 	usecase := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager)
 
 	teamID := uuid.New()
