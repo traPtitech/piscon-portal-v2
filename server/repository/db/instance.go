@@ -12,11 +12,11 @@ import (
 	"github.com/traPtitech/piscon-portal-v2/server/repository/db/models"
 )
 
-func (r *Repository) CreateInstance(ctx context.Context, instance domain.Instance) error {
+func (r *Repository) CreateInstance(_ context.Context, _ domain.Instance) error {
 	return errors.New("not implemented")
 }
 
-func (r *Repository) UpdateInstance(ctx context.Context, instance domain.Instance) error {
+func (r *Repository) UpdateInstance(_ context.Context, _ domain.Instance) error {
 	return errors.New("not implemented")
 }
 
@@ -32,11 +32,11 @@ func (r *Repository) FindInstance(ctx context.Context, id uuid.UUID) (domain.Ins
 	return toDomainInstance(instance)
 }
 
-func (r *Repository) GetTeamInstances(ctx context.Context, teamID uuid.UUID) ([]domain.Instance, error) {
+func (r *Repository) GetTeamInstances(_ context.Context, _ uuid.UUID) ([]domain.Instance, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (r *Repository) GetAllInstances(ctx context.Context) ([]domain.Instance, error) {
+func (r *Repository) GetAllInstances(_ context.Context) ([]domain.Instance, error) {
 	return nil, errors.New("not implemented")
 }
 

@@ -80,18 +80,26 @@ func (i *InstanceUseCaseImpl) CreateInstance(ctx context.Context, teamID uuid.UU
 }
 
 func (i *InstanceUseCaseImpl) GetTeamInstances(ctx context.Context, teamID uuid.UUID) ([]domain.Instance, error) {
-	return i.repo.GetTeamInstances(ctx, teamID)
+	if instances, err := i.repo.GetTeamInstances(ctx, teamID); err != nil {
+		return nil, fmt.Errorf("get team instances: %w", err)
+	} else {
+		return instances, nil
+	}
 }
 
 func (i *InstanceUseCaseImpl) GetAllInstances(ctx context.Context) ([]domain.Instance, error) {
-	return i.repo.GetAllInstances(ctx)
+	if instances, err := i.repo.GetAllInstances(ctx); err != nil {
+		return nil, fmt.Errorf("get all instances: %w", err)
+	} else {
+		return instances, nil
+	}
 }
 
-func (i *InstanceUseCaseImpl) DeleteInstance(ctx context.Context, id uuid.UUID) error {
+func (i *InstanceUseCaseImpl) DeleteInstance(_ context.Context, _ uuid.UUID) error {
 	return errors.New("TODO: not implemented")
 }
 
-func (i *InstanceUseCaseImpl) UpdateInstance(ctx context.Context, id uuid.UUID, op domain.InstanceOperation) error {
+func (i *InstanceUseCaseImpl) UpdateInstance(_ context.Context, _ uuid.UUID, _ domain.InstanceOperation) error {
 	return errors.New("TODO: not implemented")
 }
 
