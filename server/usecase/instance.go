@@ -80,19 +80,19 @@ func (i *InstanceUseCaseImpl) CreateInstance(ctx context.Context, teamID uuid.UU
 }
 
 func (i *InstanceUseCaseImpl) GetTeamInstances(ctx context.Context, teamID uuid.UUID) ([]domain.Instance, error) {
-	if instances, err := i.repo.GetTeamInstances(ctx, teamID); err != nil {
+	instances, err := i.repo.GetTeamInstances(ctx, teamID)
+	if err != nil {
 		return nil, fmt.Errorf("get team instances: %w", err)
-	} else {
-		return instances, nil
 	}
+	return instances, nil
 }
 
 func (i *InstanceUseCaseImpl) GetAllInstances(ctx context.Context) ([]domain.Instance, error) {
-	if instances, err := i.repo.GetAllInstances(ctx); err != nil {
+	instances, err := i.repo.GetAllInstances(ctx)
+	if err != nil {
 		return nil, fmt.Errorf("get all instances: %w", err)
-	} else {
-		return instances, nil
 	}
+	return instances, nil
 }
 
 func (i *InstanceUseCaseImpl) DeleteInstance(_ context.Context, _ uuid.UUID) error {
