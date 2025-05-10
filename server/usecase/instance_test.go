@@ -43,7 +43,7 @@ func TestCreateInstance_tooManyInstances(t *testing.T) {
 
 	repo := repomock.NewMockRepository(ctrl)
 	manager := instancemock.NewMockManager(ctrl)
-	usecase := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager)
+	instanceUseCase := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager)
 
 	teamID := uuid.New()
 
@@ -54,6 +54,6 @@ func TestCreateInstance_tooManyInstances(t *testing.T) {
 		{Index: 1}, {Index: 2}, {Index: 3},
 	}, nil)
 
-	_, err := usecase.CreateInstance(t.Context(), teamID)
-	assert.Error(t, err)
+	_, err := instanceUseCase.CreateInstance(t.Context(), teamID)
+	assert.ErrorIs(t, err, usecase.NewUseCaseError(domain.ErrInstanceLimitExceeded))
 }
