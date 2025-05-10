@@ -12,10 +12,17 @@ import (
 )
 
 type InstanceUseCase interface {
+	// GetTeamInstances returns all instances for the given team. Deleted instances are not included.
 	GetTeamInstances(ctx context.Context, teamID uuid.UUID) ([]domain.Instance, error)
+	// GetAllInstances returns all instances. Deleted instances are not included.
 	GetAllInstances(ctx context.Context) ([]domain.Instance, error)
+	// CreateInstance creates a new instance for the given team. If the team already has the maximum number of instances, [UseCaseError] is returned.
 	CreateInstance(ctx context.Context, teamID uuid.UUID) (domain.Instance, error)
-	UpdateInstance(ctx context.Context, id uuid.UUID, status domain.InstanceOperation) error
+	// UpdateInstance updates the instance with the given ID. If the instance is not found, [ErrNotFound] is returned.
+	// If the given operation is invalid, [UseCaseError] is returned.
+	UpdateInstance(ctx context.Context, id uuid.UUID, op domain.InstanceOperation) error
+	// DeleteInstance deletes the instance with the given ID. If the instance is not found, [ErrNotFound] is returned.
+	// If the instance is already deleted, [UseCaseError] is returned.
 	DeleteInstance(ctx context.Context, id uuid.UUID) error
 }
 
