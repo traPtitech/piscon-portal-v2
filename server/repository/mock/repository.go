@@ -81,6 +81,44 @@ func (c *MockRepositoryCreateBenchmarkCall) DoAndReturn(f func(context.Context, 
 	return c
 }
 
+// CreateInstance mocks base method.
+func (m *MockRepository) CreateInstance(ctx context.Context, instance domain.Instance) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateInstance", ctx, instance)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateInstance indicates an expected call of CreateInstance.
+func (mr *MockRepositoryMockRecorder) CreateInstance(ctx, instance any) *MockRepositoryCreateInstanceCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateInstance", reflect.TypeOf((*MockRepository)(nil).CreateInstance), ctx, instance)
+	return &MockRepositoryCreateInstanceCall{Call: call}
+}
+
+// MockRepositoryCreateInstanceCall wrap *gomock.Call
+type MockRepositoryCreateInstanceCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockRepositoryCreateInstanceCall) Return(arg0 error) *MockRepositoryCreateInstanceCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockRepositoryCreateInstanceCall) Do(f func(context.Context, domain.Instance) error) *MockRepositoryCreateInstanceCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockRepositoryCreateInstanceCall) DoAndReturn(f func(context.Context, domain.Instance) error) *MockRepositoryCreateInstanceCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // CreateSession mocks base method.
 func (m *MockRepository) CreateSession(ctx context.Context, session domain.Session) error {
 	m.ctrl.T.Helper()
@@ -428,6 +466,45 @@ func (c *MockRepositoryFindUserCall) DoAndReturn(f func(context.Context, uuid.UU
 	return c
 }
 
+// GetAllInstances mocks base method.
+func (m *MockRepository) GetAllInstances(ctx context.Context) ([]domain.Instance, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllInstances", ctx)
+	ret0, _ := ret[0].([]domain.Instance)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllInstances indicates an expected call of GetAllInstances.
+func (mr *MockRepositoryMockRecorder) GetAllInstances(ctx any) *MockRepositoryGetAllInstancesCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllInstances", reflect.TypeOf((*MockRepository)(nil).GetAllInstances), ctx)
+	return &MockRepositoryGetAllInstancesCall{Call: call}
+}
+
+// MockRepositoryGetAllInstancesCall wrap *gomock.Call
+type MockRepositoryGetAllInstancesCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockRepositoryGetAllInstancesCall) Return(arg0 []domain.Instance, arg1 error) *MockRepositoryGetAllInstancesCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockRepositoryGetAllInstancesCall) Do(f func(context.Context) ([]domain.Instance, error)) *MockRepositoryGetAllInstancesCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockRepositoryGetAllInstancesCall) DoAndReturn(f func(context.Context) ([]domain.Instance, error)) *MockRepositoryGetAllInstancesCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetBenchmarkLog mocks base method.
 func (m *MockRepository) GetBenchmarkLog(ctx context.Context, benchmarkID uuid.UUID) (domain.BenchmarkLog, error) {
 	m.ctrl.T.Helper()
@@ -580,6 +657,45 @@ func (c *MockRepositoryGetRankingCall) Do(f func(context.Context, repository.Ran
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockRepositoryGetRankingCall) DoAndReturn(f func(context.Context, repository.RankingQuery) ([]domain.Score, error)) *MockRepositoryGetRankingCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetTeamInstances mocks base method.
+func (m *MockRepository) GetTeamInstances(ctx context.Context, teamID uuid.UUID) ([]domain.Instance, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTeamInstances", ctx, teamID)
+	ret0, _ := ret[0].([]domain.Instance)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTeamInstances indicates an expected call of GetTeamInstances.
+func (mr *MockRepositoryMockRecorder) GetTeamInstances(ctx, teamID any) *MockRepositoryGetTeamInstancesCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTeamInstances", reflect.TypeOf((*MockRepository)(nil).GetTeamInstances), ctx, teamID)
+	return &MockRepositoryGetTeamInstancesCall{Call: call}
+}
+
+// MockRepositoryGetTeamInstancesCall wrap *gomock.Call
+type MockRepositoryGetTeamInstancesCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockRepositoryGetTeamInstancesCall) Return(arg0 []domain.Instance, arg1 error) *MockRepositoryGetTeamInstancesCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockRepositoryGetTeamInstancesCall) Do(f func(context.Context, uuid.UUID) ([]domain.Instance, error)) *MockRepositoryGetTeamInstancesCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockRepositoryGetTeamInstancesCall) DoAndReturn(f func(context.Context, uuid.UUID) ([]domain.Instance, error)) *MockRepositoryGetTeamInstancesCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -772,6 +888,44 @@ func (c *MockRepositoryUpdateBenchmarkLogCall) Do(f func(context.Context, uuid.U
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockRepositoryUpdateBenchmarkLogCall) DoAndReturn(f func(context.Context, uuid.UUID, domain.BenchmarkLog) error) *MockRepositoryUpdateBenchmarkLogCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// UpdateInstance mocks base method.
+func (m *MockRepository) UpdateInstance(ctx context.Context, instance domain.Instance) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateInstance", ctx, instance)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateInstance indicates an expected call of UpdateInstance.
+func (mr *MockRepositoryMockRecorder) UpdateInstance(ctx, instance any) *MockRepositoryUpdateInstanceCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateInstance", reflect.TypeOf((*MockRepository)(nil).UpdateInstance), ctx, instance)
+	return &MockRepositoryUpdateInstanceCall{Call: call}
+}
+
+// MockRepositoryUpdateInstanceCall wrap *gomock.Call
+type MockRepositoryUpdateInstanceCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockRepositoryUpdateInstanceCall) Return(arg0 error) *MockRepositoryUpdateInstanceCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockRepositoryUpdateInstanceCall) Do(f func(context.Context, domain.Instance) error) *MockRepositoryUpdateInstanceCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockRepositoryUpdateInstanceCall) DoAndReturn(f func(context.Context, domain.Instance) error) *MockRepositoryUpdateInstanceCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
