@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -41,7 +42,7 @@ func (h *Handler) GetRanking(c echo.Context) error {
 	case string(openapi.RankingOrderByLatest):
 		orderBy = domain.RankingOrderByLatestScore
 	default:
-		return badRequestResponse(c, "invalid order by")
+		return badRequestResponse(c, fmt.Sprintf("invalid order by: %s", queryOrderBy))
 	}
 
 	ranking, err := h.useCase.GetRanking(c.Request().Context(), usecase.RankingQuery{OrderBy: orderBy})
