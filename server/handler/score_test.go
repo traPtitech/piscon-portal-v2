@@ -200,15 +200,15 @@ func TestGetRanking(t *testing.T) {
 			code:              http.StatusOK,
 			res: openapi.GetRankingOKApplicationJSON{
 				{
-					TeamId:    openapi.TeamId(ranking[0].Score.TeamID),
+					TeamId:    openapi.TeamId(ranking[0].TeamID),
 					Score:     openapi.Score(ranking[0].Score.Score),
-					CreatedAt: openapi.CreatedAt(ranking[0].Score.CreatedAt),
+					CreatedAt: openapi.CreatedAt(ranking[0].CreatedAt),
 					Rank:      ranking[0].Rank,
 				},
 				{
-					TeamId:    openapi.TeamId(ranking[1].Score.TeamID),
+					TeamId:    openapi.TeamId(ranking[1].TeamID),
 					Score:     openapi.Score(ranking[1].Score.Score),
-					CreatedAt: openapi.CreatedAt(ranking[1].Score.CreatedAt),
+					CreatedAt: openapi.CreatedAt(ranking[1].CreatedAt),
 					Rank:      ranking[1].Rank,
 				},
 			},

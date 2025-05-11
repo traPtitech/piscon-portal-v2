@@ -217,7 +217,7 @@ func (r *Repository) GetRanking(ctx context.Context, query repository.RankingQue
 		return nil, fmt.Errorf("query ranking: %w", err)
 	}
 	defer func() {
-		if err := rows.Close(); err != nil {
+		if err = rows.Close(); err != nil {
 			err = fmt.Errorf("close rows: %w", err)
 		}
 	}()
