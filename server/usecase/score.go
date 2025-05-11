@@ -15,11 +15,20 @@ type TeamScores struct {
 	Scores []domain.Score
 }
 
+type RankingQuery struct {
+	// OrderBy は、スコアの並び順を指定する。
+	OrderBy domain.RankingOrderBy
+}
+
 type ScoreUseCase interface {
 	// GetScores は、チームごとのベンチマークのスコアを取得する。
 	// それぞれのチームのScoresは古い順に並んでいる。
 	// チームの順番は任意
 	GetScores(ctx context.Context) ([]TeamScores, error)
+	// GetRanking は、ランキングを取得する。
+	// 返り値は1位から順に並んでおり、同じスコアの場合は実行時刻が早い順に並べる。
+	// スコアが無い場合は空配列を返す。また、スコアが無いチームは返り値に含まない。
+	GetRanking(ctx context.Context, query RankingQuery) ([]RankingItem, error)
 }
 
 type scoreUseCaseImpl struct {
@@ -61,4 +70,37 @@ func (u *scoreUseCaseImpl) GetScores(ctx context.Context) ([]TeamScores, error) 
 	}
 
 	return teamScoreList, nil
+}
+
+type RankingItem struct {
+	domain.Score
+	Rank int
+}
+
+func (u *scoreUseCaseImpl) GetRanking(ctx context.Context, query RankingQuery) ([]RankingItem, error) {
+	rankingScore, err := u.repo.GetRanking(ctx, repository.RankingQuery{OrderBy: query.OrderBy})
+	if err != nil {
+		return nil, fmt.Errorf("get ranking: %w", err)
+	}
+
+	rankingItems := make([]RankingItem, 0, len(rankingScore))
+	prevScore := int64(-1)
+	rank := 1
+	sameScoreCount := 0
+
+	for _, score := range rankingScore {
+		if score.Score != prevScore {
+			rank += sameScoreCount
+			sameScoreCount = 1
+			prevScore = score.Score
+		} else {
+			sameScoreCount++
+		}
+		rankingItems = append(rankingItems, RankingItem{
+			Score: score,
+			Rank:  rank,
+		})
+	}
+
+	return rankingItems, nil
 }

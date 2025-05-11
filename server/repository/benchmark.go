@@ -25,9 +25,17 @@ type BenchmarkRepository interface {
 	UpdateBenchmark(ctx context.Context, id uuid.UUID, benchmark domain.Benchmark) error
 	// UpdateBenchmarkLog updates a benchmark log. If not exists, it creates a new one.
 	UpdateBenchmarkLog(ctx context.Context, benchmarkID uuid.UUID, log domain.BenchmarkLog) error
+	// GetRanking returns the ranking of score. It does not contains teams without score.
+	GetRanking(ctx context.Context, query RankingQuery) ([]domain.Score, error)
 }
 
 type BenchmarkQuery struct {
 	TeamID   optional.Of[uuid.UUID]
 	StatusIn optional.Of[[]domain.BenchmarkStatus]
+}
+
+type RankingQuery struct {
+	// OrderBy は、スコアの並び順を指定する。
+	// ここで指定した値が同じ場合は、古いものが優先される。
+	OrderBy domain.RankingOrderBy
 }

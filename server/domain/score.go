@@ -12,3 +12,10 @@ type Score struct {
 	Score       int64
 	CreatedAt   time.Time
 }
+
+type RankingOrderBy int
+
+const (
+	RankingOrderByLatestScore RankingOrderBy = iota
+	RankingOrderByHighestScore
+)
