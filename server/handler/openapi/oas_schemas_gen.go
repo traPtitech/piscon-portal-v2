@@ -1179,52 +1179,6 @@ func (o OptBenchmarkStatus) Or(d BenchmarkStatus) BenchmarkStatus {
 	return d
 }
 
-// NewOptCreatedAt returns new OptCreatedAt with value set to v.
-func NewOptCreatedAt(v CreatedAt) OptCreatedAt {
-	return OptCreatedAt{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptCreatedAt is optional CreatedAt.
-type OptCreatedAt struct {
-	Value CreatedAt
-	Set   bool
-}
-
-// IsSet returns true if OptCreatedAt was set.
-func (o OptCreatedAt) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptCreatedAt) Reset() {
-	var v CreatedAt
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptCreatedAt) SetTo(v CreatedAt) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptCreatedAt) Get() (v CreatedAt, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptCreatedAt) Or(d CreatedAt) CreatedAt {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
 // NewOptMarkdownDocument returns new OptMarkdownDocument with value set to v.
 func NewOptMarkdownDocument(v MarkdownDocument) OptMarkdownDocument {
 	return OptMarkdownDocument{
@@ -1750,10 +1704,10 @@ func (*PutAdminsOK) putAdminsRes() {}
 // Ref: #/components/schemas/RankingItem
 type RankingItem struct {
 	// 順位.
-	Rank      int          `json:"rank"`
-	TeamId    TeamId       `json:"teamId"`
-	Score     Score        `json:"score"`
-	CreatedAt OptCreatedAt `json:"createdAt"`
+	Rank      int       `json:"rank"`
+	TeamId    TeamId    `json:"teamId"`
+	Score     Score     `json:"score"`
+	CreatedAt CreatedAt `json:"createdAt"`
 }
 
 // GetRank returns the value of Rank.
@@ -1772,7 +1726,7 @@ func (s *RankingItem) GetScore() Score {
 }
 
 // GetCreatedAt returns the value of CreatedAt.
-func (s *RankingItem) GetCreatedAt() OptCreatedAt {
+func (s *RankingItem) GetCreatedAt() CreatedAt {
 	return s.CreatedAt
 }
 
@@ -1792,7 +1746,7 @@ func (s *RankingItem) SetScore(val Score) {
 }
 
 // SetCreatedAt sets the value of CreatedAt.
-func (s *RankingItem) SetCreatedAt(val OptCreatedAt) {
+func (s *RankingItem) SetCreatedAt(val CreatedAt) {
 	s.CreatedAt = val
 }
 

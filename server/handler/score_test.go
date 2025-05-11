@@ -150,3 +150,125 @@ func TestGetScores(t *testing.T) {
 		})
 	}
 }
+
+func TestGetRanking(t *testing.T) {
+	t.Parallel()
+
+	ranking := []usecase.RankingItem{
+		{
+			Score: domain.Score{
+				BenchmarkID: uuid.New(),
+				TeamID:      uuid.New(),
+				Score:       1000,
+				CreatedAt:   time.Now(),
+			},
+			Rank: 1,
+		},
+		{
+			Score: domain.Score{
+				BenchmarkID: uuid.New(),
+				TeamID:      uuid.New(),
+				Score:       200,
+				CreatedAt:   time.Now(),
+			},
+			Rank: 2,
+		},
+	}
+
+	testCases := map[string]struct {
+		orderBy           openapi.RankingOrderBy
+		executeGetRanking bool
+		ranking           []usecase.RankingItem
+		GetRankingErr     error
+		code              int
+		res               openapi.GetRankingOKApplicationJSON
+	}{
+		"無効なorderByなので400": {
+			orderBy: openapi.RankingOrderBy("invalid"),
+			code:    http.StatusBadRequest,
+		},
+		"GetRankingがエラーなので500": {
+			orderBy:           openapi.RankingOrderByHighest,
+			executeGetRanking: true,
+			GetRankingErr:     assert.AnError,
+			code:              http.StatusInternalServerError,
+		},
+		"GetRankingが成功したので200": {
+			orderBy:           openapi.RankingOrderByHighest,
+			executeGetRanking: true,
+			ranking:           ranking,
+			code:              http.StatusOK,
+			res: openapi.GetRankingOKApplicationJSON{
+				{
+					TeamId:    openapi.TeamId(ranking[0].Score.TeamID),
+					Score:     openapi.Score(ranking[0].Score.Score),
+					CreatedAt: openapi.CreatedAt(ranking[0].Score.CreatedAt),
+					Rank:      ranking[0].Rank,
+				},
+				{
+					TeamId:    openapi.TeamId(ranking[1].Score.TeamID),
+					Score:     openapi.Score(ranking[1].Score.Score),
+					CreatedAt: openapi.CreatedAt(ranking[1].Score.CreatedAt),
+					Rank:      ranking[1].Rank,
+				},
+			},
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+
+			repoMock := repomock.NewMockRepository(ctrl)
+			useCaseMock := usecasemock.NewMockUseCase(ctrl)
+
+			e := echo.New()
+			h := NewHandler(useCaseMock, repoMock, nil)
+
+			req := httptest.NewRequest(http.MethodGet, "/score/ranking", nil)
+			q := req.URL.Query()
+			q.Add("orderBy", string(testCase.orderBy))
+			req.URL.RawQuery = q.Encode()
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.SetParamNames("orderBy")
+			c.SetParamValues(string(testCase.orderBy))
+
+			if testCase.executeGetRanking {
+				var orderBy domain.RankingOrderBy
+				switch testCase.orderBy {
+				case openapi.RankingOrderByHighest:
+					orderBy = domain.RankingOrderByHighestScore
+				case openapi.RankingOrderByLatest:
+					orderBy = domain.RankingOrderByLatestScore
+				default:
+					t.Fatalf("invalid order by: %s", testCase.orderBy)
+				}
+
+				useCaseMock.EXPECT().
+					GetRanking(gomock.Any(), usecase.RankingQuery{OrderBy: orderBy}).
+					Return(testCase.ranking, testCase.GetRankingErr)
+			}
+
+			_ = h.GetRanking(c)
+
+			assert.Equal(t, testCase.code, rec.Code)
+
+			if rec.Code != http.StatusOK {
+				return
+			}
+			var resBody openapi.GetRankingOKApplicationJSON
+			err := json.Unmarshal(rec.Body.Bytes(), &resBody)
+			assert.NoError(t, err)
+			assert.Equal(t, len(testCase.res), len(resBody))
+			for i, want := range testCase.res {
+				assert.Equal(t, want.TeamId, resBody[i].TeamId)
+				assert.Equal(t, want.Score, resBody[i].Score)
+				assert.WithinDuration(t, time.Time(want.CreatedAt), time.Time(resBody[i].CreatedAt), time.Second)
+				assert.Equal(t, want.Rank, resBody[i].Rank)
+			}
+		})
+	}
+}
