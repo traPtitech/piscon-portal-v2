@@ -127,3 +127,91 @@ func TestGetScores(t *testing.T) {
 		})
 	}
 }
+
+func TestGetRanking(t *testing.T) {
+	t.Parallel()
+
+	score1 := domain.Score{BenchmarkID: uuid.New(), TeamID: uuid.New(), Score: 100, CreatedAt: time.Now()}
+	score2 := domain.Score{BenchmarkID: uuid.New(), TeamID: uuid.New(), Score: 50, CreatedAt: time.Now()}
+	score3 := domain.Score{BenchmarkID: uuid.New(), TeamID: uuid.New(), Score: 100, CreatedAt: time.Now().Add(-time.Hour)}
+
+	testCases := map[string]struct {
+		query         usecase.RankingQuery
+		scores        []domain.Score
+		GetRankingErr error
+		ranking       []usecase.RankingItem
+		wantErr       error
+	}{
+		"GetRankingがエラーなのでエラー": {
+			query:         usecase.RankingQuery{OrderBy: domain.RankingOrderByLatestScore},
+			GetRankingErr: assert.AnError,
+			wantErr:       assert.AnError,
+		},
+		"GetRankingが空のスライスを返す": {
+			query:   usecase.RankingQuery{OrderBy: domain.RankingOrderByLatestScore},
+			scores:  []domain.Score{},
+			ranking: []usecase.RankingItem{},
+		},
+		"scoreが1つだけ": {
+			query:  usecase.RankingQuery{OrderBy: domain.RankingOrderByLatestScore},
+			scores: []domain.Score{score1},
+			ranking: []usecase.RankingItem{
+				{Score: score1, Rank: 1},
+			},
+		},
+		"点数の違うscoreが2つ": {
+			query:  usecase.RankingQuery{OrderBy: domain.RankingOrderByLatestScore},
+			scores: []domain.Score{score1, score2},
+			ranking: []usecase.RankingItem{
+				{Score: score1, Rank: 1},
+				{Score: score2, Rank: 2},
+			},
+		},
+		"点数の同じscoreが2つ": {
+			query:  usecase.RankingQuery{OrderBy: domain.RankingOrderByLatestScore},
+			scores: []domain.Score{score3, score1},
+			ranking: []usecase.RankingItem{
+				{Score: score3, Rank: 1},
+				{Score: score1, Rank: 1},
+			},
+		},
+		"scoreが3つ": {
+			query:  usecase.RankingQuery{OrderBy: domain.RankingOrderByLatestScore},
+			scores: []domain.Score{score3, score1, score2},
+			ranking: []usecase.RankingItem{
+				{Score: score3, Rank: 1},
+				{Score: score1, Rank: 1},
+				{Score: score2, Rank: 3},
+			},
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			r := mock.NewMockRepository(ctrl)
+			r.EXPECT().
+				GetRanking(gomock.Any(), repository.RankingQuery{OrderBy: testCase.query.OrderBy}).
+				Return(testCase.scores, testCase.GetRankingErr)
+
+			s := usecase.NewScoreUseCase(r)
+
+			ranking, err := s.GetRanking(t.Context(), testCase.query)
+
+			if testCase.wantErr != nil {
+				assert.ErrorIs(t, err, testCase.wantErr)
+			} else {
+				assert.NoError(t, err)
+			}
+
+			if err != nil {
+				return
+			}
+
+			assert.Equal(t, testCase.ranking, ranking)
+		})
+	}
+
+}
