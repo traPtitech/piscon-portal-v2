@@ -190,7 +190,7 @@ func (r *Repository) GetRanking(ctx context.Context, query repository.RankingQue
 		return nil, fmt.Errorf("unknown ranking order by: %v", query.OrderBy)
 	}
 
-	q, args, err := mysql.Select(
+	q := mysql.Select(
 		sm.From(
 			models.Benchmarks.Query(
 				sm.Columns(
@@ -207,27 +207,14 @@ func (r *Repository) GetRanking(ctx context.Context, query repository.RankingQue
 		sm.Where(mysql.Quote("rank_team", "rank_in_team").EQ(mysql.Arg(1))),
 		sm.OrderBy(mysql.Quote("rank_team", "score")).Desc(),
 		sm.OrderBy(mysql.Quote("rank_team", "created_at")).Asc(),
-	).Build(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("build ranking query: %w", err)
-	}
-
-	rows, err := r.executor(ctx).QueryContext(ctx, q, args...)
-	if err != nil {
-		return nil, fmt.Errorf("query ranking: %w", err)
-	}
-	defer func() {
-		if err = rows.Close(); err != nil {
-			err = fmt.Errorf("close rows: %w", err)
-		}
-	}()
+	)
 
 	type BenchmarkWithRank struct {
 		models.Benchmark
 		TeamRank int64 `db:"rank_in_team"`
 	}
 
-	benchmarks, err := scan.AllFromRows(ctx, scan.StructMapper[BenchmarkWithRank](), rows)
+	benchmarks, err := bob.All(ctx, r.executor(ctx), q, scan.StructMapper[BenchmarkWithRank]())
 	if err != nil {
 		return nil, fmt.Errorf("scan ranking: %w", err)
 	}
