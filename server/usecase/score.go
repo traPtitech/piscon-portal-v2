@@ -87,13 +87,17 @@ func (u *scoreUseCaseImpl) GetRanking(ctx context.Context, query RankingQuery) (
 	prevScore := int64(-1)
 	rank := 1
 	sameScoreCount := 0
-
+	// スコアが同じ場合は、同じ順位を付ける
+	// その場合、次の順位はスコアの数だけ飛ばす
+	// 例: 100点、100点、90点 の場合、1位は2人、3位は1人
 	for _, score := range rankingScore {
 		if score.Score != prevScore {
+			// スコアが1つ前と違ったら順位の数字を増やす
 			rank += sameScoreCount
 			sameScoreCount = 1
 			prevScore = score.Score
 		} else {
+			// 同じだったら増やさない
 			sameScoreCount++
 		}
 		rankingItems = append(rankingItems, RankingItem{
