@@ -221,20 +221,9 @@ func (r *Repository) GetRanking(ctx context.Context, query repository.RankingQue
 
 	ranking = make([]domain.Score, 0, len(benchmarks))
 	for _, benchmark := range benchmarks {
-		teamID, err := uuid.Parse(benchmark.TeamID)
+		domainScore, err := toDomainScore(benchmark.Benchmark)
 		if err != nil {
-			return nil, fmt.Errorf("parse team id: %w", err)
-		}
-
-		id, err := uuid.Parse(benchmark.ID)
-		if err != nil {
-			return nil, fmt.Errorf("parse benchmark id: %w", err)
-		}
-		domainScore := domain.Score{
-			BenchmarkID: id,
-			TeamID:      teamID,
-			Score:       benchmark.Score,
-			CreatedAt:   benchmark.CreatedAt,
+			return nil, fmt.Errorf("to domain score: %w", err)
 		}
 		ranking = append(ranking, domainScore)
 	}
@@ -346,4 +335,22 @@ func fromDomainBenchmarkResult(result *domain.BenchmarkResult) (*models.Benchmar
 	default:
 		return nil, fmt.Errorf("unknown benchmark result: %v", *result)
 	}
+}
+
+func toDomainScore(benchmark models.Benchmark) (domain.Score, error) {
+	id, err := uuid.Parse(benchmark.ID)
+	if err != nil {
+		return domain.Score{}, fmt.Errorf("parse benchmark id: %w", err)
+	}
+	teamID, err := uuid.Parse(benchmark.TeamID)
+	if err != nil {
+		return domain.Score{}, fmt.Errorf("parse benchmark team id: %w", err)
+	}
+
+	return domain.Score{
+		BenchmarkID: id,
+		TeamID:      teamID,
+		Score:       benchmark.Score,
+		CreatedAt:   benchmark.CreatedAt,
+	}, nil
 }
