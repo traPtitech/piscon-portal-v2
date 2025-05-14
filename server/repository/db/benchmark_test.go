@@ -534,3 +534,115 @@ func TestUpdateBenchmarkLog(t *testing.T) {
 		})
 	}
 }
+
+func TestGetRanking(t *testing.T) {
+	t.Parallel()
+
+	repo, testDB := setupRepository(t)
+
+	team1 := uuid.New()
+	team2 := uuid.New()
+	team3 := uuid.New()
+	score0 := domain.Score{
+		BenchmarkID: uuid.New(),
+		TeamID:      team1,
+		Score:       300,
+		CreatedAt:   time.Now(),
+	}
+	score1 := domain.Score{
+		BenchmarkID: uuid.New(),
+		TeamID:      team1,
+		Score:       200,
+		CreatedAt:   time.Now(),
+	}
+	score2 := domain.Score{
+		BenchmarkID: uuid.New(),
+		TeamID:      team1,
+		Score:       100,
+		CreatedAt:   time.Now().Add(-time.Hour),
+	}
+	score3 := domain.Score{
+		BenchmarkID: uuid.New(),
+		TeamID:      team2,
+		Score:       100,
+		CreatedAt:   time.Now().Add(-time.Hour),
+	}
+	score4 := domain.Score{
+		BenchmarkID: uuid.New(),
+		TeamID:      team2,
+		Score:       150,
+		CreatedAt:   time.Now().Add(-time.Hour * 2),
+	}
+	score5 := domain.Score{
+		BenchmarkID: uuid.New(),
+		TeamID:      team3,
+		Score:       100,
+		CreatedAt:   time.Now().Add(-time.Hour * 2),
+	}
+	score6 := domain.Score{
+		BenchmarkID: uuid.New(),
+		TeamID:      team3,
+		Score:       150,
+		CreatedAt:   time.Now().Add(-time.Hour * 3),
+	}
+	scores := []domain.Score{score1, score2, score3, score4, score5, score6}
+
+	instanceID := uuid.New()
+
+	mustMakeInstance(t, testDB, domain.Instance{
+		ID:    instanceID,
+		Infra: domain.InfraInstance{Status: domain.InstanceStatusRunning},
+	})
+	mustMakeTeam(t, testDB, domain.Team{ID: team1, CreatedAt: time.Now()})
+	mustMakeTeam(t, testDB, domain.Team{ID: team2, CreatedAt: time.Now()})
+	mustMakeTeam(t, testDB, domain.Team{ID: team3, CreatedAt: time.Now()})
+	for _, score := range scores {
+		mustMakeBenchmark(t, testDB, domain.Benchmark{
+			ID:        score.BenchmarkID,
+			TeamID:    score.TeamID,
+			Score:     score.Score,
+			CreatedAt: score.CreatedAt,
+			Status:    domain.BenchmarkStatusFinished,
+			Instance:  domain.Instance{ID: instanceID},
+		})
+	}
+	mustMakeBenchmark(t, testDB, domain.Benchmark{
+		ID:        score0.BenchmarkID,
+		TeamID:    score0.TeamID,
+		Score:     score0.Score,
+		CreatedAt: score0.CreatedAt,
+		Status:    domain.BenchmarkStatusRunning,
+		Instance:  domain.Instance{ID: instanceID},
+	})
+
+	testCases := map[string]struct {
+		query    repository.RankingQuery
+		expected []domain.Score
+	}{
+		"最新のスコア高い順": {
+			query:    repository.RankingQuery{OrderBy: domain.RankingOrderByLatestScore},
+			expected: []domain.Score{score1, score5, score3},
+		},
+		"最高点が高い順": {
+			query:    repository.RankingQuery{OrderBy: domain.RankingOrderByHighestScore},
+			expected: []domain.Score{score1, score6, score4},
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			got, err := repo.GetRanking(t.Context(), testCase.query)
+
+			assert.NoError(t, err)
+
+			assert.Len(t, got, len(testCase.expected))
+			for i, score := range got {
+				assert.Equal(t, testCase.expected[i].BenchmarkID, score.BenchmarkID)
+				assert.Equal(t, testCase.expected[i].TeamID, score.TeamID)
+				assert.Equal(t, testCase.expected[i].Score, score.Score)
+				assert.WithinDuration(t, testCase.expected[i].CreatedAt, score.CreatedAt, time.Second)
+			}
+		})
+	}
+
+}

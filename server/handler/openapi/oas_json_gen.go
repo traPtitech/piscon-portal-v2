@@ -2694,39 +2694,6 @@ func (s *NotFound) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes CreatedAt as json.
-func (o OptCreatedAt) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	o.Value.Encode(e)
-}
-
-// Decode decodes CreatedAt from json.
-func (o *OptCreatedAt) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptCreatedAt to nil")
-	}
-	o.Set = true
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptCreatedAt) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptCreatedAt) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
 // Encode encodes MarkdownDocument as json.
 func (o OptMarkdownDocument) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -3630,10 +3597,8 @@ func (s *RankingItem) encodeFields(e *jx.Encoder) {
 		s.Score.Encode(e)
 	}
 	{
-		if s.CreatedAt.Set {
-			e.FieldStart("createdAt")
-			s.CreatedAt.Encode(e)
-		}
+		e.FieldStart("createdAt")
+		s.CreatedAt.Encode(e)
 	}
 }
 
@@ -3686,8 +3651,8 @@ func (s *RankingItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"score\"")
 			}
 		case "createdAt":
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
-				s.CreatedAt.Reset()
 				if err := s.CreatedAt.Decode(d); err != nil {
 					return err
 				}
@@ -3705,7 +3670,7 @@ func (s *RankingItem) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000111,
+		0b00001111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

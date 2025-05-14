@@ -316,6 +316,45 @@ func (c *MockUseCaseGetQueuedBenchmarksCall) DoAndReturn(f func(context.Context)
 	return c
 }
 
+// GetRanking mocks base method.
+func (m *MockUseCase) GetRanking(ctx context.Context, query usecase.RankingQuery) ([]usecase.RankingItem, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRanking", ctx, query)
+	ret0, _ := ret[0].([]usecase.RankingItem)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRanking indicates an expected call of GetRanking.
+func (mr *MockUseCaseMockRecorder) GetRanking(ctx, query any) *MockUseCaseGetRankingCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRanking", reflect.TypeOf((*MockUseCase)(nil).GetRanking), ctx, query)
+	return &MockUseCaseGetRankingCall{Call: call}
+}
+
+// MockUseCaseGetRankingCall wrap *gomock.Call
+type MockUseCaseGetRankingCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockUseCaseGetRankingCall) Return(arg0 []usecase.RankingItem, arg1 error) *MockUseCaseGetRankingCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockUseCaseGetRankingCall) Do(f func(context.Context, usecase.RankingQuery) ([]usecase.RankingItem, error)) *MockUseCaseGetRankingCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockUseCaseGetRankingCall) DoAndReturn(f func(context.Context, usecase.RankingQuery) ([]usecase.RankingItem, error)) *MockUseCaseGetRankingCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetScores mocks base method.
 func (m *MockUseCase) GetScores(ctx context.Context) ([]usecase.TeamScores, error) {
 	m.ctrl.T.Helper()

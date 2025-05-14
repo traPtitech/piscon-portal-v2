@@ -622,6 +622,45 @@ func (c *MockRepositoryGetOldestQueuedBenchmarkCall) DoAndReturn(f func(context.
 	return c
 }
 
+// GetRanking mocks base method.
+func (m *MockRepository) GetRanking(ctx context.Context, query repository.RankingQuery) ([]domain.Score, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRanking", ctx, query)
+	ret0, _ := ret[0].([]domain.Score)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRanking indicates an expected call of GetRanking.
+func (mr *MockRepositoryMockRecorder) GetRanking(ctx, query any) *MockRepositoryGetRankingCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRanking", reflect.TypeOf((*MockRepository)(nil).GetRanking), ctx, query)
+	return &MockRepositoryGetRankingCall{Call: call}
+}
+
+// MockRepositoryGetRankingCall wrap *gomock.Call
+type MockRepositoryGetRankingCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockRepositoryGetRankingCall) Return(arg0 []domain.Score, arg1 error) *MockRepositoryGetRankingCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockRepositoryGetRankingCall) Do(f func(context.Context, repository.RankingQuery) ([]domain.Score, error)) *MockRepositoryGetRankingCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockRepositoryGetRankingCall) DoAndReturn(f func(context.Context, repository.RankingQuery) ([]domain.Score, error)) *MockRepositoryGetRankingCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetTeamInstances mocks base method.
 func (m *MockRepository) GetTeamInstances(ctx context.Context, teamID uuid.UUID) ([]domain.Instance, error) {
 	m.ctrl.T.Helper()

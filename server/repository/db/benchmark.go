@@ -10,9 +10,13 @@ import (
 	"github.com/aarondl/opt/omitnull"
 	"github.com/google/uuid"
 	"github.com/stephenafamo/bob"
+	"github.com/stephenafamo/bob/dialect/mysql"
 	"github.com/stephenafamo/bob/dialect/mysql/dialect"
+	"github.com/stephenafamo/bob/dialect/mysql/fm"
 	"github.com/stephenafamo/bob/dialect/mysql/im"
 	"github.com/stephenafamo/bob/dialect/mysql/sm"
+	"github.com/stephenafamo/bob/dialect/mysql/wm"
+	"github.com/stephenafamo/scan"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
 	"github.com/traPtitech/piscon-portal-v2/server/repository/db/models"
@@ -175,6 +179,58 @@ func (r *Repository) UpdateBenchmarkLog(ctx context.Context, benchmarkID uuid.UU
 	return nil
 }
 
+func (r *Repository) GetRanking(ctx context.Context, query repository.RankingQuery) (ranking []domain.Score, err error) {
+	var maxColumn string
+	switch query.OrderBy {
+	case domain.RankingOrderByLatestScore:
+		maxColumn = "created_at"
+	case domain.RankingOrderByHighestScore:
+		maxColumn = "score"
+	default:
+		return nil, fmt.Errorf("unknown ranking order by: %v", query.OrderBy)
+	}
+
+	q := mysql.Select(
+		sm.From(
+			models.Benchmarks.Query(
+				sm.Columns(
+					models.Benchmarks.Columns(),
+					mysql.F("RANK")(
+						fm.Over(
+							wm.PartitionBy(models.BenchmarkColumns.TeamID),
+							wm.OrderBy(maxColumn).Desc()),
+					).As("rank_in_team"),
+				),
+				models.SelectWhere.Benchmarks.Status.EQ(models.BenchmarksStatusFinished),
+			),
+		).As("rank_team"),
+		sm.Where(mysql.Quote("rank_team", "rank_in_team").EQ(mysql.Arg(1))),
+		sm.OrderBy(mysql.Quote("rank_team", "score")).Desc(),
+		sm.OrderBy(mysql.Quote("rank_team", "created_at")).Asc(),
+	)
+
+	type BenchmarkWithRank struct {
+		models.Benchmark
+		TeamRank int64 `db:"rank_in_team"`
+	}
+
+	benchmarks, err := bob.All(ctx, r.executor(ctx), q, scan.StructMapper[BenchmarkWithRank]())
+	if err != nil {
+		return nil, fmt.Errorf("scan ranking: %w", err)
+	}
+
+	ranking = make([]domain.Score, 0, len(benchmarks))
+	for _, benchmark := range benchmarks {
+		domainScore, err := toDomainScore(benchmark.Benchmark)
+		if err != nil {
+			return nil, fmt.Errorf("to domain score: %w", err)
+		}
+		ranking = append(ranking, domainScore)
+	}
+
+	return ranking, nil
+}
+
 func fromDomainBenchmarkStatus(status domain.BenchmarkStatus) (models.BenchmarksStatus, error) {
 	switch status {
 	case domain.BenchmarkStatusWaiting:
@@ -279,4 +335,22 @@ func fromDomainBenchmarkResult(result *domain.BenchmarkResult) (*models.Benchmar
 	default:
 		return nil, fmt.Errorf("unknown benchmark result: %v", *result)
 	}
+}
+
+func toDomainScore(benchmark models.Benchmark) (domain.Score, error) {
+	id, err := uuid.Parse(benchmark.ID)
+	if err != nil {
+		return domain.Score{}, fmt.Errorf("parse benchmark id: %w", err)
+	}
+	teamID, err := uuid.Parse(benchmark.TeamID)
+	if err != nil {
+		return domain.Score{}, fmt.Errorf("parse benchmark team id: %w", err)
+	}
+
+	return domain.Score{
+		BenchmarkID: id,
+		TeamID:      teamID,
+		Score:       benchmark.Score,
+		CreatedAt:   benchmark.CreatedAt,
+	}, nil
 }
