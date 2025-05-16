@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
+	"github.com/traPtitech/piscon-portal-v2/server/repository"
 	repomock "github.com/traPtitech/piscon-portal-v2/server/repository/mock"
 	instancemock "github.com/traPtitech/piscon-portal-v2/server/services/instance/mock"
 	"github.com/traPtitech/piscon-portal-v2/server/usecase"
@@ -89,4 +90,22 @@ func TestDeleteInstance(t *testing.T) {
 
 	err := usecase.DeleteInstance(t.Context(), instanceID)
 	assert.NoError(t, err)
+}
+
+func TestDeleteInstance_instanceNotFound(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	repo := repomock.NewMockRepository(ctrl)
+	manager := instancemock.NewMockManager(ctrl)
+	instanceUsecase := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager)
+
+	instanceID := uuid.New()
+
+	repo.EXPECT().Transaction(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, f func(context.Context) error) error {
+		return f(ctx)
+	})
+	repo.EXPECT().FindInstance(gomock.Any(), instanceID).Return(domain.Instance{}, repository.ErrNotFound)
+
+	err := instanceUsecase.DeleteInstance(t.Context(), instanceID)
+	assert.ErrorIs(t, err, usecase.ErrNotFound)
 }
