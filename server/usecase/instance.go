@@ -95,8 +95,29 @@ func (i *InstanceUseCaseImpl) GetAllInstances(ctx context.Context) ([]domain.Ins
 	return instances, nil
 }
 
-func (i *InstanceUseCaseImpl) DeleteInstance(_ context.Context, _ uuid.UUID) error {
-	return errors.New("TODO: not implemented")
+func (i *InstanceUseCaseImpl) DeleteInstance(ctx context.Context, id uuid.UUID) error {
+	err := i.repo.Transaction(ctx, func(ctx context.Context) error {
+		instance, err := i.repo.FindInstance(ctx, id)
+		if errors.Is(err, repository.ErrNotFound) {
+			return ErrNotFound
+		}
+		if err != nil {
+			return fmt.Errorf("find instance: %w", err)
+		}
+
+		deletedInstance, err := i.manager.Delete(ctx, instance.Infra)
+		if err != nil {
+			return fmt.Errorf("delete infra instance: %w", err)
+		}
+		instance.Infra = deletedInstance
+
+		return i.repo.UpdateInstance(ctx, instance)
+	})
+	if err != nil {
+		return fmt.Errorf("transaction: %w", err)
+	}
+
+	return nil
 }
 
 func (i *InstanceUseCaseImpl) UpdateInstance(_ context.Context, _ uuid.UUID, _ domain.InstanceOperation) error {
