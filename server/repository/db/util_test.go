@@ -18,9 +18,10 @@ import (
 func mustMakeUser(t *testing.T, executor bob.Executor, user domain.User) {
 	t.Helper()
 	_, err := models.Users.Insert(&models.UserSetter{
-		ID:     omit.From(user.ID.String()),
-		Name:   omit.From(user.Name),
-		TeamID: lo.Ternary(user.TeamID.Valid, omitnull.From(user.TeamID.UUID.String()), omitnull.Val[string]{}),
+		ID:      omit.From(user.ID.String()),
+		Name:    omit.From(user.Name),
+		TeamID:  lo.Ternary(user.TeamID.Valid, omitnull.From(user.TeamID.UUID.String()), omitnull.Val[string]{}),
+		IsAdmin: omit.From(user.IsAdmin),
 	}).Exec(context.Background(), executor)
 	require.NoError(t, err)
 }
