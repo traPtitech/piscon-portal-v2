@@ -20,7 +20,7 @@ type UserRepository interface {
 	GetUsersByIDs(ctx context.Context, ids []uuid.UUID) ([]domain.User, error)
 	// GetAdmins returns all admin users.
 	GetAdmins(ctx context.Context) ([]domain.User, error)
-	// UpdateAdmins updates admin users.
+	// AddAdmins updates admin users.
 	// If userIDs contains a id that does not exist, it is ignored.
 	// If userIDs is empty, it does nothing.
 	// If userIDs contains a id that is already an admin, it is ignored.
