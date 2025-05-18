@@ -9,6 +9,8 @@ import (
 	"github.com/aarondl/opt/omit"
 	"github.com/google/uuid"
 	"github.com/stephenafamo/bob"
+	"github.com/stephenafamo/bob/dialect/mysql"
+	"github.com/stephenafamo/bob/dialect/mysql/sm"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
 	"github.com/traPtitech/piscon-portal-v2/server/repository/db/models"
@@ -61,6 +63,33 @@ func createUser(ctx context.Context, executor bob.Executor, user domain.User) er
 		return fmt.Errorf("create user: %w", err)
 	}
 	return nil
+}
+
+func (r *Repository) GetUsersByIDs(ctx context.Context, ids []uuid.UUID) ([]domain.User, error) {
+	if len(ids) == 0 {
+		return []domain.User{}, nil
+	}
+
+	anyIDs := make([]any, len(ids))
+	for i, id := range ids {
+		anyIDs[i] = id.String()
+	}
+	users, err := models.Users.Query(
+		sm.Where(models.UserColumns.ID.In(mysql.Arg(anyIDs...))),
+	).All(ctx, r.executor(ctx))
+	if err != nil {
+		return nil, fmt.Errorf("get users by ids: %w", err)
+	}
+	res := make([]domain.User, 0, len(users))
+	for _, user := range users {
+		domainUser, err := toDomainUser(user)
+		if err != nil {
+			return nil, fmt.Errorf("convert user: %w", err)
+		}
+		res = append(res, domainUser)
+	}
+
+	return res, nil
 }
 
 func toDomainUser(user *models.User) (domain.User, error) {
