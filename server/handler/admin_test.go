@@ -79,7 +79,7 @@ func TestPutAdmins(t *testing.T) {
 			require.NoError(t, err)
 			body := bytes.NewBuffer(bodyJSON)
 
-			req := httptest.NewRequest(http.MethodGet, "/admins", body)
+			req := httptest.NewRequest(http.MethodPut, "/admins", body)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 			c.Set(handler.UserIDKey, testCase.loginUserID)
