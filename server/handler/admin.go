@@ -20,11 +20,11 @@ func (h *Handler) PutAdmins(c echo.Context) error {
 
 	ids := make([]uuid.UUID, 0, len(req))
 	for _, id := range req {
-		uuid, err := uuid.Parse(id)
+		userUUID, err := uuid.Parse(id)
 		if err != nil {
 			return badRequestResponse(c, fmt.Sprintf("invalid uuid: '%s'", id))
 		}
-		ids = append(ids, uuid)
+		ids = append(ids, userUUID)
 	}
 
 	loginUserID := getUserIDFromSession(c)
