@@ -183,3 +183,33 @@ func TestAddAdmins(t *testing.T) {
 		assert.True(t, admin.IsAdmin)
 	}
 }
+
+func TestDeleteAdmins(t *testing.T) {
+	t.Parallel()
+
+	repo, db := setupRepository(t)
+
+	adminUser := domain.User{
+		ID:      uuid.New(),
+		Name:    "adminUser",
+		IsAdmin: true,
+	}
+	normalUser := domain.User{
+		ID:   uuid.New(),
+		Name: "normalUser",
+	}
+	mustMakeUser(t, db, adminUser)
+	mustMakeUser(t, db, normalUser)
+
+	err := repo.DeleteAdmins(t.Context(), []uuid.UUID{adminUser.ID, normalUser.ID})
+	assert.NoError(t, err)
+
+	resultAdmins, err := models.Users.Query(
+		sm.Where(models.UserColumns.ID.In(mysql.Arg(adminUser.ID, normalUser.ID))),
+	).All(t.Context(), db)
+	assert.NoError(t, err)
+	assert.Len(t, resultAdmins, 2)
+	for _, admin := range resultAdmins {
+		assert.False(t, admin.IsAdmin)
+	}
+}

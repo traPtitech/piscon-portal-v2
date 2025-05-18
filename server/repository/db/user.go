@@ -133,6 +133,26 @@ func (r *Repository) AddAdmins(ctx context.Context, userIDs []uuid.UUID) error {
 	return nil
 }
 
+func (r *Repository) DeleteAdmins(ctx context.Context, userIDs []uuid.UUID) error {
+	if len(userIDs) == 0 {
+		return nil
+	}
+
+	anyIDs := make([]any, len(userIDs))
+	for i, id := range userIDs {
+		anyIDs[i] = id.String()
+	}
+	_, err := models.Users.Update(
+		um.SetCol(models.ColumnNames.Users.IsAdmin).To(false),
+		um.Where(models.UserColumns.ID.In(mysql.Arg(anyIDs...))),
+	).Exec(ctx, r.executor(ctx))
+	if err != nil {
+		return fmt.Errorf("delete admins: %w", err)
+	}
+
+	return nil
+}
+
 func toDomainUser(user *models.User) (domain.User, error) {
 	userID, err := uuid.Parse(user.ID)
 	if err != nil {
