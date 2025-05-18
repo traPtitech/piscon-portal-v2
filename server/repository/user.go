@@ -21,13 +21,13 @@ type UserRepository interface {
 	// GetAdmins returns all admin users.
 	GetAdmins(ctx context.Context) ([]domain.User, error)
 	// AddAdmins updates admin users.
-	// If userIDs contains a id that does not exist, it is ignored.
+	// If userIDs contains an id that does not exist, it is ignored.
 	// If userIDs is empty, it does nothing.
-	// If userIDs contains a id that is already an admin, it is ignored.
+	// If userIDs contains an id that is already an admin, it is ignored.
 	AddAdmins(ctx context.Context, userIDs []uuid.UUID) error
 	// DeleteAdmins deletes admin users.
-	// If userIDs contains a id that does not exist, it is ignored.
+	// If userIDs contains an id that does not exist, it is ignored.
 	// If userIDs is empty, it does nothing.
-	// If userIDs contains a id that is not an admin, it is ignored.
+	// If userIDs contains an id that is not an admin, it is ignored.
 	DeleteAdmins(ctx context.Context, userIDs []uuid.UUID) error
 }
