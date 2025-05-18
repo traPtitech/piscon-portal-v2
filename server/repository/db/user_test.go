@@ -125,3 +125,28 @@ func TestGetUsersByIDs(t *testing.T) {
 		})
 	}
 }
+
+func TestGetAdmins(t *testing.T) {
+	t.Parallel()
+
+	repo, db := setupRepository(t)
+
+	adminUser := domain.User{
+		ID:      uuid.New(),
+		Name:    "adminUser",
+		IsAdmin: true,
+	}
+	normalUser := domain.User{
+		ID:   uuid.New(),
+		Name: "normalUser",
+	}
+	mustMakeUser(t, db, adminUser)
+	mustMakeUser(t, db, normalUser)
+
+	got, err := repo.GetAdmins(t.Context())
+	assert.NoError(t, err)
+	assert.Len(t, got, 1)
+	assert.Equal(t, adminUser.ID, got[0].ID)
+	assert.Equal(t, adminUser.Name, got[0].Name)
+	assert.Equal(t, adminUser.IsAdmin, got[0].IsAdmin)
+}
