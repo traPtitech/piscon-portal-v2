@@ -4,8 +4,11 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/stephenafamo/bob/dialect/mysql"
+	"github.com/stephenafamo/bob/dialect/mysql/sm"
 	"github.com/stretchr/testify/assert"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
+	"github.com/traPtitech/piscon-portal-v2/server/repository/db/models"
 	"github.com/traPtitech/piscon-portal-v2/server/utils/testutil"
 )
 
@@ -149,4 +152,34 @@ func TestGetAdmins(t *testing.T) {
 	assert.Equal(t, adminUser.ID, got[0].ID)
 	assert.Equal(t, adminUser.Name, got[0].Name)
 	assert.Equal(t, adminUser.IsAdmin, got[0].IsAdmin)
+}
+
+func TestAddAdmins(t *testing.T) {
+	t.Parallel()
+
+	repo, db := setupRepository(t)
+
+	adminUser := domain.User{
+		ID:      uuid.New(),
+		Name:    "adminUser",
+		IsAdmin: true,
+	}
+	normalUser := domain.User{
+		ID:   uuid.New(),
+		Name: "normalUser",
+	}
+	mustMakeUser(t, db, adminUser)
+	mustMakeUser(t, db, normalUser)
+
+	err := repo.AddAdmins(t.Context(), []uuid.UUID{adminUser.ID, normalUser.ID})
+	assert.NoError(t, err)
+
+	resultAdmins, err := models.Users.Query(
+		sm.Where(models.UserColumns.ID.In(mysql.Arg(adminUser.ID, normalUser.ID))),
+	).All(t.Context(), db)
+	assert.NoError(t, err)
+	assert.Len(t, resultAdmins, 2)
+	for _, admin := range resultAdmins {
+		assert.True(t, admin.IsAdmin)
+	}
 }

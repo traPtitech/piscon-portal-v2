@@ -11,6 +11,7 @@ import (
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/mysql"
 	"github.com/stephenafamo/bob/dialect/mysql/sm"
+	"github.com/stephenafamo/bob/dialect/mysql/um"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
 	"github.com/traPtitech/piscon-portal-v2/server/repository/db/models"
@@ -110,6 +111,26 @@ func (r *Repository) GetAdmins(ctx context.Context) ([]domain.User, error) {
 	}
 
 	return res, nil
+}
+
+func (r *Repository) AddAdmins(ctx context.Context, userIDs []uuid.UUID) error {
+	if len(userIDs) == 0 {
+		return nil
+	}
+
+	anyIDs := make([]any, len(userIDs))
+	for i, id := range userIDs {
+		anyIDs[i] = id.String()
+	}
+	_, err := models.Users.Update(
+		um.SetCol(models.ColumnNames.Users.IsAdmin).To(true),
+		um.Where(models.UserColumns.ID.In(mysql.Arg(anyIDs...))),
+	).Exec(ctx, r.executor(ctx))
+	if err != nil {
+		return fmt.Errorf("add admins: %w", err)
+	}
+
+	return nil
 }
 
 func toDomainUser(user *models.User) (domain.User, error) {
