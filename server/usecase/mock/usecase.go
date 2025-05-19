@@ -589,6 +589,44 @@ func (c *MockUseCaseGetUsersCall) DoAndReturn(f func(context.Context) ([]domain.
 	return c
 }
 
+// PutAdmins mocks base method.
+func (m *MockUseCase) PutAdmins(ctx context.Context, loginUserID uuid.UUID, userIDs []uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PutAdmins", ctx, loginUserID, userIDs)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// PutAdmins indicates an expected call of PutAdmins.
+func (mr *MockUseCaseMockRecorder) PutAdmins(ctx, loginUserID, userIDs any) *MockUseCasePutAdminsCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PutAdmins", reflect.TypeOf((*MockUseCase)(nil).PutAdmins), ctx, loginUserID, userIDs)
+	return &MockUseCasePutAdminsCall{Call: call}
+}
+
+// MockUseCasePutAdminsCall wrap *gomock.Call
+type MockUseCasePutAdminsCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockUseCasePutAdminsCall) Return(arg0 error) *MockUseCasePutAdminsCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockUseCasePutAdminsCall) Do(f func(context.Context, uuid.UUID, []uuid.UUID) error) *MockUseCasePutAdminsCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockUseCasePutAdminsCall) DoAndReturn(f func(context.Context, uuid.UUID, []uuid.UUID) error) *MockUseCasePutAdminsCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // SaveBenchmarkProgress mocks base method.
 func (m *MockUseCase) SaveBenchmarkProgress(ctx context.Context, benchmarkID uuid.UUID, benchLog domain.BenchmarkLog, score int64, startedAt time.Time) error {
 	m.ctrl.T.Helper()

@@ -43,6 +43,44 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
 }
 
+// AddAdmins mocks base method.
+func (m *MockRepository) AddAdmins(ctx context.Context, userIDs []uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddAdmins", ctx, userIDs)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddAdmins indicates an expected call of AddAdmins.
+func (mr *MockRepositoryMockRecorder) AddAdmins(ctx, userIDs any) *MockRepositoryAddAdminsCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddAdmins", reflect.TypeOf((*MockRepository)(nil).AddAdmins), ctx, userIDs)
+	return &MockRepositoryAddAdminsCall{Call: call}
+}
+
+// MockRepositoryAddAdminsCall wrap *gomock.Call
+type MockRepositoryAddAdminsCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockRepositoryAddAdminsCall) Return(arg0 error) *MockRepositoryAddAdminsCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockRepositoryAddAdminsCall) Do(f func(context.Context, []uuid.UUID) error) *MockRepositoryAddAdminsCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockRepositoryAddAdminsCall) DoAndReturn(f func(context.Context, []uuid.UUID) error) *MockRepositoryAddAdminsCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // CreateBenchmark mocks base method.
 func (m *MockRepository) CreateBenchmark(ctx context.Context, benchmark domain.Benchmark) error {
 	m.ctrl.T.Helper()
@@ -229,6 +267,44 @@ func (c *MockRepositoryCreateUserCall) Do(f func(context.Context, domain.User) e
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockRepositoryCreateUserCall) DoAndReturn(f func(context.Context, domain.User) error) *MockRepositoryCreateUserCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// DeleteAdmins mocks base method.
+func (m *MockRepository) DeleteAdmins(ctx context.Context, userIDs []uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteAdmins", ctx, userIDs)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteAdmins indicates an expected call of DeleteAdmins.
+func (mr *MockRepositoryMockRecorder) DeleteAdmins(ctx, userIDs any) *MockRepositoryDeleteAdminsCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAdmins", reflect.TypeOf((*MockRepository)(nil).DeleteAdmins), ctx, userIDs)
+	return &MockRepositoryDeleteAdminsCall{Call: call}
+}
+
+// MockRepositoryDeleteAdminsCall wrap *gomock.Call
+type MockRepositoryDeleteAdminsCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockRepositoryDeleteAdminsCall) Return(arg0 error) *MockRepositoryDeleteAdminsCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockRepositoryDeleteAdminsCall) Do(f func(context.Context, []uuid.UUID) error) *MockRepositoryDeleteAdminsCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockRepositoryDeleteAdminsCall) DoAndReturn(f func(context.Context, []uuid.UUID) error) *MockRepositoryDeleteAdminsCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -462,6 +538,45 @@ func (c *MockRepositoryFindUserCall) Do(f func(context.Context, uuid.UUID) (doma
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockRepositoryFindUserCall) DoAndReturn(f func(context.Context, uuid.UUID) (domain.User, error)) *MockRepositoryFindUserCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetAdmins mocks base method.
+func (m *MockRepository) GetAdmins(ctx context.Context) ([]domain.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAdmins", ctx)
+	ret0, _ := ret[0].([]domain.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAdmins indicates an expected call of GetAdmins.
+func (mr *MockRepositoryMockRecorder) GetAdmins(ctx any) *MockRepositoryGetAdminsCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAdmins", reflect.TypeOf((*MockRepository)(nil).GetAdmins), ctx)
+	return &MockRepositoryGetAdminsCall{Call: call}
+}
+
+// MockRepositoryGetAdminsCall wrap *gomock.Call
+type MockRepositoryGetAdminsCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockRepositoryGetAdminsCall) Return(arg0 []domain.User, arg1 error) *MockRepositoryGetAdminsCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockRepositoryGetAdminsCall) Do(f func(context.Context) ([]domain.User, error)) *MockRepositoryGetAdminsCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockRepositoryGetAdminsCall) DoAndReturn(f func(context.Context) ([]domain.User, error)) *MockRepositoryGetAdminsCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -774,6 +889,45 @@ func (c *MockRepositoryGetUsersCall) Do(f func(context.Context) ([]domain.User, 
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockRepositoryGetUsersCall) DoAndReturn(f func(context.Context) ([]domain.User, error)) *MockRepositoryGetUsersCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetUsersByIDs mocks base method.
+func (m *MockRepository) GetUsersByIDs(ctx context.Context, ids []uuid.UUID) ([]domain.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUsersByIDs", ctx, ids)
+	ret0, _ := ret[0].([]domain.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUsersByIDs indicates an expected call of GetUsersByIDs.
+func (mr *MockRepositoryMockRecorder) GetUsersByIDs(ctx, ids any) *MockRepositoryGetUsersByIDsCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUsersByIDs", reflect.TypeOf((*MockRepository)(nil).GetUsersByIDs), ctx, ids)
+	return &MockRepositoryGetUsersByIDsCall{Call: call}
+}
+
+// MockRepositoryGetUsersByIDsCall wrap *gomock.Call
+type MockRepositoryGetUsersByIDsCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockRepositoryGetUsersByIDsCall) Return(arg0 []domain.User, arg1 error) *MockRepositoryGetUsersByIDsCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockRepositoryGetUsersByIDsCall) Do(f func(context.Context, []uuid.UUID) ([]domain.User, error)) *MockRepositoryGetUsersByIDsCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockRepositoryGetUsersByIDsCall) DoAndReturn(f func(context.Context, []uuid.UUID) ([]domain.User, error)) *MockRepositoryGetUsersByIDsCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

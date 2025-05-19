@@ -9,6 +9,9 @@ import (
 	"github.com/aarondl/opt/omit"
 	"github.com/google/uuid"
 	"github.com/stephenafamo/bob"
+	"github.com/stephenafamo/bob/dialect/mysql"
+	"github.com/stephenafamo/bob/dialect/mysql/sm"
+	"github.com/stephenafamo/bob/dialect/mysql/um"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
 	"github.com/traPtitech/piscon-portal-v2/server/repository/db/models"
@@ -60,6 +63,93 @@ func createUser(ctx context.Context, executor bob.Executor, user domain.User) er
 	if err != nil {
 		return fmt.Errorf("create user: %w", err)
 	}
+	return nil
+}
+
+func (r *Repository) GetUsersByIDs(ctx context.Context, ids []uuid.UUID) ([]domain.User, error) {
+	if len(ids) == 0 {
+		return []domain.User{}, nil
+	}
+
+	anyIDs := make([]any, len(ids))
+	for i, id := range ids {
+		anyIDs[i] = id.String()
+	}
+	users, err := models.Users.Query(
+		sm.Where(models.UserColumns.ID.In(mysql.Arg(anyIDs...))),
+	).All(ctx, r.executor(ctx))
+	if err != nil {
+		return nil, fmt.Errorf("get users by ids: %w", err)
+	}
+	res := make([]domain.User, 0, len(users))
+	for _, user := range users {
+		domainUser, err := toDomainUser(user)
+		if err != nil {
+			return nil, fmt.Errorf("convert user: %w", err)
+		}
+		res = append(res, domainUser)
+	}
+
+	return res, nil
+}
+
+func (r *Repository) GetAdmins(ctx context.Context) ([]domain.User, error) {
+	adminUsers, err := models.Users.Query(
+		sm.Where(models.UserColumns.IsAdmin.EQ(mysql.Arg(true))),
+	).All(ctx, r.executor(ctx))
+	if err != nil {
+		return nil, fmt.Errorf("get admins: %w", err)
+	}
+
+	res := make([]domain.User, 0, len(adminUsers))
+	for _, user := range adminUsers {
+		domainUser, err := toDomainUser(user)
+		if err != nil {
+			return nil, fmt.Errorf("convert user: %w", err)
+		}
+		res = append(res, domainUser)
+	}
+
+	return res, nil
+}
+
+func (r *Repository) AddAdmins(ctx context.Context, userIDs []uuid.UUID) error {
+	if len(userIDs) == 0 {
+		return nil
+	}
+
+	anyIDs := make([]any, len(userIDs))
+	for i, id := range userIDs {
+		anyIDs[i] = id.String()
+	}
+	_, err := models.Users.Update(
+		um.SetCol(models.ColumnNames.Users.IsAdmin).To(true),
+		um.Where(models.UserColumns.ID.In(mysql.Arg(anyIDs...))),
+	).Exec(ctx, r.executor(ctx))
+	if err != nil {
+		return fmt.Errorf("add admins: %w", err)
+	}
+
+	return nil
+}
+
+func (r *Repository) DeleteAdmins(ctx context.Context, userIDs []uuid.UUID) error {
+	if len(userIDs) == 0 {
+		return nil
+	}
+
+	anyIDs := make([]any, len(userIDs))
+	for i, id := range userIDs {
+		anyIDs[i] = id.String()
+	}
+	_, err := models.Users.Update(
+		um.SetCol(models.ColumnNames.Users.IsAdmin).To(false),
+		um.Where(models.UserColumns.ID.In(mysql.Arg(anyIDs...))),
+	).Exec(ctx, r.executor(ctx))
+	if err != nil {
+		return fmt.Errorf("delete admins: %w", err)
+	}
+
 	return nil
 }
 
