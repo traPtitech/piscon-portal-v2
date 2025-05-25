@@ -19,7 +19,7 @@ type docUseCaseImpl struct {
 	repo repository.Repository
 }
 
-func NewDocUseCase(repo repository.Repository) DocumentUseCase {
+func NewDocumentUseCase(repo repository.Repository) DocumentUseCase {
 	return &docUseCaseImpl{repo: repo}
 }
 

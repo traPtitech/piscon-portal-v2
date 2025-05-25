@@ -30,6 +30,6 @@ func New(repo repository.Repository) UseCase {
 		BenchmarkUseCase: NewBenchmarkUseCase(repo),
 		ScoreUseCase:     NewScoreUseCase(repo),
 		AdminUseCase:     NewAdminUseCase(repo),
-		DocumentUseCase:  NewDocUseCase(repo),
+		DocumentUseCase:  NewDocumentUseCase(repo),
 	}
 }

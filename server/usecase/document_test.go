@@ -55,7 +55,7 @@ func TestGetDocument(t *testing.T) {
 			t.Parallel()
 
 			mockRepo := mock.NewMockRepository(ctrl)
-			docUseCase := usecase.NewDocUseCase(mockRepo)
+			docUseCase := usecase.NewDocumentUseCase(mockRepo)
 
 			if testCase.GetDocumentResult != nil {
 				mockRepo.EXPECT().GetDocument(gomock.Any()).Return(testCase.GetDocumentResult.doc, testCase.GetDocumentResult.err)
