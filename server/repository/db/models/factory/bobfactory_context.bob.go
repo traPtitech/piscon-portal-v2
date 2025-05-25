@@ -14,6 +14,7 @@ type contextKey string
 var (
 	benchmarkLogCtx = newContextual[*models.BenchmarkLog]("benchmarkLog")
 	benchmarkCtx    = newContextual[*models.Benchmark]("benchmark")
+	documentCtx     = newContextual[*models.Document]("document")
 	instanceCtx     = newContextual[*models.Instance]("instance")
 	sessionCtx      = newContextual[*models.Session]("session")
 	teamCtx         = newContextual[*models.Team]("team")

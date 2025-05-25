@@ -6,6 +6,7 @@ package factory
 type Factory struct {
 	baseBenchmarkLogMods BenchmarkLogModSlice
 	baseBenchmarkMods    BenchmarkModSlice
+	baseDocumentMods     DocumentModSlice
 	baseInstanceMods     InstanceModSlice
 	baseSessionMods      SessionModSlice
 	baseTeamMods         TeamModSlice
@@ -36,6 +37,18 @@ func (f *Factory) NewBenchmark(mods ...BenchmarkMod) *BenchmarkTemplate {
 	}
 
 	BenchmarkModSlice(mods).Apply(o)
+
+	return o
+}
+
+func (f *Factory) NewDocument(mods ...DocumentMod) *DocumentTemplate {
+	o := &DocumentTemplate{f: f}
+
+	if f != nil {
+		f.baseDocumentMods.Apply(o)
+	}
+
+	DocumentModSlice(mods).Apply(o)
 
 	return o
 }
@@ -102,6 +115,14 @@ func (f *Factory) ClearBaseBenchmarkMods() {
 
 func (f *Factory) AddBaseBenchmarkMod(mods ...BenchmarkMod) {
 	f.baseBenchmarkMods = append(f.baseBenchmarkMods, mods...)
+}
+
+func (f *Factory) ClearBaseDocumentMods() {
+	f.baseDocumentMods = nil
+}
+
+func (f *Factory) AddBaseDocumentMod(mods ...DocumentMod) {
+	f.baseDocumentMods = append(f.baseDocumentMods, mods...)
 }
 
 func (f *Factory) ClearBaseInstanceMods() {
