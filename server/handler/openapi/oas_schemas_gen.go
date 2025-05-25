@@ -12,6 +12,7 @@ import (
 
 type AdminAuth struct {
 	APIKey string
+	Roles  []string
 }
 
 // GetAPIKey returns the value of APIKey.
@@ -19,9 +20,19 @@ func (s *AdminAuth) GetAPIKey() string {
 	return s.APIKey
 }
 
+// GetRoles returns the value of Roles.
+func (s *AdminAuth) GetRoles() []string {
+	return s.Roles
+}
+
 // SetAPIKey sets the value of APIKey.
 func (s *AdminAuth) SetAPIKey(val string) {
 	s.APIKey = val
+}
+
+// SetRoles sets the value of Roles.
+func (s *AdminAuth) SetRoles(val []string) {
+	s.Roles = val
 }
 
 // ベンチマークのスコア.
@@ -1990,6 +2001,7 @@ func (*Team) postTeamRes()  {}
 
 type TeamAuth struct {
 	APIKey string
+	Roles  []string
 }
 
 // GetAPIKey returns the value of APIKey.
@@ -1997,9 +2009,19 @@ func (s *TeamAuth) GetAPIKey() string {
 	return s.APIKey
 }
 
+// GetRoles returns the value of Roles.
+func (s *TeamAuth) GetRoles() []string {
+	return s.Roles
+}
+
 // SetAPIKey sets the value of APIKey.
 func (s *TeamAuth) SetAPIKey(val string) {
 	s.APIKey = val
+}
+
+// SetRoles sets the value of Roles.
+func (s *TeamAuth) SetRoles(val []string) {
+	s.Roles = val
 }
 
 type TeamId uuid.UUID
@@ -2126,6 +2148,7 @@ func (*User) getMeRes() {}
 
 type UserAuth struct {
 	APIKey string
+	Roles  []string
 }
 
 // GetAPIKey returns the value of APIKey.
@@ -2133,9 +2156,19 @@ func (s *UserAuth) GetAPIKey() string {
 	return s.APIKey
 }
 
+// GetRoles returns the value of Roles.
+func (s *UserAuth) GetRoles() []string {
+	return s.Roles
+}
+
 // SetAPIKey sets the value of APIKey.
 func (s *UserAuth) SetAPIKey(val string) {
 	s.APIKey = val
+}
+
+// SetRoles sets the value of Roles.
+func (s *UserAuth) SetRoles(val []string) {
+	s.Roles = val
 }
 
 type UserId uuid.UUID
