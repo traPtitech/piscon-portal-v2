@@ -1,0 +1,74 @@
+package db_test
+
+import (
+	"context"
+	"testing"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/stephenafamo/bob/dialect/mysql"
+	"github.com/stephenafamo/bob/dialect/mysql/dm"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/traPtitech/piscon-portal-v2/server/domain"
+	"github.com/traPtitech/piscon-portal-v2/server/repository"
+	"github.com/traPtitech/piscon-portal-v2/server/repository/db/models"
+)
+
+func TestGetDocument(t *testing.T) {
+	t.Parallel()
+
+	repo, db := setupRepository(t)
+
+	doc := domain.Document{
+		ID:        uuid.New(),
+		Body:      "test document body",
+		CreatedAt: time.Now(),
+	}
+
+	testCases := map[string]struct {
+		docsBefore []domain.Document
+		doc        domain.Document
+		err        error
+	}{
+		"正しく取得できる": {
+			docsBefore: []domain.Document{doc},
+			doc:        doc,
+		},
+		"ドキュメントが存在しない": {
+			docsBefore: []domain.Document{},
+			err:        repository.ErrNotFound,
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			for _, d := range testCase.docsBefore {
+				mustMakeDocument(t, db, d)
+				t.Cleanup(func() {
+					_, err := models.Documents.Delete(
+						dm.Where(models.DocumentColumns.ID.EQ(mysql.Arg(d.ID.String()))),
+					).Exec(context.Background(), db)
+					require.NoError(t, err)
+				})
+			}
+
+			doc, err := repo.GetDocument(t.Context())
+
+			if testCase.err != nil {
+				assert.ErrorIs(t, err, testCase.err)
+			} else {
+				assert.NoError(t, err)
+			}
+
+			if err != nil {
+				return
+			}
+
+			assert.Equal(t, doc.ID, testCase.doc.ID)
+			assert.Equal(t, doc.Body, testCase.doc.Body)
+			assert.WithinDuration(t, doc.CreatedAt, testCase.doc.CreatedAt, time.Second)
+		})
+	}
+
+}
