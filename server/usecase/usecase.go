@@ -11,6 +11,7 @@ type UseCase interface {
 	BenchmarkUseCase
 	ScoreUseCase
 	AdminUseCase
+	DocumentUseCase
 }
 
 type useCaseImpl struct {
@@ -19,6 +20,7 @@ type useCaseImpl struct {
 	BenchmarkUseCase
 	ScoreUseCase
 	AdminUseCase
+	DocumentUseCase
 }
 
 func New(repo repository.Repository) UseCase {
@@ -28,5 +30,6 @@ func New(repo repository.Repository) UseCase {
 		BenchmarkUseCase: NewBenchmarkUseCase(repo),
 		ScoreUseCase:     NewScoreUseCase(repo),
 		AdminUseCase:     NewAdminUseCase(repo),
+		DocumentUseCase:  NewDocUseCase(repo),
 	}
 }
