@@ -14,7 +14,7 @@ require (
 	github.com/jaswdr/faker/v2 v2.5.0
 	github.com/jellydator/ttlcache/v3 v3.3.0
 	github.com/labstack/echo-contrib v0.17.4
-	github.com/labstack/echo/v4 v4.13.3
+	github.com/labstack/echo/v4 v4.13.4
 	github.com/ogen-go/ogen v1.13.0
 	github.com/samber/lo v1.50.0
 	github.com/spf13/pflag v1.0.6
