@@ -4,36 +4,27 @@ import (
 	"database/sql"
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/traPtitech/piscon-portal-v2/server/handler"
+	"github.com/traPtitech/piscon-portal-v2/server/repository"
 	dbrepo "github.com/traPtitech/piscon-portal-v2/server/repository/db"
 	"github.com/traPtitech/piscon-portal-v2/server/server"
+	"github.com/traPtitech/piscon-portal-v2/server/services/instance"
+	"github.com/traPtitech/piscon-portal-v2/server/services/instance/aws"
 	"github.com/traPtitech/piscon-portal-v2/server/services/oauth2"
 	"github.com/traPtitech/piscon-portal-v2/server/usecase"
 )
 
 func main() {
-	dbConfig := mysql.Config{
-		User:      os.Getenv("DB_USER"),
-		Passwd:    os.Getenv("DB_PASSWORD"),
-		Net:       "tcp",
-		Addr:      os.Getenv("DB_HOST") + ":" + os.Getenv("DB_PORT"),
-		DBName:    os.Getenv("DB_NAME"),
-		ParseTime: true,
-	}
-	db, err := sql.Open("mysql", dbConfig.FormatDSN())
-	if err != nil {
-		panic(err)
-	}
-
 	e := echo.New()
 
 	e.Use(middleware.Logger())
 
-	config := handler.Config{
+	handlerConfig := handler.Config{
 		RootURL:       os.Getenv("ROOT_URL"),
 		SessionSecret: os.Getenv("SESSION_SECRET"),
 		Oauth2: oauth2.Config{
@@ -44,9 +35,22 @@ func main() {
 			TokenURL:     "https://q.trap.jp/api/v3/oauth2/token",
 		},
 	}
-	repo := dbrepo.NewRepository(db)
-	useCase := usecase.New(repo)
-	handler, err := handler.New(useCase, repo, config)
+
+	useCaseConfig, err := provideUseCaseConfig()
+	if err != nil {
+		log.Fatal("failed to create use case config:", err)
+	}
+	manager, err := provideInstanceManager()
+	if err != nil {
+		log.Fatal("failed to create instance manager:", err)
+	}
+	repo, err := provideRepository()
+	if err != nil {
+		log.Fatal("failed to create repository:", err)
+	}
+
+	useCase := usecase.New(useCaseConfig, repo, manager)
+	handler, err := handler.New(useCase, repo, handlerConfig)
 	if err != nil {
 		panic(err)
 	}
@@ -58,4 +62,46 @@ func main() {
 	}()
 
 	e.Logger.Fatal(e.Start(":8080"))
+}
+
+func provideRepository() (repository.Repository, error) {
+	dbConfig := mysql.Config{
+		User:      os.Getenv("DB_USER"),
+		Passwd:    os.Getenv("DB_PASSWORD"),
+		Net:       "tcp",
+		Addr:      os.Getenv("DB_HOST") + ":" + os.Getenv("DB_PORT"),
+		DBName:    os.Getenv("DB_NAME"),
+		ParseTime: true,
+	}
+	db, err := sql.Open("mysql", dbConfig.FormatDSN())
+	if err != nil {
+		return nil, err
+	}
+	return dbrepo.NewRepository(db), nil
+}
+
+func provideUseCaseConfig() (usecase.Config, error) {
+	instanceLimit := 3 // default instance limit
+	if str := os.Getenv("INSTANCE_LIMIT"); str != "" {
+		var err error
+		instanceLimit, err = strconv.Atoi(str)
+		if err != nil {
+			return usecase.Config{}, err
+		}
+	}
+	return usecase.Config{InstanceLimit: instanceLimit}, nil
+}
+
+func provideInstanceManager() (instance.Manager, error) {
+	awsConfig := aws.Config{
+		ImageID:         os.Getenv("AWS_IMAGE_ID"),
+		InstanceType:    os.Getenv("AWS_INSTANCE_TYPE"),
+		Region:          os.Getenv("AWS_REGION"),
+		AccessKey:       os.Getenv("AWS_ACCESS_KEY"),
+		SecretKey:       os.Getenv("AWS_SECRET_KEY"),
+		SubnetID:        os.Getenv("AWS_SUBNET_ID"),
+		SecurityGroupID: os.Getenv("AWS_SECURITY_GROUP_ID"),
+		KeyPairName:     os.Getenv("AWS_KEY_PAIR_NAME"),
+	}
+	return aws.NewClient(awsConfig)
 }

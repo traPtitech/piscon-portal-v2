@@ -83,6 +83,45 @@ func (c *MockUseCaseCreateBenchmarkCall) DoAndReturn(f func(context.Context, uui
 	return c
 }
 
+// CreateInstance mocks base method.
+func (m *MockUseCase) CreateInstance(ctx context.Context, teamID uuid.UUID) (domain.Instance, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateInstance", ctx, teamID)
+	ret0, _ := ret[0].(domain.Instance)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateInstance indicates an expected call of CreateInstance.
+func (mr *MockUseCaseMockRecorder) CreateInstance(ctx, teamID any) *MockUseCaseCreateInstanceCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateInstance", reflect.TypeOf((*MockUseCase)(nil).CreateInstance), ctx, teamID)
+	return &MockUseCaseCreateInstanceCall{Call: call}
+}
+
+// MockUseCaseCreateInstanceCall wrap *gomock.Call
+type MockUseCaseCreateInstanceCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockUseCaseCreateInstanceCall) Return(arg0 domain.Instance, arg1 error) *MockUseCaseCreateInstanceCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockUseCaseCreateInstanceCall) Do(f func(context.Context, uuid.UUID) (domain.Instance, error)) *MockUseCaseCreateInstanceCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockUseCaseCreateInstanceCall) DoAndReturn(f func(context.Context, uuid.UUID) (domain.Instance, error)) *MockUseCaseCreateInstanceCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // CreateTeam mocks base method.
 func (m *MockUseCase) CreateTeam(ctx context.Context, input usecase.CreateTeamInput) (domain.Team, error) {
 	m.ctrl.T.Helper()
@@ -122,6 +161,44 @@ func (c *MockUseCaseCreateTeamCall) DoAndReturn(f func(context.Context, usecase.
 	return c
 }
 
+// DeleteInstance mocks base method.
+func (m *MockUseCase) DeleteInstance(ctx context.Context, id uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteInstance", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteInstance indicates an expected call of DeleteInstance.
+func (mr *MockUseCaseMockRecorder) DeleteInstance(ctx, id any) *MockUseCaseDeleteInstanceCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteInstance", reflect.TypeOf((*MockUseCase)(nil).DeleteInstance), ctx, id)
+	return &MockUseCaseDeleteInstanceCall{Call: call}
+}
+
+// MockUseCaseDeleteInstanceCall wrap *gomock.Call
+type MockUseCaseDeleteInstanceCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockUseCaseDeleteInstanceCall) Return(arg0 error) *MockUseCaseDeleteInstanceCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockUseCaseDeleteInstanceCall) Do(f func(context.Context, uuid.UUID) error) *MockUseCaseDeleteInstanceCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockUseCaseDeleteInstanceCall) DoAndReturn(f func(context.Context, uuid.UUID) error) *MockUseCaseDeleteInstanceCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // FinalizeBenchmark mocks base method.
 func (m *MockUseCase) FinalizeBenchmark(ctx context.Context, benchmarkID uuid.UUID, result domain.BenchmarkResult, finishedAt time.Time, errorMessage *string) error {
 	m.ctrl.T.Helper()
@@ -156,6 +233,45 @@ func (c *MockUseCaseFinalizeBenchmarkCall) Do(f func(context.Context, uuid.UUID,
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockUseCaseFinalizeBenchmarkCall) DoAndReturn(f func(context.Context, uuid.UUID, domain.BenchmarkResult, time.Time, *string) error) *MockUseCaseFinalizeBenchmarkCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetAllInstances mocks base method.
+func (m *MockUseCase) GetAllInstances(ctx context.Context) ([]domain.Instance, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllInstances", ctx)
+	ret0, _ := ret[0].([]domain.Instance)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllInstances indicates an expected call of GetAllInstances.
+func (mr *MockUseCaseMockRecorder) GetAllInstances(ctx any) *MockUseCaseGetAllInstancesCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllInstances", reflect.TypeOf((*MockUseCase)(nil).GetAllInstances), ctx)
+	return &MockUseCaseGetAllInstancesCall{Call: call}
+}
+
+// MockUseCaseGetAllInstancesCall wrap *gomock.Call
+type MockUseCaseGetAllInstancesCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockUseCaseGetAllInstancesCall) Return(arg0 []domain.Instance, arg1 error) *MockUseCaseGetAllInstancesCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockUseCaseGetAllInstancesCall) Do(f func(context.Context) ([]domain.Instance, error)) *MockUseCaseGetAllInstancesCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockUseCaseGetAllInstancesCall) DoAndReturn(f func(context.Context) ([]domain.Instance, error)) *MockUseCaseGetAllInstancesCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -511,6 +627,45 @@ func (c *MockUseCaseGetTeamBenchmarksCall) DoAndReturn(f func(context.Context, u
 	return c
 }
 
+// GetTeamInstances mocks base method.
+func (m *MockUseCase) GetTeamInstances(ctx context.Context, teamID uuid.UUID) ([]domain.Instance, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTeamInstances", ctx, teamID)
+	ret0, _ := ret[0].([]domain.Instance)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTeamInstances indicates an expected call of GetTeamInstances.
+func (mr *MockUseCaseMockRecorder) GetTeamInstances(ctx, teamID any) *MockUseCaseGetTeamInstancesCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTeamInstances", reflect.TypeOf((*MockUseCase)(nil).GetTeamInstances), ctx, teamID)
+	return &MockUseCaseGetTeamInstancesCall{Call: call}
+}
+
+// MockUseCaseGetTeamInstancesCall wrap *gomock.Call
+type MockUseCaseGetTeamInstancesCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockUseCaseGetTeamInstancesCall) Return(arg0 []domain.Instance, arg1 error) *MockUseCaseGetTeamInstancesCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockUseCaseGetTeamInstancesCall) Do(f func(context.Context, uuid.UUID) ([]domain.Instance, error)) *MockUseCaseGetTeamInstancesCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockUseCaseGetTeamInstancesCall) DoAndReturn(f func(context.Context, uuid.UUID) ([]domain.Instance, error)) *MockUseCaseGetTeamInstancesCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetTeams mocks base method.
 func (m *MockUseCase) GetTeams(ctx context.Context) ([]domain.Team, error) {
 	m.ctrl.T.Helper()
@@ -739,6 +894,44 @@ func (c *MockUseCaseStartBenchmarkCall) Do(f func(context.Context) (domain.Bench
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockUseCaseStartBenchmarkCall) DoAndReturn(f func(context.Context) (domain.Benchmark, error)) *MockUseCaseStartBenchmarkCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// UpdateInstance mocks base method.
+func (m *MockUseCase) UpdateInstance(ctx context.Context, id uuid.UUID, op domain.InstanceOperation) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateInstance", ctx, id, op)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateInstance indicates an expected call of UpdateInstance.
+func (mr *MockUseCaseMockRecorder) UpdateInstance(ctx, id, op any) *MockUseCaseUpdateInstanceCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateInstance", reflect.TypeOf((*MockUseCase)(nil).UpdateInstance), ctx, id, op)
+	return &MockUseCaseUpdateInstanceCall{Call: call}
+}
+
+// MockUseCaseUpdateInstanceCall wrap *gomock.Call
+type MockUseCaseUpdateInstanceCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockUseCaseUpdateInstanceCall) Return(arg0 error) *MockUseCaseUpdateInstanceCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockUseCaseUpdateInstanceCall) Do(f func(context.Context, uuid.UUID, domain.InstanceOperation) error) *MockUseCaseUpdateInstanceCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockUseCaseUpdateInstanceCall) DoAndReturn(f func(context.Context, uuid.UUID, domain.InstanceOperation) error) *MockUseCaseUpdateInstanceCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
