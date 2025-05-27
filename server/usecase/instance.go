@@ -120,8 +120,36 @@ func (i *InstanceUseCaseImpl) DeleteInstance(ctx context.Context, id uuid.UUID) 
 	return nil
 }
 
-func (i *InstanceUseCaseImpl) UpdateInstance(_ context.Context, _ uuid.UUID, _ domain.InstanceOperation) error {
-	return errors.New("TODO: not implemented")
+func (i *InstanceUseCaseImpl) UpdateInstance(ctx context.Context, id uuid.UUID, op domain.InstanceOperation) error {
+	err := i.repo.Transaction(ctx, func(ctx context.Context) error {
+		instance, err := i.repo.FindInstance(ctx, id)
+		if errors.Is(err, repository.ErrNotFound) {
+			return ErrNotFound
+		} else if err != nil {
+			return fmt.Errorf("find instance: %w", err)
+		}
+
+		var updatedInstance domain.InfraInstance
+		switch op {
+		case domain.InstanceOperationStart:
+			updatedInstance, err = i.manager.Start(ctx, instance.Infra)
+		case domain.InstanceOperationStop:
+			updatedInstance, err = i.manager.Stop(ctx, instance.Infra)
+		default:
+			return NewUseCaseErrorFromMsg("invalid operation")
+		}
+		if err != nil {
+			return fmt.Errorf("update infra instance: %w", err)
+		}
+		instance.Infra = updatedInstance
+
+		return i.repo.UpdateInstance(ctx, instance)
+	})
+	if err != nil {
+		return fmt.Errorf("transaction: %w", err)
+	}
+
+	return nil
 }
 
 func instanceName(teamID uuid.UUID, index int) string {
