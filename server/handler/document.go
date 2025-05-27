@@ -22,6 +22,7 @@ func (h *Handler) GetDocument(c echo.Context) error {
 		if err != nil {
 			return internalServerErrorResponse(c, err)
 		}
+		// 初期状態などドキュメントがないのが正しい時もあるので、bodyフィールドが空の状態で200を返す。
 		return c.JSONBlob(http.StatusOK, bodyJSON)
 	}
 	if err != nil {
