@@ -3,6 +3,7 @@ package aws
 import (
 	"bytes"
 	"encoding/base64"
+	"fmt"
 
 	"gopkg.in/yaml.v2"
 )
@@ -23,7 +24,7 @@ func (c *CloudConfig) ConvertToUserData() (string, error) {
 	buf := bytes.NewBufferString("#cloud-config\n")
 	err := yaml.NewEncoder(buf).Encode(c)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("encode cloud config to YAML: %w", err)
 	}
 	return base64.StdEncoding.EncodeToString(buf.Bytes()), nil
 }

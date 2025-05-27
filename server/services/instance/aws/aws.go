@@ -44,7 +44,7 @@ func NewClient(cfg Config) (*Client, error) {
 			},
 		}))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("load AWS config: %w", err)
 	}
 
 	return &Client{
@@ -103,7 +103,7 @@ func (a *Client) Create(ctx context.Context, name string, sshPubKeys []string) (
 
 	res, err := a.client.RunInstances(ctx, instanceInput)
 	if err != nil {
-		return domain.InfraInstance{}, err
+		return domain.InfraInstance{}, fmt.Errorf("run instances: %w", err)
 	}
 
 	instance := res.Instances[0]

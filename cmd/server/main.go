@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -75,7 +76,7 @@ func provideRepository() (repository.Repository, error) {
 	}
 	db, err := sql.Open("mysql", dbConfig.FormatDSN())
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("open database: %w", err)
 	}
 	return dbrepo.NewRepository(db), nil
 }
@@ -86,7 +87,7 @@ func provideUseCaseConfig() (usecase.Config, error) {
 		var err error
 		instanceLimit, err = strconv.Atoi(str)
 		if err != nil {
-			return usecase.Config{}, err
+			return usecase.Config{}, fmt.Errorf("invalid INSTANCE_LIMIT: %w", err)
 		}
 	}
 	return usecase.Config{InstanceLimit: instanceLimit}, nil
@@ -103,5 +104,9 @@ func provideInstanceManager() (instance.Manager, error) {
 		SecurityGroupID: os.Getenv("AWS_SECURITY_GROUP_ID"),
 		KeyPairName:     os.Getenv("AWS_KEY_PAIR_NAME"),
 	}
-	return aws.NewClient(awsConfig)
+	manager, err := aws.NewClient(awsConfig)
+	if err != nil {
+		return nil, fmt.Errorf("create AWS client: %w", err)
+	}
+	return manager, nil
 }
