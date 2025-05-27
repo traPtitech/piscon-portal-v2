@@ -23,6 +23,8 @@ type InfraInstance struct {
 type InstanceStatus string
 
 const (
+	InstanceStatusUnknown  InstanceStatus = "unknown"
+	InstanceStatusPending  InstanceStatus = "pending"
 	InstanceStatusRunning  InstanceStatus = "running"
 	InstanceStatusBuilding InstanceStatus = "building"
 	InstanceStatusStarting InstanceStatus = "starting"
