@@ -16,6 +16,9 @@ var _ bob.HookableType = &BenchmarkLog{}
 // Make sure the type Benchmark runs hooks after queries
 var _ bob.HookableType = &Benchmark{}
 
+// Make sure the type Document runs hooks after queries
+var _ bob.HookableType = &Document{}
+
 // Make sure the type Instance runs hooks after queries
 var _ bob.HookableType = &Instance{}
 

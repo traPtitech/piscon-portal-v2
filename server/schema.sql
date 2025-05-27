@@ -58,3 +58,10 @@ CREATE TABLE IF NOT EXISTS `benchmark_logs` (
     PRIMARY KEY (`benchmark_id`),
     FOREIGN KEY (`benchmark_id`) REFERENCES `benchmarks` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `documents` (
+    `id` VARCHAR(36) NOT NULL,
+    `body` TEXT NOT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

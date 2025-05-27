@@ -16,6 +16,7 @@ type Repository interface {
 	TeamRepository
 	BenchmarkRepository
 	InstanceRepository
+	DocumentRepository
 }
 
 var (

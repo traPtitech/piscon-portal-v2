@@ -82,6 +82,9 @@ func (h *Handler) SetupRoutes(e *echo.Echo) {
 	scores.GET("", h.GetScores)
 	scores.GET("/ranking", h.GetRanking)
 
+	docs := api.Group("/docs", h.AuthMiddleware())
+	docs.GET("", h.GetDocument)
+
 	admins := api.Group("/admins", h.AdminAuthMiddleware())
 	admins.PUT("", h.PutAdmins)
 }

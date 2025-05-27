@@ -698,6 +698,45 @@ func (c *MockRepositoryGetBenchmarksCall) DoAndReturn(f func(context.Context, re
 	return c
 }
 
+// GetDocument mocks base method.
+func (m *MockRepository) GetDocument(ctx context.Context) (domain.Document, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetDocument", ctx)
+	ret0, _ := ret[0].(domain.Document)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetDocument indicates an expected call of GetDocument.
+func (mr *MockRepositoryMockRecorder) GetDocument(ctx any) *MockRepositoryGetDocumentCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDocument", reflect.TypeOf((*MockRepository)(nil).GetDocument), ctx)
+	return &MockRepositoryGetDocumentCall{Call: call}
+}
+
+// MockRepositoryGetDocumentCall wrap *gomock.Call
+type MockRepositoryGetDocumentCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockRepositoryGetDocumentCall) Return(arg0 domain.Document, arg1 error) *MockRepositoryGetDocumentCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockRepositoryGetDocumentCall) Do(f func(context.Context) (domain.Document, error)) *MockRepositoryGetDocumentCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockRepositoryGetDocumentCall) DoAndReturn(f func(context.Context) (domain.Document, error)) *MockRepositoryGetDocumentCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetOldestQueuedBenchmark mocks base method.
 func (m *MockRepository) GetOldestQueuedBenchmark(ctx context.Context) (domain.Benchmark, error) {
 	m.ctrl.T.Helper()

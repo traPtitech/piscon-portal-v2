@@ -17,6 +17,7 @@ import (
 var TableNames = struct {
 	BenchmarkLogs string
 	Benchmarks    string
+	Documents     string
 	Instances     string
 	Sessions      string
 	Teams         string
@@ -24,6 +25,7 @@ var TableNames = struct {
 }{
 	BenchmarkLogs: "benchmark_logs",
 	Benchmarks:    "benchmarks",
+	Documents:     "documents",
 	Instances:     "instances",
 	Sessions:      "sessions",
 	Teams:         "teams",
@@ -33,6 +35,7 @@ var TableNames = struct {
 var ColumnNames = struct {
 	BenchmarkLogs benchmarkLogColumnNames
 	Benchmarks    benchmarkColumnNames
+	Documents     documentColumnNames
 	Instances     instanceColumnNames
 	Sessions      sessionColumnNames
 	Teams         teamColumnNames
@@ -55,6 +58,11 @@ var ColumnNames = struct {
 		Score:        "score",
 		Result:       "result",
 		ErrorMessage: "error_message",
+	},
+	Documents: documentColumnNames{
+		ID:        "id",
+		Body:      "body",
+		CreatedAt: "created_at",
 	},
 	Instances: instanceColumnNames{
 		ID:             "id",
@@ -93,6 +101,7 @@ var (
 func Where[Q mysql.Filterable]() struct {
 	BenchmarkLogs benchmarkLogWhere[Q]
 	Benchmarks    benchmarkWhere[Q]
+	Documents     documentWhere[Q]
 	Instances     instanceWhere[Q]
 	Sessions      sessionWhere[Q]
 	Teams         teamWhere[Q]
@@ -101,6 +110,7 @@ func Where[Q mysql.Filterable]() struct {
 	return struct {
 		BenchmarkLogs benchmarkLogWhere[Q]
 		Benchmarks    benchmarkWhere[Q]
+		Documents     documentWhere[Q]
 		Instances     instanceWhere[Q]
 		Sessions      sessionWhere[Q]
 		Teams         teamWhere[Q]
@@ -108,6 +118,7 @@ func Where[Q mysql.Filterable]() struct {
 	}{
 		BenchmarkLogs: buildBenchmarkLogWhere[Q](BenchmarkLogColumns),
 		Benchmarks:    buildBenchmarkWhere[Q](BenchmarkColumns),
+		Documents:     buildDocumentWhere[Q](DocumentColumns),
 		Instances:     buildInstanceWhere[Q](InstanceColumns),
 		Sessions:      buildSessionWhere[Q](SessionColumns),
 		Teams:         buildTeamWhere[Q](TeamColumns),

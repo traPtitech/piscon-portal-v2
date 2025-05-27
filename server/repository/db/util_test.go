@@ -81,3 +81,13 @@ func mustMakeBenchmarkLog(t *testing.T, executor bob.Executor, benchmarkID uuid.
 	}).Exec(context.Background(), executor)
 	require.NoError(t, err)
 }
+
+func mustMakeDocument(t *testing.T, executor bob.Executor, document domain.Document) {
+	t.Helper()
+	_, err := models.Documents.Insert(&models.DocumentSetter{
+		ID:        omit.From(document.ID.String()),
+		Body:      omit.From(document.Body),
+		CreatedAt: omit.From(document.CreatedAt),
+	}).Exec(t.Context(), executor)
+	require.NoError(t, err)
+}
