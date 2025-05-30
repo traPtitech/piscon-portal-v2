@@ -16,7 +16,7 @@ import (
 )
 
 func (r *Repository) FindTeam(ctx context.Context, id uuid.UUID) (domain.Team, error) {
-	team, err := models.Teams.Query(models.SelectWhere.Teams.ID.EQ(id.String()), models.ThenLoadTeamUsers()).One(ctx, r.executor(ctx))
+	team, err := models.Teams.Query(models.SelectWhere.Teams.ID.EQ(id.String()), models.SelectThenLoad.Team.Users()).One(ctx, r.executor(ctx))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Team{}, repository.ErrNotFound
@@ -27,7 +27,7 @@ func (r *Repository) FindTeam(ctx context.Context, id uuid.UUID) (domain.Team, e
 }
 
 func (r *Repository) GetTeams(ctx context.Context) ([]domain.Team, error) {
-	teams, err := models.Teams.Query(models.ThenLoadTeamUsers()).All(ctx, r.executor(ctx))
+	teams, err := models.Teams.Query(models.SelectThenLoad.Team.Users()).All(ctx, r.executor(ctx))
 	if err != nil {
 		return nil, fmt.Errorf("get teams: %w", err)
 	}

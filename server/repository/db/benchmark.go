@@ -26,7 +26,7 @@ import (
 func (r *Repository) FindBenchmark(ctx context.Context, id uuid.UUID) (domain.Benchmark, error) {
 	benchmark, err := models.Benchmarks.
 		Query(
-			models.PreloadBenchmarkInstance(),
+			models.Preload.Benchmark.Instance(),
 			models.SelectWhere.Benchmarks.ID.EQ(id.String()),
 		).
 		One(ctx, r.executor(ctx))
@@ -63,7 +63,7 @@ func (r *Repository) GetBenchmarks(ctx context.Context, query repository.Benchma
 	where := models.SelectWhere.Benchmarks
 
 	mods := bob.Mods[*dialect.SelectQuery]{
-		models.PreloadBenchmarkInstance(),
+		models.Preload.Benchmark.Instance(),
 		sm.OrderBy(models.BenchmarkColumns.CreatedAt).Asc(),
 	}
 	if query.TeamID.IsSet() {
@@ -104,7 +104,7 @@ func (r *Repository) GetOldestQueuedBenchmark(ctx context.Context) (domain.Bench
 	orderByCreatedAtAsc := sm.OrderBy(models.BenchmarkColumns.CreatedAt).Asc()
 	limit1 := sm.Limit(1)
 	benchmark, err := models.Benchmarks.Query(
-		models.PreloadBenchmarkInstance(),
+		models.Preload.Benchmark.Instance(),
 		statusWaiting, orderByCreatedAtAsc, limit1).One(ctx, r.executor(ctx))
 	if errors.Is(err, sql.ErrNoRows) {
 		return domain.Benchmark{}, repository.ErrNotFound
