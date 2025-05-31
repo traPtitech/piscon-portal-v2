@@ -1,9 +1,10 @@
 module github.com/traPtitech/piscon-portal-v2
 
-go 1.24
+go 1.24.0
+
+toolchain go1.24.3
 
 require (
-	github.com/aarondl/opt v0.0.0-20240623220848-083f18ab9536
 	github.com/coreos/go-oidc/v3 v3.14.1
 	github.com/go-faster/errors v0.7.1
 	github.com/go-faster/jx v1.1.0
@@ -18,7 +19,7 @@ require (
 	github.com/ogen-go/ogen v1.13.0
 	github.com/samber/lo v1.50.0
 	github.com/spf13/pflag v1.0.6
-	github.com/stephenafamo/bob v0.36.1
+	github.com/stephenafamo/bob v0.37.0
 	github.com/stephenafamo/scan v0.6.2
 	github.com/stretchr/testify v1.10.0
 	github.com/testcontainers/testcontainers-go/modules/mysql v0.37.0
@@ -38,6 +39,7 @@ require (
 	github.com/Masterminds/sprig/v3 v3.3.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/aarondl/json v0.0.0-20221020222930-8b0db17ef1bf // indirect
+	github.com/aarondl/opt v0.0.0-20240623220848-083f18ab9536 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/containerd/log v0.1.0 // indirect

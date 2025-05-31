@@ -6,8 +6,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/aarondl/opt/omit"
-	"github.com/aarondl/opt/omitnull"
 	"github.com/google/uuid"
 	"github.com/samber/lo"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
@@ -50,9 +48,9 @@ func (r *Repository) CreateTeam(ctx context.Context, team domain.Team) error {
 	}
 
 	_, err := models.Teams.Insert(&models.TeamSetter{
-		ID:        omit.From(team.ID.String()),
-		Name:      omit.From(team.Name),
-		CreatedAt: omit.From(team.CreatedAt),
+		ID:        lo.ToPtr(team.ID.String()),
+		Name:      lo.ToPtr(team.Name),
+		CreatedAt: lo.ToPtr(team.CreatedAt),
 	}).Exec(ctx, r.executor(ctx))
 	if err != nil {
 		return fmt.Errorf("create team: %w", err)
@@ -62,7 +60,7 @@ func (r *Repository) CreateTeam(ctx context.Context, team domain.Team) error {
 	_, err = models.Users.Update(
 		models.UpdateWhere.Users.ID.In(memberIDs...),
 		models.UserSetter{
-			TeamID: omitnull.From(team.ID.String()),
+			TeamID: ToSqlNull(team.ID.String()),
 		}.UpdateMod(),
 	).Exec(ctx, r.executor(ctx))
 
@@ -83,7 +81,7 @@ func (r *Repository) UpdateTeam(ctx context.Context, team domain.Team) error {
 	_, err := models.Teams.Update(
 		models.UpdateWhere.Teams.ID.EQ(team.ID.String()),
 		models.TeamSetter{
-			Name: omit.From(team.Name),
+			Name: lo.ToPtr(team.Name),
 		}.UpdateMod(),
 	).Exec(ctx, r.executor(ctx))
 	if err != nil {
@@ -94,7 +92,7 @@ func (r *Repository) UpdateTeam(ctx context.Context, team domain.Team) error {
 	_, err = models.Users.Update(
 		models.UpdateWhere.Users.ID.In(memberIDs...),
 		models.UserSetter{
-			TeamID: omitnull.From(team.ID.String()),
+			TeamID: ToSqlNull(team.ID.String()),
 		}.UpdateMod(),
 	).Exec(ctx, r.executor(ctx))
 
