@@ -446,17 +446,17 @@ func TestUpdateBenchmark(t *testing.T) {
 			assert.Equal(t, status, bench.Status)
 			result, err := db.FromDomainBenchmarkResult(testCase.afterBench.Result)
 			require.NoError(t, err)
-			assert.Equal(t, result, db.SqlNullToPtr(bench.Result))
+			assert.Equal(t, result, db.SQLNullToPtr(bench.Result))
 			assert.WithinDuration(t, testCase.afterBench.CreatedAt, bench.CreatedAt, time.Second)
 			if testCase.afterBench.StartedAt != nil {
 				assert.WithinDuration(t, *testCase.afterBench.StartedAt, bench.StartedAt.V, time.Second)
 			} else {
-				assert.Nil(t, db.SqlNullToPtr(bench.StartedAt))
+				assert.Nil(t, db.SQLNullToPtr(bench.StartedAt))
 			}
 			if testCase.afterBench.FinishedAt != nil {
 				assert.WithinDuration(t, *testCase.afterBench.FinishedAt, bench.FinishedAt.V, time.Second)
 			} else {
-				assert.Nil(t, db.SqlNullToPtr(bench.FinishedAt))
+				assert.Nil(t, db.SQLNullToPtr(bench.FinishedAt))
 			}
 		})
 	}

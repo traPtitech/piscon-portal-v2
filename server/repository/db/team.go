@@ -60,7 +60,7 @@ func (r *Repository) CreateTeam(ctx context.Context, team domain.Team) error {
 	_, err = models.Users.Update(
 		models.UpdateWhere.Users.ID.In(memberIDs...),
 		models.UserSetter{
-			TeamID: ToSqlNull(team.ID.String()),
+			TeamID: ToSQLNull(team.ID.String()),
 		}.UpdateMod(),
 	).Exec(ctx, r.executor(ctx))
 
@@ -92,7 +92,7 @@ func (r *Repository) UpdateTeam(ctx context.Context, team domain.Team) error {
 	_, err = models.Users.Update(
 		models.UpdateWhere.Users.ID.In(memberIDs...),
 		models.UserSetter{
-			TeamID: ToSqlNull(team.ID.String()),
+			TeamID: ToSQLNull(team.ID.String()),
 		}.UpdateMod(),
 	).Exec(ctx, r.executor(ctx))
 

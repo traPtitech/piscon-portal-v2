@@ -18,7 +18,7 @@ func mustMakeUser(t *testing.T, executor bob.Executor, user domain.User) {
 	_, err := models.Users.Insert(&models.UserSetter{
 		ID:      lo.ToPtr(user.ID.String()),
 		Name:    lo.ToPtr(user.Name),
-		TeamID:  lo.Ternary(user.TeamID.Valid, db.ToSqlNull(user.TeamID.UUID.String()), nil),
+		TeamID:  lo.Ternary(user.TeamID.Valid, db.ToSQLNull(user.TeamID.UUID.String()), nil),
 		IsAdmin: lo.ToPtr(user.IsAdmin),
 	}).Exec(context.Background(), executor)
 	require.NoError(t, err)
@@ -43,8 +43,8 @@ func mustMakeInstance(t *testing.T, executor bob.Executor, instance domain.Insta
 		TeamID:         lo.ToPtr(instance.TeamID.String()),
 		InstanceNumber: lo.ToPtr(int32(instance.Index)),
 		Status:         lo.ToPtr(status),
-		PrivateIP:      db.ToSqlNull(instance.Infra.PrivateIP),
-		PublicIP:       db.ToSqlNull(instance.Infra.PublicIP),
+		PrivateIP:      db.ToSQLNull(instance.Infra.PrivateIP),
+		PublicIP:       db.ToSQLNull(instance.Infra.PublicIP),
 	}).Exec(context.Background(), executor)
 	require.NoError(t, err)
 }
@@ -62,10 +62,10 @@ func mustMakeBenchmark(t *testing.T, executor bob.Executor, benchmark domain.Ben
 		UserID:     lo.ToPtr(benchmark.UserID.String()),
 		Status:     lo.ToPtr(status),
 		CreatedAt:  lo.ToPtr(benchmark.CreatedAt),
-		StartedAt:  db.PtrToSqlNull(benchmark.StartedAt),
-		FinishedAt: db.PtrToSqlNull(benchmark.FinishedAt),
+		StartedAt:  db.PtrToSQLNull(benchmark.StartedAt),
+		FinishedAt: db.PtrToSQLNull(benchmark.FinishedAt),
 		Score:      lo.ToPtr(benchmark.Score),
-		Result:     db.PtrToSqlNull(result),
+		Result:     db.PtrToSQLNull(result),
 	}).Exec(context.Background(), executor)
 	require.NoError(t, err)
 }

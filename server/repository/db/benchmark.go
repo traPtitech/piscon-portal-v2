@@ -133,11 +133,11 @@ func (r *Repository) UpdateBenchmark(ctx context.Context, id uuid.UUID, benchmar
 		UserID:       lo.ToPtr(benchmark.UserID.String()),
 		Status:       lo.ToPtr(status),
 		CreatedAt:    lo.ToPtr(benchmark.CreatedAt),
-		StartedAt:    PtrToSqlNull(benchmark.StartedAt),
-		FinishedAt:   PtrToSqlNull(benchmark.FinishedAt),
+		StartedAt:    PtrToSQLNull(benchmark.StartedAt),
+		FinishedAt:   PtrToSQLNull(benchmark.FinishedAt),
 		Score:        lo.ToPtr(benchmark.Score),
-		Result:       PtrToSqlNull(result),
-		ErrorMessage: PtrToSqlNull(benchmark.ErrorMes),
+		Result:       PtrToSQLNull(result),
+		ErrorMessage: PtrToSQLNull(benchmark.ErrorMes),
 	}
 
 	_, err = models.Benchmarks.Update(whereID, newBenchmark.UpdateMod()).Exec(ctx, r.executor(ctx))
@@ -289,11 +289,11 @@ func toDomainBenchmark(benchmark *models.Benchmark) (domain.Benchmark, error) {
 		UserID:     userID,
 		Status:     status,
 		CreatedAt:  benchmark.CreatedAt,
-		StartedAt:  SqlNullToPtr(benchmark.StartedAt),
-		FinishedAt: SqlNullToPtr(benchmark.FinishedAt),
+		StartedAt:  SQLNullToPtr(benchmark.StartedAt),
+		FinishedAt: SQLNullToPtr(benchmark.FinishedAt),
 		Score:      benchmark.Score,
 		Result:     result,
-		ErrorMes:   SqlNullToPtr(benchmark.ErrorMessage),
+		ErrorMes:   SQLNullToPtr(benchmark.ErrorMessage),
 	}, nil
 }
 
