@@ -61,7 +61,7 @@ func setupRepository(t *testing.T) (*dbrepo.Repository, bob.Executor) {
 		t.Fatal(err)
 	}
 
-	return dbrepo.NewRepository(db), bob.New(db)
+	return dbrepo.NewRepository(db), bob.NewDB(db)
 }
 
 func createDatabase(name string) error {

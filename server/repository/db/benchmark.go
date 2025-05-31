@@ -6,9 +6,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/aarondl/opt/omit"
-	"github.com/aarondl/opt/omitnull"
 	"github.com/google/uuid"
+	"github.com/samber/lo"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/mysql"
 	"github.com/stephenafamo/bob/dialect/mysql/dialect"
@@ -26,7 +25,7 @@ import (
 func (r *Repository) FindBenchmark(ctx context.Context, id uuid.UUID) (domain.Benchmark, error) {
 	benchmark, err := models.Benchmarks.
 		Query(
-			models.PreloadBenchmarkInstance(),
+			models.Preload.Benchmark.Instance(),
 			models.SelectWhere.Benchmarks.ID.EQ(id.String()),
 		).
 		One(ctx, r.executor(ctx))
@@ -46,12 +45,12 @@ func (r *Repository) CreateBenchmark(ctx context.Context, benchmark domain.Bench
 		return err
 	}
 	_, err = models.Benchmarks.Insert(&models.BenchmarkSetter{
-		ID:         omit.From(benchmark.ID.String()),
-		InstanceID: omit.From(benchmark.Instance.ID.String()),
-		TeamID:     omit.From(benchmark.TeamID.String()),
-		UserID:     omit.From(benchmark.UserID.String()),
-		Status:     omit.From(status),
-		CreatedAt:  omit.From(benchmark.CreatedAt),
+		ID:         lo.ToPtr(benchmark.ID.String()),
+		InstanceID: lo.ToPtr(benchmark.Instance.ID.String()),
+		TeamID:     lo.ToPtr(benchmark.TeamID.String()),
+		UserID:     lo.ToPtr(benchmark.UserID.String()),
+		Status:     lo.ToPtr(status),
+		CreatedAt:  lo.ToPtr(benchmark.CreatedAt),
 	}).Exec(ctx, r.executor(ctx))
 	if err != nil {
 		return fmt.Errorf("create benchmark: %w", err)
@@ -63,7 +62,7 @@ func (r *Repository) GetBenchmarks(ctx context.Context, query repository.Benchma
 	where := models.SelectWhere.Benchmarks
 
 	mods := bob.Mods[*dialect.SelectQuery]{
-		models.PreloadBenchmarkInstance(),
+		models.Preload.Benchmark.Instance(),
 		sm.OrderBy(models.BenchmarkColumns.CreatedAt).Asc(),
 	}
 	if query.TeamID.IsSet() {
@@ -104,7 +103,7 @@ func (r *Repository) GetOldestQueuedBenchmark(ctx context.Context) (domain.Bench
 	orderByCreatedAtAsc := sm.OrderBy(models.BenchmarkColumns.CreatedAt).Asc()
 	limit1 := sm.Limit(1)
 	benchmark, err := models.Benchmarks.Query(
-		models.PreloadBenchmarkInstance(),
+		models.Preload.Benchmark.Instance(),
 		statusWaiting, orderByCreatedAtAsc, limit1).One(ctx, r.executor(ctx))
 	if errors.Is(err, sql.ErrNoRows) {
 		return domain.Benchmark{}, repository.ErrNotFound
@@ -128,17 +127,17 @@ func (r *Repository) UpdateBenchmark(ctx context.Context, id uuid.UUID, benchmar
 
 	whereID := models.UpdateWhere.Benchmarks.ID.EQ(id.String())
 	newBenchmark := models.BenchmarkSetter{
-		ID:           omit.From(id.String()),
-		InstanceID:   omit.From(benchmark.Instance.ID.String()),
-		TeamID:       omit.From(benchmark.TeamID.String()),
-		UserID:       omit.From(benchmark.UserID.String()),
-		Status:       omit.From(status),
-		CreatedAt:    omit.From(benchmark.CreatedAt),
-		StartedAt:    omitnull.FromPtr(benchmark.StartedAt),
-		FinishedAt:   omitnull.FromPtr(benchmark.FinishedAt),
-		Score:        omit.From(benchmark.Score),
-		Result:       omitnull.FromPtr(result),
-		ErrorMessage: omitnull.FromPtr(benchmark.ErrorMes),
+		ID:           lo.ToPtr(id.String()),
+		InstanceID:   lo.ToPtr(benchmark.Instance.ID.String()),
+		TeamID:       lo.ToPtr(benchmark.TeamID.String()),
+		UserID:       lo.ToPtr(benchmark.UserID.String()),
+		Status:       lo.ToPtr(status),
+		CreatedAt:    lo.ToPtr(benchmark.CreatedAt),
+		StartedAt:    PtrToSQLNull(benchmark.StartedAt),
+		FinishedAt:   PtrToSQLNull(benchmark.FinishedAt),
+		Score:        lo.ToPtr(benchmark.Score),
+		Result:       PtrToSQLNull(result),
+		ErrorMessage: PtrToSQLNull(benchmark.ErrorMes),
 	}
 
 	_, err = models.Benchmarks.Update(whereID, newBenchmark.UpdateMod()).Exec(ctx, r.executor(ctx))
@@ -164,9 +163,9 @@ func (r *Repository) GetBenchmarkLog(ctx context.Context, benchmarkID uuid.UUID)
 func (r *Repository) UpdateBenchmarkLog(ctx context.Context, benchmarkID uuid.UUID, log domain.BenchmarkLog) error {
 	_, err := models.BenchmarkLogs.Insert(
 		&models.BenchmarkLogSetter{
-			BenchmarkID: omit.From(benchmarkID.String()),
-			UserLog:     omit.From(log.UserLog),
-			AdminLog:    omit.From(log.AdminLog),
+			BenchmarkID: lo.ToPtr(benchmarkID.String()),
+			UserLog:     lo.ToPtr(log.UserLog),
+			AdminLog:    lo.ToPtr(log.AdminLog),
 		},
 		im.OnDuplicateKeyUpdate(
 			im.UpdateWithValues(models.ColumnNames.BenchmarkLogs.UserLog, models.ColumnNames.BenchmarkLogs.AdminLog),
@@ -274,7 +273,7 @@ func toDomainBenchmark(benchmark *models.Benchmark) (domain.Benchmark, error) {
 	if err != nil {
 		return domain.Benchmark{}, fmt.Errorf("parse benchmark user id: %w", err)
 	}
-	result, err := toDomainBenchmarkResult(benchmark.Result.Ptr())
+	result, err := toDomainBenchmarkResult(benchmark.Result)
 	if err != nil {
 		return domain.Benchmark{}, fmt.Errorf("parse benchmark result: %w", err)
 	}
@@ -290,11 +289,11 @@ func toDomainBenchmark(benchmark *models.Benchmark) (domain.Benchmark, error) {
 		UserID:     userID,
 		Status:     status,
 		CreatedAt:  benchmark.CreatedAt,
-		StartedAt:  benchmark.StartedAt.Ptr(),
-		FinishedAt: benchmark.FinishedAt.Ptr(),
+		StartedAt:  SQLNullToPtr(benchmark.StartedAt),
+		FinishedAt: SQLNullToPtr(benchmark.FinishedAt),
 		Score:      benchmark.Score,
 		Result:     result,
-		ErrorMes:   benchmark.ErrorMessage.Ptr(),
+		ErrorMes:   SQLNullToPtr(benchmark.ErrorMessage),
 	}, nil
 }
 
@@ -305,11 +304,11 @@ func toDomainBenchmarkLog(log *models.BenchmarkLog) (domain.BenchmarkLog, error)
 	}, nil
 }
 
-func toDomainBenchmarkResult(result *models.BenchmarksResult) (*domain.BenchmarkResult, error) {
-	if result == nil {
+func toDomainBenchmarkResult(result sql.Null[models.BenchmarksResult]) (*domain.BenchmarkResult, error) {
+	if !result.Valid {
 		return nil, nil
 	}
-	switch *result {
+	switch result.V {
 	case models.BenchmarksResultPassed:
 		return ptr.Of(domain.BenchmarkResultStatusPassed), nil
 	case models.BenchmarksResultFailed:
@@ -317,7 +316,7 @@ func toDomainBenchmarkResult(result *models.BenchmarksResult) (*domain.Benchmark
 	case models.BenchmarksResultError:
 		return ptr.Of(domain.BenchmarkResultStatusError), nil
 	default:
-		return nil, fmt.Errorf("unknown benchmark result: %v", *result)
+		return nil, fmt.Errorf("unknown benchmark result: %v", result.V)
 	}
 }
 

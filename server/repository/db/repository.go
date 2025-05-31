@@ -45,7 +45,7 @@ func (r *Repository) Transaction(ctx context.Context, f func(ctx context.Context
 	if err != nil {
 		return fmt.Errorf("begin transaction: %w", err)
 	}
-	defer tx.Rollback() //nolint errcheck
+	defer tx.Rollback(ctx) //nolint errcheck
 
 	ctx = context.WithValue(ctx, executorCtxKey, tx)
 
@@ -54,7 +54,7 @@ func (r *Repository) Transaction(ctx context.Context, f func(ctx context.Context
 		return err
 	}
 
-	if err := tx.Commit(); err != nil {
+	if err := tx.Commit(ctx); err != nil {
 		return fmt.Errorf("commit transaction: %w", err)
 	}
 	return nil

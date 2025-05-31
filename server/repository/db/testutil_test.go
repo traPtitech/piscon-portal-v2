@@ -4,8 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/aarondl/opt/omit"
-	"github.com/aarondl/opt/omitnull"
 	"github.com/google/uuid"
 	"github.com/samber/lo"
 	"github.com/stephenafamo/bob"
@@ -18,10 +16,10 @@ import (
 func mustMakeUser(t *testing.T, executor bob.Executor, user domain.User) {
 	t.Helper()
 	_, err := models.Users.Insert(&models.UserSetter{
-		ID:      omit.From(user.ID.String()),
-		Name:    omit.From(user.Name),
-		TeamID:  lo.Ternary(user.TeamID.Valid, omitnull.From(user.TeamID.UUID.String()), omitnull.Val[string]{}),
-		IsAdmin: omit.From(user.IsAdmin),
+		ID:      lo.ToPtr(user.ID.String()),
+		Name:    lo.ToPtr(user.Name),
+		TeamID:  lo.Ternary(user.TeamID.Valid, db.ToSQLNull(user.TeamID.UUID.String()), nil),
+		IsAdmin: lo.ToPtr(user.IsAdmin),
 	}).Exec(context.Background(), executor)
 	require.NoError(t, err)
 }
@@ -29,9 +27,9 @@ func mustMakeUser(t *testing.T, executor bob.Executor, user domain.User) {
 func mustMakeTeam(t *testing.T, executor bob.Executor, team domain.Team) {
 	t.Helper()
 	_, err := models.Teams.Insert(&models.TeamSetter{
-		ID:        omit.From(team.ID.String()),
-		Name:      omit.From(team.Name),
-		CreatedAt: omit.From(team.CreatedAt),
+		ID:        lo.ToPtr(team.ID.String()),
+		Name:      lo.ToPtr(team.Name),
+		CreatedAt: lo.ToPtr(team.CreatedAt),
 	}).Exec(context.Background(), executor)
 	require.NoError(t, err)
 }
@@ -41,12 +39,12 @@ func mustMakeInstance(t *testing.T, executor bob.Executor, instance domain.Insta
 	status, err := db.FromDomainInstanceStatus(instance.Infra.Status)
 	require.NoError(t, err)
 	_, err = models.Instances.Insert(&models.InstanceSetter{
-		ID:             omit.From(instance.ID.String()),
-		TeamID:         omit.From(instance.TeamID.String()),
-		InstanceNumber: omit.From(int32(instance.Index)),
-		Status:         omit.From(status),
-		PrivateIP:      omitnull.From(instance.Infra.PrivateIP),
-		PublicIP:       omitnull.From(instance.Infra.PublicIP),
+		ID:             lo.ToPtr(instance.ID.String()),
+		TeamID:         lo.ToPtr(instance.TeamID.String()),
+		InstanceNumber: lo.ToPtr(int32(instance.Index)),
+		Status:         lo.ToPtr(status),
+		PrivateIP:      db.ToSQLNull(instance.Infra.PrivateIP),
+		PublicIP:       db.ToSQLNull(instance.Infra.PublicIP),
 	}).Exec(context.Background(), executor)
 	require.NoError(t, err)
 }
@@ -58,16 +56,16 @@ func mustMakeBenchmark(t *testing.T, executor bob.Executor, benchmark domain.Ben
 	result, err := db.FromDomainBenchmarkResult(benchmark.Result)
 	require.NoError(t, err)
 	_, err = models.Benchmarks.Insert(&models.BenchmarkSetter{
-		ID:         omit.From(benchmark.ID.String()),
-		InstanceID: omit.From(benchmark.Instance.ID.String()),
-		TeamID:     omit.From(benchmark.TeamID.String()),
-		UserID:     omit.From(benchmark.UserID.String()),
-		Status:     omit.From(status),
-		CreatedAt:  omit.From(benchmark.CreatedAt),
-		StartedAt:  omitnull.FromPtr(benchmark.StartedAt),
-		FinishedAt: omitnull.FromPtr(benchmark.FinishedAt),
-		Score:      omit.From(benchmark.Score),
-		Result:     omitnull.FromPtr(result),
+		ID:         lo.ToPtr(benchmark.ID.String()),
+		InstanceID: lo.ToPtr(benchmark.Instance.ID.String()),
+		TeamID:     lo.ToPtr(benchmark.TeamID.String()),
+		UserID:     lo.ToPtr(benchmark.UserID.String()),
+		Status:     lo.ToPtr(status),
+		CreatedAt:  lo.ToPtr(benchmark.CreatedAt),
+		StartedAt:  db.PtrToSQLNull(benchmark.StartedAt),
+		FinishedAt: db.PtrToSQLNull(benchmark.FinishedAt),
+		Score:      lo.ToPtr(benchmark.Score),
+		Result:     db.PtrToSQLNull(result),
 	}).Exec(context.Background(), executor)
 	require.NoError(t, err)
 }
@@ -75,9 +73,9 @@ func mustMakeBenchmark(t *testing.T, executor bob.Executor, benchmark domain.Ben
 func mustMakeBenchmarkLog(t *testing.T, executor bob.Executor, benchmarkID uuid.UUID, log domain.BenchmarkLog) {
 	t.Helper()
 	_, err := models.BenchmarkLogs.Insert(&models.BenchmarkLogSetter{
-		BenchmarkID: omit.From(benchmarkID.String()),
-		UserLog:     omit.From(log.UserLog),
-		AdminLog:    omit.From(log.AdminLog),
+		BenchmarkID: lo.ToPtr(benchmarkID.String()),
+		UserLog:     lo.ToPtr(log.UserLog),
+		AdminLog:    lo.ToPtr(log.AdminLog),
 	}).Exec(context.Background(), executor)
 	require.NoError(t, err)
 }
@@ -85,9 +83,9 @@ func mustMakeBenchmarkLog(t *testing.T, executor bob.Executor, benchmarkID uuid.
 func mustMakeDocument(t *testing.T, executor bob.Executor, document domain.Document) {
 	t.Helper()
 	_, err := models.Documents.Insert(&models.DocumentSetter{
-		ID:        omit.From(document.ID.String()),
-		Body:      omit.From(document.Body),
-		CreatedAt: omit.From(document.CreatedAt),
+		ID:        lo.ToPtr(document.ID.String()),
+		Body:      lo.ToPtr(document.Body),
+		CreatedAt: lo.ToPtr(document.CreatedAt),
 	}).Exec(t.Context(), executor)
 	require.NoError(t, err)
 }
