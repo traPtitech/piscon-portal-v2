@@ -60,8 +60,8 @@ func toDomainInstance(instance *models.Instance) (domain.Instance, error) {
 		Index:  int(instance.InstanceNumber),
 		Infra: domain.InfraInstance{
 			Status:    status,
-			PrivateIP: instance.PrivateIP.GetOrZero(),
-			PublicIP:  instance.PublicIP.GetOrZero(),
+			PrivateIP: instance.PrivateIP.V,
+			PublicIP:  instance.PublicIP.V,
 		},
 	}, nil
 }

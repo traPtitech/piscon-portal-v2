@@ -6,8 +6,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/aarondl/opt/omit"
 	"github.com/google/uuid"
+	"github.com/samber/lo"
 	"github.com/stephenafamo/bob"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
@@ -40,9 +40,9 @@ func findSession(ctx context.Context, executor bob.Executor, id string) (domain.
 
 func createSession(ctx context.Context, executor bob.Executor, session domain.Session) error {
 	_, err := models.Sessions.Insert(&models.SessionSetter{
-		ID:        omit.From(session.ID),
-		UserID:    omit.From(session.UserID.String()),
-		ExpiredAt: omit.From(session.ExpiresAt),
+		ID:        lo.ToPtr(session.ID),
+		UserID:    lo.ToPtr(session.UserID.String()),
+		ExpiredAt: lo.ToPtr(session.ExpiresAt),
 	}).Exec(ctx, executor)
 	if err != nil {
 		return fmt.Errorf("create session: %w", err)

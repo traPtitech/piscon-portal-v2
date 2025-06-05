@@ -6,8 +6,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/aarondl/opt/omit"
 	"github.com/google/uuid"
+	"github.com/samber/lo"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/mysql"
 	"github.com/stephenafamo/bob/dialect/mysql/sm"
@@ -57,8 +57,8 @@ func findUser(ctx context.Context, executor bob.Executor, id string) (domain.Use
 
 func createUser(ctx context.Context, executor bob.Executor, user domain.User) error {
 	_, err := models.Users.Insert(&models.UserSetter{
-		ID:   omit.From(user.ID.String()),
-		Name: omit.From(user.Name),
+		ID:   lo.ToPtr(user.ID.String()),
+		Name: lo.ToPtr(user.Name),
 	}).Exec(ctx, executor)
 	if err != nil {
 		return fmt.Errorf("create user: %w", err)
@@ -160,8 +160,8 @@ func toDomainUser(user *models.User) (domain.User, error) {
 	}
 
 	var teamID uuid.NullUUID
-	if id, ok := user.TeamID.Get(); ok {
-		parsedID, err := uuid.Parse(id)
+	if user.TeamID.Valid {
+		parsedID, err := uuid.Parse(user.TeamID.V)
 		if err != nil {
 			return domain.User{}, fmt.Errorf("parse team ID: %w", err)
 		}
