@@ -80,7 +80,7 @@ func (a *Client) Create(ctx context.Context, name string, sshPubKeys []string) (
 	}
 	userdata, err := cloudConfig.ConvertToUserData()
 	if err != nil {
-		return domain.InfraInstance{}, fmt.Errorf("failed to generate user data: %w", err)
+		return domain.InfraInstance{}, fmt.Errorf("generate user data: %w", err)
 	}
 
 	nispec := types.InstanceNetworkInterfaceSpecification{
@@ -116,15 +116,15 @@ func (a *Client) Create(ctx context.Context, name string, sshPubKeys []string) (
 }
 
 func (a *Client) Delete(ctx context.Context, instance domain.InfraInstance) (domain.InfraInstance, error) {
-	_, err := a.client.TerminateInstances(ctx, &ec2.TerminateInstancesInput{
+	res, err := a.client.TerminateInstances(ctx, &ec2.TerminateInstancesInput{
 		InstanceIds: []string{instance.ProviderInstanceID},
 	})
 	if err != nil {
-		return domain.InfraInstance{}, fmt.Errorf("failed to terminate instance: %w", err)
+		return domain.InfraInstance{}, fmt.Errorf("terminate instance: %w", err)
 	}
 
 	deleted := instance
-	deleted.Status = domain.InstanceStatusDeleting
+	deleted.Status = convertInstanceState(res.TerminatingInstances[0].CurrentState.Name)
 
 	return deleted, nil
 }
@@ -134,7 +134,7 @@ func (a *Client) Get(ctx context.Context, id string) (domain.InfraInstance, erro
 		InstanceIds: []string{id},
 	})
 	if err != nil {
-		return domain.InfraInstance{}, fmt.Errorf("failed to describe instance: %w", err)
+		return domain.InfraInstance{}, fmt.Errorf("describe instance: %w", err)
 	}
 
 	if len(res.Reservations) == 0 || len(res.Reservations[0].Instances) == 0 {
@@ -160,7 +160,7 @@ func (a *Client) GetAll(ctx context.Context) ([]domain.InfraInstance, error) {
 		},
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to describe instances: %w", err)
+		return nil, fmt.Errorf("describe instances: %w", err)
 	}
 
 	var instances []domain.InfraInstance
@@ -179,29 +179,29 @@ func (a *Client) GetAll(ctx context.Context) ([]domain.InfraInstance, error) {
 }
 
 func (a *Client) Stop(ctx context.Context, instance domain.InfraInstance) (domain.InfraInstance, error) {
-	_, err := a.client.StopInstances(ctx, &ec2.StopInstancesInput{
+	res, err := a.client.StopInstances(ctx, &ec2.StopInstancesInput{
 		InstanceIds: []string{instance.ProviderInstanceID},
 	})
 	if err != nil {
-		return domain.InfraInstance{}, fmt.Errorf("failed to stop instance: %w", err)
+		return domain.InfraInstance{}, fmt.Errorf("stop instance: %w", err)
 	}
 
 	stopped := instance
-	stopped.Status = domain.InstanceStatusStopping
+	stopped.Status = convertInstanceState(res.StoppingInstances[0].CurrentState.Name)
 
 	return stopped, nil
 }
 
 func (a *Client) Start(ctx context.Context, instance domain.InfraInstance) (domain.InfraInstance, error) {
-	_, err := a.client.StartInstances(ctx, &ec2.StartInstancesInput{
+	res, err := a.client.StartInstances(ctx, &ec2.StartInstancesInput{
 		InstanceIds: []string{instance.ProviderInstanceID},
 	})
 	if err != nil {
-		return domain.InfraInstance{}, fmt.Errorf("failed to start instance: %w", err)
+		return domain.InfraInstance{}, fmt.Errorf("start instance: %w", err)
 	}
 
 	started := instance
-	started.Status = domain.InstanceStatusRunning
+	started.Status = convertInstanceState(res.StartingInstances[0].CurrentState.Name)
 
 	return started, nil
 }
