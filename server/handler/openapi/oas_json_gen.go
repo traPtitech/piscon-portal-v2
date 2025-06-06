@@ -384,6 +384,66 @@ func (s BenchmarkAdminResultSum) Encode(e *jx.Encoder) {
 
 func (s BenchmarkAdminResultSum) encodeFields(e *jx.Encoder) {
 	switch s.Type {
+	case WaitingBenchmarkBenchmarkAdminResultSum:
+		e.FieldStart("status")
+		e.Str("waiting")
+		{
+			s := s.WaitingBenchmark
+			{
+				e.FieldStart("id")
+				s.ID.Encode(e)
+			}
+			{
+				e.FieldStart("instanceId")
+				s.InstanceId.Encode(e)
+			}
+			{
+				e.FieldStart("teamId")
+				s.TeamId.Encode(e)
+			}
+			{
+				e.FieldStart("userId")
+				s.UserId.Encode(e)
+			}
+			{
+				e.FieldStart("createdAt")
+				s.CreatedAt.Encode(e)
+			}
+		}
+	case RunningBenchmarkBenchmarkAdminResultSum:
+		e.FieldStart("status")
+		e.Str("running")
+		{
+			s := s.RunningBenchmark
+			{
+				e.FieldStart("id")
+				s.ID.Encode(e)
+			}
+			{
+				e.FieldStart("instanceId")
+				s.InstanceId.Encode(e)
+			}
+			{
+				e.FieldStart("teamId")
+				s.TeamId.Encode(e)
+			}
+			{
+				e.FieldStart("userId")
+				s.UserId.Encode(e)
+			}
+			{
+				e.FieldStart("score")
+				s.Score.Encode(e)
+			}
+			{
+				e.FieldStart("createdAt")
+				s.CreatedAt.Encode(e)
+			}
+			{
+				e.FieldStart("startedAt")
+				s.StartedAt.Encode(e)
+			}
+		}
 	case FinishedBenchmarkBenchmarkAdminResultSum:
 		e.FieldStart("status")
 		e.Str("finished")
@@ -426,66 +486,6 @@ func (s BenchmarkAdminResultSum) encodeFields(e *jx.Encoder) {
 				s.FinishedAt.Encode(e)
 			}
 		}
-	case RunningBenchmarkBenchmarkAdminResultSum:
-		e.FieldStart("status")
-		e.Str("running")
-		{
-			s := s.RunningBenchmark
-			{
-				e.FieldStart("id")
-				s.ID.Encode(e)
-			}
-			{
-				e.FieldStart("instanceId")
-				s.InstanceId.Encode(e)
-			}
-			{
-				e.FieldStart("teamId")
-				s.TeamId.Encode(e)
-			}
-			{
-				e.FieldStart("userId")
-				s.UserId.Encode(e)
-			}
-			{
-				e.FieldStart("score")
-				s.Score.Encode(e)
-			}
-			{
-				e.FieldStart("createdAt")
-				s.CreatedAt.Encode(e)
-			}
-			{
-				e.FieldStart("startedAt")
-				s.StartedAt.Encode(e)
-			}
-		}
-	case WaitingBenchmarkBenchmarkAdminResultSum:
-		e.FieldStart("status")
-		e.Str("waiting")
-		{
-			s := s.WaitingBenchmark
-			{
-				e.FieldStart("id")
-				s.ID.Encode(e)
-			}
-			{
-				e.FieldStart("instanceId")
-				s.InstanceId.Encode(e)
-			}
-			{
-				e.FieldStart("teamId")
-				s.TeamId.Encode(e)
-			}
-			{
-				e.FieldStart("userId")
-				s.UserId.Encode(e)
-			}
-			{
-				e.FieldStart("createdAt")
-				s.CreatedAt.Encode(e)
-			}
-		}
 	}
 }
 
@@ -512,14 +512,14 @@ func (s *BenchmarkAdminResultSum) Decode(d *jx.Decoder) error {
 					return err
 				}
 				switch typ {
-				case "finished":
-					s.Type = FinishedBenchmarkBenchmarkAdminResultSum
+				case "waiting":
+					s.Type = WaitingBenchmarkBenchmarkAdminResultSum
 					found = true
 				case "running":
 					s.Type = RunningBenchmarkBenchmarkAdminResultSum
 					found = true
-				case "waiting":
-					s.Type = WaitingBenchmarkBenchmarkAdminResultSum
+				case "finished":
+					s.Type = FinishedBenchmarkBenchmarkAdminResultSum
 					found = true
 				default:
 					return errors.Errorf("unknown type %s", typ)
@@ -665,6 +665,66 @@ func (s BenchmarkListItemSum) Encode(e *jx.Encoder) {
 
 func (s BenchmarkListItemSum) encodeFields(e *jx.Encoder) {
 	switch s.Type {
+	case WaitingBenchmarkBenchmarkListItemSum:
+		e.FieldStart("status")
+		e.Str("waiting")
+		{
+			s := s.WaitingBenchmark
+			{
+				e.FieldStart("id")
+				s.ID.Encode(e)
+			}
+			{
+				e.FieldStart("instanceId")
+				s.InstanceId.Encode(e)
+			}
+			{
+				e.FieldStart("teamId")
+				s.TeamId.Encode(e)
+			}
+			{
+				e.FieldStart("userId")
+				s.UserId.Encode(e)
+			}
+			{
+				e.FieldStart("createdAt")
+				s.CreatedAt.Encode(e)
+			}
+		}
+	case RunningBenchmarkBenchmarkListItemSum:
+		e.FieldStart("status")
+		e.Str("running")
+		{
+			s := s.RunningBenchmark
+			{
+				e.FieldStart("id")
+				s.ID.Encode(e)
+			}
+			{
+				e.FieldStart("instanceId")
+				s.InstanceId.Encode(e)
+			}
+			{
+				e.FieldStart("teamId")
+				s.TeamId.Encode(e)
+			}
+			{
+				e.FieldStart("userId")
+				s.UserId.Encode(e)
+			}
+			{
+				e.FieldStart("score")
+				s.Score.Encode(e)
+			}
+			{
+				e.FieldStart("createdAt")
+				s.CreatedAt.Encode(e)
+			}
+			{
+				e.FieldStart("startedAt")
+				s.StartedAt.Encode(e)
+			}
+		}
 	case FinishedBenchmarkBenchmarkListItemSum:
 		e.FieldStart("status")
 		e.Str("finished")
@@ -707,66 +767,6 @@ func (s BenchmarkListItemSum) encodeFields(e *jx.Encoder) {
 				s.FinishedAt.Encode(e)
 			}
 		}
-	case RunningBenchmarkBenchmarkListItemSum:
-		e.FieldStart("status")
-		e.Str("running")
-		{
-			s := s.RunningBenchmark
-			{
-				e.FieldStart("id")
-				s.ID.Encode(e)
-			}
-			{
-				e.FieldStart("instanceId")
-				s.InstanceId.Encode(e)
-			}
-			{
-				e.FieldStart("teamId")
-				s.TeamId.Encode(e)
-			}
-			{
-				e.FieldStart("userId")
-				s.UserId.Encode(e)
-			}
-			{
-				e.FieldStart("score")
-				s.Score.Encode(e)
-			}
-			{
-				e.FieldStart("createdAt")
-				s.CreatedAt.Encode(e)
-			}
-			{
-				e.FieldStart("startedAt")
-				s.StartedAt.Encode(e)
-			}
-		}
-	case WaitingBenchmarkBenchmarkListItemSum:
-		e.FieldStart("status")
-		e.Str("waiting")
-		{
-			s := s.WaitingBenchmark
-			{
-				e.FieldStart("id")
-				s.ID.Encode(e)
-			}
-			{
-				e.FieldStart("instanceId")
-				s.InstanceId.Encode(e)
-			}
-			{
-				e.FieldStart("teamId")
-				s.TeamId.Encode(e)
-			}
-			{
-				e.FieldStart("userId")
-				s.UserId.Encode(e)
-			}
-			{
-				e.FieldStart("createdAt")
-				s.CreatedAt.Encode(e)
-			}
-		}
 	}
 }
 
@@ -793,14 +793,14 @@ func (s *BenchmarkListItemSum) Decode(d *jx.Decoder) error {
 					return err
 				}
 				switch typ {
-				case "finished":
-					s.Type = FinishedBenchmarkBenchmarkListItemSum
+				case "waiting":
+					s.Type = WaitingBenchmarkBenchmarkListItemSum
 					found = true
 				case "running":
 					s.Type = RunningBenchmarkBenchmarkListItemSum
 					found = true
-				case "waiting":
-					s.Type = WaitingBenchmarkBenchmarkListItemSum
+				case "finished":
+					s.Type = FinishedBenchmarkBenchmarkListItemSum
 					found = true
 				default:
 					return errors.Errorf("unknown type %s", typ)
@@ -856,6 +856,66 @@ func (s BenchmarkSum) Encode(e *jx.Encoder) {
 
 func (s BenchmarkSum) encodeFields(e *jx.Encoder) {
 	switch s.Type {
+	case WaitingBenchmarkBenchmarkSum:
+		e.FieldStart("status")
+		e.Str("waiting")
+		{
+			s := s.WaitingBenchmark
+			{
+				e.FieldStart("id")
+				s.ID.Encode(e)
+			}
+			{
+				e.FieldStart("instanceId")
+				s.InstanceId.Encode(e)
+			}
+			{
+				e.FieldStart("teamId")
+				s.TeamId.Encode(e)
+			}
+			{
+				e.FieldStart("userId")
+				s.UserId.Encode(e)
+			}
+			{
+				e.FieldStart("createdAt")
+				s.CreatedAt.Encode(e)
+			}
+		}
+	case RunningBenchmarkBenchmarkSum:
+		e.FieldStart("status")
+		e.Str("running")
+		{
+			s := s.RunningBenchmark
+			{
+				e.FieldStart("id")
+				s.ID.Encode(e)
+			}
+			{
+				e.FieldStart("instanceId")
+				s.InstanceId.Encode(e)
+			}
+			{
+				e.FieldStart("teamId")
+				s.TeamId.Encode(e)
+			}
+			{
+				e.FieldStart("userId")
+				s.UserId.Encode(e)
+			}
+			{
+				e.FieldStart("score")
+				s.Score.Encode(e)
+			}
+			{
+				e.FieldStart("createdAt")
+				s.CreatedAt.Encode(e)
+			}
+			{
+				e.FieldStart("startedAt")
+				s.StartedAt.Encode(e)
+			}
+		}
 	case FinishedBenchmarkBenchmarkSum:
 		e.FieldStart("status")
 		e.Str("finished")
@@ -898,66 +958,6 @@ func (s BenchmarkSum) encodeFields(e *jx.Encoder) {
 				s.FinishedAt.Encode(e)
 			}
 		}
-	case RunningBenchmarkBenchmarkSum:
-		e.FieldStart("status")
-		e.Str("running")
-		{
-			s := s.RunningBenchmark
-			{
-				e.FieldStart("id")
-				s.ID.Encode(e)
-			}
-			{
-				e.FieldStart("instanceId")
-				s.InstanceId.Encode(e)
-			}
-			{
-				e.FieldStart("teamId")
-				s.TeamId.Encode(e)
-			}
-			{
-				e.FieldStart("userId")
-				s.UserId.Encode(e)
-			}
-			{
-				e.FieldStart("score")
-				s.Score.Encode(e)
-			}
-			{
-				e.FieldStart("createdAt")
-				s.CreatedAt.Encode(e)
-			}
-			{
-				e.FieldStart("startedAt")
-				s.StartedAt.Encode(e)
-			}
-		}
-	case WaitingBenchmarkBenchmarkSum:
-		e.FieldStart("status")
-		e.Str("waiting")
-		{
-			s := s.WaitingBenchmark
-			{
-				e.FieldStart("id")
-				s.ID.Encode(e)
-			}
-			{
-				e.FieldStart("instanceId")
-				s.InstanceId.Encode(e)
-			}
-			{
-				e.FieldStart("teamId")
-				s.TeamId.Encode(e)
-			}
-			{
-				e.FieldStart("userId")
-				s.UserId.Encode(e)
-			}
-			{
-				e.FieldStart("createdAt")
-				s.CreatedAt.Encode(e)
-			}
-		}
 	}
 }
 
@@ -984,14 +984,14 @@ func (s *BenchmarkSum) Decode(d *jx.Decoder) error {
 					return err
 				}
 				switch typ {
-				case "finished":
-					s.Type = FinishedBenchmarkBenchmarkSum
+				case "waiting":
+					s.Type = WaitingBenchmarkBenchmarkSum
 					found = true
 				case "running":
 					s.Type = RunningBenchmarkBenchmarkSum
 					found = true
-				case "waiting":
-					s.Type = WaitingBenchmarkBenchmarkSum
+				case "finished":
+					s.Type = FinishedBenchmarkBenchmarkSum
 					found = true
 				default:
 					return errors.Errorf("unknown type %s", typ)

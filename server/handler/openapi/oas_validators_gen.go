@@ -561,6 +561,9 @@ func (s *PatchTeamReq) Validate() error {
 
 	var failures []validate.FieldError
 	if err := func() error {
+		if s.Members == nil {
+			return nil // optional
+		}
 		if err := (validate.Array{
 			MinLength:    1,
 			MinLengthSet: true,
@@ -577,6 +580,9 @@ func (s *PatchTeamReq) Validate() error {
 		})
 	}
 	if err := func() error {
+		if s.GithubIds == nil {
+			return nil // optional
+		}
 		if err := (validate.Array{
 			MinLength:    0,
 			MinLengthSet: false,
@@ -740,6 +746,9 @@ func (s *Team) Validate() error {
 		})
 	}
 	if err := func() error {
+		if s.GithubIds == nil {
+			return nil // optional
+		}
 		if err := (validate.Array{
 			MinLength:    0,
 			MinLengthSet: false,
