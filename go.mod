@@ -21,7 +21,7 @@ require (
 	github.com/labstack/echo-contrib v0.17.4
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/ogen-go/ogen v1.14.0
-	github.com/samber/lo v1.50.0
+	github.com/samber/lo v1.51.0
 	github.com/spf13/pflag v1.0.6
 	github.com/stephenafamo/bob v0.38.0
 	github.com/stephenafamo/scan v0.6.2
