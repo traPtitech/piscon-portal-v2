@@ -83,6 +83,45 @@ func (c *MockUseCaseCreateBenchmarkCall) DoAndReturn(f func(context.Context, uui
 	return c
 }
 
+// CreateDocument mocks base method.
+func (m *MockUseCase) CreateDocument(ctx context.Context, body string) (domain.Document, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateDocument", ctx, body)
+	ret0, _ := ret[0].(domain.Document)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateDocument indicates an expected call of CreateDocument.
+func (mr *MockUseCaseMockRecorder) CreateDocument(ctx, body any) *MockUseCaseCreateDocumentCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateDocument", reflect.TypeOf((*MockUseCase)(nil).CreateDocument), ctx, body)
+	return &MockUseCaseCreateDocumentCall{Call: call}
+}
+
+// MockUseCaseCreateDocumentCall wrap *gomock.Call
+type MockUseCaseCreateDocumentCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockUseCaseCreateDocumentCall) Return(arg0 domain.Document, arg1 error) *MockUseCaseCreateDocumentCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockUseCaseCreateDocumentCall) Do(f func(context.Context, string) (domain.Document, error)) *MockUseCaseCreateDocumentCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockUseCaseCreateDocumentCall) DoAndReturn(f func(context.Context, string) (domain.Document, error)) *MockUseCaseCreateDocumentCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // CreateInstance mocks base method.
 func (m *MockUseCase) CreateInstance(ctx context.Context, teamID uuid.UUID) (domain.Instance, error) {
 	m.ctrl.T.Helper()

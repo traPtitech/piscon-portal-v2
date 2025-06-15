@@ -6,6 +6,7 @@ import (
 	_ "embed"
 	"fmt"
 	"math/rand/v2"
+	"net/url"
 	"os"
 	"testing"
 	"time"
@@ -52,7 +53,8 @@ func setupRepository(t *testing.T) (*dbrepo.Repository, bob.Executor) {
 	if err := createDatabase(dbName); err != nil {
 		t.Fatal(err)
 	}
-	connection := mysqlContainer.MustConnectionString(ctx, "parseTime=true", "loc=Local")
+
+	connection := mysqlContainer.MustConnectionString(ctx, "parseTime=true", url.QueryEscape("loc=Local"))
 	db, err := sql.Open("mysql", connection)
 	if err != nil {
 		t.Fatal(err)

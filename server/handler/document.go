@@ -34,3 +34,21 @@ func (h *Handler) GetDocument(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, body)
 }
+
+func (h *Handler) PatchDocument(c echo.Context) error {
+	var body openapi.PatchDocsReq
+	if err := c.Bind(&body); err != nil {
+		return badRequestResponse(c, err.Error())
+	}
+
+	doc, err := h.useCase.CreateDocument(c.Request().Context(), string(body.Body))
+	if err != nil {
+		return internalServerErrorResponse(c, err)
+	}
+
+	res := openapi.PatchDocsOK{
+		Body: openapi.NewOptMarkdownDocument(openapi.MarkdownDocument(doc.Body)),
+	}
+
+	return c.JSON(http.StatusOK, res)
+}
