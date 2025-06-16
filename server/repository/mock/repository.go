@@ -119,6 +119,45 @@ func (c *MockRepositoryCreateBenchmarkCall) DoAndReturn(f func(context.Context, 
 	return c
 }
 
+// CreateDocument mocks base method.
+func (m *MockRepository) CreateDocument(ctx context.Context, id uuid.UUID, body string) (domain.Document, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateDocument", ctx, id, body)
+	ret0, _ := ret[0].(domain.Document)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateDocument indicates an expected call of CreateDocument.
+func (mr *MockRepositoryMockRecorder) CreateDocument(ctx, id, body any) *MockRepositoryCreateDocumentCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateDocument", reflect.TypeOf((*MockRepository)(nil).CreateDocument), ctx, id, body)
+	return &MockRepositoryCreateDocumentCall{Call: call}
+}
+
+// MockRepositoryCreateDocumentCall wrap *gomock.Call
+type MockRepositoryCreateDocumentCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockRepositoryCreateDocumentCall) Return(arg0 domain.Document, arg1 error) *MockRepositoryCreateDocumentCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockRepositoryCreateDocumentCall) Do(f func(context.Context, uuid.UUID, string) (domain.Document, error)) *MockRepositoryCreateDocumentCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockRepositoryCreateDocumentCall) DoAndReturn(f func(context.Context, uuid.UUID, string) (domain.Document, error)) *MockRepositoryCreateDocumentCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // CreateInstance mocks base method.
 func (m *MockRepository) CreateInstance(ctx context.Context, instance domain.Instance) error {
 	m.ctrl.T.Helper()

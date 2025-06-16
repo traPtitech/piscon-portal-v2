@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
 )
@@ -13,6 +14,8 @@ type DocumentUseCase interface {
 	// GetDocument retrieves the document.
 	// If the document does not exist, it returns ErrNotFound.
 	GetDocument(ctx context.Context) (domain.Document, error)
+	// CreateDocument creates a new document with the given body.
+	CreateDocument(ctx context.Context, body string) (domain.Document, error)
 }
 
 type docUseCaseImpl struct {
@@ -30,6 +33,16 @@ func (u *docUseCaseImpl) GetDocument(ctx context.Context) (domain.Document, erro
 	}
 	if err != nil {
 		return domain.Document{}, fmt.Errorf("get document: %w", err)
+	}
+
+	return doc, nil
+}
+
+func (u *docUseCaseImpl) CreateDocument(ctx context.Context, body string) (domain.Document, error) {
+	docID := uuid.New()
+	doc, err := u.repo.CreateDocument(ctx, docID, body)
+	if err != nil {
+		return domain.Document{}, fmt.Errorf("create document: %w", err)
 	}
 
 	return doc, nil
