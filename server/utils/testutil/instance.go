@@ -17,3 +17,15 @@ func CompareInstance(t *testing.T, want, got domain.Instance) {
 	assert.Equal(t, want.Infra.PrivateIP, got.Infra.PrivateIP, "instance.Infra.PrivateIP mismatch")
 	assert.Equal(t, want.Infra.PublicIP, got.Infra.PublicIP, "instance.Infra.PublicIP mismatch")
 }
+
+func ContainsInstance(t *testing.T, instances []domain.Instance, want domain.Instance) {
+	t.Helper()
+
+	for _, instance := range instances {
+		if instance.ID == want.ID {
+			CompareInstance(t, want, instance)
+			return
+		}
+	}
+	t.Errorf("instance with ID %s not found", want.ID)
+}
