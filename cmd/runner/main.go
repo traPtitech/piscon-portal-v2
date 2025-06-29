@@ -11,16 +11,18 @@ import (
 	"github.com/traPtitech/piscon-portal-v2/runner"
 	"github.com/traPtitech/piscon-portal-v2/runner/benchmarker"
 	benchImpl "github.com/traPtitech/piscon-portal-v2/runner/benchmarker/impl"
+	privateisu "github.com/traPtitech/piscon-portal-v2/runner/benchmarker/impl/private_isu"
 	portalGrpc "github.com/traPtitech/piscon-portal-v2/runner/portal/grpc"
 	grpc "google.golang.org/grpc"
 )
 
 const (
-	problemExample string = "example"
+	problemExample    string = "example"
+	problemPrivateIsu string = "private_isu"
 )
 
 var (
-	problems = []string{problemExample}
+	problems = []string{problemExample, problemPrivateIsu}
 	target   = pflag.StringP("target", "t", "", "portal server address (host:port)")
 	problem  = pflag.StringP("problem", "p", "", fmt.Sprintf("problem name: one of %v", problems))
 	help     = pflag.BoolP("help", "h", false, "show help (this message)")
@@ -28,6 +30,9 @@ var (
 	problemBenchmarks = map[string]func(config map[string]any) benchmarker.Benchmarker{
 		problemExample: func(_ map[string]any) benchmarker.Benchmarker {
 			return benchImpl.NewExample()
+		},
+		problemPrivateIsu: func(_ map[string]any) benchmarker.Benchmarker {
+			return privateisu.New()
 		},
 	}
 )
