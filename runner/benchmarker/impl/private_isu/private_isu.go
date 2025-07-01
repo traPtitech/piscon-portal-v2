@@ -75,7 +75,7 @@ func (b *PrivateIsu) Wait(_ context.Context) (domain.Result, time.Time, error) {
 	endTime := time.Now()
 
 	var stdout stdOut
-	err := json.Unmarshal([]byte(b.stdout), &b)
+	err := json.Unmarshal([]byte(b.stdout), &stdout)
 	if err != nil {
 		return domain.ResultError, endTime, fmt.Errorf("unmarshal stdout: %w", err)
 	}
