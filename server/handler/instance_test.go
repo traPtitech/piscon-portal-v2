@@ -235,7 +235,7 @@ func TestPatchTeamInstance(t *testing.T) {
 		{
 			name: "bad request",
 			body: openapi.PatchTeamInstanceReq{Operation: openapi.InstanceOperation("invalid")},
-			mockSetup: func(m *usecasemock.MockUseCase) {
+			mockSetup: func(_ *usecasemock.MockUseCase) {
 				// no call expected
 			},
 			expectedCode: http.StatusBadRequest,
