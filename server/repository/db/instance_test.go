@@ -2,6 +2,7 @@ package db_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -26,6 +27,7 @@ func TestFindInstance(t *testing.T) {
 			PrivateIP: "192.0.2.0",
 			PublicIP:  "192.0.2.0",
 		},
+		CreatedAt: time.Now(),
 	}
 	mustMakeInstance(t, db, instance)
 
@@ -61,6 +63,7 @@ func TestCreateInstance(t *testing.T) {
 			PrivateIP: "10.0.0.1",
 			PublicIP:  "203.0.113.1",
 		},
+		CreatedAt: time.Now(),
 	}
 
 	err := repo.CreateInstance(t.Context(), instance)
@@ -87,6 +90,7 @@ func TestUpdateInstance(t *testing.T) {
 			PrivateIP: "10.0.0.2",
 			PublicIP:  "203.0.113.2",
 		},
+		CreatedAt: time.Now(),
 	}
 	mustMakeInstance(t, db, instance)
 
@@ -115,6 +119,7 @@ func TestUpdateInstance_NotFound(t *testing.T) {
 			PrivateIP: "10.0.0.99",
 			PublicIP:  "203.0.113.99",
 		},
+		CreatedAt: time.Now(),
 	}
 	err := repo.UpdateInstance(t.Context(), instance)
 	assert.ErrorIs(t, err, repository.ErrNotFound)
@@ -137,6 +142,7 @@ func TestGetTeamInstances(t *testing.T) {
 				PrivateIP: "10.0.0.4",
 				PublicIP:  "203.0.113.4",
 			},
+			CreatedAt: time.Now(),
 		},
 		{
 			ID:     uuid.New(),
@@ -147,6 +153,7 @@ func TestGetTeamInstances(t *testing.T) {
 				PrivateIP: "10.0.0.5",
 				PublicIP:  "203.0.113.5",
 			},
+			CreatedAt: time.Now(),
 		},
 		{
 			ID:     uuid.New(),
@@ -157,6 +164,7 @@ func TestGetTeamInstances(t *testing.T) {
 				PrivateIP: "10.0.0.6",
 				PublicIP:  "203.0.113.6",
 			},
+			CreatedAt: time.Now(),
 		},
 	}
 	for _, inst := range instances {
@@ -185,6 +193,7 @@ func TestGetAllInstances(t *testing.T) {
 				PrivateIP: "10.0.0.7",
 				PublicIP:  "203.0.113.7",
 			},
+			CreatedAt: time.Now(),
 		},
 		{
 			ID:     uuid.New(),
@@ -195,6 +204,7 @@ func TestGetAllInstances(t *testing.T) {
 				PrivateIP: "10.0.0.8",
 				PublicIP:  "203.0.113.8",
 			},
+			CreatedAt: time.Now(),
 		},
 	}
 	for _, inst := range instances {
