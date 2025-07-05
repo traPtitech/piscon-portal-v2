@@ -32,6 +32,14 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
+    develop:
+      watch:
+        - path: ./server
+          action: "rebuild"
+        - path: ./cmd/server
+          action: "rebuild"
+        - path: ./gen
+          action: "rebuild"
 
   runner:
     build:
@@ -44,3 +52,11 @@ services:
         condition: service_healthy
     volumes:
       - ./runner/benchmarker/impl/example.sh:/bin/example.sh
+    develop:
+      watch:
+        - path: ./runner
+          action: "rebuild"
+        - path: ./cmd/runner
+          action: "rebuild"
+        - path: ./gen
+          action: "rebuild"
