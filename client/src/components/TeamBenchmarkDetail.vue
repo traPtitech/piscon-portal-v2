@@ -42,38 +42,34 @@ watch(
 
 <template>
   <div class="team-bench-detail-container">
-    <MainButton
-      @click="reEnqueueBenchmark"
-      class="bench-re-enqueue-button"
-      :disabled="!canReEnqueue"
-      v-tooltip.bottom="
-        !canReEnqueue
-          ? {
-              value: '現在実行中のベンチマークがあるため、新しいベンチマークを実行できません',
-              pt: {
-                arrow: {
-                  style: {
-                    borderBottomColor: 'rgba(var(--ct-slate-800-rgb), 0.9)',
-                  },
-                },
-                text: {
-                  style: {
-                    color: 'var(--ct-slate-100)',
-                    backgroundColor: 'rgba(var(--ct-slate-800-rgb), 0.9)',
-                    fontSize: '0.875rem',
-                  },
-                },
-              },
-            }
-          : ''
-      "
-    >
+    <MainButton @click="reEnqueueBenchmark" class="bench-re-enqueue-button" :disabled="!canReEnqueue" v-tooltip.bottom="!canReEnqueue
+      ? {
+        value: '現在実行中のベンチマークがあるため、新しいベンチマークを実行できません',
+        pt: {
+          arrow: {
+            style: {
+              borderBottomColor: 'rgba(var(--ct-slate-800-rgb), 0.9)',
+            },
+          },
+          text: {
+            style: {
+              color: 'var(--ct-slate-100)',
+              backgroundColor: 'rgba(var(--ct-slate-800-rgb), 0.9)',
+              fontSize: '0.875rem',
+            },
+          },
+        },
+      }
+      : ''
+      ">
       <Icon icon="mdi:thunder" width="20" height="20" />
       <span>ベンチマーク再実行</span>
     </MainButton>
     <ErrorMessage v-if="benchError" :error="benchError" />
     <BenchmarkDetail v-else-if="bench !== undefined" :bench="bench" :instances="instances ?? []" />
   </div>
+  <ErrorMessage v-if="benchError" :error="benchError" />
+  <BenchmarkDetail v-else-if="bench !== undefined" :bench="bench" :instances="instances ?? []" />
 </template>
 
 <style scoped>
