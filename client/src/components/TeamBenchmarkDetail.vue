@@ -1,13 +1,7 @@
 <script setup lang="ts">
+import { useTeamBench, useTeamBenches, useEnqueueBenchmark, useTeamInstances } from '@/lib/useServerData';
 import { Icon } from '@iconify/vue'
-import {
-  useEnqueueBenchmark,
-  useTeamBench,
-  useTeamBenches,
-  useTeamInstances,
-} from '@/lib/useServerData'
-import { computed, watch } from 'vue'
-
+import { computed, watch } from 'vue';
 const { teamId, benchId } = defineProps<{
   teamId: string
   benchId: string
@@ -68,8 +62,6 @@ watch(
     <ErrorMessage v-if="benchError" :error="benchError" />
     <BenchmarkDetail v-else-if="bench !== undefined" :bench="bench" :instances="instances ?? []" />
   </div>
-  <ErrorMessage v-if="benchError" :error="benchError" />
-  <BenchmarkDetail v-else-if="bench !== undefined" :bench="bench" :instances="instances ?? []" />
 </template>
 
 <style scoped>
