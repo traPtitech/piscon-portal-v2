@@ -28,6 +28,7 @@ onUnmounted(() => {
     <div class="team-benchmark-list-actions">
       <BenchmarkRunner :teamId="teamId" :benches="benches ?? []" :instances="instances ?? []" />
       <SingleTeamScoreChart :benches="benches ?? []" />
+      <div />
     </div>
     <ErrorMessage v-if="benchesError" :error="benchesError" />
     <BenchmarkList v-else :benches="benches ?? []" :instances="instances ?? []" />
