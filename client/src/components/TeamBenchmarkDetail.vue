@@ -15,7 +15,7 @@ watch(
   () => {
     if (bench.value?.status === 'running' || bench.value?.status === 'waiting') {
       const interval = setInterval(() => {
-        refetch()
+        void refetch()
       }, 1000)
       return () => clearInterval(interval)
     }

@@ -15,7 +15,7 @@ const visibleInstances = computed(() =>
 setInterval(() => {
   const loadingStatuses = ['building', 'starting', 'stopping', 'deleting']
   if (instances.value?.some((i) => loadingStatuses.includes(i.status))) {
-    refetch()
+    void refetch()
   }
 }, 500)
 </script>

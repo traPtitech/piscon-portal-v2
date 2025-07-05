@@ -307,7 +307,7 @@ export const handlers = [
     type Body =
       paths['/teams/{teamId}/instances/{instanceId}']['patch']['requestBody']['content']['application/json']
     const body = (await c.request.json()) as Body
-    const operation = body.operation as 'start' | 'stop'
+    const operation = body.operation
     if (operation === 'start') {
       if (instances[index].status === 'stopped') {
         instances[index] = { ...instances[index], status: 'starting' }
@@ -399,8 +399,8 @@ export const handlers = [
       b: components['schemas']['FinishedBenchmark'],
     ) => {
       // スコアの降順
-      if (a.score! < b.score!) return 1
-      if (a.score! > b.score!) return -1
+      if (a.score < b.score) return 1
+      if (a.score > b.score) return -1
       // スコアが同じなら、作成日時の昇順
       if (new Date(a.createdAt) > new Date(b.createdAt)) return 1
       return -1
