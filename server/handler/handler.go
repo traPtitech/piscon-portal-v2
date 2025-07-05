@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"net/http"
 	"net/url"
 
 	"github.com/labstack/echo/v4"
@@ -55,6 +56,10 @@ func New(useCase usecase.UseCase, repo repository.Repository, config Config) (*H
 func (h *Handler) SetupRoutes(e *echo.Echo) {
 	api := e.Group("/api")
 	h.sessionManager.Init(api)
+
+	api.GET("/health", func(c echo.Context) error {
+		return c.NoContent(http.StatusOK)
+	})
 
 	api.GET("/oauth2/code", h.GetOauth2Code)
 	api.GET("/oauth2/callback", h.Oauth2Callback)

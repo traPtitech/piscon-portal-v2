@@ -14,6 +14,7 @@ import (
 	privateisu "github.com/traPtitech/piscon-portal-v2/runner/benchmarker/impl/private_isu"
 	portalGrpc "github.com/traPtitech/piscon-portal-v2/runner/portal/grpc"
 	grpc "google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 const (
@@ -60,7 +61,8 @@ func main() {
 		log.Fatalf("validation error: %v", err)
 	}
 
-	conn, err := grpc.NewClient(*target)
+	conn, err := grpc.NewClient(*target,
+		grpc.WithTransportCredentials(insecure.NewCredentials())) //TODO: TLS を有効にする
 	if err != nil {
 		log.Fatalf("failed to connect: %v", err)
 	}
@@ -77,6 +79,8 @@ func main() {
 	}
 
 	r := runner.Prepare(p, bench(benchConfig))
+
+	log.Printf("runner started: target=%s, problem=%s\n", *target, *problem)
 
 	for {
 		if err := r.Run(); err != nil {

@@ -4,14 +4,6 @@ env:
   GOEXPERIMENT: "synctest"
 
 tasks:
-  run-server:
-    dotenv:
-      - .env
-    deps:
-      - up-db
-    cmds:
-      - go run cmd/server/main.go
-
   test:
     cmds:
       - go test -cover -race ./...
@@ -52,6 +44,26 @@ tasks:
       - task: go:gen
       - task: runner:gen
       - task: proto:gen
+
+  up:
+    cmds:
+      - docker compose up --detach --build
+    desc: アプリ全体を起動する
+
+  dev:
+    cmds:
+      - docker compose watch
+    desc: ホットリロード付きでアプリ全体を起動する
+
+  down:
+    cmds:
+      - docker compose down
+    desc: アプリ全体を停止する
+
+  logs:
+    cmds:
+      - docker compose logs --follow {{.CLI_ARGS}}
+    desc: コンテナのログを表示する。 task logs -- {コンテナ名} で特定のコンテナのログを表示できる
 
   up-db:
     cmds:

@@ -13,3 +13,50 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  portal:
+    build:
+      context: .
+      dockerfile: portal.Dockerfile
+    ports:
+      - 8080:8080
+    depends_on:
+      db:
+        condition: service_healthy
+    expose:
+      - 50051
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:8080/api/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    develop:
+      watch:
+        - path: ./server
+          action: "rebuild"
+        - path: ./cmd/server
+          action: "rebuild"
+        - path: ./gen
+          action: "rebuild"
+
+  runner:
+    build:
+      context: .
+      dockerfile: runner.Dockerfile
+    entrypoint:
+      ["/bin/runner", "--target", "portal:50051", "--problem", "example"]
+    depends_on:
+      portal:
+        condition: service_healthy
+    volumes:
+      - ./runner/benchmarker/impl/example.sh:/bin/example.sh
+    develop:
+      watch:
+        - path: ./runner
+          action: "rebuild"
+        - path: ./cmd/runner
+          action: "rebuild"
+        - path: ./gen
+          action: "rebuild"
