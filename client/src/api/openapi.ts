@@ -635,7 +635,7 @@ export interface components {
       rank: number
       teamId: components['schemas']['TeamId']
       score: components['schemas']['Score']
-      createdAt?: components['schemas']['CreatedAt']
+      createdAt: components['schemas']['CreatedAt']
     }
     /**
      * @description Markdown形式のドキュメント
