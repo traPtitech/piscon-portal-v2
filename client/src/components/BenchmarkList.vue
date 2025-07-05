@@ -67,10 +67,7 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
         </div>
         <div v-else class="bench-score-loading">待機中</div>
         <div class="bench-date list-datetime">
-          <time
-            :datetime="bench.createdAt"
-            :title="formatDate(bench.createdAt, 'YYYY/MM/DD hh:mm:ss.SSS')"
-          >
+          <time :datetime="bench.createdAt" :title="formatDate(bench.createdAt, 'YYYY/MM/DD hh:mm:ss.SSS')">
             {{ formatRelativeDate(bench.createdAt) }}
           </time>
         </div>
@@ -87,10 +84,7 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
           <BenchmarkStatusChip :status="bench.status" />
         </div>
         <div>
-          <NavigationLink
-            :to="isAdmin ? `/admin/benches/${bench.id}` : `/benches/${bench.id}`"
-            class="bench-link"
-          >
+          <NavigationLink :to="isAdmin ? `/admin/benches/${bench.id}` : `/benches/${bench.id}`" class="bench-link">
             <span>詳細を見る</span>
             <Icon icon="mdi:chevron-right" width="24" height="24" />
           </NavigationLink>
@@ -105,6 +99,7 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
   width: 100%;
   container-type: inline-size;
 }
+
 .bench-list {
   width: 100%;
   display: grid;
@@ -119,7 +114,7 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
   align-items: center;
 }
 
-.bench-list > div {
+.bench-list>div {
   border-bottom: 1px solid var(--ct-slate-300);
   padding: 0.5rem 1rem;
   display: flex;
@@ -134,6 +129,7 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
 .bench-score {
   font-weight: 700;
 }
+
 .bench-score-loading {
   color: var(--ct-slate-500);
   font-size: 0.8rem;
@@ -142,6 +138,7 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
 .bench-date {
   font-size: 0.9rem;
 }
+
 .bench-server {
   font-size: 0.9rem;
 }
@@ -167,6 +164,7 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
   .bench-list {
     grid-template-columns: repeat(v-bind(columns-1), auto);
   }
+
   .list-datetime.list-datetime {
     display: none;
   }
@@ -176,6 +174,7 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
   .bench-list {
     grid-template-columns: repeat(v-bind(columns-2), auto);
   }
+
   .list-server.list-server {
     display: none;
   }
@@ -185,6 +184,7 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
   .bench-list {
     grid-template-columns: repeat(v-bind(columns-3), auto);
   }
+
   .list-user.list-user {
     display: none;
   }
