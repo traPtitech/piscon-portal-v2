@@ -9,7 +9,7 @@ const showDeleted = ref(false)
 const { data: instances, refetch } = useTeamInstances(teamId)
 
 const visibleInstances = computed(() =>
-  instances.value?.filter((i) => showDeleted.value || i.status !== 'deleted'),
+  instances.value ? instances.value.filter((i) => showDeleted.value || i.status !== 'deleted') : [],
 )
 
 setInterval(() => {
