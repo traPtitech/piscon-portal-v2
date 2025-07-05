@@ -44,7 +44,6 @@ const enqueueBenchmark = (instanceId: string | null) => {
       <MainButton :disabled="targetInstanceId === null || isPending || !canEnqueue" variant="primary"
         @click="enqueueBenchmark(targetInstanceId)" class="benchmark-runner-button">
         <Icon icon="mdi:thunder" width="24" height="24" />
-
         <span>実行</span>
       </MainButton>
     </div>
