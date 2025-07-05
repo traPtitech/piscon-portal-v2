@@ -1,7 +1,12 @@
-import { apiBaseUrl } from '@/api'
-import { http, HttpResponse } from 'msw'
-import type { components, paths } from '@/api/openapi'
+import { HttpResponse } from 'msw'
 import { uuidv7 } from 'uuidv7'
+import { createOpenApiHttp } from 'openapi-msw'
+import type { components, paths } from '@/api/openapi'
+import { apiBaseUrl } from '@/api'
+
+const http = createOpenApiHttp<paths>({
+  baseUrl: apiBaseUrl,
+})
 
 const userIds = {
   cp20: '01943f2e-0dca-7599-9f79-901de49660fd',
@@ -216,21 +221,23 @@ const code = 'Hello, world!';
 `
 
 export const handlers = [
-  http.get(`${apiBaseUrl}/oauth2/code`, () => {
+  http.get(`/oauth2/code`, () => {
     // TODO
   }),
-  http.get(`${apiBaseUrl}/oauth2/callback`, () => {
+  http.get(`/oauth2/callback`, () => {
     // TODO
   }),
-  http.get(`${apiBaseUrl}/oauth2/logout`, () => {
+  http.post(`/oauth2/logout`, () => {
     // TODO
   }),
-  http.get(`${apiBaseUrl}/users`, () => HttpResponse.json(users)),
-  http.get(`${apiBaseUrl}/users/me`, () => HttpResponse.json(users[0])),
-  http.get(`${apiBaseUrl}/teams`, () => HttpResponse.json(teams)),
-  http.post(`${apiBaseUrl}/teams`, async (c) => {
-    type Body = NonNullable<paths['/teams']['post']['requestBody']>['content']['application/json']
-    const body = (await c.request.json()) as Body
+  http.get(`/users`, () => HttpResponse.json(users)),
+  http.get(`/users/me`, () => HttpResponse.json(users[0])),
+  http.get(`/teams`, () => HttpResponse.json(teams)),
+  http.post(`/teams`, async (c) => {
+    const body = await c.request.json()
+    if (body === undefined) {
+      return HttpResponse.json({ message: 'Bad request' }, { status: 400 })
+    }
     const newTeam: components['schemas']['Team'] = {
       id: uuidv7(),
       name: body.name,
@@ -244,44 +251,53 @@ export const handlers = [
     }
     return HttpResponse.json(newTeam)
   }),
-  http.get(new RegExp(`${apiBaseUrl}/teams/([^/]+)$`), (c) => {
-    const teamId = c.params[0] as string
+  http.get('/teams/{teamId}', (c) => {
+    const teamId = c.params.teamId
     const team = teams.find((t) => t.id === teamId)
     if (team === undefined) return HttpResponse.json({ message: 'Not found' }, { status: 404 })
     return HttpResponse.json(team)
   }),
-  http.patch(new RegExp(`${apiBaseUrl}/teams/([^/]+)$`), async (c) => {
-    const teamId = c.params[0] as string
+  http.patch('/teams/{teamId}', async (c) => {
+    const teamId = c.params.teamId
     const team = teams.find((t) => t.id === teamId)
     if (team === undefined) return HttpResponse.json({ message: 'Not found' }, { status: 404 })
 
-    const body = (await c.request.json()) as { name: string; members: string[] }
-    team.name = body.name
-    const oldMembers = team.members
-    team.members = body.members
-
-    const removedMembers = oldMembers.filter((m) => !body.members.includes(m))
-    for (const member of removedMembers) {
-      const user = users.find((u) => u.id === member)
-      if (user !== undefined) user.teamId = undefined
+    const body = await c.request.json()
+    if (body === undefined) {
+      return HttpResponse.json({ message: 'Bad request' }, { status: 400 })
     }
-    const addedMembers = body.members.filter((m) => !oldMembers.includes(m))
-    for (const member of addedMembers) {
-      const user = users.find((u) => u.id === member)
-      if (user !== undefined) user.teamId = teamId
+
+    if (body.name !== undefined) {
+      team.name = body.name
+    }
+
+    if (body.members !== undefined) {
+      const oldMembers = team.members
+      team.members = body.members
+
+      const removedMembers = oldMembers.filter((m) => !body.members!.includes(m))
+      for (const member of removedMembers) {
+        const user = users.find((u) => u.id === member)
+        if (user !== undefined) user.teamId = undefined
+      }
+      const addedMembers = body.members.filter((m) => !oldMembers.includes(m))
+      for (const member of addedMembers) {
+        const user = users.find((u) => u.id === member)
+        if (user !== undefined) user.teamId = teamId
+      }
     }
 
     return HttpResponse.json(team)
   }),
-  http.get(new RegExp(`${apiBaseUrl}/teams/([^/]+)/instances`), (c) => {
-    const teamId = c.params[0] as string
+  http.get('/teams/{teamId}/instances', (c) => {
+    const teamId = c.params.teamId
     const team = teams.find((t) => t.id === teamId)
     if (team === undefined) return HttpResponse.json({ message: 'Not found' }, { status: 404 })
     const res = instances.filter((i) => i.teamId === teamId)
     return HttpResponse.json(res)
   }),
-  http.post(new RegExp(`${apiBaseUrl}/teams/([^/]+)/instances`), (c) => {
-    const teamId = c.params[0] as string
+  http.post('/teams/{teamId}/instances', (c) => {
+    const teamId = c.params.teamId
     const newServerId = instances.reduce((max, i) => Math.max(max, i.serverId), 0) + 1
     const newInstance: components['schemas']['Instance'] = {
       id: uuidv7(),
@@ -294,19 +310,17 @@ export const handlers = [
     }
     instances.push(newInstance)
   }),
-  http.delete(new RegExp(`${apiBaseUrl}/teams/([^/]+)/instances/([^/]+)`), (c) => {
-    const teamId = c.params[0] as string
-    const instanceId = c.params[1] as string
+  http.delete('/teams/{teamId}/instances/{instanceId}', (c) => {
+    const teamId = c.params.teamId
+    const instanceId = c.params.instanceId
     const index = instances.findIndex((i) => i.teamId === teamId && i.id === instanceId)
     instances[index] = { ...instances[index], status: 'deleting' }
   }),
-  http.patch(new RegExp(`${apiBaseUrl}/teams/([^/]+)/instances/([^/]+)`), async (c) => {
-    const teamId = c.params[0] as string
-    const instanceId = c.params[1] as string
+  http.patch('/teams/{teamId}/instances/{instanceId}', async (c) => {
+    const teamId = c.params.teamId
+    const instanceId = c.params.instanceId
     const index = instances.findIndex((i) => i.teamId === teamId && i.id === instanceId)
-    type Body =
-      paths['/teams/{teamId}/instances/{instanceId}']['patch']['requestBody']['content']['application/json']
-    const body = (await c.request.json()) as Body
+    const body = await c.request.json()
     const operation = body.operation
     if (operation === 'start') {
       if (instances[index].status === 'stopped') {
@@ -322,12 +336,12 @@ export const handlers = [
     }
     return HttpResponse.json({ message: 'Bad request' }, { status: 400 })
   }),
-  http.get(`${apiBaseUrl}/instances`, () => HttpResponse.json(instances)),
-  http.post(`${apiBaseUrl}/benchmarks`, async (c) => {
-    type Body = NonNullable<
-      paths['/benchmarks']['post']['requestBody']
-    >['content']['application/json']
-    const body = (await c.request.json()) as Body
+  http.get(`/instances`, () => HttpResponse.json(instances)),
+  http.post(`/benchmarks`, async (c) => {
+    const body = await c.request.json()
+    if (body === undefined) {
+      return HttpResponse.json({ message: 'Bad request' }, { status: 400 })
+    }
 
     const instance = instances.find((i) => i.id === body.instanceId)
     if (instance === undefined) return HttpResponse.json({ message: 'Not found' }, { status: 404 })
@@ -348,35 +362,35 @@ export const handlers = [
     benchmarks.push(benchmark)
     return HttpResponse.json(benchmark, { status: 201 })
   }),
-  http.get(`${apiBaseUrl}/benchmarks`, () => HttpResponse.json(benchmarks)),
-  http.get(`${apiBaseUrl}/benchmarks/queue`, () => {
+  http.get(`/benchmarks`, () => HttpResponse.json(benchmarks)),
+  http.get(`/benchmarks/queue`, () => {
     const res = benchmarks.filter((b) => b.status === 'waiting' || b.status === 'running')
     return HttpResponse.json(res)
   }),
-  http.get(new RegExp(`${apiBaseUrl}/teams/([^/]+)/benchmarks$`), (c) => {
-    const teamId = c.params[0] as string
+  http.get('/teams/{teamId}/benchmarks', (c) => {
+    const teamId = c.params.teamId
     const team = teams.find((t) => t.id === teamId)
     if (team === undefined) return HttpResponse.json({ message: 'Not found' }, { status: 404 })
     const res = benchmarks.filter((b) => b.teamId === teamId)
     return HttpResponse.json(res)
   }),
-  http.get(new RegExp(`${apiBaseUrl}/teams/([^/]+)/benchmarks/([^/]+)`), (c) => {
-    const teamId = c.params[0] as string
+  http.get('/teams/{teamId}/benchmarks/{benchmarkId}', (c) => {
+    const teamId = c.params.teamId
     const team = teams.find((t) => t.id === teamId)
     if (team === undefined) return HttpResponse.json({ message: 'Not found' }, { status: 404 })
-    const benchmarkId = c.params[1] as string
+    const benchmarkId = c.params.benchmarkId
     const benchmark = benchmarks.find((b) => b.teamId === teamId && b.id === benchmarkId)
     if (benchmark === undefined) return HttpResponse.json({ message: 'Not found' }, { status: 404 })
     const { adminLog: _, ...res } = benchmark
     return HttpResponse.json(res)
   }),
-  http.get(new RegExp(`${apiBaseUrl}/benchmarks/([^/]+)`), (c) => {
-    const benchmarkId = c.params[0] as string
+  http.get('/benchmarks/{benchmarkId}', (c) => {
+    const benchmarkId = c.params.benchmarkId
     const benchmark = benchmarks.find((b) => b.id === benchmarkId)
     if (benchmark === undefined) return HttpResponse.json({ message: 'Not found' }, { status: 404 })
     return HttpResponse.json(benchmark)
   }),
-  http.get(`${apiBaseUrl}/scores`, () => {
+  http.get(`/scores`, () => {
     const res: paths['/scores']['get']['responses']['200']['content']['application/json'] =
       teams.map((team) => ({
         teamId: team.id,
@@ -393,7 +407,7 @@ export const handlers = [
 
     return HttpResponse.json(res)
   }),
-  http.get(`${apiBaseUrl}/scores/ranking`, () => {
+  http.get(`/scores/ranking`, () => {
     const sortFn = (
       a: components['schemas']['FinishedBenchmark'],
       b: components['schemas']['FinishedBenchmark'],
@@ -424,9 +438,8 @@ export const handlers = [
 
     return HttpResponse.json(res)
   }),
-  http.put(`${apiBaseUrl}/admins`, async (c) => {
-    type Body = paths['/admins']['put']['requestBody']['content']['application/json']
-    const body = (await c.request.json()) as Body
+  http.put(`/admins`, async (c) => {
+    const body = await c.request.json()
 
     for (const user of users) {
       user.isAdmin = body.includes(user.id)
@@ -434,14 +447,14 @@ export const handlers = [
 
     return HttpResponse.json({})
   }),
-  http.get(`${apiBaseUrl}/docs`, () => {
+  http.get(`/docs`, () => {
     const res: paths['/docs']['get']['responses']['200']['content']['application/json'] = {
       body: docs,
     }
 
     return HttpResponse.json(res)
   }),
-  http.patch(`${apiBaseUrl}/docs`, () => {
+  http.patch(`/docs`, () => {
     // TODO
   }),
 ]
