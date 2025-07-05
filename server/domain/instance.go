@@ -2,15 +2,17 @@ package domain
 
 import (
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
 )
 
 type Instance struct {
-	ID     uuid.UUID
-	TeamID uuid.UUID
-	Index  int
-	Infra  InfraInstance
+	ID        uuid.UUID
+	TeamID    uuid.UUID
+	Index     int
+	Infra     InfraInstance
+	CreatedAt time.Time
 }
 
 type InfraInstance struct {
@@ -71,10 +73,11 @@ func (f *InstanceFactory) Create(teamID uuid.UUID, existing []Instance) (Instanc
 	}
 
 	instance := Instance{
-		ID:     uuid.New(),
-		TeamID: teamID,
-		Index:  index,
-		Infra:  InfraInstance{}, // initialize with empty InfraInstance
+		ID:        uuid.New(),
+		TeamID:    teamID,
+		Index:     index,
+		Infra:     InfraInstance{}, // initialize with empty InfraInstance
+		CreatedAt: time.Now(),
 	}
 	return instance, nil
 }

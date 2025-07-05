@@ -113,6 +113,7 @@ func toDomainInstance(instance *models.Instance) (domain.Instance, error) {
 			PrivateIP: instance.PrivateIP.V,
 			PublicIP:  instance.PublicIP.V,
 		},
+		CreatedAt: instance.CreatedAt,
 	}, nil
 }
 
@@ -170,6 +171,7 @@ func buildInstanceSetter(instance domain.Instance) (*models.InstanceSetter, erro
 		Status:         &status,
 		PublicIP:       ToSQLNull(instance.Infra.PublicIP),
 		PrivateIP:      ToSQLNull(instance.Infra.PrivateIP),
+		CreatedAt:      lo.Ternary(!instance.CreatedAt.IsZero(), &instance.CreatedAt, nil),
 	}
 	return setter, nil
 }

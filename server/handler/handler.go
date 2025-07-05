@@ -76,6 +76,13 @@ func (h *Handler) SetupRoutes(e *echo.Echo) {
 	teams.PATCH("/:teamID", h.UpdateTeam, h.TeamOrAdminAuthMiddleware())
 	teams.GET("/:teamID/benchmarks", h.GetTeamBenchmarks, h.TeamOrAdminAuthMiddleware())
 	teams.GET("/:teamID/benchmarks/:benchmarkID", h.GetTeamBenchmark, h.TeamOrAdminAuthMiddleware())
+	teams.GET("/:teamID/instances", h.GetTeamInstances, h.TeamOrAdminAuthMiddleware())
+	teams.POST("/:teamID/instances", h.CreateTeamInstance, h.TeamOrAdminAuthMiddleware())
+	teams.DELETE("/:teamID/instances/:instanceID", h.DeleteTeamInstance, h.TeamOrAdminAuthMiddleware())
+	teams.PATCH("/:teamID/instances/:instanceID", h.PatchTeamInstance, h.TeamOrAdminAuthMiddleware())
+
+	instances := api.Group("/instances", h.AuthMiddleware())
+	instances.GET("", h.GetInstances, h.AdminAuthMiddleware())
 
 	benchmarks := api.Group("/benchmarks", h.AuthMiddleware())
 	benchmarks.GET("", h.GetBenchmarks, h.AdminAuthMiddleware())
