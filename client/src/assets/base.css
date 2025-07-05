@@ -50,8 +50,10 @@
 
   --color-primary: #005bac;
   --color-primary-rgb: 0, 91, 172;
-  --color-primary-hover: #004a9a;
-  --color-primary-hover-rgb: 0, 74, 154;
+  --color-primary-hover-bg: #004a9a;
+  --color-primary-hover-bg-rgb: 0, 74, 154;
+  --color-primary-hover-text: #003e80;
+  --color-primary-hover-text-rgb: 0, 62, 128;
   --color-primary-background: var(--ct-slate-200);
 }
 

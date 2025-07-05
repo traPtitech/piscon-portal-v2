@@ -80,6 +80,6 @@ const id = useId()
 }
 
 .checkbox-wrapper .switch:checked:hover {
-  background-color: var(--color-primary-hover);
+  background-color: var(--color-primary-hover-bg);
 }
 </style>

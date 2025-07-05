@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
 import { formatDate, formatRelativeDate } from '@/lib/formatDate'
 import { Icon } from '@iconify/vue'
 import BenchmarkStatusChip from '@/components/BenchmarkStatusChip.vue'
@@ -88,13 +87,13 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
           <BenchmarkStatusChip :status="bench.status" />
         </div>
         <div>
-          <RouterLink
+          <NavigationLink
             :to="isAdmin ? `/admin/benches/${bench.id}` : `/benches/${bench.id}`"
             class="bench-link"
           >
             <span>詳細を見る</span>
             <Icon icon="mdi:chevron-right" width="24" height="24" />
-          </RouterLink>
+          </NavigationLink>
         </div>
       </template>
     </div>
@@ -158,9 +157,6 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
   width: fit-content;
   align-items: center;
   gap: 0rem;
-  text-decoration: none;
-  color: var(--color-primary);
-  font-weight: 700;
 }
 
 .bench-link svg {

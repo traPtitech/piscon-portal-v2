@@ -35,7 +35,7 @@ const rendered = computed(() => renderMarkdown(markdown))
   color: var(--color-primary);
 }
 .docs-markdown-root a:hover {
-  color: var(--color-primary-hover);
+  color: var(--color-primary-hover-text);
 }
 .docs-markdown-root ul,
 .docs-markdown-root ol {
