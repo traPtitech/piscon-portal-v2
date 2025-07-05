@@ -4,7 +4,6 @@ import { formatDate, formatRelativeDate } from '@/lib/formatDate'
 import { Icon } from '@iconify/vue'
 import BenchmarkStatusChip from '@/components/BenchmarkStatusChip.vue'
 import { formatScore } from '@/lib/formatScore'
-import UserAvatar from '@/components/UserAvatar.vue'
 import { useUsers } from '@/lib/useUsers'
 import type { components } from '@/api/openapi'
 import { computed } from 'vue'
@@ -83,8 +82,7 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
           サーバー{{ getInstanceServerId(bench.instanceId) }}
         </div>
         <div class="bench-user list-user">
-          <UserAvatar :name="getUserName(bench.userId)" />
-          <span>@{{ getUserName(bench.userId) }}</span>
+          <UserChip :name="getUserName(bench.userId)" />
         </div>
         <div>
           <BenchmarkStatusChip :status="bench.status" />
