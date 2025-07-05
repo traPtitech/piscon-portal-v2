@@ -27,7 +27,7 @@ onUnmounted(() => {
   <div class="team-benchmark-list-container">
     <div class="team-benchmark-list-actions">
       <BenchmarkRunner :teamId="teamId" :instances="instances ?? []" />
-      <div />
+      <SingleTeamScoreChart :benches="benches ?? []" />
     </div>
     <ErrorMessage v-if="benchesError" :error="benchesError" />
     <BenchmarkList v-else :benches="benches ?? []" :instances="instances ?? []" />
@@ -48,7 +48,7 @@ onUnmounted(() => {
 
 @container (max-width: 780px) {
   .team-benchmark-list-actions {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr;
   }
 }
 </style>
