@@ -58,6 +58,11 @@ tasks:
       - docker compose up --detach --build
     desc: アプリ全体を起動する
 
+  dev:
+    cmds:
+      - docker compose watch
+    desc: ホットリロード付きでアプリ全体を起動する
+
   down:
     cmds:
       - docker compose down
