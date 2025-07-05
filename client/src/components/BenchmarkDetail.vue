@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import BenchmarkStatusChip from '@/components/BenchmarkStatusChip.vue'
-import { formatDate } from '@/lib/formatDate'
+import { formatDate, formatRelativeDate } from '@/lib/formatDate'
 import { useTeam } from '@/lib/useServerData'
 import { computed } from 'vue'
 import { formatScore } from '@/lib/formatScore'
@@ -53,7 +53,12 @@ const user = computed(() => getUserById(bench?.userId))
       <div class="bench-detail-element">
         <div class="bench-detail-label">リクエスト時刻</div>
         <div class="bench-detail-content">
-          {{ formatDate(bench.createdAt, 'YYYY/MM/DD hh:mm:ss') }}
+          <time
+            :datetime="bench.createdAt"
+            :title="formatDate(bench.createdAt, 'YYYY/MM/DD hh:mm:ss.SSS')"
+          >
+            {{ formatRelativeDate(bench.createdAt) }}
+          </time>
         </div>
       </div>
       <div class="bench-detail-element">
@@ -62,14 +67,24 @@ const user = computed(() => getUserById(bench?.userId))
           class="bench-detail-content"
           v-if="bench.status === 'running' || bench.status === 'finished'"
         >
-          {{ formatDate(bench.startedAt, 'YYYY/MM/DD hh:mm:ss') }}
+          <time
+            :datetime="bench.startedAt"
+            :title="formatDate(bench.startedAt, 'YYYY/MM/DD hh:mm:ss.SSS')"
+          >
+            {{ formatRelativeDate(bench.startedAt) }}
+          </time>
         </div>
         <div class="bench-detail-content-dimmed" v-else>まだ開始していません</div>
       </div>
       <div class="bench-detail-element">
         <div class="bench-detail-label">終了時刻</div>
         <div class="bench-detail-content" v-if="bench.status === 'finished'">
-          {{ formatDate(bench.finishedAt, 'YYYY/MM/DD hh:mm:ss') }}
+          <time
+            :datetime="bench.finishedAt"
+            :title="formatDate(bench.finishedAt, 'YYYY/MM/DD hh:mm:ss.SSS')"
+          >
+            {{ formatRelativeDate(bench.finishedAt) }}
+          </time>
         </div>
         <div class="bench-detail-content-dimmed" v-else>まだ終了していません</div>
       </div>

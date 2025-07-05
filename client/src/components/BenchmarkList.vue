@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
-import { formatDate } from '@/lib/formatDate'
+import { formatDate, formatRelativeDate } from '@/lib/formatDate'
 import { Icon } from '@iconify/vue'
 import BenchmarkStatusChip from '@/components/BenchmarkStatusChip.vue'
 import { formatScore } from '@/lib/formatScore'
@@ -44,7 +44,7 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
       </div>
       <div class="list-label list-datetime">
         <Icon icon="mdi:calendar-clock" width="24" height="24" />
-        <span>日時</span>
+        <span>リクエスト時刻</span>
       </div>
       <div class="list-label" v-if="isAdmin">
         <Icon icon="mdi:account-group" width="24" height="24" />
@@ -69,7 +69,12 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
         </div>
         <div v-else class="bench-score-loading">計測中</div>
         <div class="bench-date list-datetime">
-          {{ formatDate(bench.createdAt, 'YYYY/MM/DD hh:mm:ss.SSS') }}
+          <time
+            :datetime="bench.createdAt"
+            :title="formatDate(bench.createdAt, 'YYYY/MM/DD hh:mm:ss.SSS')"
+          >
+            {{ formatRelativeDate(bench.createdAt) }}
+          </time>
         </div>
         <div v-if="isAdmin" class="bench-team">
           {{ getTeamName(bench.teamId) }}
