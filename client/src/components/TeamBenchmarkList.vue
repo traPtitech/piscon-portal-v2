@@ -9,6 +9,6 @@ const { data: instances } = useTeamInstances(teamId)
 </script>
 
 <template>
-  <BenchmarkList :benches="benches ?? []" :instances="instances ?? []" />
-  <ErrorMessage v-if="benchesError" />
+  <ErrorMessage v-if="benchesError" :error="benchesError" />
+  <BenchmarkList v-else :benches="benches ?? []" :instances="instances ?? []" />
 </template>

@@ -7,7 +7,7 @@ const { teamId, benchId } = defineProps<{
   benchId: string
 }>()
 
-const { data: bench, error, refetch } = useTeamBench(teamId, benchId)
+const { data: bench, error: benchError, refetch } = useTeamBench(teamId, benchId)
 const { data: instances } = useTeamInstances(teamId)
 
 watch(
@@ -25,6 +25,6 @@ watch(
 </script>
 
 <template>
-  <ErrorMessage v-if="error" />
-  <BenchmarkDetail v-if="bench !== undefined" :bench="bench" :instances="instances ?? []" />
+  <ErrorMessage v-if="benchError" :error="benchError" />
+  <BenchmarkDetail v-else-if="bench !== undefined" :bench="bench" :instances="instances ?? []" />
 </template>
