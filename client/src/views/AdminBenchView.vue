@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
-import { RouterLink, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 import BenchmarkDetail from '@/components/BenchmarkDetail.vue'
 import { useAllInstances, useBench } from '@/lib/useServerData'
 
@@ -14,10 +14,10 @@ const { data: instances } = useAllInstances()
 <template>
   <main class="bench-container">
     <div>
-      <RouterLink to="/admin/benches" class="back-button">
+      <NavigationLink to="/admin/benches" class="back-button">
         <Icon icon="mdi:chevron-left" width="24" height="24" />
         <span>ベンチマーク一覧に戻る</span>
-      </RouterLink>
+      </NavigationLink>
     </div>
     <BenchmarkDetail v-if="bench !== undefined" :bench="bench" :instances="instances ?? []" />
   </main>
@@ -36,10 +36,6 @@ const { data: instances } = useAllInstances()
   padding: 0.25rem 0.5rem;
   display: flex;
   align-items: center;
-  color: var(--color-primary);
-  text-decoration: none;
-  font-size: 1rem;
-  font-weight: 600;
 }
 .back-button svg {
   margin-top: 0.15rem;

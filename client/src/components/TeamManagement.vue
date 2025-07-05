@@ -10,7 +10,7 @@ import ErrorMessage from '@/components/ErrorMessage.vue'
 const { teamId } = defineProps<{ teamId: string }>()
 
 const { data: me } = useMe()
-const { data: team, error } = useTeam(teamId)
+const { data: team, error: teamError } = useTeam(teamId)
 const { getUserById, getUserByName } = useUsers()
 const { mutate: updateTeam } = useUpdateTeam()
 
@@ -44,8 +44,8 @@ const addNewMemberHandler = (newMemberName: string) => {
 
 <template>
   <div>
-    <ErrorMessage v-if="error" />
-    <div v-if="team !== undefined" class="team-management-container">
+    <ErrorMessage v-if="teamError" :error="teamError" />
+    <div v-else-if="team !== undefined" class="team-management-container">
       <div class="team-info">
         <div class="team-name">チーム: {{ team.name }}</div>
         <MainButton

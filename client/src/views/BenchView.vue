@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useMe } from '@/lib/useServerData'
 import { Icon } from '@iconify/vue'
-import { RouterLink, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 import TeamBenchmarkDetail from '@/components/TeamBenchmarkDetail.vue'
 
 const { data: me } = useMe()
@@ -12,10 +12,10 @@ const benchId = params.id as string
 <template>
   <main class="bench-container">
     <div>
-      <RouterLink to="/benches" class="back-button">
+      <NavigationLink to="/benches" class="back-button">
         <Icon icon="mdi:chevron-left" width="24" height="24" />
         <span>ベンチマーク一覧に戻る</span>
-      </RouterLink>
+      </NavigationLink>
     </div>
     <div v-if="me?.teamId !== undefined">
       <TeamBenchmarkDetail :teamId="me.teamId" :benchId="benchId" />
@@ -39,10 +39,6 @@ const benchId = params.id as string
   padding: 0.25rem 0.5rem;
   display: flex;
   align-items: center;
-  color: var(--color-primary);
-  text-decoration: none;
-  font-size: 1rem;
-  font-weight: 600;
 }
 .back-button svg {
   margin-top: 0.15rem;

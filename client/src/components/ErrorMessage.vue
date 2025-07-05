@@ -1,5 +1,15 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
+import { effect } from 'vue'
+const props = defineProps<{
+  error?: Error
+}>()
+
+effect(() => {
+  if (props.error) {
+    console.error('ErrorMessage:', props.error)
+  }
+})
 </script>
 
 <template>
