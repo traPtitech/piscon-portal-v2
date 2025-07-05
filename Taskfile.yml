@@ -4,14 +4,6 @@ env:
   GOEXPERIMENT: "synctest"
 
 tasks:
-  run-server:
-    dotenv:
-      - .env
-    deps:
-      - up-db
-    cmds:
-      - go run cmd/server/main.go
-
   test:
     cmds:
       - go test -cover -race ./...
