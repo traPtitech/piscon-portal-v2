@@ -53,8 +53,8 @@ export const useCreateTeamInstance = () => {
         params: { path: params },
       }),
     onSuccess: (_, params) => {
-      client.invalidateQueries({ queryKey: ['team-instances', params.teamId] })
-      client.invalidateQueries({ queryKey: ['instances'] })
+      void client.invalidateQueries({ queryKey: ['team-instances', params.teamId] })
+      void client.invalidateQueries({ queryKey: ['instances'] })
     },
   })
 }
@@ -68,8 +68,8 @@ export const useStartTeamInstance = () => {
         body: { operation: 'start' },
       }),
     onSuccess: (_, params) => {
-      client.invalidateQueries({ queryKey: ['team-instances', params.teamId] })
-      client.invalidateQueries({ queryKey: ['instances'] })
+      void client.invalidateQueries({ queryKey: ['team-instances', params.teamId] })
+      void client.invalidateQueries({ queryKey: ['instances'] })
     },
   })
 }
@@ -83,8 +83,8 @@ export const useStopTeamInstance = () => {
         body: { operation: 'stop' },
       }),
     onSuccess: (_, params) => {
-      client.invalidateQueries({ queryKey: ['team-instances', params.teamId] })
-      client.invalidateQueries({ queryKey: ['instances'] })
+      void client.invalidateQueries({ queryKey: ['team-instances', params.teamId] })
+      void client.invalidateQueries({ queryKey: ['instances'] })
     },
   })
 }
@@ -97,8 +97,8 @@ export const useDeleteTeamInstance = () => {
         params: { path: params },
       }),
     onSuccess: (_, params) => {
-      client.invalidateQueries({ queryKey: ['team-instances', params.teamId] })
-      client.invalidateQueries({ queryKey: ['instances'] })
+      void client.invalidateQueries({ queryKey: ['team-instances', params.teamId] })
+      void client.invalidateQueries({ queryKey: ['instances'] })
     },
   })
 }
@@ -111,8 +111,8 @@ export const useCreateTeam = () => {
         body: params,
       }),
     onSuccess: () => {
-      client.invalidateQueries({ queryKey: ['teams'] })
-      client.invalidateQueries({ queryKey: ['me'] })
+      void client.invalidateQueries({ queryKey: ['teams'] })
+      void client.invalidateQueries({ queryKey: ['me'] })
     },
   })
 }
@@ -126,9 +126,9 @@ export const useUpdateTeam = () => {
         body: params,
       }),
     onSuccess: (_, params) => {
-      client.invalidateQueries({ queryKey: ['team', params.teamId] })
-      client.invalidateQueries({ queryKey: ['teams'] })
-      client.invalidateQueries({ queryKey: ['me'] })
+      void client.invalidateQueries({ queryKey: ['team', params.teamId] })
+      void client.invalidateQueries({ queryKey: ['teams'] })
+      void client.invalidateQueries({ queryKey: ['me'] })
     },
   })
 }
@@ -141,10 +141,10 @@ export const useEnqueueBenchmark = (options?: { redirect?: boolean }) => {
         body: { instanceId: params.instanceId },
       }),
     onSuccess: (res, params) => {
-      client.invalidateQueries({ queryKey: ['team-benches', params.teamId] })
-      client.invalidateQueries({ queryKey: ['benches'] })
+      void client.invalidateQueries({ queryKey: ['team-benches', params.teamId] })
+      void client.invalidateQueries({ queryKey: ['benches'] })
       if (options?.redirect && res.data !== undefined) {
-        router.push(`/benches/${res.data.id}`)
+        void router.push(`/benches/${res.data.id}`)
       }
     },
   })
@@ -191,7 +191,7 @@ export const useUpdateDocs = () => {
         body: params,
       }),
     onSuccess: () => {
-      client.invalidateQueries({ queryKey: ['docs'] })
+      void client.invalidateQueries({ queryKey: ['docs'] })
     },
   })
 }
@@ -204,8 +204,8 @@ export const useUpdateAdmins = () => {
         body: params,
       }),
     onSuccess: () => {
-      client.invalidateQueries({ queryKey: ['admins'] })
-      client.invalidateQueries({ queryKey: ['users'] })
+      void client.invalidateQueries({ queryKey: ['admins'] })
+      void client.invalidateQueries({ queryKey: ['users'] })
     },
   })
 }

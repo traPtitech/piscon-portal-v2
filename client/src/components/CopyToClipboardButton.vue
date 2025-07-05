@@ -6,12 +6,21 @@ const { text } = defineProps<{ text: string }>()
 
 const clicked = ref(false)
 
-const copyToClipboard = () => {
-  navigator.clipboard.writeText(text)
-  clicked.value = true
-  setTimeout(() => {
-    clicked.value = false
-  }, 3000)
+const copyToClipboard = async () => {
+  try {
+    if (!navigator.clipboard) {
+      throw new Error('Clipboard API not supported')
+    }
+    await navigator.clipboard.writeText(text)
+    clicked.value = true
+    setTimeout(() => {
+      clicked.value = false
+    }, 3000)
+  } catch (err) {
+    console.error('Failed to copy text to clipboard:', err)
+    // TODO: もっとリッチな表示にする
+    alert('クリップボードへのコピーに失敗しました。')
+  }
 }
 </script>
 
