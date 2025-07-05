@@ -471,6 +471,45 @@ func (c *MockUseCaseGetDocumentCall) DoAndReturn(f func(context.Context) (domain
 	return c
 }
 
+// GetInstance mocks base method.
+func (m *MockUseCase) GetInstance(ctx context.Context, id uuid.UUID) (domain.Instance, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetInstance", ctx, id)
+	ret0, _ := ret[0].(domain.Instance)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetInstance indicates an expected call of GetInstance.
+func (mr *MockUseCaseMockRecorder) GetInstance(ctx, id any) *MockUseCaseGetInstanceCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetInstance", reflect.TypeOf((*MockUseCase)(nil).GetInstance), ctx, id)
+	return &MockUseCaseGetInstanceCall{Call: call}
+}
+
+// MockUseCaseGetInstanceCall wrap *gomock.Call
+type MockUseCaseGetInstanceCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockUseCaseGetInstanceCall) Return(arg0 domain.Instance, arg1 error) *MockUseCaseGetInstanceCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockUseCaseGetInstanceCall) Do(f func(context.Context, uuid.UUID) (domain.Instance, error)) *MockUseCaseGetInstanceCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockUseCaseGetInstanceCall) DoAndReturn(f func(context.Context, uuid.UUID) (domain.Instance, error)) *MockUseCaseGetInstanceCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetQueuedBenchmarks mocks base method.
 func (m *MockUseCase) GetQueuedBenchmarks(ctx context.Context) ([]domain.Benchmark, error) {
 	m.ctrl.T.Helper()

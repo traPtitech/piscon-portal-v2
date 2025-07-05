@@ -174,20 +174,39 @@ func TestDeleteTeamInstance(t *testing.T) {
 		{
 			name: "success",
 			mockSetup: func(m *usecasemock.MockUseCase) {
+				m.EXPECT().GetInstance(gomock.Any(), instanceID).Return(domain.Instance{
+					ID:     instanceID,
+					TeamID: teamID,
+				}, nil)
 				m.EXPECT().DeleteInstance(gomock.Any(), instanceID).Return(nil)
 			},
 			expectedCode: http.StatusOK,
 		},
 		{
-			name: "not found",
+			name: "instance not found",
 			mockSetup: func(m *usecasemock.MockUseCase) {
-				m.EXPECT().DeleteInstance(gomock.Any(), instanceID).Return(usecase.ErrNotFound)
+				m.EXPECT().GetInstance(gomock.Any(), instanceID).Return(domain.Instance{}, usecase.ErrNotFound)
+			},
+			expectedCode: http.StatusNotFound,
+		},
+		{
+			name: "not found: instance does not belong to  the team",
+			mockSetup: func(m *usecasemock.MockUseCase) {
+				m.EXPECT().GetInstance(gomock.Any(), instanceID).Return(domain.Instance{
+					ID:     instanceID,
+					TeamID: uuid.New(), // Different team ID
+				}, nil)
+				// No call to DeleteInstance expected, as the instance does not belong to the team
 			},
 			expectedCode: http.StatusNotFound,
 		},
 		{
 			name: "internal error",
 			mockSetup: func(m *usecasemock.MockUseCase) {
+				m.EXPECT().GetInstance(gomock.Any(), instanceID).Return(domain.Instance{
+					ID:     instanceID,
+					TeamID: teamID,
+				}, nil)
 				m.EXPECT().DeleteInstance(gomock.Any(), instanceID).Return(errors.New("unexpected error"))
 			},
 			expectedCode: http.StatusInternalServerError,
@@ -225,9 +244,25 @@ func TestPatchTeamInstance(t *testing.T) {
 		expectedCode int
 	}{
 		{
-			name: "success",
+			name: "success: start instance",
 			body: openapi.PatchTeamInstanceReq{Operation: openapi.InstanceOperationStart},
 			mockSetup: func(m *usecasemock.MockUseCase) {
+				m.EXPECT().GetInstance(gomock.Any(), instanceID).Return(domain.Instance{
+					ID:     instanceID,
+					TeamID: teamID,
+				}, nil)
+				m.EXPECT().UpdateInstance(gomock.Any(), instanceID, gomock.Any()).Return(nil)
+			},
+			expectedCode: http.StatusOK,
+		},
+		{
+			name: "success: stop instance",
+			body: openapi.PatchTeamInstanceReq{Operation: openapi.InstanceOperationStop},
+			mockSetup: func(m *usecasemock.MockUseCase) {
+				m.EXPECT().GetInstance(gomock.Any(), instanceID).Return(domain.Instance{
+					ID:     instanceID,
+					TeamID: teamID,
+				}, nil)
 				m.EXPECT().UpdateInstance(gomock.Any(), instanceID, gomock.Any()).Return(nil)
 			},
 			expectedCode: http.StatusOK,
@@ -241,10 +276,22 @@ func TestPatchTeamInstance(t *testing.T) {
 			expectedCode: http.StatusBadRequest,
 		},
 		{
-			name: "not found",
+			name: "instance not found",
 			body: openapi.PatchTeamInstanceReq{Operation: openapi.InstanceOperationStart},
 			mockSetup: func(m *usecasemock.MockUseCase) {
-				m.EXPECT().UpdateInstance(gomock.Any(), instanceID, gomock.Any()).Return(usecase.ErrNotFound)
+				m.EXPECT().GetInstance(gomock.Any(), instanceID).Return(domain.Instance{}, usecase.ErrNotFound)
+			},
+			expectedCode: http.StatusNotFound,
+		},
+		{
+			name: "instance does not belong to the team",
+			body: openapi.PatchTeamInstanceReq{Operation: openapi.InstanceOperationStart},
+			mockSetup: func(m *usecasemock.MockUseCase) {
+				m.EXPECT().GetInstance(gomock.Any(), instanceID).Return(domain.Instance{
+					ID:     instanceID,
+					TeamID: uuid.New(), // Different team ID
+				}, nil)
+				// No call to UpdateInstance expected, as the instance does not belong to the team
 			},
 			expectedCode: http.StatusNotFound,
 		},
@@ -252,6 +299,10 @@ func TestPatchTeamInstance(t *testing.T) {
 			name: "internal error",
 			body: openapi.PatchTeamInstanceReq{Operation: openapi.InstanceOperationStart},
 			mockSetup: func(m *usecasemock.MockUseCase) {
+				m.EXPECT().GetInstance(gomock.Any(), instanceID).Return(domain.Instance{
+					ID:     instanceID,
+					TeamID: teamID,
+				}, nil)
 				m.EXPECT().UpdateInstance(gomock.Any(), instanceID, gomock.Any()).Return(errors.New("unexpected error"))
 			},
 			expectedCode: http.StatusInternalServerError,

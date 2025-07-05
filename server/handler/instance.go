@@ -48,9 +48,24 @@ func (h *Handler) CreateTeamInstance(c echo.Context) error {
 
 func (h *Handler) DeleteTeamInstance(c echo.Context) error {
 	ctx := c.Request().Context()
+
 	instanceID, err := uuid.Parse(c.Param("instanceID"))
 	if err != nil {
-		return badRequestResponse(c, err.Error())
+		return badRequestResponse(c, "invalid instance id")
+	}
+	teamID, err := uuid.Parse(c.Param("teamID"))
+	if err != nil {
+		return badRequestResponse(c, "invalid team id")
+	}
+	instance, err := h.useCase.GetInstance(ctx, instanceID)
+	if err != nil {
+		if errors.Is(err, usecase.ErrNotFound) {
+			return notFoundResponse(c)
+		}
+		return internalServerErrorResponse(c, err)
+	}
+	if instance.TeamID != teamID {
+		return notFoundResponse(c)
 	}
 
 	err = h.useCase.DeleteInstance(ctx, instanceID)
@@ -70,7 +85,11 @@ func (h *Handler) PatchTeamInstance(c echo.Context) error {
 	ctx := c.Request().Context()
 	instanceID, err := uuid.Parse(c.Param("instanceID"))
 	if err != nil {
-		return badRequestResponse(c, err.Error())
+		return badRequestResponse(c, "invalid instance id")
+	}
+	teamID, err := uuid.Parse(c.Param("teamID"))
+	if err != nil {
+		return badRequestResponse(c, "invalid team id")
 	}
 	var req openapi.PatchTeamInstanceReq
 	if err := c.Bind(&req); err != nil {
@@ -85,6 +104,17 @@ func (h *Handler) PatchTeamInstance(c echo.Context) error {
 		op = domain.InstanceOperationStop
 	default:
 		return badRequestResponse(c, "invalid operation")
+	}
+
+	instance, err := h.useCase.GetInstance(ctx, instanceID)
+	if err != nil {
+		if errors.Is(err, usecase.ErrNotFound) {
+			return notFoundResponse(c)
+		}
+		return internalServerErrorResponse(c, err)
+	}
+	if instance.TeamID != teamID {
+		return notFoundResponse(c)
 	}
 
 	err = h.useCase.UpdateInstance(ctx, instanceID, op)

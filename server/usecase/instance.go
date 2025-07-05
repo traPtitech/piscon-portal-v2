@@ -12,6 +12,8 @@ import (
 )
 
 type InstanceUseCase interface {
+	// GetInstance returns the instance with the given ID. If the instance is not found, [ErrNotFound] is returned.
+	GetInstance(ctx context.Context, id uuid.UUID) (domain.Instance, error)
 	// GetTeamInstances returns all instances for the given team. Deleted instances are not included.
 	GetTeamInstances(ctx context.Context, teamID uuid.UUID) ([]domain.Instance, error)
 	// GetAllInstances returns all instances. Deleted instances are not included.
@@ -38,6 +40,16 @@ func NewInstanceUseCase(repo repository.Repository, factory *domain.InstanceFact
 		factory: factory,
 		manager: manager,
 	}
+}
+
+func (i *InstanceUseCaseImpl) GetInstance(ctx context.Context, id uuid.UUID) (domain.Instance, error) {
+	instance, err := i.repo.FindInstance(ctx, id)
+	if errors.Is(err, repository.ErrNotFound) {
+		return domain.Instance{}, ErrNotFound
+	} else if err != nil {
+		return domain.Instance{}, fmt.Errorf("find instance: %w", err)
+	}
+	return instance, nil
 }
 
 func (i *InstanceUseCaseImpl) CreateInstance(ctx context.Context, teamID uuid.UUID) (domain.Instance, error) {
