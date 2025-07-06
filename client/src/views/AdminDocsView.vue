@@ -4,10 +4,13 @@ import MainButton from '@/components/MainButton.vue'
 import PageTitle from '@/components/PageTitle.vue'
 import { useDocs, useUpdateDocs } from '@/lib/useServerData'
 import { Icon } from '@iconify/vue'
+import { useConfirm } from 'primevue'
 import { ref, watch } from 'vue'
+import { onBeforeRouteLeave } from 'vue-router'
 
 const { data: docs } = useDocs()
 const { mutate: updateDocs } = useUpdateDocs()
+const confirm = useConfirm();
 
 const docsValue = ref('')
 watch(
@@ -17,6 +20,21 @@ watch(
   },
   { immediate: true },
 )
+
+onBeforeRouteLeave((_to, _from, next) => {
+  if (docsValue.value == docs?.value?.body) {
+    next()
+    return
+  }
+
+  confirm.require({
+    header: '変更の確認',
+    message: 'ドキュメントが変更されています。このまま保存せずに移動しますか？',
+    accept: () => {
+      next()
+    },
+  })
+})
 </script>
 
 <template>
@@ -34,6 +52,22 @@ watch(
       </MainButton>
     </div>
   </main>
+
+  <ConfirmDialog>
+    <template #container="{ message, acceptCallback, rejectCallback }">
+      <div class="confirm-dialog-container">
+        <div class="confirm-dialog-header">
+          {{ message.header }}
+        </div>
+        <div class="confirm-dialog-message">{{ message.message }}</div>
+        <div class="confirm-dialog-actions">
+          <MainButton variant="primary" outlined @click="rejectCallback" class="confirm-dialog-reject">移動しない
+          </MainButton>
+          <MainButton variant="destructive" @click="acceptCallback" class="confirm-dialog-accept">保存せずに移動</MainButton>
+        </div>
+      </div>
+    </template>
+  </ConfirmDialog>
 </template>
 
 <style scoped>
@@ -55,5 +89,28 @@ watch(
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
+}
+
+.confirm-dialog-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.confirm-dialog-header {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.confirm-dialog-message {
+  font-size: 1rem;
+  color: var(--ct-slate-700);
+}
+
+.confirm-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
 }
 </style>
