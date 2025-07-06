@@ -38,11 +38,22 @@ const enqueueBenchmark = (instanceId: string | null) => {
     <div class="benchmark-runner-title">新しくベンチマークを実行する</div>
     <div class="benchmark-runner-content">
       <div>
-        <Select v-model="targetInstanceId" :options="instances" option-label="label" option-value="value"
-          :placeholder="'対象サーバーを選択'" :id="id" class="benchmark-runner-instance-selector" />
+        <Select
+          v-model="targetInstanceId"
+          :options="instances"
+          option-label="label"
+          option-value="value"
+          :placeholder="'対象サーバーを選択'"
+          :id="id"
+          class="benchmark-runner-instance-selector"
+        />
       </div>
-      <MainButton :disabled="targetInstanceId === null || isPending || !canEnqueue" variant="primary"
-        @click="enqueueBenchmark(targetInstanceId)" class="benchmark-runner-button">
+      <MainButton
+        :disabled="targetInstanceId === null || isPending || !canEnqueue"
+        variant="primary"
+        @click="enqueueBenchmark(targetInstanceId)"
+        class="benchmark-runner-button"
+      >
         <Icon icon="mdi:thunder" width="24" height="24" />
         <span>実行</span>
       </MainButton>
