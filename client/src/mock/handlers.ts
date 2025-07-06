@@ -429,7 +429,7 @@ export const handlers = [
             benchmarks
               .filter((b) => b.teamId === team.id)
               .filter((b) => b.status === 'finished')
-              .sort(sortFn)[0],
+              .slice(-1)[0],
         )
         .sort(sortFn)
         .map((b, i) => ({
