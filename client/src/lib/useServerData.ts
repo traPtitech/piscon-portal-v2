@@ -209,3 +209,22 @@ export const useUpdateAdmins = () => {
     },
   })
 }
+
+export const useScores = () =>
+  useQuery({
+    queryKey: ['scores'],
+    queryFn: () => api.GET('/scores').then((r) => r.data),
+  })
+
+export const useRanking = (orderBy: 'latest' | 'highest') =>
+  useQuery({
+    queryKey: ['ranking', orderBy],
+    queryFn: () =>
+      api.GET('/scores/ranking', { params: { query: { orderBy } } }).then((r) => r.data),
+  })
+
+export const useBenchmarkQueue = () =>
+  useQuery({
+    queryKey: ['benchmark-queue'],
+    queryFn: () => api.GET('/benchmarks/queue').then((r) => r.data),
+  })
