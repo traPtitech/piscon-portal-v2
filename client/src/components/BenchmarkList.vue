@@ -65,7 +65,7 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
         <div v-if="bench.status === 'running' || bench.status === 'finished'" class="bench-score">
           {{ formatScore(bench.score) }}
         </div>
-        <div v-else class="bench-score-loading">計測中</div>
+        <div v-else class="bench-score-loading">待機中</div>
         <div class="bench-date list-datetime">
           <time
             :datetime="bench.createdAt"
