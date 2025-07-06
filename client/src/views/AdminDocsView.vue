@@ -10,7 +10,7 @@ import { onBeforeRouteLeave } from 'vue-router'
 
 const { data: docs } = useDocs()
 const { mutate: updateDocs } = useUpdateDocs()
-const confirm = useConfirm();
+const confirm = useConfirm()
 
 const docsValue = ref('')
 watch(
@@ -61,9 +61,17 @@ onBeforeRouteLeave((_to, _from, next) => {
         </div>
         <div class="confirm-dialog-message">{{ message.message }}</div>
         <div class="confirm-dialog-actions">
-          <MainButton variant="primary" outlined @click="rejectCallback" class="confirm-dialog-reject">移動しない
+          <MainButton
+            variant="primary"
+            outlined
+            @click="rejectCallback"
+            class="confirm-dialog-reject"
+          >
+            移動しない
           </MainButton>
-          <MainButton variant="destructive" @click="acceptCallback" class="confirm-dialog-accept">保存せずに移動</MainButton>
+          <MainButton variant="destructive" @click="acceptCallback" class="confirm-dialog-accept">
+            保存せずに移動
+          </MainButton>
         </div>
       </div>
     </template>
