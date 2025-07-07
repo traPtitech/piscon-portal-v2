@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
-import { formatDate } from '@/lib/formatDate'
+import { formatDate, formatRelativeDate } from '@/lib/formatDate'
 import { Icon } from '@iconify/vue'
 import BenchmarkStatusChip from '@/components/BenchmarkStatusChip.vue'
 import { formatScore } from '@/lib/formatScore'
-import UserAvatar from '@/components/UserAvatar.vue'
 import { useUsers } from '@/lib/useUsers'
 import type { components } from '@/api/openapi'
 import { computed } from 'vue'
@@ -44,7 +42,7 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
       </div>
       <div class="list-label list-datetime">
         <Icon icon="mdi:calendar-clock" width="24" height="24" />
-        <span>日時</span>
+        <span>リクエスト時刻</span>
       </div>
       <div class="list-label" v-if="isAdmin">
         <Icon icon="mdi:account-group" width="24" height="24" />
@@ -67,9 +65,14 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
         <div v-if="bench.status === 'running' || bench.status === 'finished'" class="bench-score">
           {{ formatScore(bench.score) }}
         </div>
-        <div v-else class="bench-score-loading">計測中</div>
+        <div v-else class="bench-score-loading">待機中</div>
         <div class="bench-date list-datetime">
-          {{ formatDate(bench.createdAt, 'YYYY/MM/DD hh:mm:ss.SSS') }}
+          <time
+            :datetime="bench.createdAt"
+            :title="formatDate(bench.createdAt, 'YYYY/MM/DD hh:mm:ss.SSS')"
+          >
+            {{ formatRelativeDate(bench.createdAt) }}
+          </time>
         </div>
         <div v-if="isAdmin" class="bench-team">
           {{ getTeamName(bench.teamId) }}
@@ -78,20 +81,19 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
           サーバー{{ getInstanceServerId(bench.instanceId) }}
         </div>
         <div class="bench-user list-user">
-          <UserAvatar :name="getUserName(bench.userId)" />
-          <span>@{{ getUserName(bench.userId) }}</span>
+          <UserChip :name="getUserName(bench.userId)" />
         </div>
         <div>
           <BenchmarkStatusChip :status="bench.status" />
         </div>
         <div>
-          <RouterLink
+          <NavigationLink
             :to="isAdmin ? `/admin/benches/${bench.id}` : `/benches/${bench.id}`"
             class="bench-link"
           >
             <span>詳細を見る</span>
             <Icon icon="mdi:chevron-right" width="24" height="24" />
-          </RouterLink>
+          </NavigationLink>
         </div>
       </template>
     </div>
@@ -155,9 +157,6 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
   width: fit-content;
   align-items: center;
   gap: 0rem;
-  text-decoration: none;
-  color: var(--color-primary);
-  font-weight: 700;
 }
 
 .bench-link svg {

@@ -5,7 +5,7 @@ import { RouterView } from 'vue-router'
 
 <template>
   <MainLayout>
-    <RouterView />
+    <RouterView :key="$route.fullPath" />
   </MainLayout>
 </template>
 

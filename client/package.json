@@ -18,6 +18,9 @@
   "dependencies": {
     "@primevue/themes": "^4.3.6",
     "@tanstack/vue-query": "^5.81.5",
+    "chart.js": "^4.5.0",
+    "chartjs-adapter-dayjs-4": "^1.0.4",
+    "dayjs": "^1.11.13",
     "micromark": "^4.0.2",
     "openapi-fetch": "^0.14.0",
     "primevue": "^4.3.6",
