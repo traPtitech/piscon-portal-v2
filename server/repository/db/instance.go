@@ -109,9 +109,10 @@ func toDomainInstance(instance *models.Instance) (domain.Instance, error) {
 		TeamID: teamID,
 		Index:  int(instance.InstanceNumber),
 		Infra: domain.InfraInstance{
-			Status:    status,
-			PrivateIP: instance.PrivateIP.V,
-			PublicIP:  instance.PublicIP.V,
+			ProviderInstanceID: instance.ProviderInstanceID,
+			Status:             status,
+			PrivateIP:          instance.PrivateIP.V,
+			PublicIP:           instance.PublicIP.V,
 		},
 		CreatedAt: instance.CreatedAt,
 	}, nil
@@ -165,13 +166,14 @@ func buildInstanceSetter(instance domain.Instance) (*models.InstanceSetter, erro
 		return nil, err
 	}
 	setter := &models.InstanceSetter{
-		ID:             lo.ToPtr(instance.ID.String()),
-		TeamID:         lo.ToPtr(instance.TeamID.String()),
-		InstanceNumber: lo.ToPtr(int32(instance.Index)),
-		Status:         &status,
-		PublicIP:       ToSQLNull(instance.Infra.PublicIP),
-		PrivateIP:      ToSQLNull(instance.Infra.PrivateIP),
-		CreatedAt:      lo.Ternary(!instance.CreatedAt.IsZero(), &instance.CreatedAt, nil),
+		ID:                 lo.ToPtr(instance.ID.String()),
+		ProviderInstanceID: lo.ToPtr(instance.Infra.ProviderInstanceID),
+		TeamID:             lo.ToPtr(instance.TeamID.String()),
+		InstanceNumber:     lo.ToPtr(int32(instance.Index)),
+		Status:             &status,
+		PublicIP:           ToSQLNull(instance.Infra.PublicIP),
+		PrivateIP:          ToSQLNull(instance.Infra.PrivateIP),
+		CreatedAt:          lo.Ternary(!instance.CreatedAt.IsZero(), &instance.CreatedAt, nil),
 	}
 	return setter, nil
 }

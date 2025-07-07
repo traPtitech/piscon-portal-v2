@@ -35,13 +35,14 @@ func (mods InstanceModSlice) Apply(ctx context.Context, n *InstanceTemplate) {
 // InstanceTemplate is an object representing the database table.
 // all columns are optional and should be set by mods
 type InstanceTemplate struct {
-	ID             func() string
-	TeamID         func() string
-	InstanceNumber func() int32
-	Status         func() InstancesStatus
-	CreatedAt      func() time.Time
-	PublicIP       func() sql.Null[string]
-	PrivateIP      func() sql.Null[string]
+	ID                 func() string
+	ProviderInstanceID func() string
+	TeamID             func() string
+	InstanceNumber     func() int32
+	Status             func() InstancesStatus
+	CreatedAt          func() time.Time
+	PublicIP           func() sql.Null[string]
+	PrivateIP          func() sql.Null[string]
 
 	r instanceR
 	f *Factory
@@ -88,6 +89,10 @@ func (o InstanceTemplate) BuildSetter() *models.InstanceSetter {
 	if o.ID != nil {
 		val := o.ID()
 		m.ID = &val
+	}
+	if o.ProviderInstanceID != nil {
+		val := o.ProviderInstanceID()
+		m.ProviderInstanceID = &val
 	}
 	if o.TeamID != nil {
 		val := o.TeamID()
@@ -138,6 +143,9 @@ func (o InstanceTemplate) Build() *models.Instance {
 	if o.ID != nil {
 		m.ID = o.ID()
 	}
+	if o.ProviderInstanceID != nil {
+		m.ProviderInstanceID = o.ProviderInstanceID()
+	}
 	if o.TeamID != nil {
 		m.TeamID = o.TeamID()
 	}
@@ -179,6 +187,10 @@ func ensureCreatableInstance(m *models.InstanceSetter) {
 	if m.ID == nil {
 		val := random_string(nil, "36")
 		m.ID = &val
+	}
+	if m.ProviderInstanceID == nil {
+		val := random_string(nil, "255")
+		m.ProviderInstanceID = &val
 	}
 	if m.TeamID == nil {
 		val := random_string(nil, "36")
@@ -325,6 +337,7 @@ type instanceMods struct{}
 func (m instanceMods) RandomizeAllColumns(f *faker.Faker) InstanceMod {
 	return InstanceModSlice{
 		InstanceMods.RandomID(f),
+		InstanceMods.RandomProviderInstanceID(f),
 		InstanceMods.RandomTeamID(f),
 		InstanceMods.RandomInstanceNumber(f),
 		InstanceMods.RandomStatus(f),
@@ -361,6 +374,37 @@ func (m instanceMods) RandomID(f *faker.Faker) InstanceMod {
 	return InstanceModFunc(func(_ context.Context, o *InstanceTemplate) {
 		o.ID = func() string {
 			return random_string(f, "36")
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m instanceMods) ProviderInstanceID(val string) InstanceMod {
+	return InstanceModFunc(func(_ context.Context, o *InstanceTemplate) {
+		o.ProviderInstanceID = func() string { return val }
+	})
+}
+
+// Set the Column from the function
+func (m instanceMods) ProviderInstanceIDFunc(f func() string) InstanceMod {
+	return InstanceModFunc(func(_ context.Context, o *InstanceTemplate) {
+		o.ProviderInstanceID = f
+	})
+}
+
+// Clear any values for the column
+func (m instanceMods) UnsetProviderInstanceID() InstanceMod {
+	return InstanceModFunc(func(_ context.Context, o *InstanceTemplate) {
+		o.ProviderInstanceID = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m instanceMods) RandomProviderInstanceID(f *faker.Faker) InstanceMod {
+	return InstanceModFunc(func(_ context.Context, o *InstanceTemplate) {
+		o.ProviderInstanceID = func() string {
+			return random_string(f, "255")
 		}
 	})
 }

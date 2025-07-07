@@ -23,13 +23,14 @@ import (
 
 // Instance is an object representing the database table.
 type Instance struct {
-	ID             string           `db:"id,pk" `
-	TeamID         string           `db:"team_id" `
-	InstanceNumber int32            `db:"instance_number" `
-	Status         InstancesStatus  `db:"status" `
-	CreatedAt      time.Time        `db:"created_at" `
-	PublicIP       sql.Null[string] `db:"public_ip" `
-	PrivateIP      sql.Null[string] `db:"private_ip" `
+	ID                 string           `db:"id,pk" `
+	ProviderInstanceID string           `db:"provider_instance_id" `
+	TeamID             string           `db:"team_id" `
+	InstanceNumber     int32            `db:"instance_number" `
+	Status             InstancesStatus  `db:"status" `
+	CreatedAt          time.Time        `db:"created_at" `
+	PublicIP           sql.Null[string] `db:"public_ip" `
+	PrivateIP          sql.Null[string] `db:"private_ip" `
 
 	R instanceR `db:"-" `
 }
@@ -50,26 +51,28 @@ type instanceR struct {
 }
 
 type instanceColumnNames struct {
-	ID             string
-	TeamID         string
-	InstanceNumber string
-	Status         string
-	CreatedAt      string
-	PublicIP       string
-	PrivateIP      string
+	ID                 string
+	ProviderInstanceID string
+	TeamID             string
+	InstanceNumber     string
+	Status             string
+	CreatedAt          string
+	PublicIP           string
+	PrivateIP          string
 }
 
 var InstanceColumns = buildInstanceColumns("instances")
 
 type instanceColumns struct {
-	tableAlias     string
-	ID             mysql.Expression
-	TeamID         mysql.Expression
-	InstanceNumber mysql.Expression
-	Status         mysql.Expression
-	CreatedAt      mysql.Expression
-	PublicIP       mysql.Expression
-	PrivateIP      mysql.Expression
+	tableAlias         string
+	ID                 mysql.Expression
+	ProviderInstanceID mysql.Expression
+	TeamID             mysql.Expression
+	InstanceNumber     mysql.Expression
+	Status             mysql.Expression
+	CreatedAt          mysql.Expression
+	PublicIP           mysql.Expression
+	PrivateIP          mysql.Expression
 }
 
 func (c instanceColumns) Alias() string {
@@ -82,25 +85,27 @@ func (instanceColumns) AliasedAs(alias string) instanceColumns {
 
 func buildInstanceColumns(alias string) instanceColumns {
 	return instanceColumns{
-		tableAlias:     alias,
-		ID:             mysql.Quote(alias, "id"),
-		TeamID:         mysql.Quote(alias, "team_id"),
-		InstanceNumber: mysql.Quote(alias, "instance_number"),
-		Status:         mysql.Quote(alias, "status"),
-		CreatedAt:      mysql.Quote(alias, "created_at"),
-		PublicIP:       mysql.Quote(alias, "public_ip"),
-		PrivateIP:      mysql.Quote(alias, "private_ip"),
+		tableAlias:         alias,
+		ID:                 mysql.Quote(alias, "id"),
+		ProviderInstanceID: mysql.Quote(alias, "provider_instance_id"),
+		TeamID:             mysql.Quote(alias, "team_id"),
+		InstanceNumber:     mysql.Quote(alias, "instance_number"),
+		Status:             mysql.Quote(alias, "status"),
+		CreatedAt:          mysql.Quote(alias, "created_at"),
+		PublicIP:           mysql.Quote(alias, "public_ip"),
+		PrivateIP:          mysql.Quote(alias, "private_ip"),
 	}
 }
 
 type instanceWhere[Q mysql.Filterable] struct {
-	ID             mysql.WhereMod[Q, string]
-	TeamID         mysql.WhereMod[Q, string]
-	InstanceNumber mysql.WhereMod[Q, int32]
-	Status         mysql.WhereMod[Q, InstancesStatus]
-	CreatedAt      mysql.WhereMod[Q, time.Time]
-	PublicIP       mysql.WhereNullMod[Q, string]
-	PrivateIP      mysql.WhereNullMod[Q, string]
+	ID                 mysql.WhereMod[Q, string]
+	ProviderInstanceID mysql.WhereMod[Q, string]
+	TeamID             mysql.WhereMod[Q, string]
+	InstanceNumber     mysql.WhereMod[Q, int32]
+	Status             mysql.WhereMod[Q, InstancesStatus]
+	CreatedAt          mysql.WhereMod[Q, time.Time]
+	PublicIP           mysql.WhereNullMod[Q, string]
+	PrivateIP          mysql.WhereNullMod[Q, string]
 }
 
 func (instanceWhere[Q]) AliasedAs(alias string) instanceWhere[Q] {
@@ -109,13 +114,14 @@ func (instanceWhere[Q]) AliasedAs(alias string) instanceWhere[Q] {
 
 func buildInstanceWhere[Q mysql.Filterable](cols instanceColumns) instanceWhere[Q] {
 	return instanceWhere[Q]{
-		ID:             mysql.Where[Q, string](cols.ID),
-		TeamID:         mysql.Where[Q, string](cols.TeamID),
-		InstanceNumber: mysql.Where[Q, int32](cols.InstanceNumber),
-		Status:         mysql.Where[Q, InstancesStatus](cols.Status),
-		CreatedAt:      mysql.Where[Q, time.Time](cols.CreatedAt),
-		PublicIP:       mysql.WhereNull[Q, string](cols.PublicIP),
-		PrivateIP:      mysql.WhereNull[Q, string](cols.PrivateIP),
+		ID:                 mysql.Where[Q, string](cols.ID),
+		ProviderInstanceID: mysql.Where[Q, string](cols.ProviderInstanceID),
+		TeamID:             mysql.Where[Q, string](cols.TeamID),
+		InstanceNumber:     mysql.Where[Q, int32](cols.InstanceNumber),
+		Status:             mysql.Where[Q, InstancesStatus](cols.Status),
+		CreatedAt:          mysql.Where[Q, time.Time](cols.CreatedAt),
+		PublicIP:           mysql.WhereNull[Q, string](cols.PublicIP),
+		PrivateIP:          mysql.WhereNull[Q, string](cols.PrivateIP),
 	}
 }
 
@@ -136,19 +142,24 @@ type instanceErrors struct {
 // All values are optional, and do not have to be set
 // Generated columns are not included
 type InstanceSetter struct {
-	ID             *string           `db:"id,pk" `
-	TeamID         *string           `db:"team_id" `
-	InstanceNumber *int32            `db:"instance_number" `
-	Status         *InstancesStatus  `db:"status" `
-	CreatedAt      *time.Time        `db:"created_at" `
-	PublicIP       *sql.Null[string] `db:"public_ip" `
-	PrivateIP      *sql.Null[string] `db:"private_ip" `
+	ID                 *string           `db:"id,pk" `
+	ProviderInstanceID *string           `db:"provider_instance_id" `
+	TeamID             *string           `db:"team_id" `
+	InstanceNumber     *int32            `db:"instance_number" `
+	Status             *InstancesStatus  `db:"status" `
+	CreatedAt          *time.Time        `db:"created_at" `
+	PublicIP           *sql.Null[string] `db:"public_ip" `
+	PrivateIP          *sql.Null[string] `db:"private_ip" `
 }
 
 func (s InstanceSetter) SetColumns() []string {
-	vals := make([]string, 0, 7)
+	vals := make([]string, 0, 8)
 	if s.ID != nil {
 		vals = append(vals, "id")
+	}
+
+	if s.ProviderInstanceID != nil {
+		vals = append(vals, "provider_instance_id")
 	}
 
 	if s.TeamID != nil {
@@ -182,6 +193,9 @@ func (s InstanceSetter) Overwrite(t *Instance) {
 	if s.ID != nil {
 		t.ID = *s.ID
 	}
+	if s.ProviderInstanceID != nil {
+		t.ProviderInstanceID = *s.ProviderInstanceID
+	}
 	if s.TeamID != nil {
 		t.TeamID = *s.TeamID
 	}
@@ -213,6 +227,11 @@ func (s *InstanceSetter) Apply(q *dialect.InsertQuery) {
 				return mysql.Raw("DEFAULT").WriteSQL(ctx, w, d, start)
 			}
 			return mysql.Arg(s.ID).WriteSQL(ctx, w, d, start)
+		}), bob.ExpressionFunc(func(ctx context.Context, w io.Writer, d bob.Dialect, start int) ([]any, error) {
+			if s.ProviderInstanceID == nil {
+				return mysql.Raw("DEFAULT").WriteSQL(ctx, w, d, start)
+			}
+			return mysql.Arg(s.ProviderInstanceID).WriteSQL(ctx, w, d, start)
 		}), bob.ExpressionFunc(func(ctx context.Context, w io.Writer, d bob.Dialect, start int) ([]any, error) {
 			if s.TeamID == nil {
 				return mysql.Raw("DEFAULT").WriteSQL(ctx, w, d, start)
@@ -251,12 +270,19 @@ func (s InstanceSetter) UpdateMod() bob.Mod[*dialect.UpdateQuery] {
 }
 
 func (s InstanceSetter) Expressions(prefix ...string) []bob.Expression {
-	exprs := make([]bob.Expression, 0, 7)
+	exprs := make([]bob.Expression, 0, 8)
 
 	if s.ID != nil {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
 			mysql.Quote(append(prefix, "id")...),
 			mysql.Arg(s.ID),
+		}})
+	}
+
+	if s.ProviderInstanceID != nil {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			mysql.Quote(append(prefix, "provider_instance_id")...),
+			mysql.Arg(s.ProviderInstanceID),
 		}})
 	}
 
