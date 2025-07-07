@@ -26,13 +26,22 @@ const getTeamName = (teamId: string): string => {
       <div>スコア</div>
     </div>
     <div class="ranking-list-body">
-      <div v-for="item in ranking" :key="item.teamId"
-        :class="['ranking-list-row', { highlight: item.teamId === highlightTeamId }]">
+      <div
+        v-for="item in ranking"
+        :key="item.teamId"
+        :class="['ranking-list-row', { highlight: item.teamId === highlightTeamId }]"
+      >
         <div class="ranking-list-rank">
           <span v-if="item.rank <= 3" class="crown">
-            <Icon icon="mdi:crown" width="24" height="24" :title="`${item.rank}`" :style="{
-              color: ['orange', 'silver', 'indianred'][item.rank - 1] || 'var(--ct-slate-900)'
-            }" />
+            <Icon
+              icon="mdi:crown"
+              width="24"
+              height="24"
+              :title="`${item.rank}`"
+              :style="{
+                color: ['orange', 'silver', 'indianred'][item.rank - 1] || 'var(--ct-slate-900)',
+              }"
+            />
           </span>
           <span v-else>
             {{ item.rank }}

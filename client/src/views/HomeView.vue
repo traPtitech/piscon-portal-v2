@@ -47,16 +47,30 @@ const chartScores = computed(() => {
 
     <section class="overview-section">
       <StatusCard icon="mdi:account-group" title="参加チーム数" :value="teamCount" />
-      <StatusCard v-if="myTeamRanking" icon="mdi:trophy" title="チーム順位" :value="`${myTeamRanking.rank}位`"
-        variant="highlight" />
-      <StatusCard v-if="myTeamRanking" icon="mdi:chart-line" title="チームスコア" :value="myTeamRanking.score"
-        variant="primary" />
+      <StatusCard
+        v-if="myTeamRanking"
+        icon="mdi:trophy"
+        title="チーム順位"
+        :value="`${myTeamRanking.rank}位`"
+        variant="highlight"
+      />
+      <StatusCard
+        v-if="myTeamRanking"
+        icon="mdi:chart-line"
+        title="チームスコア"
+        :value="myTeamRanking.score"
+        variant="primary"
+      />
     </section>
 
     <section class="content-section">
       <div class="ranking-container">
         <h2 class="section-title">スコアランキング</h2>
-        <RankingList v-if="ranking && ranking.length > 0" :ranking="ranking" :highlight-team-id="myTeam?.id" />
+        <RankingList
+          v-if="ranking && ranking.length > 0"
+          :ranking="ranking"
+          :highlight-team-id="myTeam?.id"
+        />
         <div v-else class="empty-state">まだベンチマーク結果がありません</div>
       </div>
 
@@ -71,14 +85,34 @@ const chartScores = computed(() => {
 
     <section class="navigation-section">
       <div class="navigation-grid">
-        <NavigationCard v-if="myTeam" icon="mdi:server" title="インスタンス管理" description="インスタンスの起動・停止・削除"
-          to="/instances" />
+        <NavigationCard
+          v-if="myTeam"
+          icon="mdi:server"
+          title="インスタンス管理"
+          description="インスタンスの起動・停止・削除"
+          to="/instances"
+        />
 
-        <NavigationCard icon="mdi:thunder" title="ベンチマーク" description="ベンチマークの実行と結果確認" to="/benches" />
+        <NavigationCard
+          icon="mdi:thunder"
+          title="ベンチマーク"
+          description="ベンチマークの実行と結果確認"
+          to="/benches"
+        />
 
-        <NavigationCard icon="mdi:account-group" title="チーム管理" description="メンバー管理など" to="/team" />
+        <NavigationCard
+          icon="mdi:account-group"
+          title="チーム管理"
+          description="メンバー管理など"
+          to="/team"
+        />
 
-        <NavigationCard icon="mdi:file-document" title="ドキュメント" description="ルール・注意点など" to="/docs" />
+        <NavigationCard
+          icon="mdi:file-document"
+          title="ドキュメント"
+          description="ルール・注意点など"
+          to="/docs"
+        />
       </div>
     </section>
   </main>

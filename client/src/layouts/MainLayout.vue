@@ -31,8 +31,13 @@ const isActive = (link: string) =>
     <nav class="nav-container">
       <div class="logo">PISCON</div>
       <div class="nav-links">
-        <RouterLink v-for="link in links" class="nav-link" :class="{ active: isActive(link.path) }" :key="link.path"
-          :to="link.path">
+        <RouterLink
+          v-for="link in links"
+          class="nav-link"
+          :class="{ active: isActive(link.path) }"
+          :key="link.path"
+          :to="link.path"
+        >
           <Icon :icon="link.icon" width="24" height="24" />
           <span>
             {{ link.name }}
@@ -40,8 +45,13 @@ const isActive = (link: string) =>
         </RouterLink>
         <template v-if="me?.isAdmin">
           <div class="for-admins-label">管理者向け</div>
-          <RouterLink v-for="link in adminLinks" class="nav-link" :class="{ active: isActive(link.path) }"
-            :key="link.path" :to="link.path">
+          <RouterLink
+            v-for="link in adminLinks"
+            class="nav-link"
+            :class="{ active: isActive(link.path) }"
+            :key="link.path"
+            :to="link.path"
+          >
             <Icon :icon="link.icon" width="24" height="24" />
             <span>
               {{ link.name }}
