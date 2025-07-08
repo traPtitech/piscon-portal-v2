@@ -180,4 +180,3 @@ const chartScores = computed(() => {
   border: 1px solid var(--ct-slate-200);
 }
 </style>
-style
