@@ -39,12 +39,13 @@ func mustMakeInstance(t *testing.T, executor bob.Executor, instance domain.Insta
 	status, err := db.FromDomainInstanceStatus(instance.Infra.Status)
 	require.NoError(t, err)
 	_, err = models.Instances.Insert(&models.InstanceSetter{
-		ID:             lo.ToPtr(instance.ID.String()),
-		TeamID:         lo.ToPtr(instance.TeamID.String()),
-		InstanceNumber: lo.ToPtr(int32(instance.Index)),
-		Status:         lo.ToPtr(status),
-		PrivateIP:      db.ToSQLNull(instance.Infra.PrivateIP),
-		PublicIP:       db.ToSQLNull(instance.Infra.PublicIP),
+		ID:                 lo.ToPtr(instance.ID.String()),
+		ProviderInstanceID: lo.ToPtr(instance.Infra.ProviderInstanceID),
+		TeamID:             lo.ToPtr(instance.TeamID.String()),
+		InstanceNumber:     lo.ToPtr(int32(instance.Index)),
+		Status:             lo.ToPtr(status),
+		PrivateIP:          db.ToSQLNull(instance.Infra.PrivateIP),
+		PublicIP:           db.ToSQLNull(instance.Infra.PublicIP),
 	}).Exec(context.Background(), executor)
 	require.NoError(t, err)
 }

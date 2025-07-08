@@ -23,9 +23,10 @@ func TestFindInstance(t *testing.T) {
 		TeamID: teamID,
 		Index:  1,
 		Infra: domain.InfraInstance{
-			Status:    domain.InstanceStatusRunning,
-			PrivateIP: "192.0.2.0",
-			PublicIP:  "192.0.2.0",
+			ProviderInstanceID: "prov-instance-id",
+			Status:             domain.InstanceStatusRunning,
+			PrivateIP:          "192.0.2.0",
+			PublicIP:           "192.0.2.0",
 		},
 		CreatedAt: time.Now(),
 	}
@@ -59,9 +60,10 @@ func TestCreateInstance(t *testing.T) {
 		TeamID: teamID,
 		Index:  2,
 		Infra: domain.InfraInstance{
-			Status:    domain.InstanceStatusBuilding,
-			PrivateIP: "10.0.0.1",
-			PublicIP:  "203.0.113.1",
+			ProviderInstanceID: "prov-instance-id",
+			Status:             domain.InstanceStatusBuilding,
+			PrivateIP:          "10.0.0.1",
+			PublicIP:           "203.0.113.1",
 		},
 		CreatedAt: time.Now(),
 	}
@@ -86,9 +88,10 @@ func TestUpdateInstance(t *testing.T) {
 		TeamID: teamID,
 		Index:  3,
 		Infra: domain.InfraInstance{
-			Status:    domain.InstanceStatusRunning,
-			PrivateIP: "10.0.0.2",
-			PublicIP:  "203.0.113.2",
+			ProviderInstanceID: "prov-instance-id",
+			Status:             domain.InstanceStatusRunning,
+			PrivateIP:          "10.0.0.2",
+			PublicIP:           "203.0.113.2",
 		},
 		CreatedAt: time.Now(),
 	}
@@ -115,9 +118,10 @@ func TestUpdateInstance_NotFound(t *testing.T) {
 		TeamID: uuid.New(),
 		Index:  99,
 		Infra: domain.InfraInstance{
-			Status:    domain.InstanceStatusRunning,
-			PrivateIP: "10.0.0.99",
-			PublicIP:  "203.0.113.99",
+			ProviderInstanceID: "prov-instance-id",
+			Status:             domain.InstanceStatusRunning,
+			PrivateIP:          "10.0.0.99",
+			PublicIP:           "203.0.113.99",
 		},
 		CreatedAt: time.Now(),
 	}
@@ -138,9 +142,10 @@ func TestGetTeamInstances(t *testing.T) {
 			TeamID: teamID,
 			Index:  1,
 			Infra: domain.InfraInstance{
-				Status:    domain.InstanceStatusRunning,
-				PrivateIP: "10.0.0.4",
-				PublicIP:  "203.0.113.4",
+				ProviderInstanceID: "prov-instance-id-1",
+				Status:             domain.InstanceStatusRunning,
+				PrivateIP:          "10.0.0.4",
+				PublicIP:           "203.0.113.4",
 			},
 			CreatedAt: time.Now(),
 		},
@@ -149,9 +154,10 @@ func TestGetTeamInstances(t *testing.T) {
 			TeamID: teamID,
 			Index:  2,
 			Infra: domain.InfraInstance{
-				Status:    domain.InstanceStatusStopped,
-				PrivateIP: "10.0.0.5",
-				PublicIP:  "203.0.113.5",
+				ProviderInstanceID: "prov-instance-id-2",
+				Status:             domain.InstanceStatusStopped,
+				PrivateIP:          "10.0.0.5",
+				PublicIP:           "203.0.113.5",
 			},
 			CreatedAt: time.Now(),
 		},
@@ -160,9 +166,23 @@ func TestGetTeamInstances(t *testing.T) {
 			TeamID: otherTeamID,
 			Index:  1,
 			Infra: domain.InfraInstance{
-				Status:    domain.InstanceStatusRunning,
-				PrivateIP: "10.0.0.6",
-				PublicIP:  "203.0.113.6",
+				ProviderInstanceID: "prov-instance-id-3",
+				Status:             domain.InstanceStatusRunning,
+				PrivateIP:          "10.0.0.6",
+				PublicIP:           "203.0.113.6",
+			},
+			CreatedAt: time.Now(),
+		},
+		{
+			// Deleted instance is not included in the results
+			ID:     uuid.New(),
+			TeamID: otherTeamID,
+			Index:  2,
+			Infra: domain.InfraInstance{
+				ProviderInstanceID: "prov-instance-id-4",
+				Status:             domain.InstanceStatusDeleted,
+				PrivateIP:          "10.0.0.7",
+				PublicIP:           "203.0.113.7",
 			},
 			CreatedAt: time.Now(),
 		},
@@ -189,9 +209,10 @@ func TestGetAllInstances(t *testing.T) {
 			TeamID: uuid.New(),
 			Index:  1,
 			Infra: domain.InfraInstance{
-				Status:    domain.InstanceStatusRunning,
-				PrivateIP: "10.0.0.7",
-				PublicIP:  "203.0.113.7",
+				ProviderInstanceID: "prov-instance-id-1",
+				Status:             domain.InstanceStatusRunning,
+				PrivateIP:          "10.0.0.7",
+				PublicIP:           "203.0.113.7",
 			},
 			CreatedAt: time.Now(),
 		},
@@ -200,9 +221,23 @@ func TestGetAllInstances(t *testing.T) {
 			TeamID: uuid.New(),
 			Index:  2,
 			Infra: domain.InfraInstance{
-				Status:    domain.InstanceStatusStopped,
-				PrivateIP: "10.0.0.8",
-				PublicIP:  "203.0.113.8",
+				ProviderInstanceID: "prov-instance-id-2",
+				Status:             domain.InstanceStatusStopped,
+				PrivateIP:          "10.0.0.8",
+				PublicIP:           "203.0.113.8",
+			},
+			CreatedAt: time.Now(),
+		},
+		{
+			// Deleted instance is not included in the results
+			ID:     uuid.New(),
+			TeamID: uuid.New(),
+			Index:  3,
+			Infra: domain.InfraInstance{
+				ProviderInstanceID: "prov-instance-id-3",
+				Status:             domain.InstanceStatusDeleted,
+				PrivateIP:          "10.0.0.9",
+				PublicIP:           "203.0.113.9",
 			},
 			CreatedAt: time.Now(),
 		},
@@ -213,8 +248,8 @@ func TestGetAllInstances(t *testing.T) {
 
 	got, err := repo.GetAllInstances(t.Context())
 	assert.NoError(t, err)
-	assert.Len(t, got, len(instances))
-	for _, want := range instances {
+	assert.Len(t, got, 2)
+	for _, want := range instances[:2] {
 		testutil.ContainsInstance(t, got, want)
 	}
 }
