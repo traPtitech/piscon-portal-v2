@@ -3,7 +3,7 @@ import { uuidv7 } from 'uuidv7'
 import { createOpenApiHttp } from 'openapi-msw'
 import type { components, paths } from '@/api/openapi'
 import { apiBaseUrl } from '@/api'
-import { users, teams, instances, benchmarks, docs } from './data'
+import { users, teams, instances, benchmarks, docs, updateDocs } from './data'
 import { startJobs } from '@/mock/jobs'
 
 const http = createOpenApiHttp<paths>({
@@ -246,7 +246,13 @@ export const handlers = [
 
     return HttpResponse.json(res)
   }),
-  http.patch(`/docs`, () => {
-    // TODO
+  http.patch(`/docs`, async (c) => {
+    const body = await c.request.json()
+    if (body === undefined) {
+      return HttpResponse.json({ message: 'Bad request' }, { status: 400 })
+    }
+
+    updateDocs(body.body)
+    return HttpResponse.json({ body: docs }, { status: 200 })
   }),
 ]

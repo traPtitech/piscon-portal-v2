@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS `sessions` (
 
 CREATE TABLE IF NOT EXISTS `instances` (
     `id` VARCHAR(36) NOT NULL,
+    `provider_instance_id` VARCHAR(255) NOT NULL,
     `team_id` VARCHAR(36) NOT NULL,
     `instance_number` INT NOT NULL,
     `status` ENUM('running', 'building', 'starting', 'stopping', 'stopped', 'deleting', 'deleted') NOT NULL,

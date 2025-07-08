@@ -32,7 +32,8 @@ func TestFindBenchmark(t *testing.T) {
 		Instance: domain.Instance{
 			ID: instanceID,
 			Infra: domain.InfraInstance{
-				Status: domain.InstanceStatusRunning,
+				ProviderInstanceID: "provider-instance-id",
+				Status:             domain.InstanceStatusRunning,
 			},
 		},
 		TeamID:     teamID,
@@ -63,7 +64,8 @@ func TestCreateBenchmark(t *testing.T) {
 	instance := domain.Instance{
 		ID: instanceID,
 		Infra: domain.InfraInstance{
-			Status: domain.InstanceStatusRunning,
+			ProviderInstanceID: "provider-instance-id",
+			Status:             domain.InstanceStatusRunning,
 		},
 	}
 	benchmark := domain.Benchmark{
@@ -99,7 +101,8 @@ func TestGetAllBenchmarks(t *testing.T) {
 		ID:     uuid.New(),
 		TeamID: teamID,
 		Infra: domain.InfraInstance{
-			Status: domain.InstanceStatusRunning,
+			ProviderInstanceID: "provider-instance-id",
+			Status:             domain.InstanceStatusRunning,
 		},
 	}
 
@@ -149,7 +152,8 @@ func TestGetQueuedBenchmarks(t *testing.T) {
 		ID:     uuid.New(),
 		TeamID: teamID,
 		Infra: domain.InfraInstance{
-			Status: domain.InstanceStatusRunning,
+			ProviderInstanceID: "provider-instance-id",
+			Status:             domain.InstanceStatusRunning,
 		},
 	}
 
@@ -202,7 +206,8 @@ func TestGetBenchmarkLog(t *testing.T) {
 		Instance: domain.Instance{
 			ID: uuid.New(),
 			Infra: domain.InfraInstance{
-				Status: domain.InstanceStatusRunning,
+				ProviderInstanceID: "provider-instance-id",
+				Status:             domain.InstanceStatusRunning,
 			},
 		},
 		CreatedAt: time.Now(),
@@ -231,9 +236,10 @@ func TestGetOldestQueuedBenchmark(t *testing.T) {
 		TeamID: uuid.New(),
 		Index:  1,
 		Infra: domain.InfraInstance{
-			Status:    domain.InstanceStatusRunning,
-			PublicIP:  "192.168.1.1",
-			PrivateIP: "10.0.0.1",
+			ProviderInstanceID: "provider-instance-id",
+			Status:             domain.InstanceStatusRunning,
+			PublicIP:           "192.168.1.1",
+			PrivateIP:          "10.0.0.1",
 		},
 	}
 	waitingBench := domain.Benchmark{
@@ -356,9 +362,10 @@ func TestUpdateBenchmark(t *testing.T) {
 		TeamID: uuid.New(),
 		Index:  1,
 		Infra: domain.InfraInstance{
-			Status:    domain.InstanceStatusRunning,
-			PrivateIP: "0.0.0.0",
-			PublicIP:  "0.0.0.0",
+			ProviderInstanceID: "provider-instance-id",
+			Status:             domain.InstanceStatusRunning,
+			PrivateIP:          "0.0.0.0",
+			PublicIP:           "0.0.0.0",
 		},
 	}
 
@@ -480,7 +487,8 @@ func TestUpdateBenchmarkLog(t *testing.T) {
 	mustMakeInstance(t, testDB, domain.Instance{
 		ID: instanceID,
 		Infra: domain.InfraInstance{
-			Status: domain.InstanceStatusRunning,
+			ProviderInstanceID: "provider-instance-id",
+			Status:             domain.InstanceStatusRunning,
 		},
 	})
 	mustMakeBenchmark(t, testDB, domain.Benchmark{
@@ -590,8 +598,11 @@ func TestGetRanking(t *testing.T) {
 	instanceID := uuid.New()
 
 	mustMakeInstance(t, testDB, domain.Instance{
-		ID:    instanceID,
-		Infra: domain.InfraInstance{Status: domain.InstanceStatusRunning},
+		ID: instanceID,
+		Infra: domain.InfraInstance{
+			ProviderInstanceID: "provider-instance-id",
+			Status:             domain.InstanceStatusRunning,
+		},
 	})
 	mustMakeTeam(t, testDB, domain.Team{ID: team1, CreatedAt: time.Now()})
 	mustMakeTeam(t, testDB, domain.Team{ID: team2, CreatedAt: time.Now()})

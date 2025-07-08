@@ -181,7 +181,7 @@ export const benchmarks: components['schemas']['BenchmarkAdminResult'][] = [
   },
 ]
 
-export const docs = `# ドキュメント
+export let docs = `# ドキュメント
 
 ## はじめに
 
@@ -215,6 +215,11 @@ export const docs = `# ドキュメント
 const code = 'Hello, world!';
 \`\`\`
 `
+
+export const updateDocs = (body: string) => {
+  docs = body
+  return docs
+}
 
 const DUMMY_TEAM_COUNT = 10
 

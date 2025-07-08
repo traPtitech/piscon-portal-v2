@@ -13,6 +13,8 @@ import (
 	"github.com/traPtitech/piscon-portal-v2/server/repository/db/models"
 )
 
+var whereNotDeleted = models.SelectWhere.Instances.Status.NE(models.InstancesStatusDeleted)
+
 func (r *Repository) CreateInstance(ctx context.Context, instance domain.Instance) error {
 	setter, err := buildInstanceSetter(instance)
 	if err != nil {
@@ -59,6 +61,7 @@ func (r *Repository) FindInstance(ctx context.Context, id uuid.UUID) (domain.Ins
 func (r *Repository) GetTeamInstances(ctx context.Context, teamID uuid.UUID) ([]domain.Instance, error) {
 	instances, err := models.Instances.Query(
 		models.SelectWhere.Instances.TeamID.EQ(teamID.String()),
+		whereNotDeleted, // Exclude deleted instances
 	).All(ctx, r.executor(ctx))
 	if err != nil {
 		return nil, fmt.Errorf("get team instances: %w", err)
@@ -75,7 +78,7 @@ func (r *Repository) GetTeamInstances(ctx context.Context, teamID uuid.UUID) ([]
 }
 
 func (r *Repository) GetAllInstances(ctx context.Context) ([]domain.Instance, error) {
-	instances, err := models.Instances.Query().All(ctx, r.executor(ctx))
+	instances, err := models.Instances.Query(whereNotDeleted).All(ctx, r.executor(ctx))
 	if err != nil {
 		return nil, fmt.Errorf("get all instances: %w", err)
 	}
@@ -109,9 +112,10 @@ func toDomainInstance(instance *models.Instance) (domain.Instance, error) {
 		TeamID: teamID,
 		Index:  int(instance.InstanceNumber),
 		Infra: domain.InfraInstance{
-			Status:    status,
-			PrivateIP: instance.PrivateIP.V,
-			PublicIP:  instance.PublicIP.V,
+			ProviderInstanceID: instance.ProviderInstanceID,
+			Status:             status,
+			PrivateIP:          instance.PrivateIP.V,
+			PublicIP:           instance.PublicIP.V,
 		},
 		CreatedAt: instance.CreatedAt,
 	}, nil
@@ -165,13 +169,14 @@ func buildInstanceSetter(instance domain.Instance) (*models.InstanceSetter, erro
 		return nil, err
 	}
 	setter := &models.InstanceSetter{
-		ID:             lo.ToPtr(instance.ID.String()),
-		TeamID:         lo.ToPtr(instance.TeamID.String()),
-		InstanceNumber: lo.ToPtr(int32(instance.Index)),
-		Status:         &status,
-		PublicIP:       ToSQLNull(instance.Infra.PublicIP),
-		PrivateIP:      ToSQLNull(instance.Infra.PrivateIP),
-		CreatedAt:      lo.Ternary(!instance.CreatedAt.IsZero(), &instance.CreatedAt, nil),
+		ID:                 lo.ToPtr(instance.ID.String()),
+		ProviderInstanceID: lo.ToPtr(instance.Infra.ProviderInstanceID),
+		TeamID:             lo.ToPtr(instance.TeamID.String()),
+		InstanceNumber:     lo.ToPtr(int32(instance.Index)),
+		Status:             &status,
+		PublicIP:           ToSQLNull(instance.Infra.PublicIP),
+		PrivateIP:          ToSQLNull(instance.Infra.PrivateIP),
+		CreatedAt:          lo.Ternary(!instance.CreatedAt.IsZero(), &instance.CreatedAt, nil),
 	}
 	return setter, nil
 }
