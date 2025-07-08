@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { Icon } from '@iconify/vue'
 import {
-  useEnqueueBenchmark,
   useTeamBench,
   useTeamBenches,
+  useEnqueueBenchmark,
   useTeamInstances,
 } from '@/lib/useServerData'
+import { Icon } from '@iconify/vue'
 import { computed, watch } from 'vue'
 
 const { teamId, benchId } = defineProps<{

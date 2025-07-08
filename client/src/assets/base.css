@@ -48,6 +48,29 @@
   --ct-red-950: #450a0a;
   --ct-red-950-rgb: 69, 10, 10;
 
+  --ct-orange-50: #fff7ed;
+  --ct-orange-50-rgb: 255, 247, 237;
+  --ct-orange-100: #ffedd5;
+  --ct-orange-100-rgb: 255, 237, 213;
+  --ct-orange-200: #fed7aa;
+  --ct-orange-200-rgb: 254, 215, 170;
+  --ct-orange-300: #fdba74;
+  --ct-orange-300-rgb: 253, 186, 116;
+  --ct-orange-400: #fb923c;
+  --ct-orange-400-rgb: 251, 146, 60;
+  --ct-orange-500: #f97316;
+  --ct-orange-500-rgb: 249, 115, 22;
+  --ct-orange-600: #ea580c;
+  --ct-orange-600-rgb: 234, 88, 12;
+  --ct-orange-700: #c2410c;
+  --ct-orange-700-rgb: 194, 65, 12;
+  --ct-orange-800: #9a3412;
+  --ct-orange-800-rgb: 154, 52, 18;
+  --ct-orange-900: #7c2d12;
+  --ct-orange-900-rgb: 124, 45, 18;
+  --ct-orange-950: #431407;
+  --ct-orange-950-rgb: 67, 20, 7;
+
   --color-primary: #005bac;
   --color-primary-rgb: 0, 91, 172;
   --color-primary-hover-bg: #004a9a;

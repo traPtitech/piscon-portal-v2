@@ -7,7 +7,7 @@ const route = useRoute()
 const { data: me } = useMe()
 
 const links = [
-  { icon: 'mdi:crown', name: '順位表', path: '/' },
+  { icon: 'mdi:home', name: 'ホーム', path: '/' },
   { icon: 'mdi:thunder', name: 'ベンチマーク', path: '/benches' },
   { icon: 'mdi:server-network', name: 'インスタンス', path: '/instances' },
   { icon: 'mdi:account-group', name: 'チーム管理', path: '/team' },
@@ -60,8 +60,10 @@ const isActive = (link: string) =>
         </template>
       </div>
     </nav>
-    <div class="main-content">
-      <slot />
+    <div class="main-content-wrapper">
+      <div class="main-content">
+        <slot />
+      </div>
     </div>
   </div>
 </template>
@@ -115,9 +117,16 @@ const isActive = (link: string) =>
   opacity: 1;
 }
 
-.main-content {
+.main-content-wrapper {
+  padding-top: 1rem;
+  padding-bottom: 10rem;
   overflow-y: auto;
   min-width: 0;
+}
+
+.main-content {
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .for-admins-label {
@@ -128,15 +137,18 @@ const isActive = (link: string) =>
   display: flex;
   align-items: center;
 }
+
 .for-admins-label::before,
 .for-admins-label::after {
   content: '';
   flex: 1;
   border-bottom: 1px solid var(--ct-slate-500);
 }
+
 .for-admins-label::before {
   margin-right: 0.5rem;
 }
+
 .for-admins-label::after {
   margin-left: 0.5rem;
 }

@@ -55,7 +55,6 @@ const enqueueBenchmark = (instanceId: string | null) => {
         class="benchmark-runner-button"
       >
         <Icon icon="mdi:thunder" width="24" height="24" />
-
         <span>実行</span>
       </MainButton>
     </div>
