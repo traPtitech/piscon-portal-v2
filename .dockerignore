@@ -1,0 +1,13 @@
+Dockerfile*
+compose*
+.dockerignore
+.git
+.gitignore
+README.md
+LICENSE
+.env
+.vscode
+
+client/node_modules
+client/.editorconfig
+client/dist
