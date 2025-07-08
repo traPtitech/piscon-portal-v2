@@ -40,11 +40,10 @@ const collapseStates = ref<Record<string, boolean>>({})
         <h2 class="team-instance-title" :id="team.team.id">
           <div>{{ team.team.name }}</div>
           <div class="team-members">
-            <UserAvatar
+            <UserChip
               v-for="member in team.team.members"
               :key="member"
               :name="getUserById(member)?.name ?? ''"
-              :title="getUserById(member)?.name ?? ''"
             />
           </div>
           <button
