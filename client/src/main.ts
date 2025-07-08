@@ -5,6 +5,7 @@ import App from './App.vue'
 import router from './router'
 import { VueQueryPlugin } from '@tanstack/vue-query'
 import PrimeVue from 'primevue/config'
+import ConfirmationService from 'primevue/confirmationservice'
 import Aura from '@primevue/themes/aura'
 import { definePreset } from '@primevue/themes'
 
@@ -41,5 +42,6 @@ app.use(PrimeVue, {
     options: { darkModeSelector: '.dark' },
   },
 })
+app.use(ConfirmationService)
 
 app.mount('#app')

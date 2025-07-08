@@ -188,7 +188,7 @@ const benchmarks: components['schemas']['BenchmarkAdminResult'][] = [
   },
 ]
 
-const docs = `# ドキュメント
+let docs = `# ドキュメント
 
 ## はじめに
 
@@ -457,8 +457,14 @@ export const handlers = [
 
     return HttpResponse.json(res)
   }),
-  http.patch(`/docs`, () => {
-    // TODO
+  http.patch(`/docs`, async (c) => {
+    const body = await c.request.json()
+    if (body === undefined) {
+      return HttpResponse.json({ message: 'Bad request' }, { status: 400 })
+    }
+
+    docs = body.body
+    return HttpResponse.json({ body: docs }, { status: 200 })
   }),
 ]
 
