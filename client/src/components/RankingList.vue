@@ -2,19 +2,28 @@
 import { Icon } from '@iconify/vue'
 import type { components } from '@/api/openapi'
 import { useTeams } from '@/lib/useServerData'
+import { useUsers } from '@/lib/useUsers'
 
 type RankingItem = components['schemas']['RankingItem']
 
-defineProps<{
+const props = defineProps<{
   ranking: RankingItem[]
   highlightTeamId?: string
 }>()
 
 const { data: teams } = useTeams()
+const { getUserById } = useUsers()
 
 const getTeamName = (teamId: string): string => {
   const team = teams.value?.find((t) => t.id === teamId)
   return team ? team.name : `Unknown Team`
+}
+
+const getTeamMembers = (teamId: string): string[] => {
+  const team = teams.value?.find((t) => t.id === teamId)
+  if (team === undefined) return []
+  const members = team.members.map((m) => getUserById(m)?.name).filter((x) => x !== undefined)
+  return members
 }
 </script>
 
@@ -27,9 +36,9 @@ const getTeamName = (teamId: string): string => {
     </div>
     <div class="ranking-list-body">
       <div
-        v-for="item in ranking"
+        v-for="item in props.ranking"
         :key="item.teamId"
-        :class="['ranking-list-row', { highlight: item.teamId === highlightTeamId }]"
+        :class="['ranking-list-row', { highlight: item.teamId === props.highlightTeamId }]"
       >
         <div class="ranking-list-rank">
           <span v-if="item.rank <= 3" class="crown">
@@ -47,7 +56,14 @@ const getTeamName = (teamId: string): string => {
             {{ item.rank }}
           </span>
         </div>
-        <div class="ranking-list-team">{{ getTeamName(item.teamId) }}</div>
+        <div class="ranking-list-team">
+          <span>
+            {{ getTeamName(item.teamId) }}
+          </span>
+          <div class="ranking-list-team-members">
+            <UserChip v-for="member in getTeamMembers(item.teamId)" :key="member" :name="member" />
+          </div>
+        </div>
         <div class="ranking-list-score">{{ item.score }}</div>
       </div>
     </div>
@@ -60,11 +76,12 @@ const getTeamName = (teamId: string): string => {
   border-radius: 4px;
   overflow: auto;
   background: var(--ct-white);
+  container-type: inline-size;
 }
 
 .ranking-list-header {
   display: grid;
-  grid-template-columns: 40px 1fr 120px;
+  grid-template-columns: 40px 1fr 80px;
   gap: 1rem;
   padding: 0.75rem 1rem;
   background: var(--ct-slate-100);
@@ -80,7 +97,7 @@ const getTeamName = (teamId: string): string => {
 
 .ranking-list-row {
   display: grid;
-  grid-template-columns: 40px 1fr 120px;
+  grid-template-columns: 40px 1fr 80px;
   gap: 1rem;
   padding: 0.75rem 1rem;
   border-bottom: 1px solid var(--ct-slate-200);
@@ -120,6 +137,21 @@ const getTeamName = (teamId: string): string => {
 
 .ranking-list-team {
   color: var(--ct-slate-800);
+  display: flex;
+  gap: 1em;
+}
+
+@container (max-width: 600px) {
+  .ranking-list-team {
+    flex-direction: column;
+    gap: 0.5em;
+  }
+}
+
+.ranking-list-team-members {
+  display: flex;
+  gap: 0.25em;
+  flex-wrap: wrap;
 }
 
 .ranking-list-row.highlight .ranking-list-team {
