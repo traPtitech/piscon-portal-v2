@@ -27,17 +27,13 @@ const myTeamRanking = computed(() => {
 const chartScores = computed(() => {
   if (!scores.value) return []
 
-  const flatScores: { teamId: string; score: number; createdAt: string }[] = []
-  scores.value.forEach((teamScore) => {
-    teamScore.scores.forEach((score) => {
-      flatScores.push({
-        teamId: teamScore.teamId,
-        score: score.score,
-        createdAt: score.createdAt,
-      })
-    })
-  })
-  return flatScores
+  return scores.value.flatMap((teamScore) =>
+    teamScore.scores.map((score) => ({
+      teamId: teamScore.teamId,
+      score: score.score,
+      createdAt: score.createdAt,
+    })),
+  )
 })
 </script>
 
