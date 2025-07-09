@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import type { components } from '@/api/openapi'
-import { useTeams } from '@/lib/useServerData'
-import { useUsers } from '@/lib/useUsers'
+import { useTeams } from '@/lib/useTeams'
 
 type RankingItem = components['schemas']['RankingItem']
 
@@ -11,20 +10,7 @@ const props = defineProps<{
   highlightTeamId?: string
 }>()
 
-const { data: teams } = useTeams()
-const { getUserById } = useUsers()
-
-const getTeamName = (teamId: string): string => {
-  const team = teams.value?.find((t) => t.id === teamId)
-  return team ? team.name : `Unknown Team`
-}
-
-const getTeamMembers = (teamId: string): string[] => {
-  const team = teams.value?.find((t) => t.id === teamId)
-  if (team === undefined) return []
-  const members = team.members.map((m) => getUserById(m)?.name).filter((x) => x !== undefined)
-  return members
-}
+const { getTeamName, getTeamMembers } = useTeams()
 </script>
 
 <template>
@@ -61,7 +47,11 @@ const getTeamMembers = (teamId: string): string[] => {
             {{ getTeamName(item.teamId) }}
           </span>
           <div class="ranking-list-team-members">
-            <UserChip v-for="member in getTeamMembers(item.teamId)" :key="member" :name="member" />
+            <UserChip
+              v-for="member in getTeamMembers(item.teamId)"
+              :key="member.name"
+              :name="member.name"
+            />
           </div>
         </div>
         <div class="ranking-list-score">{{ item.score }}</div>

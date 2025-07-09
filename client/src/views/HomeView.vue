@@ -5,7 +5,7 @@ import StatusCard from '@/components/StatusCard.vue'
 import RankingList from '@/components/RankingList.vue'
 import NavigationCard from '@/components/NavigationCard.vue'
 import ScoreChart from '@/components/ScoreChart.vue'
-import { useMe, useTeams, useRanking, useScores } from '@/lib/useServerData'
+import { useMe, useTeamsData, useRanking, useScores } from '@/lib/useServerData'
 
 const { data: me } = useMe()
 const { data: teams } = useTeams()

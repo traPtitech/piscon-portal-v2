@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useTeams } from '@/lib/useServerData'
+import { useTeams } from '@/lib/useTeams'
 import type { ChartConfiguration } from 'chart.js'
 import { computed } from 'vue'
 
@@ -12,12 +12,7 @@ const props = defineProps<{
   scores: TeamScore[]
 }>()
 
-const { data: teams } = useTeams()
-
-const getTeamName = (teamId: string): string => {
-  const team = teams.value?.find((t) => t.id === teamId)
-  return team ? team.name : `Unknown Team`
-}
+const { getTeamName } = useTeams()
 
 const scoresByTeam = computed(() => {
   const scoresMap: Record<string, { x: string; y: number }[]> = {}
