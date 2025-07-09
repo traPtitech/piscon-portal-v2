@@ -11,7 +11,7 @@ import { definePreset } from '@primevue/themes'
 
 const app = createApp(App)
 
-if (import.meta.env.DEV) {
+if (import.meta.env.DEV && !import.meta.env.VITE_DISABLE_MSW) {
   const { worker } = await import('@/mock/browser')
   await worker.start({ onUnhandledRequest: 'bypass' })
 }
