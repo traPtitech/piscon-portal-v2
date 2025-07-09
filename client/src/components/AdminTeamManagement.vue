@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import UserAvatar from '@/components/UserAvatar.vue'
-import { useMe, useTeam, useUpdateTeam } from '@/lib/useServerData'
+import { useTeam, useUpdateTeam } from '@/lib/useServerData'
 import { Icon } from '@iconify/vue'
 import MainButton from '@/components/MainButton.vue'
 import { useUsers } from '@/lib/useUsers'
@@ -8,7 +8,6 @@ import { ref } from 'vue'
 
 const { teamId } = defineProps<{ teamId: string }>()
 
-const { data: me } = useMe()
 const { data: team } = useTeam(teamId)
 const { getUserById, getUserByName } = useUsers()
 const { mutate: updateTeam } = useUpdateTeam()
@@ -61,7 +60,6 @@ const changeTeamNameHandler = () => {
           <div>{{ getUserById(member)?.name }}</div>
           <MainButton
             @click="removeMember(member)"
-            :disabled="me?.id === member"
             class="remove-member-button"
             variant="destructive"
           >
