@@ -32,18 +32,18 @@ type IPInfo struct {
 	PublicIPs  []string `json:"public_ips"`
 }
 
-// FakeManager is a mock implementation of the instance.Manager interface.
+// Manager is a mock implementation of the instance.Manager interface.
 // It simulates the behavior of an instance manager for development environments.
 // It stores instance data in a local file system.
-type FakeManager struct {
+type Manager struct {
 	mu   sync.Mutex
 	root *os.Root
 }
 
-var _ instance.Manager = &FakeManager{}
+var _ instance.Manager = &Manager{}
 
-func NewManager(root *os.Root) (*FakeManager, error) {
-	m := &FakeManager{
+func NewManager(root *os.Root) (*Manager, error) {
+	m := &Manager{
 		root: root,
 	}
 
@@ -74,7 +74,7 @@ func NewManager(root *os.Root) (*FakeManager, error) {
 	return m, nil
 }
 
-func (m *FakeManager) Create(ctx context.Context, _ string, sshPubKeys []string) (domain.InfraInstance, error) {
+func (m *Manager) Create(_ context.Context, _ string, _ []string) (domain.InfraInstance, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -121,7 +121,7 @@ func (m *FakeManager) Create(ctx context.Context, _ string, sshPubKeys []string)
 	return instance, nil
 }
 
-func (m *FakeManager) Get(ctx context.Context, id string) (domain.InfraInstance, error) {
+func (m *Manager) Get(_ context.Context, id string) (domain.InfraInstance, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -139,7 +139,7 @@ func (m *FakeManager) Get(ctx context.Context, id string) (domain.InfraInstance,
 	return instance, nil
 }
 
-func (m *FakeManager) GetAll(ctx context.Context) ([]domain.InfraInstance, error) {
+func (m *Manager) GetAll(_ context.Context) ([]domain.InfraInstance, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -150,7 +150,7 @@ func (m *FakeManager) GetAll(ctx context.Context) ([]domain.InfraInstance, error
 	return instances, nil
 }
 
-func (m *FakeManager) Delete(ctx context.Context, instance domain.InfraInstance) (domain.InfraInstance, error) {
+func (m *Manager) Delete(_ context.Context, instance domain.InfraInstance) (domain.InfraInstance, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -184,7 +184,7 @@ func (m *FakeManager) Delete(ctx context.Context, instance domain.InfraInstance)
 	return instance, nil
 }
 
-func (m *FakeManager) Stop(ctx context.Context, instance domain.InfraInstance) (domain.InfraInstance, error) {
+func (m *Manager) Stop(_ context.Context, instance domain.InfraInstance) (domain.InfraInstance, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -206,7 +206,7 @@ func (m *FakeManager) Stop(ctx context.Context, instance domain.InfraInstance) (
 	return instance, nil
 }
 
-func (m *FakeManager) Start(ctx context.Context, instance domain.InfraInstance) (domain.InfraInstance, error) {
+func (m *Manager) Start(_ context.Context, instance domain.InfraInstance) (domain.InfraInstance, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -228,7 +228,7 @@ func (m *FakeManager) Start(ctx context.Context, instance domain.InfraInstance) 
 	return instance, nil
 }
 
-func (m *FakeManager) readInstances() ([]domain.InfraInstance, error) {
+func (m *Manager) readInstances() ([]domain.InfraInstance, error) {
 	f, err := m.root.Open(instanceFileName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open instances file: %w", err)
@@ -242,7 +242,7 @@ func (m *FakeManager) readInstances() ([]domain.InfraInstance, error) {
 	return instances, nil
 }
 
-func (m *FakeManager) storeInstances(instances []domain.InfraInstance) error {
+func (m *Manager) storeInstances(instances []domain.InfraInstance) error {
 	f, err := m.root.Create(instanceFileName)
 	if err != nil {
 		return fmt.Errorf("failed to create instances file: %w", err)
@@ -255,7 +255,7 @@ func (m *FakeManager) storeInstances(instances []domain.InfraInstance) error {
 	return nil
 }
 
-func (m *FakeManager) updateInstance(instance domain.InfraInstance) error {
+func (m *Manager) updateInstance(instance domain.InfraInstance) error {
 	f, err := m.root.OpenFile(instanceFileName, os.O_RDWR, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to open instances file: %w", err)
@@ -287,7 +287,7 @@ func (m *FakeManager) updateInstance(instance domain.InfraInstance) error {
 	return nil
 }
 
-func (m *FakeManager) readIPInfo() (IPInfo, error) {
+func (m *Manager) readIPInfo() (IPInfo, error) {
 	f, err := m.root.Open(ipInfoFileName)
 	if err != nil {
 		return IPInfo{}, fmt.Errorf("failed to open IP info file: %w", err)
@@ -301,7 +301,7 @@ func (m *FakeManager) readIPInfo() (IPInfo, error) {
 	return ipInfo, nil
 }
 
-func (m *FakeManager) storeIPInfo(ipInfo IPInfo) error {
+func (m *Manager) storeIPInfo(ipInfo IPInfo) error {
 	f, err := m.root.Create(ipInfoFileName)
 	if err != nil {
 		return fmt.Errorf("failed to create IP info file: %w", err)
@@ -314,7 +314,7 @@ func (m *FakeManager) storeIPInfo(ipInfo IPInfo) error {
 	return nil
 }
 
-func (m *FakeManager) generatePrivateIP() (string, error) {
+func (m *Manager) generatePrivateIP() (string, error) {
 	ipInfo, err := m.readIPInfo()
 	if err != nil {
 		return "", fmt.Errorf("failed to read IP info: %w", err)
@@ -334,7 +334,7 @@ func (m *FakeManager) generatePrivateIP() (string, error) {
 	}
 }
 
-func (m *FakeManager) generatePublicIP() (string, error) {
+func (m *Manager) generatePublicIP() (string, error) {
 	ipInfo, err := m.readIPInfo()
 	if err != nil {
 		return "", fmt.Errorf("failed to read IP info: %w", err)

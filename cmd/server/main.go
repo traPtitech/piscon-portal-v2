@@ -110,7 +110,11 @@ func provideMockInstanceManager() (instance.Manager, error) {
 	if err != nil {
 		return nil, fmt.Errorf("open root directory: %w", err)
 	}
-	return fake.NewManager(root)
+	manager, err := fake.NewManager(root)
+	if err != nil {
+		return nil, fmt.Errorf("create mock instance manager: %w", err)
+	}
+	return manager, nil
 }
 
 func provideAWSInstanceManager() (instance.Manager, error) {
@@ -124,5 +128,9 @@ func provideAWSInstanceManager() (instance.Manager, error) {
 		SecurityGroupID: os.Getenv("AWS_SECURITY_GROUP_ID"),
 		KeyPairName:     os.Getenv("AWS_KEY_PAIR_NAME"),
 	}
-	return aws.NewClient(awsConfig)
+	manager, err := aws.NewClient(awsConfig)
+	if err != nil {
+		return nil, fmt.Errorf("create AWS instance manager: %w", err)
+	}
+	return manager, nil
 }
