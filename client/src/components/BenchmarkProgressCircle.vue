@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { BENCHMARK_DURATION_SECONDS } from '@/lib/benchmark'
-import { computed, onMounted, useTemplateRef } from 'vue'
+import { computed } from 'vue'
 
 const duration = `${BENCHMARK_DURATION_SECONDS}s`
 
@@ -9,7 +9,6 @@ const props = defineProps<{
   startedAt: string
 }>()
 
-const ref = useTemplateRef('progress-circle')
 const sizePx = computed(() => `${props.size}px`)
 const delay = computed(() => {
   const startedAt = new Date(props.startedAt)
