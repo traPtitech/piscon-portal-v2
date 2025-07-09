@@ -8,7 +8,7 @@ import ScoreChart from '@/components/ScoreChart.vue'
 import { useMe, useTeamsData, useRanking, useScores } from '@/lib/useServerData'
 
 const { data: me } = useMe()
-const { data: teams } = useTeams()
+const { data: teams } = useTeamsData()
 const { data: ranking } = useRanking('latest')
 const { data: scores } = useScores()
 
@@ -60,14 +60,20 @@ const chartScores = computed(() => {
     </section>
 
     <section class="content-section">
-      <div class="ranking-container">
-        <h2 class="section-title">スコアランキング</h2>
-        <RankingList
-          v-if="ranking && ranking.length > 0"
-          :ranking="ranking"
-          :highlight-team-id="myTeam?.id"
-        />
-        <div v-else class="empty-state">まだベンチマーク結果がありません</div>
+      <div class="content-section-row">
+        <div class="ranking-container">
+          <h2 class="section-title">スコアランキング</h2>
+          <RankingList
+            v-if="ranking && ranking.length > 0"
+            :ranking="ranking"
+            :highlight-team-id="myTeam?.id"
+          />
+          <div v-else class="empty-state">まだベンチマーク結果がありません</div>
+        </div>
+        <div class="queue-container">
+          <h2 class="section-title">ベンチマークキュー</h2>
+          <BenchmarkQueue class="benchmark-queue" />
+        </div>
       </div>
 
       <div class="chart-container">
@@ -135,11 +141,31 @@ const chartScores = computed(() => {
   gap: 2rem;
 }
 
+.content-section-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  justify-content: space-between;
+  align-items: stretch;
+}
+
+@container (max-width: 720px) {
+  .content-section-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 .ranking-container,
+.queue-container,
 .chart-container {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.benchmark-queue {
+  max-height: 446px;
+  overflow-y: auto;
 }
 
 .chart-wrapper {

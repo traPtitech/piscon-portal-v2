@@ -1,0 +1,1 @@
+export const BENCHMARK_DURATION_SECONDS = 5
