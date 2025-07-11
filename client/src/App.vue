@@ -8,20 +8,22 @@ import { RouterView, useRouter } from 'vue-router'
 const { data: me, isLoading } = useMe()
 const router = useRouter()
 
+const SESSION_STORAGE_KEY_REDIRECT = 'redirect'
+
 const status = computed(() => {
   if (isLoading.value) return 'loading'
   return me.value ? 'authenticated' : 'unauthenticated'
 })
 
 const loginHandler = () => {
-  sessionStorage.setItem('redirect', window.location.pathname)
+  sessionStorage.setItem(SESSION_STORAGE_KEY_REDIRECT, window.location.pathname)
   window.location.href = apiBaseUrl + '/oauth2/code'
 }
 
 effect(() => {
-  const redirect = sessionStorage.getItem('redirect')
+  const redirect = sessionStorage.getItem(SESSION_STORAGE_KEY_REDIRECT)
   if (redirect && status.value === 'authenticated') {
-    sessionStorage.removeItem('redirect')
+    sessionStorage.removeItem(SESSION_STORAGE_KEY_REDIRECT)
     if (!redirect.startsWith('/')) return
     void router.push(redirect)
   }
