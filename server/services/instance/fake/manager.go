@@ -51,12 +51,12 @@ func NewManager(root *os.Root) (*Manager, error) {
 	if _, err := m.root.Stat(instanceFileName); errors.Is(err, os.ErrNotExist) {
 		f, err := m.root.Create(instanceFileName)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create instances file: %w", err)
+			return nil, fmt.Errorf("create instances file: %w", err)
 		}
 		defer f.Close()
 
 		if err := json.NewEncoder(f).Encode([]domain.InfraInstance{}); err != nil {
-			return nil, fmt.Errorf("failed to initialize instances file: %w", err)
+			return nil, fmt.Errorf("initialize instances file: %w", err)
 		}
 	}
 
@@ -67,7 +67,7 @@ func NewManager(root *os.Root) (*Manager, error) {
 			PublicIPs:  []string{},
 		}
 		if err := m.storeIPInfo(ipInfo); err != nil {
-			return nil, fmt.Errorf("failed to initialize IP info file: %w", err)
+			return nil, fmt.Errorf("initialize IP info file: %w", err)
 		}
 	}
 
@@ -81,12 +81,12 @@ func (m *Manager) Create(_ context.Context, _ string, _ []string) (domain.InfraI
 	id := uuid.NewString()
 	privateIP, err := m.generatePrivateIP()
 	if err != nil {
-		return domain.InfraInstance{}, fmt.Errorf("failed to generate private IP: %w", err)
+		return domain.InfraInstance{}, fmt.Errorf("generate private IP: %w", err)
 	}
 
 	publicIP, err := m.generatePublicIP()
 	if err != nil {
-		return domain.InfraInstance{}, fmt.Errorf("failed to generate public IP: %w", err)
+		return domain.InfraInstance{}, fmt.Errorf("generate public IP: %w", err)
 	}
 
 	instance := domain.InfraInstance{
@@ -98,12 +98,12 @@ func (m *Manager) Create(_ context.Context, _ string, _ []string) (domain.InfraI
 
 	instances, err := m.readInstances()
 	if err != nil {
-		return domain.InfraInstance{}, fmt.Errorf("failed to read instances: %w", err)
+		return domain.InfraInstance{}, fmt.Errorf("read instances: %w", err)
 	}
 	instances = append(instances, instance)
 
 	if err := m.storeInstances(instances); err != nil {
-		return domain.InfraInstance{}, fmt.Errorf("failed to store instances: %w", err)
+		return domain.InfraInstance{}, fmt.Errorf("store instances: %w", err)
 	}
 
 	// Simulate a delay for building the instance
@@ -114,7 +114,7 @@ func (m *Manager) Create(_ context.Context, _ string, _ []string) (domain.InfraI
 		log.Println("instance locked, updating status to running")
 		instance.Status = domain.InstanceStatusRunning
 		if err := m.updateInstance(instance); err != nil {
-			log.Printf("failed to update instance status: %v", err)
+			log.Printf("update instance status: %v", err)
 		}
 	})
 
@@ -127,7 +127,7 @@ func (m *Manager) Get(_ context.Context, id string) (domain.InfraInstance, error
 
 	instances, err := m.readInstances()
 	if err != nil {
-		return domain.InfraInstance{}, fmt.Errorf("failed to read instances: %w", err)
+		return domain.InfraInstance{}, fmt.Errorf("read instances: %w", err)
 	}
 
 	instance, ok := lo.Find(instances, func(i domain.InfraInstance) bool {
@@ -145,7 +145,7 @@ func (m *Manager) GetAll(_ context.Context) ([]domain.InfraInstance, error) {
 
 	instances, err := m.readInstances()
 	if err != nil {
-		return nil, fmt.Errorf("failed to read instances: %w", err)
+		return nil, fmt.Errorf("read instances: %w", err)
 	}
 	return instances, nil
 }
@@ -158,7 +158,7 @@ func (m *Manager) Delete(_ context.Context, instance domain.InfraInstance) (doma
 
 	instances, err := m.readInstances()
 	if err != nil {
-		return domain.InfraInstance{}, fmt.Errorf("failed to read instances: %w", err)
+		return domain.InfraInstance{}, fmt.Errorf("read instances: %w", err)
 	}
 
 	instances = slices.DeleteFunc(instances, func(i domain.InfraInstance) bool {
@@ -168,17 +168,17 @@ func (m *Manager) Delete(_ context.Context, instance domain.InfraInstance) (doma
 	// Remove the IPs from the IP info
 	ipInfo, err := m.readIPInfo()
 	if err != nil {
-		return domain.InfraInstance{}, fmt.Errorf("failed to read IP info: %w", err)
+		return domain.InfraInstance{}, fmt.Errorf("read IP info: %w", err)
 	}
 	ipInfo.PrivateIPs = lo.Without(ipInfo.PrivateIPs, instance.PrivateIP)
 	ipInfo.PublicIPs = lo.Without(ipInfo.PublicIPs, instance.PublicIP)
 
 	if err := m.storeIPInfo(ipInfo); err != nil {
-		return domain.InfraInstance{}, fmt.Errorf("failed to store IP info: %w", err)
+		return domain.InfraInstance{}, fmt.Errorf("store IP info: %w", err)
 	}
 
 	if err := m.storeInstances(instances); err != nil {
-		return domain.InfraInstance{}, fmt.Errorf("failed to store instances: %w", err)
+		return domain.InfraInstance{}, fmt.Errorf("store instances: %w", err)
 	}
 
 	return instance, nil
@@ -190,7 +190,7 @@ func (m *Manager) Stop(_ context.Context, instance domain.InfraInstance) (domain
 
 	instance.Status = domain.InstanceStatusStopping
 	if err := m.updateInstance(instance); err != nil {
-		return domain.InfraInstance{}, fmt.Errorf("failed to update instance status to stopping: %w", err)
+		return domain.InfraInstance{}, fmt.Errorf("update instance status to stopping: %w", err)
 	}
 
 	// Simulate a delay for stopping the instance
@@ -199,7 +199,7 @@ func (m *Manager) Stop(_ context.Context, instance domain.InfraInstance) (domain
 		defer m.mu.Unlock()
 		instance.Status = domain.InstanceStatusStopped
 		if err := m.updateInstance(instance); err != nil {
-			log.Printf("failed to update instance status to stopped: %v", err)
+			log.Printf("update instance status to stopped: %v", err)
 		}
 	})
 
@@ -212,7 +212,7 @@ func (m *Manager) Start(_ context.Context, instance domain.InfraInstance) (domai
 
 	instance.Status = domain.InstanceStatusStarting
 	if err := m.updateInstance(instance); err != nil {
-		return domain.InfraInstance{}, fmt.Errorf("failed to update instance status to starting: %w", err)
+		return domain.InfraInstance{}, fmt.Errorf("update instance status to starting: %w", err)
 	}
 
 	// Simulate a delay for starting the instance
@@ -221,7 +221,7 @@ func (m *Manager) Start(_ context.Context, instance domain.InfraInstance) (domai
 		defer m.mu.Unlock()
 		instance.Status = domain.InstanceStatusRunning
 		if err := m.updateInstance(instance); err != nil {
-			log.Printf("failed to update instance status to running: %v", err)
+			log.Printf("update instance status to running: %v", err)
 		}
 	})
 
@@ -231,13 +231,13 @@ func (m *Manager) Start(_ context.Context, instance domain.InfraInstance) (domai
 func (m *Manager) readInstances() ([]domain.InfraInstance, error) {
 	f, err := m.root.Open(instanceFileName)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open instances file: %w", err)
+		return nil, fmt.Errorf("open instances file: %w", err)
 	}
 	defer f.Close()
 
 	var instances []domain.InfraInstance
 	if err := json.NewDecoder(f).Decode(&instances); err != nil {
-		return nil, fmt.Errorf("failed to decode instances: %w", err)
+		return nil, fmt.Errorf("decode instances: %w", err)
 	}
 	return instances, nil
 }
@@ -245,12 +245,12 @@ func (m *Manager) readInstances() ([]domain.InfraInstance, error) {
 func (m *Manager) storeInstances(instances []domain.InfraInstance) error {
 	f, err := m.root.Create(instanceFileName)
 	if err != nil {
-		return fmt.Errorf("failed to create instances file: %w", err)
+		return fmt.Errorf("create instances file: %w", err)
 	}
 	defer f.Close()
 
 	if err := json.NewEncoder(f).Encode(instances); err != nil {
-		return fmt.Errorf("failed to encode instances: %w", err)
+		return fmt.Errorf("encode instances: %w", err)
 	}
 	return nil
 }
@@ -258,13 +258,13 @@ func (m *Manager) storeInstances(instances []domain.InfraInstance) error {
 func (m *Manager) updateInstance(instance domain.InfraInstance) error {
 	f, err := m.root.OpenFile(instanceFileName, os.O_RDWR, 0644)
 	if err != nil {
-		return fmt.Errorf("failed to open instances file: %w", err)
+		return fmt.Errorf("open instances file: %w", err)
 	}
 	defer f.Close()
 
 	var instances []domain.InfraInstance
 	if err := json.NewDecoder(f).Decode(&instances); err != nil {
-		return fmt.Errorf("failed to decode instances: %w", err)
+		return fmt.Errorf("decode instances: %w", err)
 	}
 
 	for i, inst := range instances {
@@ -276,13 +276,13 @@ func (m *Manager) updateInstance(instance domain.InfraInstance) error {
 
 	// Truncate the file and write the updated instances
 	if err := f.Truncate(0); err != nil {
-		return fmt.Errorf("failed to truncate instances file: %w", err)
+		return fmt.Errorf("truncate instances file: %w", err)
 	}
 	if _, err := f.Seek(0, 0); err != nil {
-		return fmt.Errorf("failed to seek to beginning of instances file: %w", err)
+		return fmt.Errorf("seek to beginning of instances file: %w", err)
 	}
 	if err := json.NewEncoder(f).Encode(instances); err != nil {
-		return fmt.Errorf("failed to encode updated instances: %w", err)
+		return fmt.Errorf("encode updated instances: %w", err)
 	}
 	return nil
 }
@@ -290,13 +290,13 @@ func (m *Manager) updateInstance(instance domain.InfraInstance) error {
 func (m *Manager) readIPInfo() (IPInfo, error) {
 	f, err := m.root.Open(ipInfoFileName)
 	if err != nil {
-		return IPInfo{}, fmt.Errorf("failed to open IP info file: %w", err)
+		return IPInfo{}, fmt.Errorf("open IP info file: %w", err)
 	}
 	defer f.Close()
 
 	var ipInfo IPInfo
 	if err := json.NewDecoder(f).Decode(&ipInfo); err != nil {
-		return IPInfo{}, fmt.Errorf("failed to decode IP info: %w", err)
+		return IPInfo{}, fmt.Errorf("decode IP info: %w", err)
 	}
 	return ipInfo, nil
 }
@@ -304,12 +304,12 @@ func (m *Manager) readIPInfo() (IPInfo, error) {
 func (m *Manager) storeIPInfo(ipInfo IPInfo) error {
 	f, err := m.root.Create(ipInfoFileName)
 	if err != nil {
-		return fmt.Errorf("failed to create IP info file: %w", err)
+		return fmt.Errorf("create IP info file: %w", err)
 	}
 	defer f.Close()
 
 	if err := json.NewEncoder(f).Encode(ipInfo); err != nil {
-		return fmt.Errorf("failed to encode IP info: %w", err)
+		return fmt.Errorf("encode IP info: %w", err)
 	}
 	return nil
 }
@@ -317,7 +317,7 @@ func (m *Manager) storeIPInfo(ipInfo IPInfo) error {
 func (m *Manager) generatePrivateIP() (string, error) {
 	ipInfo, err := m.readIPInfo()
 	if err != nil {
-		return "", fmt.Errorf("failed to read IP info: %w", err)
+		return "", fmt.Errorf("read IP info: %w", err)
 	}
 
 	for {
@@ -328,7 +328,7 @@ func (m *Manager) generatePrivateIP() (string, error) {
 		ipInfo.PrivateIPs = append(ipInfo.PrivateIPs, ip)
 
 		if err := m.storeIPInfo(ipInfo); err != nil {
-			return "", fmt.Errorf("failed to store IP info: %w", err)
+			return "", fmt.Errorf("store IP info: %w", err)
 		}
 		return ip, nil
 	}
@@ -337,7 +337,7 @@ func (m *Manager) generatePrivateIP() (string, error) {
 func (m *Manager) generatePublicIP() (string, error) {
 	ipInfo, err := m.readIPInfo()
 	if err != nil {
-		return "", fmt.Errorf("failed to read IP info: %w", err)
+		return "", fmt.Errorf("read IP info: %w", err)
 	}
 
 	for {
@@ -348,7 +348,7 @@ func (m *Manager) generatePublicIP() (string, error) {
 		ipInfo.PublicIPs = append(ipInfo.PublicIPs, ip)
 
 		if err := m.storeIPInfo(ipInfo); err != nil {
-			return "", fmt.Errorf("failed to store IP info: %w", err)
+			return "", fmt.Errorf("store IP info: %w", err)
 		}
 		return ip, nil
 	}
