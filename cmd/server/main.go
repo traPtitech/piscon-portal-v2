@@ -100,12 +100,12 @@ func provideInstanceManager() (instance.Manager, error) {
 		return provideAWSInstanceManager()
 	}
 	if manager == "" || manager == "mock" {
-		return provideMockInstanceManager()
+		return provideFakeInstanceManager()
 	}
 	return nil, fmt.Errorf("unknown INSTANCE_MANAGER: %s", manager)
 }
 
-func provideMockInstanceManager() (instance.Manager, error) {
+func provideFakeInstanceManager() (instance.Manager, error) {
 	root, err := os.OpenRoot("/app/.dev/instance")
 	if err != nil {
 		return nil, fmt.Errorf("open root directory: %w", err)
