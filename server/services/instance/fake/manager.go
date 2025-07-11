@@ -32,7 +32,7 @@ type IPInfo struct {
 	PublicIPs  []string `json:"public_ips"`
 }
 
-// Manager is a mock implementation of the instance.Manager interface.
+// Manager is a fake implementation of the instance.Manager interface.
 // It simulates the behavior of an instance manager for development environments.
 // It stores instance data in a local file system.
 type Manager struct {
