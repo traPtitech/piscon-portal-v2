@@ -20,6 +20,8 @@ services:
       dockerfile: portal.Dockerfile
     ports:
       - 8080:8080
+    volumes:
+      - ./.dev/instance:/app/.dev/instance
     depends_on:
       db:
         condition: service_healthy
