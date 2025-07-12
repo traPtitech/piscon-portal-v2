@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { useInterval } from '@/lib/useInterval'
 import { useTeamInstances } from '@/lib/useServerData'
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 
 const { teamId } = defineProps<{ teamId: string }>()
 
@@ -12,19 +13,12 @@ const visibleInstances = computed(() =>
   instances.value ? instances.value.filter((i) => showDeleted.value || i.status !== 'deleted') : [],
 )
 
-let interval: number
-onMounted(() => {
-  interval = setInterval(() => {
-    const loadingStatuses = ['building', 'starting', 'stopping', 'deleting']
-    if (instances.value?.some((i) => loadingStatuses.includes(i.status))) {
-      void refetch()
-    }
-  }, 500)
-})
-
-onUnmounted(() => {
-  clearInterval(interval)
-})
+useInterval(() => {
+  const loadingStatuses = ['building', 'starting', 'stopping', 'deleting']
+  if (instances.value?.some((i) => loadingStatuses.includes(i.status))) {
+    void refetch()
+  }
+}, 500)
 </script>
 
 <template>

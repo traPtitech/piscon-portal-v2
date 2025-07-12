@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import PageTitle from '@/components/PageTitle.vue'
 import AdminTeamManagement from '@/components/AdminTeamManagement.vue'
-import { useTeams } from '@/lib/useServerData'
+import { useTeamsData } from '@/lib/useServerData'
 import notfoundImage from '@/assets/not-found.png'
 
-const { data: teams } = useTeams()
+const { data: teams } = useTeamsData()
 </script>
 
 <template>

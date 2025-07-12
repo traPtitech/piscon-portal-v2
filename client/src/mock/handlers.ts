@@ -220,6 +220,7 @@ export const handlers = [
               .filter((b) => b.status === 'finished')
               .slice(-1)[0],
         )
+        .filter((b) => b !== undefined)
         .sort(sortFn)
         .map((b, i) => ({
           rank: i + 1,

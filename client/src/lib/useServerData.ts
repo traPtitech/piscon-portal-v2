@@ -156,7 +156,7 @@ export const useAllInstances = () =>
     queryFn: () => api.GET('/instances').then((r) => r.data),
   })
 
-export const useTeams = () =>
+export const useTeamsData = () =>
   useQuery({
     queryKey: ['teams'],
     queryFn: () => api.GET('/teams').then((r) => r.data),

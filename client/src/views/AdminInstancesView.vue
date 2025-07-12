@@ -2,13 +2,13 @@
 import InstanceCardList from '@/components/InstanceCardList.vue'
 import MainSwitch from '@/components/MainSwitch.vue'
 import PageTitle from '@/components/PageTitle.vue'
-import { useAllInstances, useTeams } from '@/lib/useServerData'
+import { useAllInstances, useTeamsData } from '@/lib/useServerData'
 import { useUsers } from '@/lib/useUsers'
 import { ref, computed } from 'vue'
 import { Icon } from '@iconify/vue'
 
 const { data: instances } = useAllInstances()
-const { data: teams } = useTeams()
+const { data: teams } = useTeamsData()
 const { getUserById } = useUsers()
 
 const showDeleted = ref(false)
