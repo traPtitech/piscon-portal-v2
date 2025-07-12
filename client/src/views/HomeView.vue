@@ -76,10 +76,10 @@ const chartScores = computed(() => {
 
       <div class="chart-container">
         <h2 class="section-title">全体スコア推移</h2>
-        <div class="chart-wrapper">
-          <ScoreChart v-if="chartScores.length > 0" :scores="chartScores" />
-          <div v-else class="empty-state">まだベンチマーク結果がありません</div>
+        <div v-if="chartScores.length > 0" class="chart-wrapper">
+          <ScoreChart :scores="chartScores" />
         </div>
+        <div v-else class="empty-state">まだベンチマーク結果がありません</div>
       </div>
     </section>
 
