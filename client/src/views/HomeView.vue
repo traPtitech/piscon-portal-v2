@@ -6,11 +6,12 @@ import RankingList from '@/components/RankingList.vue'
 import NavigationCard from '@/components/NavigationCard.vue'
 import ScoreChart from '@/components/ScoreChart.vue'
 import { useMe, useTeamsData, useRanking, useScores } from '@/lib/useServerData'
+import { useInterval } from '@/lib/useInterval'
 
 const { data: me } = useMe()
 const { data: teams } = useTeamsData()
-const { data: ranking } = useRanking('latest')
-const { data: scores } = useScores()
+const { data: ranking, refetch: refetchRanking } = useRanking('latest')
+const { data: scores, refetch: refetchScores } = useScores()
 
 const teamCount = computed(() => teams.value?.length ?? 0)
 
@@ -35,6 +36,11 @@ const chartScores = computed(() => {
     })),
   )
 })
+
+useInterval(() => {
+  void refetchRanking()
+  void refetchScores()
+}, 2000)
 </script>
 
 <template>
