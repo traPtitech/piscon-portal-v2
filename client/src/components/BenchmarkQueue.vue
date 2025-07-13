@@ -48,7 +48,7 @@ watch(
   { immediate: true },
 )
 
-useInterval(() => void refetch(), 500)
+useInterval(() => void refetch(), 2000)
 </script>
 
 <template>
@@ -69,18 +69,6 @@ useInterval(() => void refetch(), 500)
               height="48"
               class="benchmark-queue-icon"
             />
-            <div class="benchmark-queue-side-icon">
-              <BenchmarkProgressCircle
-                v-if="item.status === 'running'"
-                :size="24"
-                :startedAt="item.startedAt"
-              />
-              <BenchmarkProgressCircle
-                v-else-if="item.status === 'removed'"
-                :size="24"
-                :startedAt="new Date(Date.now() - 1000 * 60).toISOString()"
-              />
-            </div>
           </div>
           <div class="benchmark-queue-item-details">
             <div class="benchmark-queue-item-name">{{ getTeamName(item.teamId) }}</div>
@@ -100,16 +88,27 @@ useInterval(() => void refetch(), 500)
   overflow-x: hidden;
 }
 
+.benchmark-queue-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 .benchmark-queue-item {
   display: grid;
   grid-template-rows: 1fr;
   animation: wipe-in 0.3s ease-in-out forwards;
+  padding: 0.5rem;
+  background-color: var(--ct-slate-100);
+  border-radius: 4px;
 }
 
 .benchmark-queue-item-icon {
   position: relative;
   width: fit-content;
   height: fit-content;
+  display: grid;
+  place-items: center;
 }
 
 .benchmark-queue-item.removed {
@@ -132,20 +131,22 @@ useInterval(() => void refetch(), 500)
 @keyframes wipe-out {
   from {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateX(0) scale(1);
   }
   to {
     opacity: 0;
-    transform: translateX(64px);
+    transform: translateX(64px) scale(0.9);
   }
 }
 
 @keyframes shrink {
   from {
     grid-template-rows: 1fr;
+    padding-block: 0.5rem;
   }
   to {
     grid-template-rows: 0fr;
+    padding-block: 0rem;
   }
 }
 

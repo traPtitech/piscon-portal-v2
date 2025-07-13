@@ -1,4 +1,3 @@
-import { BENCHMARK_DURATION_SECONDS } from '@/lib/benchmark'
 import { benchmarks, dummyInstances, dummyTeams, instances, userIds } from '@/mock/data'
 import { uuidv7 } from 'uuidv7'
 
@@ -23,9 +22,9 @@ export const startJobs = () => {
       }
     }
 
-    // running のまま BENCHMARK_DURATION_SECONDS 秒経過したら finished にする
+    // running のまま60秒経過したら finished にする
     for (const b of runningBenchmarks) {
-      if (new Date(b.startedAt).getTime() + BENCHMARK_DURATION_SECONDS * 1000 < Date.now()) {
+      if (new Date(b.startedAt).getTime() + 60 * 1000 < Date.now()) {
         const index = benchmarks.findIndex((bb) => bb.id === b.id)
         const result = ['passed', 'failed', 'error'][Math.floor(Math.random() * 3)] as
           | 'passed'
