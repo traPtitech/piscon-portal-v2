@@ -16,6 +16,7 @@ import (
 	"github.com/traPtitech/piscon-portal-v2/server/server"
 	"github.com/traPtitech/piscon-portal-v2/server/services/instance"
 	"github.com/traPtitech/piscon-portal-v2/server/services/instance/aws"
+	"github.com/traPtitech/piscon-portal-v2/server/services/instance/fake"
 	"github.com/traPtitech/piscon-portal-v2/server/services/oauth2"
 	"github.com/traPtitech/piscon-portal-v2/server/usecase"
 )
@@ -94,6 +95,29 @@ func provideUseCaseConfig() (usecase.Config, error) {
 }
 
 func provideInstanceManager() (instance.Manager, error) {
+	manager := os.Getenv("INSTANCE_MANAGER")
+	if manager == "aws" {
+		return provideAWSInstanceManager()
+	}
+	if manager == "" || manager == "mock" {
+		return provideFakeInstanceManager()
+	}
+	return nil, fmt.Errorf("unknown INSTANCE_MANAGER: %s", manager)
+}
+
+func provideFakeInstanceManager() (instance.Manager, error) {
+	root, err := os.OpenRoot("/app/.dev/instance")
+	if err != nil {
+		return nil, fmt.Errorf("open root directory: %w", err)
+	}
+	manager, err := fake.NewManager(root)
+	if err != nil {
+		return nil, fmt.Errorf("create mock instance manager: %w", err)
+	}
+	return manager, nil
+}
+
+func provideAWSInstanceManager() (instance.Manager, error) {
 	awsConfig := aws.Config{
 		ImageID:         os.Getenv("AWS_IMAGE_ID"),
 		InstanceType:    os.Getenv("AWS_INSTANCE_TYPE"),
@@ -106,7 +130,7 @@ func provideInstanceManager() (instance.Manager, error) {
 	}
 	manager, err := aws.NewClient(awsConfig)
 	if err != nil {
-		return nil, fmt.Errorf("create AWS client: %w", err)
+		return nil, fmt.Errorf("create AWS instance manager: %w", err)
 	}
 	return manager, nil
 }

@@ -117,11 +117,11 @@ func (i *InstanceUseCaseImpl) DeleteInstance(ctx context.Context, id uuid.UUID) 
 			return fmt.Errorf("find instance: %w", err)
 		}
 
-		deletedInstance, err := i.manager.Delete(ctx, instance.Infra)
+		_, err = i.manager.Delete(ctx, instance.Infra)
 		if err != nil {
 			return fmt.Errorf("delete infra instance: %w", err)
 		}
-		instance.Infra = deletedInstance
+		instance.Infra.Status = domain.InstanceStatusDeleted
 
 		return i.repo.UpdateInstance(ctx, instance)
 	})
