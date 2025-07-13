@@ -1,5 +1,7 @@
-import { benchmarks, instanceIds, instances, teamIds, userIds } from '@/mock/data'
+import { benchmarks, dummyInstances, dummyTeams, instances, userIds } from '@/mock/data'
 import { uuidv7 } from 'uuidv7'
+
+const BENCHMARKER_CONCURRENCY = 3
 
 export const startJobs = () => {
   // ベンチマークの状態を定期的に更新する
@@ -20,7 +22,7 @@ export const startJobs = () => {
       }
     }
 
-    // running のまま 60 秒経過したら finished にする
+    // running のまま60秒経過したら finished にする
     for (const b of runningBenchmarks) {
       if (new Date(b.startedAt).getTime() + 60 * 1000 < Date.now()) {
         const index = benchmarks.findIndex((bb) => bb.id === b.id)
@@ -37,8 +39,8 @@ export const startJobs = () => {
       }
     }
 
-    // 実行中のベンチマークがなくなったら、waiting のベンチマークを1つ running にする
-    if (runningBenchmarks.length === 0) {
+    // 実行中のベンチマークが BENCHMARKER_CONCURRENCY 未満なら、waiting のベンチマークを running にする
+    if (runningBenchmarks.length < BENCHMARKER_CONCURRENCY) {
       const waitingBenchmark = benchmarks.find((b) => b.status === 'waiting')
       if (waitingBenchmark !== undefined) {
         const index = benchmarks.findIndex((b) => b.id === waitingBenchmark.id)
@@ -52,18 +54,20 @@ export const startJobs = () => {
     }
 
     // waiting のベンチマークがなくなったら、新しいベンチマークを enqueue する
-    const queueBenchmark = waitingBenchmarks.find((b) => b.teamId === teamIds['piropiro'])
-    if (queueBenchmark === undefined) {
-      benchmarks.push({
-        id: uuidv7(),
-        instanceId: instanceIds['piropiro-1'],
-        teamId: teamIds['piropiro'],
-        userId: userIds.pirosiki,
-        status: 'waiting',
-        createdAt: new Date().toISOString(),
-        log: '',
-        adminLog: '',
-      })
+    for (const [i, dummyTeam] of dummyTeams.entries()) {
+      const queueBenchmark = waitingBenchmarks.find((b) => b.teamId === dummyTeam.id)
+      if (queueBenchmark === undefined && Math.random() < 0.01) {
+        benchmarks.push({
+          id: uuidv7(),
+          instanceId: dummyInstances[i].id,
+          teamId: dummyTeam.id,
+          userId: userIds.cp20,
+          status: 'waiting',
+          createdAt: new Date().toISOString(),
+          log: '',
+          adminLog: '',
+        })
+      }
     }
   }, 100)
 

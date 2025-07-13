@@ -5,12 +5,13 @@ import StatusCard from '@/components/StatusCard.vue'
 import RankingList from '@/components/RankingList.vue'
 import NavigationCard from '@/components/NavigationCard.vue'
 import ScoreChart from '@/components/ScoreChart.vue'
-import { useMe, useTeams, useRanking, useScores } from '@/lib/useServerData'
+import { useMe, useTeamsData, useRanking, useScores } from '@/lib/useServerData'
+import { useInterval } from '@/lib/useInterval'
 
 const { data: me } = useMe()
-const { data: teams } = useTeams()
-const { data: ranking } = useRanking('latest')
-const { data: scores } = useScores()
+const { data: teams } = useTeamsData()
+const { data: ranking, refetch: refetchRanking } = useRanking('latest')
+const { data: scores, refetch: refetchScores } = useScores()
 
 const teamCount = computed(() => teams.value?.length ?? 0)
 
@@ -27,18 +28,19 @@ const myTeamRanking = computed(() => {
 const chartScores = computed(() => {
   if (!scores.value) return []
 
-  const flatScores: { teamId: string; score: number; createdAt: string }[] = []
-  scores.value.forEach((teamScore) => {
-    teamScore.scores.forEach((score) => {
-      flatScores.push({
-        teamId: teamScore.teamId,
-        score: score.score,
-        createdAt: score.createdAt,
-      })
-    })
-  })
-  return flatScores
+  return scores.value.flatMap((teamScore) =>
+    teamScore.scores.map((score) => ({
+      teamId: teamScore.teamId,
+      score: score.score,
+      createdAt: score.createdAt,
+    })),
+  )
 })
+
+useInterval(() => {
+  void refetchRanking()
+  void refetchScores()
+}, 2000)
 </script>
 
 <template>
@@ -64,14 +66,20 @@ const chartScores = computed(() => {
     </section>
 
     <section class="content-section">
-      <div class="ranking-container">
-        <h2 class="section-title">スコアランキング</h2>
-        <RankingList
-          v-if="ranking && ranking.length > 0"
-          :ranking="ranking"
-          :highlight-team-id="myTeam?.id"
-        />
-        <div v-else class="empty-state">まだベンチマーク結果がありません</div>
+      <div class="content-section-row">
+        <div class="ranking-container">
+          <h2 class="section-title">スコアランキング</h2>
+          <RankingList
+            v-if="ranking && ranking.length > 0"
+            :ranking="ranking"
+            :highlight-team-id="myTeam?.id"
+          />
+          <div v-else class="empty-state">まだベンチマーク結果がありません</div>
+        </div>
+        <div class="queue-container">
+          <h2 class="section-title">ベンチマークキュー</h2>
+          <BenchmarkQueue class="benchmark-queue" />
+        </div>
       </div>
 
       <div class="chart-container">
@@ -139,11 +147,31 @@ const chartScores = computed(() => {
   gap: 2rem;
 }
 
+.content-section-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  justify-content: space-between;
+  align-items: stretch;
+}
+
+@container (max-width: 720px) {
+  .content-section-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 .ranking-container,
+.queue-container,
 .chart-container {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.benchmark-queue {
+  max-height: 446px;
+  overflow-y: auto;
 }
 
 .chart-wrapper {

@@ -6,7 +6,7 @@ import { formatScore } from '@/lib/formatScore'
 import { useUsers } from '@/lib/useUsers'
 import type { components } from '@/api/openapi'
 import { computed } from 'vue'
-import { useTeams } from '@/lib/useServerData'
+import { useTeams } from '@/lib/useTeams'
 
 type Bench = components['schemas']['BenchmarkListItem']
 type Instance = components['schemas']['Instance']
@@ -23,11 +23,10 @@ const sortedBenches = computed(() =>
 )
 
 const { getUserById } = useUsers()
-const { data: teams } = useTeams()
+const { getTeamName } = useTeams()
 
 const columns = computed(() => (isAdmin ? 7 : 6))
 
-const getTeamName = (teamId: string) => teams.value?.find((t) => t.id === teamId)?.name ?? ''
 const getInstanceServerId = (instanceId: string) =>
   instances.find((i) => i.id === instanceId)?.serverId ?? '?'
 const getUserName = (userId: string) => getUserById(userId)?.name ?? ''

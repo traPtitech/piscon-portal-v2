@@ -224,7 +224,7 @@ export const updateDocs = (body: string) => {
 const DUMMY_TEAM_COUNT = 10
 
 type Team = components['schemas']['Team']
-const dummyTeams: Team[] = [...Array(DUMMY_TEAM_COUNT).keys()].map((i) => ({
+export const dummyTeams: Team[] = [...Array(DUMMY_TEAM_COUNT).keys()].map((i) => ({
   id: uuidv7(),
   name: `ダミーチーム${i + 1}`,
   members: [],
@@ -235,7 +235,7 @@ const dummyTeams: Team[] = [...Array(DUMMY_TEAM_COUNT).keys()].map((i) => ({
 teams.push(...dummyTeams)
 
 type Instance = components['schemas']['Instance']
-const dummyInstances: Instance[] = [...Array(DUMMY_TEAM_COUNT).keys()].map((i) => ({
+export const dummyInstances: Instance[] = [...Array(DUMMY_TEAM_COUNT).keys()].map((i) => ({
   id: uuidv7(),
   teamId: dummyTeams[i].id,
   serverId: 1,
@@ -246,21 +246,3 @@ const dummyInstances: Instance[] = [...Array(DUMMY_TEAM_COUNT).keys()].map((i) =
 }))
 
 instances.push(...dummyInstances)
-
-type Benchmark = components['schemas']['BenchmarkAdminResult']
-const dummyBenchmarks: Benchmark[] = [...Array(DUMMY_TEAM_COUNT).keys()].map((i) => ({
-  id: uuidv7(),
-  instanceId: dummyInstances[i].id,
-  teamId: dummyTeams[i].id,
-  userId: userIds.cp20,
-  status: 'finished',
-  createdAt: justBefore.toISOString(),
-  startedAt: justBefore.toISOString(),
-  finishedAt: new Date(justBefore.getTime() + oneMinute).toISOString(),
-  score: 1000 * 2 ** i,
-  log: '',
-  adminLog: '',
-  result: 'passed',
-}))
-
-benchmarks.push(...dummyBenchmarks)
