@@ -35,14 +35,21 @@ type Config struct {
 }
 
 func NewClient(cfg Config) (*Client, error) {
-	awsCfg, err := config.LoadDefaultConfig(context.Background(),
-		config.WithRegion(cfg.Region),
-		config.WithCredentialsProvider(credentials.StaticCredentialsProvider{
-			Value: aws.Credentials{
-				AccessKeyID:     cfg.AccessKey,
-				SecretAccessKey: cfg.SecretKey,
+	awsConfigFuncs := make([]func(*config.LoadOptions) error, 0, 2)
+
+	awsConfigFuncs = append(awsConfigFuncs, config.WithRegion(cfg.Region))
+	if cfg.AccessKey != "" && cfg.SecretKey != "" {
+		awsConfigFuncs = append(awsConfigFuncs, config.WithCredentialsProvider(
+			credentials.StaticCredentialsProvider{
+				Value: aws.Credentials{
+					AccessKeyID:     cfg.AccessKey,
+					SecretAccessKey: cfg.SecretKey,
+				},
 			},
-		}))
+		))
+	}
+
+	awsCfg, err := config.LoadDefaultConfig(context.Background(), awsConfigFuncs...)
 	if err != nil {
 		return nil, fmt.Errorf("load AWS config: %w", err)
 	}
