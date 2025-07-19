@@ -22,7 +22,7 @@ require (
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/ogen-go/ogen v1.14.0
 	github.com/samber/lo v1.51.0
-	github.com/spf13/pflag v1.0.6
+	github.com/spf13/pflag v1.0.7
 	github.com/stephenafamo/bob v0.38.0
 	github.com/stephenafamo/scan v0.7.0
 	github.com/stretchr/testify v1.10.0
