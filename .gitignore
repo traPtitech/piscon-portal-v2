@@ -25,7 +25,11 @@ go.work.sum
 .env
 
 .vscode/*
+*/.vscode
 !.vscode/extensions.json
 
 # task temp directory
 .task
+
+.ansible
+*/.ansible

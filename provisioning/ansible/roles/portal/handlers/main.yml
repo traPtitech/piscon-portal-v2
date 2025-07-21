@@ -1,0 +1,17 @@
+---
+- name: Restart portal service
+  ansible.builtin.systemd:
+    name: piscon-portal
+    state: restarted
+  become: true
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+  become: true
+
+- name: Start portal service
+  ansible.builtin.systemd:
+    name: piscon-portal
+    state: started
+  become: true
