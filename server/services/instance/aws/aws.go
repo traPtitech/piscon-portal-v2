@@ -149,6 +149,41 @@ func (a *Client) Get(ctx context.Context, id string) (domain.InfraInstance, erro
 	}, nil
 }
 
+func (a *Client) GetByIDs(ctx context.Context, ids []string) ([]domain.InfraInstance, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+
+	res, err := a.client.DescribeInstances(ctx, &ec2.DescribeInstancesInput{
+		InstanceIds: ids,
+		Filters: []types.Filter{
+			{
+				Name:   lo.ToPtr("tag:piscon"),
+				Values: []string{"true"},
+			},
+		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("describe instances: %w", err)
+	}
+
+	instances := make([]domain.InfraInstance, 0, len(res.Reservations))
+	for _, reservation := range res.Reservations {
+		for _, instance := range reservation.Instances {
+			infraInstance := domain.InfraInstance{
+				ProviderInstanceID: *instance.InstanceId,
+				PrivateIP:          *instance.PrivateIpAddress,
+				PublicIP:           *instance.PublicIpAddress,
+				Status:             convertInstanceState(instance.State.Name),
+			}
+
+			instances = append(instances, infraInstance)
+		}
+	}
+
+	return instances, nil
+}
+
 func (a *Client) GetAll(ctx context.Context) ([]domain.InfraInstance, error) {
 	res, err := a.client.DescribeInstances(ctx, &ec2.DescribeInstancesInput{
 		Filters: []types.Filter{
