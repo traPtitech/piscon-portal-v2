@@ -42,10 +42,10 @@ func (m *MockManager) EXPECT() *MockManagerMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockManager) Create(ctx context.Context, name string, sshPubKeys []string) (domain.InfraInstance, error) {
+func (m *MockManager) Create(ctx context.Context, name string, sshPubKeys []string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", ctx, name, sshPubKeys)
-	ret0, _ := ret[0].(domain.InfraInstance)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -63,30 +63,29 @@ type MockManagerCreateCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockManagerCreateCall) Return(arg0 domain.InfraInstance, arg1 error) *MockManagerCreateCall {
+func (c *MockManagerCreateCall) Return(arg0 string, arg1 error) *MockManagerCreateCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockManagerCreateCall) Do(f func(context.Context, string, []string) (domain.InfraInstance, error)) *MockManagerCreateCall {
+func (c *MockManagerCreateCall) Do(f func(context.Context, string, []string) (string, error)) *MockManagerCreateCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockManagerCreateCall) DoAndReturn(f func(context.Context, string, []string) (domain.InfraInstance, error)) *MockManagerCreateCall {
+func (c *MockManagerCreateCall) DoAndReturn(f func(context.Context, string, []string) (string, error)) *MockManagerCreateCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
 
 // Delete mocks base method.
-func (m *MockManager) Delete(ctx context.Context, instance domain.InfraInstance) (domain.InfraInstance, error) {
+func (m *MockManager) Delete(ctx context.Context, instance domain.InfraInstance) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Delete", ctx, instance)
-	ret0, _ := ret[0].(domain.InfraInstance)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Delete indicates an expected call of Delete.
@@ -102,19 +101,19 @@ type MockManagerDeleteCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockManagerDeleteCall) Return(arg0 domain.InfraInstance, arg1 error) *MockManagerDeleteCall {
-	c.Call = c.Call.Return(arg0, arg1)
+func (c *MockManagerDeleteCall) Return(arg0 error) *MockManagerDeleteCall {
+	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockManagerDeleteCall) Do(f func(context.Context, domain.InfraInstance) (domain.InfraInstance, error)) *MockManagerDeleteCall {
+func (c *MockManagerDeleteCall) Do(f func(context.Context, domain.InfraInstance) error) *MockManagerDeleteCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockManagerDeleteCall) DoAndReturn(f func(context.Context, domain.InfraInstance) (domain.InfraInstance, error)) *MockManagerDeleteCall {
+func (c *MockManagerDeleteCall) DoAndReturn(f func(context.Context, domain.InfraInstance) error) *MockManagerDeleteCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -198,12 +197,11 @@ func (c *MockManagerGetAllCall) DoAndReturn(f func(context.Context) ([]domain.In
 }
 
 // Start mocks base method.
-func (m *MockManager) Start(ctx context.Context, instance domain.InfraInstance) (domain.InfraInstance, error) {
+func (m *MockManager) Start(ctx context.Context, instance domain.InfraInstance) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Start", ctx, instance)
-	ret0, _ := ret[0].(domain.InfraInstance)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Start indicates an expected call of Start.
@@ -219,30 +217,29 @@ type MockManagerStartCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockManagerStartCall) Return(arg0 domain.InfraInstance, arg1 error) *MockManagerStartCall {
-	c.Call = c.Call.Return(arg0, arg1)
+func (c *MockManagerStartCall) Return(arg0 error) *MockManagerStartCall {
+	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockManagerStartCall) Do(f func(context.Context, domain.InfraInstance) (domain.InfraInstance, error)) *MockManagerStartCall {
+func (c *MockManagerStartCall) Do(f func(context.Context, domain.InfraInstance) error) *MockManagerStartCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockManagerStartCall) DoAndReturn(f func(context.Context, domain.InfraInstance) (domain.InfraInstance, error)) *MockManagerStartCall {
+func (c *MockManagerStartCall) DoAndReturn(f func(context.Context, domain.InfraInstance) error) *MockManagerStartCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
 
 // Stop mocks base method.
-func (m *MockManager) Stop(ctx context.Context, instance domain.InfraInstance) (domain.InfraInstance, error) {
+func (m *MockManager) Stop(ctx context.Context, instance domain.InfraInstance) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Stop", ctx, instance)
-	ret0, _ := ret[0].(domain.InfraInstance)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Stop indicates an expected call of Stop.
@@ -258,19 +255,19 @@ type MockManagerStopCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockManagerStopCall) Return(arg0 domain.InfraInstance, arg1 error) *MockManagerStopCall {
-	c.Call = c.Call.Return(arg0, arg1)
+func (c *MockManagerStopCall) Return(arg0 error) *MockManagerStopCall {
+	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockManagerStopCall) Do(f func(context.Context, domain.InfraInstance) (domain.InfraInstance, error)) *MockManagerStopCall {
+func (c *MockManagerStopCall) Do(f func(context.Context, domain.InfraInstance) error) *MockManagerStopCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockManagerStopCall) DoAndReturn(f func(context.Context, domain.InfraInstance) (domain.InfraInstance, error)) *MockManagerStopCall {
+func (c *MockManagerStopCall) DoAndReturn(f func(context.Context, domain.InfraInstance) error) *MockManagerStopCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
