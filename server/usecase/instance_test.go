@@ -247,9 +247,6 @@ func TestGetInstance(t *testing.T) {
 	t.Parallel()
 
 	ctrl := gomock.NewController(t)
-	repo := repomock.NewMockRepository(ctrl)
-	manager := instancemock.NewMockManager(ctrl)
-	u := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager)
 
 	instanceID := uuid.New()
 	infraInstanceID := uuid.New().String()
@@ -310,6 +307,10 @@ func TestGetInstance(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
+			repo := repomock.NewMockRepository(ctrl)
+			manager := instancemock.NewMockManager(ctrl)
+			u := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager)
+
 			repo.EXPECT().FindInstance(gomock.Any(), testCase.instanceID).
 				Return(testCase.instance, testCase.FindInstanceErr)
 			if testCase.executeGet {
@@ -332,9 +333,6 @@ func TestGetTeamInstances(t *testing.T) {
 	t.Parallel()
 
 	ctrl := gomock.NewController(t)
-	repo := repomock.NewMockRepository(ctrl)
-	manager := instancemock.NewMockManager(ctrl)
-	u := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager)
 
 	teamID := uuid.New()
 	instance1 := domain.Instance{
@@ -401,6 +399,10 @@ func TestGetTeamInstances(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
+			repo := repomock.NewMockRepository(ctrl)
+			manager := instancemock.NewMockManager(ctrl)
+			u := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager)
+
 			repo.EXPECT().GetTeamInstances(gomock.Any(), testCase.teamID).
 				Return(testCase.instances, testCase.GetTeamInstancesErr)
 
@@ -437,9 +439,6 @@ func TestGetAllInstances(t *testing.T) {
 	t.Parallel()
 
 	ctrl := gomock.NewController(t)
-	repo := repomock.NewMockRepository(ctrl)
-	manager := instancemock.NewMockManager(ctrl)
-	u := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager)
 
 	teamID := uuid.New()
 	instance1 := domain.Instance{
@@ -490,6 +489,10 @@ func TestGetAllInstances(t *testing.T) {
 	for name, testCase := range testCases {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
+
+			repo := repomock.NewMockRepository(ctrl)
+			manager := instancemock.NewMockManager(ctrl)
+			u := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager)
 
 			repo.EXPECT().GetAllInstances(gomock.Any()).
 				Return(testCase.instances, testCase.GetAllInstancesErr)
