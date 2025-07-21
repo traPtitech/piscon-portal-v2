@@ -31,6 +31,44 @@ Go 1.24で入った experimental な機能である `testing/synctest` を [runn
 
 を書き込むことで環境変数を設定できます。
 
+### AWS を使ったローカルでの動作
+
+ポータルをローカルのdocker composeで動かし、AWSのインスタンスを操作するには、以下のような設定を行います。
+
+#### 1. AWS CLI のインストール
+
+AWS CLI をインストールします。
+
+#### 2. AWS の認証情報の設定
+
+AWS CLIを使って認証のプロファイルを設定します。`~/.aws/config` と `~/.aws/credentials` ファイルが作成されます。
+
+#### 3. `.env` への追記
+
+`.env` ファイルに以下のように追記します。
+
+```dotenv
+AWS_IMAGE_ID=ami-002d61d6436f85f12 # private-isu の AMI の ID
+AWS_INSTANCE_TYPE=c7a.large
+AWS_REGION=ap-northeast-1
+AWS_SUBNET_ID={{ AWS の Subnet ID}}
+AWS_SECURITY_GROUP_ID={{ AWS の Security Group ID }}
+AWS_KEY_PAIR_NAME={{ AWS の Key Pair 名 }}
+
+INSTANCE_MANAGER=aws
+
+AWS_PROFILE={{ 2で用意した AWS のプロファイル名 }}
+AWS_SHARED_CREDENTIALS_FILE=/app/.aws/credentials
+AWS_CONFIG_FILE=/app/.aws/config
+AWS_SDK_LOAD_CONFIG=true
+```
+
+#### 4. 起動
+
+```bash
+docker compose --file compose.aws.yaml up
+```
+
 ## protobuf について
 
 [proto/README.md](proto/README.md) を参照してください。
