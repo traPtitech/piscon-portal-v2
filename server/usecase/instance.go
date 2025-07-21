@@ -115,19 +115,9 @@ func (i *InstanceUseCaseImpl) GetTeamInstances(ctx context.Context, teamID uuid.
 		return nil, fmt.Errorf("get infra instances: %w", err)
 	}
 
-	infraInstancesMap := make(map[string]domain.InfraInstance, len(infraInstances))
-	for _, infra := range infraInstances {
-		infraInstancesMap[infra.ProviderInstanceID] = infra
-	}
-
-	result := make([]domain.Instance, 0, len(instances))
-	for _, inst := range instances {
-		infra, ok := infraInstancesMap[inst.Infra.ProviderInstanceID]
-		if !ok {
-			return nil, fmt.Errorf("infra instance not found: %s", inst.Infra.ProviderInstanceID)
-		}
-		inst.Infra = infra
-		result = append(result, inst)
+	result, err := setInfraInstances(instances, infraInstances)
+	if err != nil {
+		return nil, err
 	}
 
 	return result, nil
@@ -144,19 +134,9 @@ func (i *InstanceUseCaseImpl) GetAllInstances(ctx context.Context) ([]domain.Ins
 		return nil, fmt.Errorf("get infra instances: %w", err)
 	}
 
-	infraInstancesMap := make(map[string]domain.InfraInstance, len(infraInstances))
-	for _, infra := range infraInstances {
-		infraInstancesMap[infra.ProviderInstanceID] = infra
-	}
-
-	result := make([]domain.Instance, 0, len(instances))
-	for _, inst := range instances {
-		infra, ok := infraInstancesMap[inst.Infra.ProviderInstanceID]
-		if !ok {
-			return nil, fmt.Errorf("infra instance not found: %s", inst.Infra.ProviderInstanceID)
-		}
-		inst.Infra = infra
-		result = append(result, inst)
+	result, err := setInfraInstances(instances, infraInstances)
+	if err != nil {
+		return nil, err
 	}
 
 	return result, nil
@@ -225,4 +205,21 @@ func (i *InstanceUseCaseImpl) UpdateInstance(ctx context.Context, id uuid.UUID, 
 
 func instanceName(teamID uuid.UUID, index int) string {
 	return fmt.Sprintf("%s-%d", teamID.String(), index)
+}
+
+func setInfraInstances(instances []domain.Instance, infraInstances []domain.InfraInstance) ([]domain.Instance, error) {
+	infraInstancesMap := make(map[string]domain.InfraInstance, len(infraInstances))
+	for _, infra := range infraInstances {
+		infraInstancesMap[infra.ProviderInstanceID] = infra
+	}
+
+	for i, inst := range instances {
+		infra, ok := infraInstancesMap[inst.Infra.ProviderInstanceID]
+		if !ok {
+			return nil, fmt.Errorf("infra instance not found: %s", inst.Infra.ProviderInstanceID)
+		}
+		instances[i].Infra = infra
+	}
+
+	return instances, nil
 }
