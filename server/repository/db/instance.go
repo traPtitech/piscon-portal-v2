@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/samber/lo"
@@ -12,8 +13,6 @@ import (
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
 	"github.com/traPtitech/piscon-portal-v2/server/repository/db/models"
 )
-
-var whereNotDeleted = models.SelectWhere.Instances.DeletedAt.IsNull()
 
 func (r *Repository) CreateInstance(ctx context.Context, instance domain.Instance) error {
 	setter, err := buildInstanceSetter(instance)
@@ -42,7 +41,6 @@ func (r *Repository) FindInstance(ctx context.Context, id uuid.UUID) (domain.Ins
 func (r *Repository) GetTeamInstances(ctx context.Context, teamID uuid.UUID) ([]domain.Instance, error) {
 	instances, err := models.Instances.Query(
 		models.SelectWhere.Instances.TeamID.EQ(teamID.String()),
-		whereNotDeleted, // Exclude deleted instances
 	).All(ctx, r.executor(ctx))
 	if err != nil {
 		return nil, fmt.Errorf("get team instances: %w", err)
@@ -59,7 +57,7 @@ func (r *Repository) GetTeamInstances(ctx context.Context, teamID uuid.UUID) ([]
 }
 
 func (r *Repository) GetAllInstances(ctx context.Context) ([]domain.Instance, error) {
-	instances, err := models.Instances.Query(whereNotDeleted).All(ctx, r.executor(ctx))
+	instances, err := models.Instances.Query().All(ctx, r.executor(ctx))
 	if err != nil {
 		return nil, fmt.Errorf("get all instances: %w", err)
 	}
@@ -75,8 +73,12 @@ func (r *Repository) GetAllInstances(ctx context.Context) ([]domain.Instance, er
 }
 
 func (r *Repository) DeleteInstance(ctx context.Context, id uuid.UUID) error {
-	rows, err := models.Instances.Delete(models.DeleteWhere.Instances.ID.EQ(id.String())).
-		Exec(ctx, r.executor(ctx))
+	rows, err := models.Instances.Update(
+		models.UpdateWhere.Instances.ID.EQ(id.String()),
+		models.InstanceSetter{
+			DeletedAt: ToSQLNull(time.Now()),
+		}.UpdateMod(),
+	).Exec(ctx, r.executor(ctx))
 	if err != nil {
 		return fmt.Errorf("delete instance: %w", err)
 	}
