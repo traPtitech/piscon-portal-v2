@@ -66,11 +66,11 @@ func (i *InstanceUseCaseImpl) CreateInstance(ctx context.Context, teamID uuid.UU
 			return NewUseCaseError(err)
 		}
 
-		infra, err := i.manager.Create(ctx, instanceName(teamID, instance.Index), nil) // TODO: pass team members' ssh keys
+		providerInstanceID, err := i.manager.Create(ctx, instanceName(teamID, instance.Index), nil) // TODO: pass team members' ssh keys
 		if err != nil {
 			return fmt.Errorf("create infra instance: %w", err)
 		}
-		instance.Infra = infra
+		instance.Infra.ProviderInstanceID = providerInstanceID
 		infraCreated = true
 
 		err = i.repo.CreateInstance(ctx, instance)
@@ -83,7 +83,7 @@ func (i *InstanceUseCaseImpl) CreateInstance(ctx context.Context, teamID uuid.UU
 	if err != nil {
 		if infraCreated {
 			// rollback the created instance
-			_, _ = i.manager.Delete(ctx, instance.Infra)
+			_ = i.manager.Delete(ctx, instance.Infra)
 		}
 		return domain.Instance{}, fmt.Errorf("transaction: %w", err)
 	}
@@ -117,7 +117,7 @@ func (i *InstanceUseCaseImpl) DeleteInstance(ctx context.Context, id uuid.UUID) 
 			return fmt.Errorf("find instance: %w", err)
 		}
 
-		_, err = i.manager.Delete(ctx, instance.Infra)
+		err = i.manager.Delete(ctx, instance.Infra)
 		if err != nil {
 			return fmt.Errorf("delete infra instance: %w", err)
 		}
@@ -144,9 +144,9 @@ func (i *InstanceUseCaseImpl) UpdateInstance(ctx context.Context, id uuid.UUID, 
 		var updatedInstance domain.InfraInstance
 		switch op {
 		case domain.InstanceOperationStart:
-			updatedInstance, err = i.manager.Start(ctx, instance.Infra)
+			err = i.manager.Start(ctx, instance.Infra)
 		case domain.InstanceOperationStop:
-			updatedInstance, err = i.manager.Stop(ctx, instance.Infra)
+			err = i.manager.Stop(ctx, instance.Infra)
 		default:
 			return NewUseCaseErrorFromMsg("invalid operation")
 		}

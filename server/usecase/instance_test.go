@@ -85,7 +85,7 @@ func TestDeleteInstance(t *testing.T) {
 		gomock.Cond(func(instance domain.InfraInstance) bool {
 			return instance.ProviderInstanceID == providerID.String()
 		}),
-	).Return(domain.InfraInstance{}, nil)
+	).Return(nil)
 	repo.EXPECT().UpdateInstance(gomock.Any(), gomock.Any()).Return(nil)
 
 	err := usecase.DeleteInstance(t.Context(), instanceID)
@@ -149,7 +149,7 @@ func TestUpdateInstance(t *testing.T) {
 			expectManager: func(manager *instancemock.MockManager, instance domain.Instance) {
 				manager.EXPECT().Start(gomock.Any(), gomock.Cond(func(infra domain.InfraInstance) bool {
 					return infra.ProviderInstanceID == instance.Infra.ProviderInstanceID
-				})).Return(domain.InfraInstance{}, nil)
+				})).Return(nil)
 			},
 			expectErr:   nil,
 			expectErrAs: false,
@@ -175,7 +175,7 @@ func TestUpdateInstance(t *testing.T) {
 			expectManager: func(manager *instancemock.MockManager, instance domain.Instance) {
 				manager.EXPECT().Stop(gomock.Any(), gomock.Cond(func(infra domain.InfraInstance) bool {
 					return infra.ProviderInstanceID == instance.Infra.ProviderInstanceID
-				})).Return(domain.InfraInstance{}, nil)
+				})).Return(nil)
 			},
 			expectErr:   nil,
 			expectErrAs: false,
