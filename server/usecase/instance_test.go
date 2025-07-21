@@ -12,6 +12,7 @@ import (
 	repomock "github.com/traPtitech/piscon-portal-v2/server/repository/mock"
 	instancemock "github.com/traPtitech/piscon-portal-v2/server/services/instance/mock"
 	"github.com/traPtitech/piscon-portal-v2/server/usecase"
+	"github.com/traPtitech/piscon-portal-v2/server/utils/ptr"
 	"github.com/traPtitech/piscon-portal-v2/server/utils/testutil"
 	"go.uber.org/mock/gomock"
 )
@@ -265,8 +266,8 @@ func TestGetInstance(t *testing.T) {
 	fullInstance.Infra = domain.InfraInstance{
 		ProviderInstanceID: infraInstanceID,
 		Status:             domain.InstanceStatusRunning,
-		PrivateIP:          "private ip",
-		PublicIP:           "public ip",
+		PrivateIP:          ptr.Of("private ip"),
+		PublicIP:           ptr.Of("public ip"),
 	}
 
 	testCases := map[string]struct {

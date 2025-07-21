@@ -92,8 +92,7 @@ func (m *Manager) Create(_ context.Context, _ string, _ []string) (string, error
 	instance := domain.InfraInstance{
 		ProviderInstanceID: id,
 		Status:             domain.InstanceStatusBuilding,
-		PrivateIP:          privateIP,
-		PublicIP:           publicIP,
+		PrivateIP:          &privateIP,
 	}
 
 	instances, err := m.readInstances()
@@ -113,6 +112,7 @@ func (m *Manager) Create(_ context.Context, _ string, _ []string) (string, error
 		defer m.mu.Unlock()
 		log.Println("instance locked, updating status to running")
 		instance.Status = domain.InstanceStatusRunning
+		instance.PublicIP = &publicIP
 		if err := m.updateInstance(instance); err != nil {
 			log.Printf("update instance status: %v", err)
 		}
@@ -189,8 +189,8 @@ func (m *Manager) Delete(_ context.Context, instance domain.InfraInstance) error
 	if err != nil {
 		return fmt.Errorf("read IP info: %w", err)
 	}
-	ipInfo.PrivateIPs = lo.Without(ipInfo.PrivateIPs, instance.PrivateIP)
-	ipInfo.PublicIPs = lo.Without(ipInfo.PublicIPs, instance.PublicIP)
+	ipInfo.PrivateIPs = lo.Without(ipInfo.PrivateIPs, *instance.PrivateIP)
+	ipInfo.PublicIPs = lo.Without(ipInfo.PublicIPs, *instance.PublicIP)
 
 	if err := m.storeIPInfo(ipInfo); err != nil {
 		return fmt.Errorf("store IP info: %w", err)

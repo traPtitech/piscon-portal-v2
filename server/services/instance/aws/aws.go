@@ -146,10 +146,11 @@ func (a *Client) Get(ctx context.Context, id string) (domain.InfraInstance, erro
 	}
 
 	instance := res.Reservations[0].Instances[0]
+
 	return domain.InfraInstance{
 		ProviderInstanceID: *instance.InstanceId,
-		PrivateIP:          *instance.PrivateIpAddress,
-		PublicIP:           *instance.PublicIpAddress,
+		PrivateIP:          instance.PrivateIpAddress,
+		PublicIP:           instance.PublicIpAddress,
 		Status:             convertInstanceState(instance.State.Name),
 	}, nil
 }
@@ -172,8 +173,8 @@ func (a *Client) GetByIDs(ctx context.Context, ids []string) ([]domain.InfraInst
 		for _, instance := range reservation.Instances {
 			infraInstance := domain.InfraInstance{
 				ProviderInstanceID: *instance.InstanceId,
-				PrivateIP:          *instance.PrivateIpAddress,
-				PublicIP:           *instance.PublicIpAddress,
+				PrivateIP:          instance.PrivateIpAddress,
+				PublicIP:           instance.PublicIpAddress,
 				Status:             convertInstanceState(instance.State.Name),
 			}
 
@@ -197,8 +198,8 @@ func (a *Client) GetAll(ctx context.Context) ([]domain.InfraInstance, error) {
 		for _, instance := range reservation.Instances {
 			instances = append(instances, domain.InfraInstance{
 				ProviderInstanceID: *instance.InstanceId,
-				PrivateIP:          *instance.PrivateIpAddress,
-				PublicIP:           *instance.PublicIpAddress,
+				PrivateIP:          instance.PrivateIpAddress,
+				PublicIP:           instance.PublicIpAddress,
 				Status:             convertInstanceState(instance.State.Name),
 			})
 		}

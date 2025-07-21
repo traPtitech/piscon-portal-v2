@@ -13,13 +13,14 @@ type Instance struct {
 	Index     int
 	Infra     InfraInstance
 	CreatedAt time.Time
+	DeletedAt *time.Time
 }
 
 type InfraInstance struct {
 	ProviderInstanceID string
 	Status             InstanceStatus
-	PrivateIP          string
-	PublicIP           string
+	PrivateIP          *string
+	PublicIP           *string
 }
 
 type InstanceStatus string
