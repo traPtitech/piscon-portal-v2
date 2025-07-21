@@ -98,6 +98,7 @@ func TestGetTeamInstances(t *testing.T) {
 				ProviderInstanceID: "prov-instance-id-2",
 			},
 			CreatedAt: time.Now(),
+			DeletedAt: ptr.Of(time.Now()),
 		},
 		{
 			ID:     uuid.New(),
@@ -109,7 +110,6 @@ func TestGetTeamInstances(t *testing.T) {
 			CreatedAt: time.Now(),
 		},
 		{
-			// Deleted instance is included in the results
 			ID:     uuid.New(),
 			TeamID: otherTeamID,
 			Index:  2,
@@ -126,10 +126,9 @@ func TestGetTeamInstances(t *testing.T) {
 
 	got, err := repo.GetTeamInstances(t.Context(), teamID)
 	assert.NoError(t, err)
-	assert.Len(t, got, 3)
+	assert.Len(t, got, 2)
 	testutil.ContainsInstance(t, got, instances[0])
 	testutil.ContainsInstance(t, got, instances[1])
-	testutil.ContainsInstance(t, got, instances[2])
 }
 
 func TestGetAllInstances(t *testing.T) {
@@ -157,7 +156,7 @@ func TestGetAllInstances(t *testing.T) {
 			CreatedAt: time.Now(),
 		},
 		{
-			// Deleted instance is not included in the results
+			// Deleted instance is included in the results
 			ID:     uuid.New(),
 			TeamID: uuid.New(),
 			Index:  3,
@@ -174,8 +173,8 @@ func TestGetAllInstances(t *testing.T) {
 
 	got, err := repo.GetAllInstances(t.Context())
 	assert.NoError(t, err)
-	assert.Len(t, got, 2)
-	for _, want := range instances[:2] {
+	assert.Len(t, got, 3)
+	for _, want := range instances {
 		testutil.ContainsInstance(t, got, want)
 	}
 }
