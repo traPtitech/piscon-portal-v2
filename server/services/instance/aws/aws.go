@@ -60,6 +60,11 @@ func NewClient(cfg Config) (*Client, error) {
 	}, nil
 }
 
+var pisconTagFilter = types.Filter{
+	Name:   lo.ToPtr("tag:piscon"),
+	Values: []string{"true"},
+}
+
 func (a *Client) Create(ctx context.Context, name string, sshPubKeys []string) (string, error) {
 	tagSpec := types.TagSpecification{
 		ResourceType: types.ResourceTypeInstance,
@@ -156,12 +161,7 @@ func (a *Client) GetByIDs(ctx context.Context, ids []string) ([]domain.InfraInst
 
 	res, err := a.client.DescribeInstances(ctx, &ec2.DescribeInstancesInput{
 		InstanceIds: ids,
-		Filters: []types.Filter{
-			{
-				Name:   lo.ToPtr("tag:piscon"),
-				Values: []string{"true"},
-			},
-		},
+		Filters:     []types.Filter{pisconTagFilter},
 	})
 	if err != nil {
 		return nil, fmt.Errorf("describe instances: %w", err)
@@ -186,12 +186,7 @@ func (a *Client) GetByIDs(ctx context.Context, ids []string) ([]domain.InfraInst
 
 func (a *Client) GetAll(ctx context.Context) ([]domain.InfraInstance, error) {
 	res, err := a.client.DescribeInstances(ctx, &ec2.DescribeInstancesInput{
-		Filters: []types.Filter{
-			{
-				Name:   lo.ToPtr("tag:piscon"),
-				Values: []string{"true"},
-			},
-		},
+		Filters: []types.Filter{pisconTagFilter},
 	})
 	if err != nil {
 		return nil, fmt.Errorf("describe instances: %w", err)
