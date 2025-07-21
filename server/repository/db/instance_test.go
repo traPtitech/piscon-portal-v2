@@ -109,7 +109,7 @@ func TestGetTeamInstances(t *testing.T) {
 			CreatedAt: time.Now(),
 		},
 		{
-			// Deleted instance is not included in the results
+			// Deleted instance is included in the results
 			ID:     uuid.New(),
 			TeamID: otherTeamID,
 			Index:  2,
@@ -126,9 +126,10 @@ func TestGetTeamInstances(t *testing.T) {
 
 	got, err := repo.GetTeamInstances(t.Context(), teamID)
 	assert.NoError(t, err)
-	assert.Len(t, got, 2)
+	assert.Len(t, got, 3)
 	testutil.ContainsInstance(t, got, instances[0])
 	testutil.ContainsInstance(t, got, instances[1])
+	testutil.ContainsInstance(t, got, instances[2])
 }
 
 func TestGetAllInstances(t *testing.T) {
