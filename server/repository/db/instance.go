@@ -93,6 +93,19 @@ func (r *Repository) GetAllInstances(ctx context.Context) ([]domain.Instance, er
 	return result, nil
 }
 
+func (r *Repository) DeleteInstance(ctx context.Context, id uuid.UUID) error {
+	rows, err := models.Instances.Delete(models.DeleteWhere.Instances.ID.EQ(id.String())).
+		Exec(ctx, r.executor(ctx))
+	if err != nil {
+		return fmt.Errorf("delete instance: %w", err)
+	}
+	if rows == 0 {
+		return repository.ErrNotFound
+	}
+
+	return nil
+}
+
 func toDomainInstance(instance *models.Instance) (domain.Instance, error) {
 	id, err := uuid.Parse(instance.ID)
 	if err != nil {
