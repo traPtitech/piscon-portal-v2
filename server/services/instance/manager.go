@@ -10,10 +10,22 @@ import (
 
 // Manager is an interface for managing infrastructure instances.
 type Manager interface {
-	Create(ctx context.Context, name string, sshPubKeys []string) (domain.InfraInstance, error)
+	// Create creates a new infrastructure instance with the given name and SSH public keys.
+	// Returns the provider instance ID or an error if the creation fails.
+	Create(ctx context.Context, name string, sshPubKeys []string) (string, error)
+	// Get retrieves an infrastructure instance by its provider ID.
+	// Returns the instance or an error if the retrieval fails.
 	Get(ctx context.Context, id string) (domain.InfraInstance, error)
+	// GetAll retrieves all infrastructure instances.
+	// Returns a slice of instances or an error if the retrieval fails.
 	GetAll(ctx context.Context) ([]domain.InfraInstance, error)
-	Delete(ctx context.Context, instance domain.InfraInstance) (domain.InfraInstance, error)
-	Stop(ctx context.Context, instance domain.InfraInstance) (domain.InfraInstance, error)
-	Start(ctx context.Context, instance domain.InfraInstance) (domain.InfraInstance, error)
+	// Update updates the infrastructure instance with the given provider ID.
+	// Returns the updated instance or an error if the update fails.
+	Delete(ctx context.Context, instance domain.InfraInstance) error
+	// Stop stops the infrastructure instance with the given provider ID.
+	// Returns an error if the stop operation fails.
+	Stop(ctx context.Context, instance domain.InfraInstance) error
+	// Start starts the infrastructure instance with the given provider ID.
+	// Returns an error if the start operation fails.
+	Start(ctx context.Context, instance domain.InfraInstance) error
 }
