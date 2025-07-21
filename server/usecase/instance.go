@@ -121,9 +121,15 @@ func (i *InstanceUseCaseImpl) DeleteInstance(ctx context.Context, id uuid.UUID) 
 		if err != nil {
 			return fmt.Errorf("delete infra instance: %w", err)
 		}
-		instance.Infra.Status = domain.InstanceStatusDeleted
 
-		return i.repo.UpdateInstance(ctx, instance)
+		err = i.repo.DeleteInstance(ctx, id)
+		if errors.Is(err, repository.ErrNotFound) {
+			return NewUseCaseErrorFromMsg("instance not found or already deleted")
+		}
+		if err != nil {
+			return fmt.Errorf("delete instance: %w", err)
+		}
+		return nil
 	})
 	if err != nil {
 		return fmt.Errorf("transaction: %w", err)
@@ -141,7 +147,6 @@ func (i *InstanceUseCaseImpl) UpdateInstance(ctx context.Context, id uuid.UUID, 
 			return fmt.Errorf("find instance: %w", err)
 		}
 
-		var updatedInstance domain.InfraInstance
 		switch op {
 		case domain.InstanceOperationStart:
 			err = i.manager.Start(ctx, instance.Infra)
@@ -153,9 +158,8 @@ func (i *InstanceUseCaseImpl) UpdateInstance(ctx context.Context, id uuid.UUID, 
 		if err != nil {
 			return fmt.Errorf("update infra instance: %w", err)
 		}
-		instance.Infra = updatedInstance
 
-		return i.repo.UpdateInstance(ctx, instance)
+		return nil
 	})
 	if err != nil {
 		return fmt.Errorf("transaction: %w", err)
