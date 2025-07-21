@@ -1,5 +1,4 @@
 package db
 
 var FromDomainBenchmarkStatus = fromDomainBenchmarkStatus
-var FromDomainInstanceStatus = fromDomainInstanceStatus
 var FromDomainBenchmarkResult = fromDomainBenchmarkResult
