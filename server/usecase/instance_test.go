@@ -86,7 +86,7 @@ func TestDeleteInstance(t *testing.T) {
 			return instance.ProviderInstanceID == providerID.String()
 		}),
 	).Return(nil)
-	repo.EXPECT().UpdateInstance(gomock.Any(), gomock.Any()).Return(nil)
+	repo.EXPECT().DeleteInstance(gomock.Any(), instanceID).Return(nil)
 
 	err := usecase.DeleteInstance(t.Context(), instanceID)
 	assert.NoError(t, err)
@@ -225,7 +225,6 @@ func TestUpdateInstance(t *testing.T) {
 
 			if tt.expectManager != nil {
 				tt.expectManager(manager, tt.fields.instance)
-				repo.EXPECT().UpdateInstance(gomock.Any(), gomock.Any()).Return(nil)
 			}
 
 			err := instanceUsecase.UpdateInstance(t.Context(), instanceID, tt.args.op)
