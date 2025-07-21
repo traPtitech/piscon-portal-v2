@@ -150,6 +150,25 @@ func (m *Manager) GetAll(_ context.Context) ([]domain.InfraInstance, error) {
 	return instances, nil
 }
 
+func (m *Manager) GetByIDs(_ context.Context, ids []string) ([]domain.InfraInstance, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	instances, err := m.readInstances()
+	if err != nil {
+		return nil, fmt.Errorf("read instances: %w", err)
+	}
+
+	result := make([]domain.InfraInstance, 0, len(instances))
+	for _, instance := range instances {
+		if slices.Contains(ids, instance.ProviderInstanceID) {
+			result = append(result, instance)
+		}
+	}
+
+	return result, nil
+}
+
 func (m *Manager) Delete(_ context.Context, instance domain.InfraInstance) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
