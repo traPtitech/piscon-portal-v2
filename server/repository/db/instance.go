@@ -27,25 +27,6 @@ func (r *Repository) CreateInstance(ctx context.Context, instance domain.Instanc
 	return nil
 }
 
-func (r *Repository) UpdateInstance(ctx context.Context, instance domain.Instance) error {
-	setter, err := buildInstanceSetter(instance)
-	if err != nil {
-		return fmt.Errorf("update instance: %w", err)
-	}
-	modelInstance, err := models.FindInstance(ctx, r.executor(ctx), instance.ID.String())
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return repository.ErrNotFound
-		}
-		return fmt.Errorf("find instance for update: %w", err)
-	}
-	err = modelInstance.Update(ctx, r.executor(ctx), setter)
-	if err != nil {
-		return fmt.Errorf("update instance: %w", err)
-	}
-	return nil
-}
-
 func (r *Repository) FindInstance(ctx context.Context, id uuid.UUID) (domain.Instance, error) {
 	instance, err := models.FindInstance(ctx, r.executor(ctx), id.String())
 	if err != nil {

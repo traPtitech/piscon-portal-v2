@@ -78,59 +78,6 @@ func TestCreateInstance(t *testing.T) {
 	testutil.CompareInstance(t, instance, got)
 }
 
-func TestUpdateInstance(t *testing.T) {
-	t.Parallel()
-
-	repo, db := setupRepository(t)
-
-	instanceID := uuid.New()
-	teamID := uuid.New()
-	instance := domain.Instance{
-		ID:     instanceID,
-		TeamID: teamID,
-		Index:  3,
-		Infra: domain.InfraInstance{
-			ProviderInstanceID: "prov-instance-id",
-			Status:             domain.InstanceStatusRunning,
-			PrivateIP:          "10.0.0.2",
-			PublicIP:           "203.0.113.2",
-		},
-		CreatedAt: time.Now(),
-	}
-	mustMakeInstance(t, db, instance)
-
-	instance.Infra.Status = domain.InstanceStatusStopped
-	instance.Infra.PrivateIP = "10.0.0.3"
-	instance.Infra.PublicIP = "203.0.113.3"
-	err := repo.UpdateInstance(t.Context(), instance)
-	assert.NoError(t, err)
-
-	got, err := repo.FindInstance(t.Context(), instance.ID)
-	assert.NoError(t, err)
-	testutil.CompareInstance(t, instance, got)
-}
-
-func TestUpdateInstance_NotFound(t *testing.T) {
-	t.Parallel()
-
-	repo, _ := setupRepository(t)
-
-	instance := domain.Instance{
-		ID:     uuid.New(),
-		TeamID: uuid.New(),
-		Index:  99,
-		Infra: domain.InfraInstance{
-			ProviderInstanceID: "prov-instance-id",
-			Status:             domain.InstanceStatusRunning,
-			PrivateIP:          "10.0.0.99",
-			PublicIP:           "203.0.113.99",
-		},
-		CreatedAt: time.Now(),
-	}
-	err := repo.UpdateInstance(t.Context(), instance)
-	assert.ErrorIs(t, err, repository.ErrNotFound)
-}
-
 func TestGetTeamInstances(t *testing.T) {
 	t.Parallel()
 
