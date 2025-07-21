@@ -216,7 +216,11 @@ func setInfraInstances(instances []domain.Instance, infraInstances []domain.Infr
 	for i, inst := range instances {
 		infra, ok := infraInstancesMap[inst.Infra.ProviderInstanceID]
 		if !ok {
-			return nil, fmt.Errorf("infra instance not found: %s", inst.Infra.ProviderInstanceID)
+			// 削除済みのインスタンスは infraInstance に含まれない
+			infra = domain.InfraInstance{
+				ProviderInstanceID: inst.Infra.ProviderInstanceID,
+				Status:             domain.InstanceStatusDeleted,
+			}
 		}
 		instances[i].Infra = infra
 	}

@@ -355,6 +355,16 @@ func TestGetTeamInstances(t *testing.T) {
 			Status:             domain.InstanceStatusStopped,
 		},
 	}
+	instance3 := domain.Instance{
+		ID:     uuid.New(),
+		TeamID: teamID,
+		Index:  3,
+		Infra: domain.InfraInstance{
+			ProviderInstanceID: "infra3",
+			Status:             domain.InstanceStatusDeleted,
+		},
+		DeletedAt: ptr.Of(time.Now()),
+	}
 
 	testCases := map[string]struct {
 		teamID              uuid.UUID
@@ -368,10 +378,10 @@ func TestGetTeamInstances(t *testing.T) {
 	}{
 		"正しく取得できる": {
 			teamID:         teamID,
-			instances:      []domain.Instance{instance1, instance2},
+			instances:      []domain.Instance{instance1, instance2, instance3},
 			executeGetAll:  true,
 			infraInstances: []domain.InfraInstance{instance1.Infra, instance2.Infra},
-			result:         []domain.Instance{instance1, instance2},
+			result:         []domain.Instance{instance1, instance2, instance3},
 		},
 		"GetTeamInstancesでエラー": {
 			teamID:              teamID,
@@ -395,7 +405,11 @@ func TestGetTeamInstances(t *testing.T) {
 				Return(testCase.instances, testCase.GetTeamInstancesErr)
 
 			if testCase.executeGetAll {
-				manager.EXPECT().GetByIDs(gomock.Any(), []string{testCase.instances[0].Infra.ProviderInstanceID, testCase.instances[1].Infra.ProviderInstanceID}).
+				ids := make([]string, 0, len(testCase.instances))
+				for _, inst := range testCase.instances {
+					ids = append(ids, inst.Infra.ProviderInstanceID)
+				}
+				manager.EXPECT().GetByIDs(gomock.Any(), ids).
 					Return(testCase.infraInstances, testCase.GetAllErr)
 			}
 
