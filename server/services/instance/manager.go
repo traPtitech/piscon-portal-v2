@@ -19,6 +19,9 @@ type Manager interface {
 	// GetAll retrieves all infrastructure instances.
 	// Returns a slice of instances or an error if the retrieval fails.
 	GetAll(ctx context.Context) ([]domain.InfraInstance, error)
+	// GetByIDs retrieves infrastructure instances by their provider instance IDs.
+	// Returns a slice of instances or an error if the retrieval fails.
+	GetByIDs(ctx context.Context, ids []string) ([]domain.InfraInstance, error)
 	// Update updates the infrastructure instance with the given provider ID.
 	// Returns the updated instance or an error if the update fails.
 	Delete(ctx context.Context, instance domain.InfraInstance) error
