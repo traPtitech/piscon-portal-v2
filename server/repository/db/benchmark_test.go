@@ -238,8 +238,8 @@ func TestGetOldestQueuedBenchmark(t *testing.T) {
 		Infra: domain.InfraInstance{
 			ProviderInstanceID: "provider-instance-id",
 			Status:             domain.InstanceStatusRunning,
-			PublicIP:           "192.168.1.1",
-			PrivateIP:          "10.0.0.1",
+			PublicIP:           ptr.Of("192.168.1.1"),
+			PrivateIP:          ptr.Of("10.0.0.1"),
 		},
 	}
 	waitingBench := domain.Benchmark{
@@ -364,8 +364,8 @@ func TestUpdateBenchmark(t *testing.T) {
 		Infra: domain.InfraInstance{
 			ProviderInstanceID: "provider-instance-id",
 			Status:             domain.InstanceStatusRunning,
-			PrivateIP:          "0.0.0.0",
-			PublicIP:           "0.0.0.0",
+			PrivateIP:          ptr.Of("0.0.0.0"),
+			PublicIP:           ptr.Of("0.0.0.0"),
 		},
 	}
 

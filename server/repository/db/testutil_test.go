@@ -41,6 +41,7 @@ func mustMakeInstance(t *testing.T, executor bob.Executor, instance domain.Insta
 		ProviderInstanceID: lo.ToPtr(instance.Infra.ProviderInstanceID),
 		TeamID:             lo.ToPtr(instance.TeamID.String()),
 		InstanceNumber:     lo.ToPtr(int32(instance.Index)),
+		DeletedAt:          db.PtrToSQLNull(instance.DeletedAt),
 	}).Exec(context.Background(), executor)
 	require.NoError(t, err)
 }

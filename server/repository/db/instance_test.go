@@ -10,6 +10,7 @@ import (
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
 	"github.com/traPtitech/piscon-portal-v2/server/repository/db/models"
+	"github.com/traPtitech/piscon-portal-v2/server/utils/ptr"
 	"github.com/traPtitech/piscon-portal-v2/server/utils/testutil"
 )
 
@@ -26,9 +27,6 @@ func TestFindInstance(t *testing.T) {
 		Index:  1,
 		Infra: domain.InfraInstance{
 			ProviderInstanceID: "prov-instance-id",
-			Status:             domain.InstanceStatusRunning,
-			PrivateIP:          "192.0.2.0",
-			PublicIP:           "192.0.2.0",
 		},
 		CreatedAt: time.Now(),
 	}
@@ -63,9 +61,6 @@ func TestCreateInstance(t *testing.T) {
 		Index:  2,
 		Infra: domain.InfraInstance{
 			ProviderInstanceID: "prov-instance-id",
-			Status:             domain.InstanceStatusBuilding,
-			PrivateIP:          "10.0.0.1",
-			PublicIP:           "203.0.113.1",
 		},
 		CreatedAt: time.Now(),
 	}
@@ -92,9 +87,6 @@ func TestGetTeamInstances(t *testing.T) {
 			Index:  1,
 			Infra: domain.InfraInstance{
 				ProviderInstanceID: "prov-instance-id-1",
-				Status:             domain.InstanceStatusRunning,
-				PrivateIP:          "10.0.0.4",
-				PublicIP:           "203.0.113.4",
 			},
 			CreatedAt: time.Now(),
 		},
@@ -104,9 +96,6 @@ func TestGetTeamInstances(t *testing.T) {
 			Index:  2,
 			Infra: domain.InfraInstance{
 				ProviderInstanceID: "prov-instance-id-2",
-				Status:             domain.InstanceStatusStopped,
-				PrivateIP:          "10.0.0.5",
-				PublicIP:           "203.0.113.5",
 			},
 			CreatedAt: time.Now(),
 		},
@@ -116,9 +105,6 @@ func TestGetTeamInstances(t *testing.T) {
 			Index:  1,
 			Infra: domain.InfraInstance{
 				ProviderInstanceID: "prov-instance-id-3",
-				Status:             domain.InstanceStatusRunning,
-				PrivateIP:          "10.0.0.6",
-				PublicIP:           "203.0.113.6",
 			},
 			CreatedAt: time.Now(),
 		},
@@ -129,11 +115,9 @@ func TestGetTeamInstances(t *testing.T) {
 			Index:  2,
 			Infra: domain.InfraInstance{
 				ProviderInstanceID: "prov-instance-id-4",
-				Status:             domain.InstanceStatusDeleted,
-				PrivateIP:          "10.0.0.7",
-				PublicIP:           "203.0.113.7",
 			},
 			CreatedAt: time.Now(),
+			DeletedAt: ptr.Of(time.Now()),
 		},
 	}
 	for _, inst := range instances {
@@ -159,9 +143,6 @@ func TestGetAllInstances(t *testing.T) {
 			Index:  1,
 			Infra: domain.InfraInstance{
 				ProviderInstanceID: "prov-instance-id-1",
-				Status:             domain.InstanceStatusRunning,
-				PrivateIP:          "10.0.0.7",
-				PublicIP:           "203.0.113.7",
 			},
 			CreatedAt: time.Now(),
 		},
@@ -171,9 +152,6 @@ func TestGetAllInstances(t *testing.T) {
 			Index:  2,
 			Infra: domain.InfraInstance{
 				ProviderInstanceID: "prov-instance-id-2",
-				Status:             domain.InstanceStatusStopped,
-				PrivateIP:          "10.0.0.8",
-				PublicIP:           "203.0.113.8",
 			},
 			CreatedAt: time.Now(),
 		},
@@ -184,11 +162,9 @@ func TestGetAllInstances(t *testing.T) {
 			Index:  3,
 			Infra: domain.InfraInstance{
 				ProviderInstanceID: "prov-instance-id-3",
-				Status:             domain.InstanceStatusDeleted,
-				PrivateIP:          "10.0.0.9",
-				PublicIP:           "203.0.113.9",
 			},
 			CreatedAt: time.Now(),
+			DeletedAt: ptr.Of(time.Now()),
 		},
 	}
 	for _, inst := range instances {
