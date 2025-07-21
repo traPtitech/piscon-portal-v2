@@ -29,10 +29,8 @@ CREATE TABLE IF NOT EXISTS `instances` (
     `provider_instance_id` VARCHAR(255) NOT NULL,
     `team_id` VARCHAR(36) NOT NULL,
     `instance_number` INT NOT NULL,
-    `status` ENUM('running', 'building', 'starting', 'stopping', 'stopped', 'deleting', 'deleted') NOT NULL,
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `public_ip` VARCHAR(15),
-    `private_ip` VARCHAR(15),
+    `deleted_at` TIMESTAMP NULL DEFAULT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
