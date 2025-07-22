@@ -51,7 +51,7 @@ AWS CLIを使って認証のプロファイルを設定します。`~/.aws/confi
 AWS_IMAGE_ID=ami-002d61d6436f85f12 # private-isu の AMI の ID
 AWS_INSTANCE_TYPE=c7a.large
 AWS_REGION=ap-northeast-1
-AWS_SUBNET_ID={{ AWS の Subnet ID}}
+AWS_SUBNET_ID={{ AWS の Subnet ID }}
 AWS_SECURITY_GROUP_ID={{ AWS の Security Group ID }}
 AWS_KEY_PAIR_NAME={{ AWS の Key Pair 名 }}
 
