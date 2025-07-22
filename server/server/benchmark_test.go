@@ -37,7 +37,7 @@ func TestGetBenchmarkJob(t *testing.T) {
 				ID: benchID,
 				Instance: domain.Instance{
 					Infra: domain.InfraInstance{
-						PrivateIP: targetIP,
+						PrivateIP: &targetIP,
 					},
 				},
 			},

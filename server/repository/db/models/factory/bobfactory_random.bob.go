@@ -31,15 +31,6 @@ func random_BenchmarksStatus(f *faker.Faker, limits ...string) BenchmarksStatus 
 	return all[f.IntBetween(0, len(all)-1)]
 }
 
-func random_InstancesStatus(f *faker.Faker, limits ...string) InstancesStatus {
-	if f == nil {
-		f = &defaultFaker
-	}
-
-	all := allInstancesStatus()
-	return all[f.IntBetween(0, len(all)-1)]
-}
-
 func random_bool(f *faker.Faker, limits ...string) bool {
 	if f == nil {
 		f = &defaultFaker

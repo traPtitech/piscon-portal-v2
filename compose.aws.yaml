@@ -1,0 +1,19 @@
+services:
+  db:
+    extends:
+      file: compose.yaml
+      service: db
+
+  portal:
+    extends:
+      file: compose.yaml
+      service: portal
+    volumes:
+      - ./.dev/instance:/app/.dev/instance
+      - ~/.aws/config:/app/.aws/config:ro
+      - ~/.aws/credentials:/app/.aws/credentials:ro
+
+  runner:
+    extends:
+      file: compose.yaml
+      service: runner

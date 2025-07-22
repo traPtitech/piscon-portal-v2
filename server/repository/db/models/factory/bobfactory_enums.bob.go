@@ -8,7 +8,6 @@ import models "github.com/traPtitech/piscon-portal-v2/server/repository/db/model
 type (
 	BenchmarksResult = models.BenchmarksResult
 	BenchmarksStatus = models.BenchmarksStatus
-	InstancesStatus  = models.InstancesStatus
 )
 
 func allBenchmarksResult() []BenchmarksResult {
@@ -17,8 +16,4 @@ func allBenchmarksResult() []BenchmarksResult {
 
 func allBenchmarksStatus() []BenchmarksStatus {
 	return models.AllBenchmarksStatus()
-}
-
-func allInstancesStatus() []InstancesStatus {
-	return models.AllInstancesStatus()
 }

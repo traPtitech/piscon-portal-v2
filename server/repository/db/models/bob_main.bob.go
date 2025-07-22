@@ -74,10 +74,8 @@ var ColumnNames = struct {
 		ProviderInstanceID: "provider_instance_id",
 		TeamID:             "team_id",
 		InstanceNumber:     "instance_number",
-		Status:             "status",
 		CreatedAt:          "created_at",
-		PublicIP:           "public_ip",
-		PrivateIP:          "private_ip",
+		DeletedAt:          "deleted_at",
 	},
 	Sessions: sessionColumnNames{
 		ID:        "id",

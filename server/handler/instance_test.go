@@ -19,6 +19,7 @@ import (
 	repomock "github.com/traPtitech/piscon-portal-v2/server/repository/mock"
 	"github.com/traPtitech/piscon-portal-v2/server/usecase"
 	usecasemock "github.com/traPtitech/piscon-portal-v2/server/usecase/mock"
+	"github.com/traPtitech/piscon-portal-v2/server/utils/ptr"
 	"go.uber.org/mock/gomock"
 )
 
@@ -30,8 +31,8 @@ func TestGetTeamInstances(t *testing.T) {
 			TeamID: teamID,
 			Index:  1,
 			Infra: domain.InfraInstance{
-				PublicIP:  "1.2.3.4",
-				PrivateIP: "10.0.0.1",
+				PublicIP:  ptr.Of("1.2.3.4"),
+				PrivateIP: ptr.Of("10.0.0.1"),
 				Status:    domain.InstanceStatusRunning,
 			},
 			CreatedAt: time.Now(),
@@ -100,8 +101,8 @@ func TestCreateTeamInstance(t *testing.T) {
 		TeamID: teamID,
 		Index:  1,
 		Infra: domain.InfraInstance{
-			PublicIP:  "1.2.3.4",
-			PrivateIP: "10.0.0.1",
+			PublicIP:  ptr.Of("1.2.3.4"),
+			PrivateIP: ptr.Of("10.0.0.1"),
 			Status:    domain.InstanceStatusRunning,
 		},
 		CreatedAt: time.Now(),
@@ -342,8 +343,8 @@ func TestGetInstances(t *testing.T) {
 			TeamID: uuid.New(),
 			Index:  1,
 			Infra: domain.InfraInstance{
-				PublicIP:  "1.2.3.4",
-				PrivateIP: "10.0.0.1",
+				PublicIP:  ptr.Of("1.2.3.4"),
+				PrivateIP: ptr.Of("10.0.0.1"),
 				Status:    domain.InstanceStatusRunning,
 			},
 			CreatedAt: time.Now(),
@@ -353,8 +354,8 @@ func TestGetInstances(t *testing.T) {
 			TeamID: uuid.New(),
 			Index:  2,
 			Infra: domain.InfraInstance{
-				PublicIP:  "5.6.7.8",
-				PrivateIP: "10.0.0.2",
+				PublicIP:  ptr.Of("5.6.7.8"),
+				PrivateIP: ptr.Of("10.0.0.2"),
 				Status:    domain.InstanceStatusStopped,
 			},
 			CreatedAt: time.Now(),

@@ -3,6 +3,7 @@ package usecase_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -11,6 +12,8 @@ import (
 	repomock "github.com/traPtitech/piscon-portal-v2/server/repository/mock"
 	instancemock "github.com/traPtitech/piscon-portal-v2/server/services/instance/mock"
 	"github.com/traPtitech/piscon-portal-v2/server/usecase"
+	"github.com/traPtitech/piscon-portal-v2/server/utils/ptr"
+	"github.com/traPtitech/piscon-portal-v2/server/utils/testutil"
 	"go.uber.org/mock/gomock"
 )
 
@@ -85,8 +88,8 @@ func TestDeleteInstance(t *testing.T) {
 		gomock.Cond(func(instance domain.InfraInstance) bool {
 			return instance.ProviderInstanceID == providerID.String()
 		}),
-	).Return(domain.InfraInstance{}, nil)
-	repo.EXPECT().UpdateInstance(gomock.Any(), gomock.Any()).Return(nil)
+	).Return(nil)
+	repo.EXPECT().DeleteInstance(gomock.Any(), instanceID).Return(nil)
 
 	err := usecase.DeleteInstance(t.Context(), instanceID)
 	assert.NoError(t, err)
@@ -149,7 +152,7 @@ func TestUpdateInstance(t *testing.T) {
 			expectManager: func(manager *instancemock.MockManager, instance domain.Instance) {
 				manager.EXPECT().Start(gomock.Any(), gomock.Cond(func(infra domain.InfraInstance) bool {
 					return infra.ProviderInstanceID == instance.Infra.ProviderInstanceID
-				})).Return(domain.InfraInstance{}, nil)
+				})).Return(nil)
 			},
 			expectErr:   nil,
 			expectErrAs: false,
@@ -175,7 +178,7 @@ func TestUpdateInstance(t *testing.T) {
 			expectManager: func(manager *instancemock.MockManager, instance domain.Instance) {
 				manager.EXPECT().Stop(gomock.Any(), gomock.Cond(func(infra domain.InfraInstance) bool {
 					return infra.ProviderInstanceID == instance.Infra.ProviderInstanceID
-				})).Return(domain.InfraInstance{}, nil)
+				})).Return(nil)
 			},
 			expectErr:   nil,
 			expectErrAs: false,
@@ -225,7 +228,6 @@ func TestUpdateInstance(t *testing.T) {
 
 			if tt.expectManager != nil {
 				tt.expectManager(manager, tt.fields.instance)
-				repo.EXPECT().UpdateInstance(gomock.Any(), gomock.Any()).Return(nil)
 			}
 
 			err := instanceUsecase.UpdateInstance(t.Context(), instanceID, tt.args.op)
@@ -236,6 +238,285 @@ func TestUpdateInstance(t *testing.T) {
 				assert.ErrorIs(t, err, tt.expectErr)
 			} else {
 				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
+func TestGetInstance(t *testing.T) {
+	t.Parallel()
+
+	ctrl := gomock.NewController(t)
+
+	instanceID := uuid.New()
+	infraInstanceID := uuid.New().String()
+	instance := domain.Instance{
+		ID:     instanceID,
+		TeamID: uuid.New(),
+		Index:  1,
+		Infra: domain.InfraInstance{
+			ProviderInstanceID: infraInstanceID,
+		},
+		CreatedAt: time.Now(),
+	}
+	fullInstance := instance
+	fullInstance.Infra = domain.InfraInstance{
+		ProviderInstanceID: infraInstanceID,
+		Status:             domain.InstanceStatusRunning,
+		PrivateIP:          ptr.Of("private ip"),
+		PublicIP:           ptr.Of("public ip"),
+	}
+
+	testCases := map[string]struct {
+		instanceID      uuid.UUID
+		instance        domain.Instance
+		FindInstanceErr error
+		infraInstance   domain.InfraInstance
+		executeGet      bool
+		GetErr          error
+		result          domain.Instance
+		expectErr       error
+	}{
+		"正しく取得できる": {
+			instanceID:    instanceID,
+			instance:      instance,
+			executeGet:    true,
+			infraInstance: fullInstance.Infra,
+			result:        fullInstance,
+		},
+		"FindInstanceでErrNotFoundなのでErrNotFound": {
+			instanceID:      instanceID,
+			FindInstanceErr: repository.ErrNotFound,
+			expectErr:       usecase.ErrNotFound,
+		},
+		"FindInstanceがエラーなのでエラー": {
+			instanceID:      instanceID,
+			FindInstanceErr: assert.AnError,
+			expectErr:       assert.AnError,
+		},
+		"Getでエラーなのでエラー": {
+			instanceID: instanceID,
+			instance:   instance,
+			executeGet: true,
+			GetErr:     assert.AnError,
+			expectErr:  assert.AnError,
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			repo := repomock.NewMockRepository(ctrl)
+			manager := instancemock.NewMockManager(ctrl)
+			u := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager)
+
+			repo.EXPECT().FindInstance(gomock.Any(), testCase.instanceID).
+				Return(testCase.instance, testCase.FindInstanceErr)
+			if testCase.executeGet {
+				manager.EXPECT().Get(gomock.Any(), testCase.instance.Infra.ProviderInstanceID).
+					Return(testCase.infraInstance, testCase.GetErr)
+			}
+
+			result, err := u.GetInstance(t.Context(), testCase.instanceID)
+			if testCase.expectErr != nil {
+				assert.ErrorIs(t, err, testCase.expectErr)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, testCase.result, result)
+			}
+		})
+	}
+}
+
+func TestGetTeamInstances(t *testing.T) {
+	t.Parallel()
+
+	ctrl := gomock.NewController(t)
+
+	teamID := uuid.New()
+	instance1 := domain.Instance{
+		ID:     uuid.New(),
+		TeamID: teamID,
+		Index:  1,
+		Infra: domain.InfraInstance{
+			ProviderInstanceID: "infra1",
+			Status:             domain.InstanceStatusRunning,
+		},
+	}
+	instance2 := domain.Instance{
+		ID:     uuid.New(),
+		TeamID: teamID,
+		Index:  2,
+		Infra: domain.InfraInstance{
+			ProviderInstanceID: "infra2",
+			Status:             domain.InstanceStatusStopped,
+		},
+	}
+	instance3 := domain.Instance{
+		ID:     uuid.New(),
+		TeamID: teamID,
+		Index:  3,
+		Infra: domain.InfraInstance{
+			ProviderInstanceID: "infra3",
+			Status:             domain.InstanceStatusDeleted,
+		},
+		DeletedAt: ptr.Of(time.Now()),
+	}
+
+	testCases := map[string]struct {
+		teamID              uuid.UUID
+		instances           []domain.Instance
+		GetTeamInstancesErr error
+		executeGetAll       bool
+		infraInstances      []domain.InfraInstance
+		GetAllErr           error
+		result              []domain.Instance
+		expectErr           error
+	}{
+		"正しく取得できる": {
+			teamID:         teamID,
+			instances:      []domain.Instance{instance1, instance2, instance3},
+			executeGetAll:  true,
+			infraInstances: []domain.InfraInstance{instance1.Infra, instance2.Infra},
+			result:         []domain.Instance{instance1, instance2, instance3},
+		},
+		"GetTeamInstancesでエラー": {
+			teamID:              teamID,
+			GetTeamInstancesErr: assert.AnError,
+			expectErr:           assert.AnError,
+		},
+		"GetAllでエラー": {
+			teamID:        teamID,
+			instances:     []domain.Instance{instance1, instance2},
+			executeGetAll: true,
+			GetAllErr:     assert.AnError,
+			expectErr:     assert.AnError,
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			repo := repomock.NewMockRepository(ctrl)
+			manager := instancemock.NewMockManager(ctrl)
+			u := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager)
+
+			repo.EXPECT().GetTeamInstances(gomock.Any(), testCase.teamID).
+				Return(testCase.instances, testCase.GetTeamInstancesErr)
+
+			if testCase.executeGetAll {
+				ids := make([]string, 0, len(testCase.instances))
+				for _, inst := range testCase.instances {
+					ids = append(ids, inst.Infra.ProviderInstanceID)
+				}
+				manager.EXPECT().GetByIDs(gomock.Any(), ids).
+					Return(testCase.infraInstances, testCase.GetAllErr)
+			}
+
+			result, err := u.GetTeamInstances(t.Context(), testCase.teamID)
+			if testCase.expectErr != nil {
+				assert.ErrorIs(t, err, testCase.expectErr)
+			} else {
+				assert.NoError(t, err)
+			}
+
+			if testCase.expectErr != nil {
+				return
+			}
+
+			assert.Len(t, result, len(testCase.result))
+
+			for i, inst := range result {
+				testutil.CompareInstance(t, testCase.result[i], inst)
+			}
+		})
+	}
+}
+
+func TestGetAllInstances(t *testing.T) {
+	t.Parallel()
+
+	ctrl := gomock.NewController(t)
+
+	teamID := uuid.New()
+	instance1 := domain.Instance{
+		ID:     uuid.New(),
+		TeamID: teamID,
+		Index:  1,
+		Infra: domain.InfraInstance{
+			ProviderInstanceID: "infra1",
+			Status:             domain.InstanceStatusRunning,
+		},
+	}
+	instance2 := domain.Instance{
+		ID:     uuid.New(),
+		TeamID: teamID,
+		Index:  2,
+		Infra: domain.InfraInstance{
+			ProviderInstanceID: "infra2",
+			Status:             domain.InstanceStatusStopped,
+		},
+	}
+
+	testCases := map[string]struct {
+		instances          []domain.Instance
+		GetAllInstancesErr error
+		executeGetAll      bool
+		infraInstances     []domain.InfraInstance
+		GetAllErr          error
+		result             []domain.Instance
+		expectErr          error
+	}{
+		"正しく取得できる": {
+			instances:      []domain.Instance{instance1, instance2},
+			executeGetAll:  true,
+			infraInstances: []domain.InfraInstance{instance1.Infra, instance2.Infra},
+			result:         []domain.Instance{instance1, instance2},
+		},
+		"GetAllInstancesでエラー": {
+			GetAllInstancesErr: assert.AnError,
+			expectErr:          assert.AnError,
+		},
+		"GetAllでエラー": {
+			instances:     []domain.Instance{instance1, instance2},
+			executeGetAll: true,
+			GetAllErr:     assert.AnError,
+			expectErr:     assert.AnError,
+		}}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			repo := repomock.NewMockRepository(ctrl)
+			manager := instancemock.NewMockManager(ctrl)
+			u := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager)
+
+			repo.EXPECT().GetAllInstances(gomock.Any()).
+				Return(testCase.instances, testCase.GetAllInstancesErr)
+
+			if testCase.executeGetAll {
+				manager.EXPECT().GetAll(gomock.Any()).
+					Return(testCase.infraInstances, testCase.GetAllErr)
+			}
+
+			result, err := u.GetAllInstances(t.Context())
+			if testCase.expectErr != nil {
+				assert.ErrorIs(t, err, testCase.expectErr)
+			} else {
+				assert.NoError(t, err)
+			}
+
+			if testCase.expectErr != nil {
+				return
+			}
+
+			assert.Len(t, result, len(testCase.result))
+
+			for i, inst := range result {
+				testutil.CompareInstance(t, testCase.result[i], inst)
 			}
 		})
 	}
