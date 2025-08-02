@@ -27,12 +27,12 @@ const (
 )
 
 var (
-	problemBenchmarks = map[string]func(config map[string]any) benchmarker.Benchmarker{
-		problemExample: func(_ map[string]any) benchmarker.Benchmarker {
-			return impl.NewExample()
+	problemBenchmarks = map[string]func(conf config.Problem) (benchmarker.Benchmarker, error){
+		problemExample: func(_ config.Problem) (benchmarker.Benchmarker, error) {
+			return impl.NewExample(), nil
 		},
-		problemPrivateIsu: func(_ map[string]any) benchmarker.Benchmarker {
-			return privateisu.New()
+		problemPrivateIsu: func(conf config.Problem) (benchmarker.Benchmarker, error) {
+			return privateisu.New(conf)
 		},
 	}
 )
@@ -43,14 +43,19 @@ type Runner struct {
 }
 
 func Prepare(portal portal.Portal, problemConfig config.Problem) (*Runner, error) {
-	benchmarker, ok := problemBenchmarks[problemConfig.Name]
+	newBenchmarkerFn, ok := problemBenchmarks[problemConfig.Name]
 	if !ok {
 		return nil, fmt.Errorf("unknown problem: %q", problemConfig.Name)
 	}
 
+	benchmarker, err := newBenchmarkerFn(problemConfig)
+	if err != nil {
+		return nil, fmt.Errorf("create benchmarker: %w", err)
+	}
+
 	return &Runner{
 		portal:      portal,
-		benchmarker: benchmarker(problemConfig.Options),
+		benchmarker: benchmarker,
 	}, nil
 }
 

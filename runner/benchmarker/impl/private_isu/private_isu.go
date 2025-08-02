@@ -8,30 +8,42 @@ import (
 	"time"
 
 	"github.com/traPtitech/piscon-portal-v2/runner/benchmarker"
+	"github.com/traPtitech/piscon-portal-v2/runner/config"
 	"github.com/traPtitech/piscon-portal-v2/runner/domain"
 )
+
+type problemConf struct {
+	execPath    string
+	userDataDir string
+}
 
 type PrivateIsu struct {
 	cmd    *exec.Cmd
 	stdout string
 	stderr string
+
+	conf problemConf
 }
 
-func New() *PrivateIsu {
-	return &PrivateIsu{}
+func New(conf config.Problem) (*PrivateIsu, error) {
+	dir, ok := conf.Options["dir"].(string)
+	if !ok || dir == "" {
+		return nil, fmt.Errorf("invalid or missing 'dir' option in problem configuration")
+	}
+
+	return &PrivateIsu{
+		conf: problemConf{
+			execPath:    dir + "/bin/benchmarker",
+			userDataDir: dir + "/userdata",
+		},
+	}, nil
 }
 
 var _ benchmarker.Benchmarker = (*PrivateIsu)(nil)
 
-const (
-	benchmarkerDir         = "/home/isucon/private_isu/benchmarker"
-	benchmarkerPath        = benchmarkerDir + "/bin/benchmarker"
-	benchmarkerUserDataDir = benchmarkerDir + "/userdata"
-)
-
 func (b *PrivateIsu) Start(ctx context.Context, job *domain.Job) (benchmarker.Outputs, time.Time, error) {
-	cmd := exec.CommandContext(ctx, benchmarkerPath,
-		"--userdata", benchmarkerUserDataDir,
+	cmd := exec.CommandContext(ctx, b.conf.execPath,
+		"--userdata", b.conf.userDataDir,
 		"--target", job.GetTargetURL(),
 	)
 
