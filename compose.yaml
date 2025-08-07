@@ -54,6 +54,7 @@ services:
         condition: service_healthy
     volumes:
       - ./runner/benchmarker/impl/example.sh:/bin/example.sh
+      - ./piscon_runner_example.yaml:/piscon_runner.yaml
     develop:
       watch:
         - path: ./runner

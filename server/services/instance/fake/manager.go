@@ -74,36 +74,35 @@ func NewManager(root *os.Root) (*Manager, error) {
 	return m, nil
 }
 
-func (m *Manager) Create(_ context.Context, _ string, _ []string) (domain.InfraInstance, error) {
+func (m *Manager) Create(_ context.Context, _ string, _ []string) (string, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
 	id := uuid.NewString()
 	privateIP, err := m.generatePrivateIP()
 	if err != nil {
-		return domain.InfraInstance{}, fmt.Errorf("generate private IP: %w", err)
+		return "", fmt.Errorf("generate private IP: %w", err)
 	}
 
 	publicIP, err := m.generatePublicIP()
 	if err != nil {
-		return domain.InfraInstance{}, fmt.Errorf("generate public IP: %w", err)
+		return "", fmt.Errorf("generate public IP: %w", err)
 	}
 
 	instance := domain.InfraInstance{
 		ProviderInstanceID: id,
 		Status:             domain.InstanceStatusBuilding,
-		PrivateIP:          privateIP,
-		PublicIP:           publicIP,
+		PrivateIP:          &privateIP,
 	}
 
 	instances, err := m.readInstances()
 	if err != nil {
-		return domain.InfraInstance{}, fmt.Errorf("read instances: %w", err)
+		return "", fmt.Errorf("read instances: %w", err)
 	}
 	instances = append(instances, instance)
 
 	if err := m.storeInstances(instances); err != nil {
-		return domain.InfraInstance{}, fmt.Errorf("store instances: %w", err)
+		return "", fmt.Errorf("store instances: %w", err)
 	}
 
 	// Simulate a delay for building the instance
@@ -113,12 +112,13 @@ func (m *Manager) Create(_ context.Context, _ string, _ []string) (domain.InfraI
 		defer m.mu.Unlock()
 		log.Println("instance locked, updating status to running")
 		instance.Status = domain.InstanceStatusRunning
+		instance.PublicIP = &publicIP
 		if err := m.updateInstance(instance); err != nil {
 			log.Printf("update instance status: %v", err)
 		}
 	})
 
-	return instance, nil
+	return instance.ProviderInstanceID, nil
 }
 
 func (m *Manager) Get(_ context.Context, id string) (domain.InfraInstance, error) {
@@ -150,7 +150,26 @@ func (m *Manager) GetAll(_ context.Context) ([]domain.InfraInstance, error) {
 	return instances, nil
 }
 
-func (m *Manager) Delete(_ context.Context, instance domain.InfraInstance) (domain.InfraInstance, error) {
+func (m *Manager) GetByIDs(_ context.Context, ids []string) ([]domain.InfraInstance, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	instances, err := m.readInstances()
+	if err != nil {
+		return nil, fmt.Errorf("read instances: %w", err)
+	}
+
+	result := make([]domain.InfraInstance, 0, len(instances))
+	for _, instance := range instances {
+		if slices.Contains(ids, instance.ProviderInstanceID) {
+			result = append(result, instance)
+		}
+	}
+
+	return result, nil
+}
+
+func (m *Manager) Delete(_ context.Context, instance domain.InfraInstance) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -158,7 +177,7 @@ func (m *Manager) Delete(_ context.Context, instance domain.InfraInstance) (doma
 
 	instances, err := m.readInstances()
 	if err != nil {
-		return domain.InfraInstance{}, fmt.Errorf("read instances: %w", err)
+		return fmt.Errorf("read instances: %w", err)
 	}
 
 	instances = slices.DeleteFunc(instances, func(i domain.InfraInstance) bool {
@@ -168,29 +187,29 @@ func (m *Manager) Delete(_ context.Context, instance domain.InfraInstance) (doma
 	// Remove the IPs from the IP info
 	ipInfo, err := m.readIPInfo()
 	if err != nil {
-		return domain.InfraInstance{}, fmt.Errorf("read IP info: %w", err)
+		return fmt.Errorf("read IP info: %w", err)
 	}
-	ipInfo.PrivateIPs = lo.Without(ipInfo.PrivateIPs, instance.PrivateIP)
-	ipInfo.PublicIPs = lo.Without(ipInfo.PublicIPs, instance.PublicIP)
+	ipInfo.PrivateIPs = lo.Without(ipInfo.PrivateIPs, *instance.PrivateIP)
+	ipInfo.PublicIPs = lo.Without(ipInfo.PublicIPs, *instance.PublicIP)
 
 	if err := m.storeIPInfo(ipInfo); err != nil {
-		return domain.InfraInstance{}, fmt.Errorf("store IP info: %w", err)
+		return fmt.Errorf("store IP info: %w", err)
 	}
 
 	if err := m.storeInstances(instances); err != nil {
-		return domain.InfraInstance{}, fmt.Errorf("store instances: %w", err)
+		return fmt.Errorf("store instances: %w", err)
 	}
 
-	return instance, nil
+	return nil
 }
 
-func (m *Manager) Stop(_ context.Context, instance domain.InfraInstance) (domain.InfraInstance, error) {
+func (m *Manager) Stop(_ context.Context, instance domain.InfraInstance) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
 	instance.Status = domain.InstanceStatusStopping
 	if err := m.updateInstance(instance); err != nil {
-		return domain.InfraInstance{}, fmt.Errorf("update instance status to stopping: %w", err)
+		return fmt.Errorf("update instance status to stopping: %w", err)
 	}
 
 	// Simulate a delay for stopping the instance
@@ -203,16 +222,16 @@ func (m *Manager) Stop(_ context.Context, instance domain.InfraInstance) (domain
 		}
 	})
 
-	return instance, nil
+	return nil
 }
 
-func (m *Manager) Start(_ context.Context, instance domain.InfraInstance) (domain.InfraInstance, error) {
+func (m *Manager) Start(_ context.Context, instance domain.InfraInstance) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
 	instance.Status = domain.InstanceStatusStarting
 	if err := m.updateInstance(instance); err != nil {
-		return domain.InfraInstance{}, fmt.Errorf("update instance status to starting: %w", err)
+		return fmt.Errorf("update instance status to starting: %w", err)
 	}
 
 	// Simulate a delay for starting the instance
@@ -225,7 +244,7 @@ func (m *Manager) Start(_ context.Context, instance domain.InfraInstance) (domai
 		}
 	})
 
-	return instance, nil
+	return nil
 }
 
 func (m *Manager) readInstances() ([]domain.InfraInstance, error) {

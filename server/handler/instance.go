@@ -142,12 +142,19 @@ func (h *Handler) GetInstances(c echo.Context) error {
 }
 
 func toOpenAPIInstance(instance domain.Instance, _ int) openapi.Instance {
+	privateIP, publicIP := "", ""
+	if instance.Infra.PrivateIP != nil {
+		privateIP = *instance.Infra.PrivateIP
+	}
+	if instance.Infra.PublicIP != nil {
+		publicIP = *instance.Infra.PublicIP
+	}
 	return openapi.Instance{
 		ID:               openapi.InstanceId(instance.ID),
 		TeamId:           openapi.TeamId(instance.TeamID),
 		ServerId:         instance.Index,
-		PublicIPAddress:  openapi.IPAddress(instance.Infra.PublicIP),
-		PrivateIPAddress: openapi.IPAddress(instance.Infra.PrivateIP),
+		PublicIPAddress:  openapi.IPAddress(publicIP),
+		PrivateIPAddress: openapi.IPAddress(privateIP),
 		Status:           openapi.InstanceStatus(instance.Infra.Status),
 		CreatedAt:        instance.CreatedAt,
 	}

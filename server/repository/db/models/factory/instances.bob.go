@@ -39,10 +39,8 @@ type InstanceTemplate struct {
 	ProviderInstanceID func() string
 	TeamID             func() string
 	InstanceNumber     func() int32
-	Status             func() InstancesStatus
 	CreatedAt          func() time.Time
-	PublicIP           func() sql.Null[string]
-	PrivateIP          func() sql.Null[string]
+	DeletedAt          func() sql.Null[time.Time]
 
 	r instanceR
 	f *Factory
@@ -102,21 +100,13 @@ func (o InstanceTemplate) BuildSetter() *models.InstanceSetter {
 		val := o.InstanceNumber()
 		m.InstanceNumber = &val
 	}
-	if o.Status != nil {
-		val := o.Status()
-		m.Status = &val
-	}
 	if o.CreatedAt != nil {
 		val := o.CreatedAt()
 		m.CreatedAt = &val
 	}
-	if o.PublicIP != nil {
-		val := o.PublicIP()
-		m.PublicIP = &val
-	}
-	if o.PrivateIP != nil {
-		val := o.PrivateIP()
-		m.PrivateIP = &val
+	if o.DeletedAt != nil {
+		val := o.DeletedAt()
+		m.DeletedAt = &val
 	}
 
 	return m
@@ -152,17 +142,11 @@ func (o InstanceTemplate) Build() *models.Instance {
 	if o.InstanceNumber != nil {
 		m.InstanceNumber = o.InstanceNumber()
 	}
-	if o.Status != nil {
-		m.Status = o.Status()
-	}
 	if o.CreatedAt != nil {
 		m.CreatedAt = o.CreatedAt()
 	}
-	if o.PublicIP != nil {
-		m.PublicIP = o.PublicIP()
-	}
-	if o.PrivateIP != nil {
-		m.PrivateIP = o.PrivateIP()
+	if o.DeletedAt != nil {
+		m.DeletedAt = o.DeletedAt()
 	}
 
 	o.setModelRels(m)
@@ -199,10 +183,6 @@ func ensureCreatableInstance(m *models.InstanceSetter) {
 	if m.InstanceNumber == nil {
 		val := random_int32(nil)
 		m.InstanceNumber = &val
-	}
-	if m.Status == nil {
-		val := random_InstancesStatus(nil)
-		m.Status = &val
 	}
 }
 
@@ -340,10 +320,8 @@ func (m instanceMods) RandomizeAllColumns(f *faker.Faker) InstanceMod {
 		InstanceMods.RandomProviderInstanceID(f),
 		InstanceMods.RandomTeamID(f),
 		InstanceMods.RandomInstanceNumber(f),
-		InstanceMods.RandomStatus(f),
 		InstanceMods.RandomCreatedAt(f),
-		InstanceMods.RandomPublicIP(f),
-		InstanceMods.RandomPrivateIP(f),
+		InstanceMods.RandomDeletedAt(f),
 	}
 }
 
@@ -472,37 +450,6 @@ func (m instanceMods) RandomInstanceNumber(f *faker.Faker) InstanceMod {
 }
 
 // Set the model columns to this value
-func (m instanceMods) Status(val InstancesStatus) InstanceMod {
-	return InstanceModFunc(func(_ context.Context, o *InstanceTemplate) {
-		o.Status = func() InstancesStatus { return val }
-	})
-}
-
-// Set the Column from the function
-func (m instanceMods) StatusFunc(f func() InstancesStatus) InstanceMod {
-	return InstanceModFunc(func(_ context.Context, o *InstanceTemplate) {
-		o.Status = f
-	})
-}
-
-// Clear any values for the column
-func (m instanceMods) UnsetStatus() InstanceMod {
-	return InstanceModFunc(func(_ context.Context, o *InstanceTemplate) {
-		o.Status = nil
-	})
-}
-
-// Generates a random value for the column using the given faker
-// if faker is nil, a default faker is used
-func (m instanceMods) RandomStatus(f *faker.Faker) InstanceMod {
-	return InstanceModFunc(func(_ context.Context, o *InstanceTemplate) {
-		o.Status = func() InstancesStatus {
-			return random_InstancesStatus(f)
-		}
-	})
-}
-
-// Set the model columns to this value
 func (m instanceMods) CreatedAt(val time.Time) InstanceMod {
 	return InstanceModFunc(func(_ context.Context, o *InstanceTemplate) {
 		o.CreatedAt = func() time.Time { return val }
@@ -534,38 +481,38 @@ func (m instanceMods) RandomCreatedAt(f *faker.Faker) InstanceMod {
 }
 
 // Set the model columns to this value
-func (m instanceMods) PublicIP(val sql.Null[string]) InstanceMod {
+func (m instanceMods) DeletedAt(val sql.Null[time.Time]) InstanceMod {
 	return InstanceModFunc(func(_ context.Context, o *InstanceTemplate) {
-		o.PublicIP = func() sql.Null[string] { return val }
+		o.DeletedAt = func() sql.Null[time.Time] { return val }
 	})
 }
 
 // Set the Column from the function
-func (m instanceMods) PublicIPFunc(f func() sql.Null[string]) InstanceMod {
+func (m instanceMods) DeletedAtFunc(f func() sql.Null[time.Time]) InstanceMod {
 	return InstanceModFunc(func(_ context.Context, o *InstanceTemplate) {
-		o.PublicIP = f
+		o.DeletedAt = f
 	})
 }
 
 // Clear any values for the column
-func (m instanceMods) UnsetPublicIP() InstanceMod {
+func (m instanceMods) UnsetDeletedAt() InstanceMod {
 	return InstanceModFunc(func(_ context.Context, o *InstanceTemplate) {
-		o.PublicIP = nil
+		o.DeletedAt = nil
 	})
 }
 
 // Generates a random value for the column using the given faker
 // if faker is nil, a default faker is used
 // The generated value is sometimes null
-func (m instanceMods) RandomPublicIP(f *faker.Faker) InstanceMod {
+func (m instanceMods) RandomDeletedAt(f *faker.Faker) InstanceMod {
 	return InstanceModFunc(func(_ context.Context, o *InstanceTemplate) {
-		o.PublicIP = func() sql.Null[string] {
+		o.DeletedAt = func() sql.Null[time.Time] {
 			if f == nil {
 				f = &defaultFaker
 			}
 
-			val := random_string(f, "15")
-			return sql.Null[string]{V: val, Valid: f.Bool()}
+			val := random_time_Time(f)
+			return sql.Null[time.Time]{V: val, Valid: f.Bool()}
 		}
 	})
 }
@@ -573,68 +520,15 @@ func (m instanceMods) RandomPublicIP(f *faker.Faker) InstanceMod {
 // Generates a random value for the column using the given faker
 // if faker is nil, a default faker is used
 // The generated value is never null
-func (m instanceMods) RandomPublicIPNotNull(f *faker.Faker) InstanceMod {
+func (m instanceMods) RandomDeletedAtNotNull(f *faker.Faker) InstanceMod {
 	return InstanceModFunc(func(_ context.Context, o *InstanceTemplate) {
-		o.PublicIP = func() sql.Null[string] {
+		o.DeletedAt = func() sql.Null[time.Time] {
 			if f == nil {
 				f = &defaultFaker
 			}
 
-			val := random_string(f, "15")
-			return sql.Null[string]{V: val, Valid: true}
-		}
-	})
-}
-
-// Set the model columns to this value
-func (m instanceMods) PrivateIP(val sql.Null[string]) InstanceMod {
-	return InstanceModFunc(func(_ context.Context, o *InstanceTemplate) {
-		o.PrivateIP = func() sql.Null[string] { return val }
-	})
-}
-
-// Set the Column from the function
-func (m instanceMods) PrivateIPFunc(f func() sql.Null[string]) InstanceMod {
-	return InstanceModFunc(func(_ context.Context, o *InstanceTemplate) {
-		o.PrivateIP = f
-	})
-}
-
-// Clear any values for the column
-func (m instanceMods) UnsetPrivateIP() InstanceMod {
-	return InstanceModFunc(func(_ context.Context, o *InstanceTemplate) {
-		o.PrivateIP = nil
-	})
-}
-
-// Generates a random value for the column using the given faker
-// if faker is nil, a default faker is used
-// The generated value is sometimes null
-func (m instanceMods) RandomPrivateIP(f *faker.Faker) InstanceMod {
-	return InstanceModFunc(func(_ context.Context, o *InstanceTemplate) {
-		o.PrivateIP = func() sql.Null[string] {
-			if f == nil {
-				f = &defaultFaker
-			}
-
-			val := random_string(f, "15")
-			return sql.Null[string]{V: val, Valid: f.Bool()}
-		}
-	})
-}
-
-// Generates a random value for the column using the given faker
-// if faker is nil, a default faker is used
-// The generated value is never null
-func (m instanceMods) RandomPrivateIPNotNull(f *faker.Faker) InstanceMod {
-	return InstanceModFunc(func(_ context.Context, o *InstanceTemplate) {
-		o.PrivateIP = func() sql.Null[string] {
-			if f == nil {
-				f = &defaultFaker
-			}
-
-			val := random_string(f, "15")
-			return sql.Null[string]{V: val, Valid: true}
+			val := random_time_Time(f)
+			return sql.Null[time.Time]{V: val, Valid: true}
 		}
 	})
 }

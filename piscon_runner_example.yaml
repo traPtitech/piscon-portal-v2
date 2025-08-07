@@ -1,0 +1,4 @@
+portal:
+  address: portal:50051
+problem:
+  name: example

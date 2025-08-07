@@ -4,6 +4,16 @@ https://github.com/catatsuy/private-isu
 
 最後に結果だけが出力される。
 
+## 設定例
+
+```yaml
+problem:
+  name: private_isu
+  options:
+    dir: /home/isucon/private_isu/benchmarker # private_isuのベンチマーカーのディレクトリ
+    # ${dir}/bin/benchmarker が実行可能ファイル、${dir}/userdata がベンチマーカーのデータのディレクトリ
+```
+
 ## 出力例
 
 標準出力

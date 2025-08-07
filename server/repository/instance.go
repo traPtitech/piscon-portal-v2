@@ -9,7 +9,6 @@ import (
 
 type InstanceRepository interface {
 	CreateInstance(ctx context.Context, instance domain.Instance) error
-	UpdateInstance(ctx context.Context, instance domain.Instance) error
 	// FindInstance finds an instance by id. If the instance is not found, it returns [ErrNotFound].
 	FindInstance(ctx context.Context, id uuid.UUID) (domain.Instance, error)
 	// GetTeamInstances retrieves all instances for a given team ID.
@@ -18,4 +17,7 @@ type InstanceRepository interface {
 	// GetAllInstances retrieves all instances.
 	// Deleted instances are not included.
 	GetAllInstances(ctx context.Context) ([]domain.Instance, error)
+	// DeleteInstance marks an instance as deleted by its ID.
+	// If the instance is not found or already deleted, it returns [ErrNotFound].
+	DeleteInstance(ctx context.Context, id uuid.UUID) error
 }

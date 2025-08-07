@@ -49,6 +49,14 @@ func (i *InstanceUseCaseImpl) GetInstance(ctx context.Context, id uuid.UUID) (do
 	} else if err != nil {
 		return domain.Instance{}, fmt.Errorf("find instance: %w", err)
 	}
+
+	infraInstance, err := i.manager.Get(ctx, instance.Infra.ProviderInstanceID)
+	if err != nil {
+		return domain.Instance{}, fmt.Errorf("get infra instance: %w", err)
+	}
+
+	instance.Infra = infraInstance
+
 	return instance, nil
 }
 
@@ -66,11 +74,11 @@ func (i *InstanceUseCaseImpl) CreateInstance(ctx context.Context, teamID uuid.UU
 			return NewUseCaseError(err)
 		}
 
-		infra, err := i.manager.Create(ctx, instanceName(teamID, instance.Index), nil) // TODO: pass team members' ssh keys
+		providerInstanceID, err := i.manager.Create(ctx, instanceName(teamID, instance.Index), nil) // TODO: pass team members' ssh keys
 		if err != nil {
 			return fmt.Errorf("create infra instance: %w", err)
 		}
-		instance.Infra = infra
+		instance.Infra.ProviderInstanceID = providerInstanceID
 		infraCreated = true
 
 		err = i.repo.CreateInstance(ctx, instance)
@@ -83,7 +91,7 @@ func (i *InstanceUseCaseImpl) CreateInstance(ctx context.Context, teamID uuid.UU
 	if err != nil {
 		if infraCreated {
 			// rollback the created instance
-			_, _ = i.manager.Delete(ctx, instance.Infra)
+			_ = i.manager.Delete(ctx, instance.Infra)
 		}
 		return domain.Instance{}, fmt.Errorf("transaction: %w", err)
 	}
@@ -96,7 +104,23 @@ func (i *InstanceUseCaseImpl) GetTeamInstances(ctx context.Context, teamID uuid.
 	if err != nil {
 		return nil, fmt.Errorf("get team instances: %w", err)
 	}
-	return instances, nil
+
+	infraInstanceIDs := make([]string, 0, len(instances))
+	for _, inst := range instances {
+		infraInstanceIDs = append(infraInstanceIDs, inst.Infra.ProviderInstanceID)
+	}
+
+	infraInstances, err := i.manager.GetByIDs(ctx, infraInstanceIDs)
+	if err != nil {
+		return nil, fmt.Errorf("get infra instances: %w", err)
+	}
+
+	result, err := setInfraInstances(instances, infraInstances)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func (i *InstanceUseCaseImpl) GetAllInstances(ctx context.Context) ([]domain.Instance, error) {
@@ -104,7 +128,18 @@ func (i *InstanceUseCaseImpl) GetAllInstances(ctx context.Context) ([]domain.Ins
 	if err != nil {
 		return nil, fmt.Errorf("get all instances: %w", err)
 	}
-	return instances, nil
+
+	infraInstances, err := i.manager.GetAll(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("get infra instances: %w", err)
+	}
+
+	result, err := setInfraInstances(instances, infraInstances)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func (i *InstanceUseCaseImpl) DeleteInstance(ctx context.Context, id uuid.UUID) error {
@@ -117,13 +152,19 @@ func (i *InstanceUseCaseImpl) DeleteInstance(ctx context.Context, id uuid.UUID) 
 			return fmt.Errorf("find instance: %w", err)
 		}
 
-		_, err = i.manager.Delete(ctx, instance.Infra)
+		err = i.manager.Delete(ctx, instance.Infra)
 		if err != nil {
 			return fmt.Errorf("delete infra instance: %w", err)
 		}
-		instance.Infra.Status = domain.InstanceStatusDeleted
 
-		return i.repo.UpdateInstance(ctx, instance)
+		err = i.repo.DeleteInstance(ctx, id)
+		if errors.Is(err, repository.ErrNotFound) {
+			return NewUseCaseErrorFromMsg("instance not found or already deleted")
+		}
+		if err != nil {
+			return fmt.Errorf("delete instance: %w", err)
+		}
+		return nil
 	})
 	if err != nil {
 		return fmt.Errorf("transaction: %w", err)
@@ -141,21 +182,19 @@ func (i *InstanceUseCaseImpl) UpdateInstance(ctx context.Context, id uuid.UUID, 
 			return fmt.Errorf("find instance: %w", err)
 		}
 
-		var updatedInstance domain.InfraInstance
 		switch op {
 		case domain.InstanceOperationStart:
-			updatedInstance, err = i.manager.Start(ctx, instance.Infra)
+			err = i.manager.Start(ctx, instance.Infra)
 		case domain.InstanceOperationStop:
-			updatedInstance, err = i.manager.Stop(ctx, instance.Infra)
+			err = i.manager.Stop(ctx, instance.Infra)
 		default:
 			return NewUseCaseErrorFromMsg("invalid operation")
 		}
 		if err != nil {
 			return fmt.Errorf("update infra instance: %w", err)
 		}
-		instance.Infra = updatedInstance
 
-		return i.repo.UpdateInstance(ctx, instance)
+		return nil
 	})
 	if err != nil {
 		return fmt.Errorf("transaction: %w", err)
@@ -166,4 +205,25 @@ func (i *InstanceUseCaseImpl) UpdateInstance(ctx context.Context, id uuid.UUID, 
 
 func instanceName(teamID uuid.UUID, index int) string {
 	return fmt.Sprintf("%s-%d", teamID.String(), index)
+}
+
+func setInfraInstances(instances []domain.Instance, infraInstances []domain.InfraInstance) ([]domain.Instance, error) {
+	infraInstancesMap := make(map[string]domain.InfraInstance, len(infraInstances))
+	for _, infra := range infraInstances {
+		infraInstancesMap[infra.ProviderInstanceID] = infra
+	}
+
+	for i, inst := range instances {
+		infra, ok := infraInstancesMap[inst.Infra.ProviderInstanceID]
+		if !ok {
+			// 削除済みのインスタンスは infraInstance に含まれない
+			infra = domain.InfraInstance{
+				ProviderInstanceID: inst.Infra.ProviderInstanceID,
+				Status:             domain.InstanceStatusDeleted,
+			}
+		}
+		instances[i].Infra = infra
+	}
+
+	return instances, nil
 }

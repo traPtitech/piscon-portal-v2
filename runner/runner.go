@@ -9,6 +9,9 @@ import (
 	"time"
 
 	"github.com/traPtitech/piscon-portal-v2/runner/benchmarker"
+	"github.com/traPtitech/piscon-portal-v2/runner/benchmarker/impl"
+	privateisu "github.com/traPtitech/piscon-portal-v2/runner/benchmarker/impl/private_isu"
+	"github.com/traPtitech/piscon-portal-v2/runner/config"
 	"github.com/traPtitech/piscon-portal-v2/runner/domain"
 	"github.com/traPtitech/piscon-portal-v2/runner/portal"
 )
@@ -18,16 +21,42 @@ const (
 	sendProgressInterval = 5 * time.Second
 )
 
+const (
+	problemExample    string = "example"
+	problemPrivateIsu string = "private_isu"
+)
+
+var (
+	problemBenchmarks = map[string]func(conf config.Problem) (benchmarker.Benchmarker, error){
+		problemExample: func(_ config.Problem) (benchmarker.Benchmarker, error) {
+			return impl.NewExample(), nil
+		},
+		problemPrivateIsu: func(conf config.Problem) (benchmarker.Benchmarker, error) {
+			return privateisu.New(conf)
+		},
+	}
+)
+
 type Runner struct {
 	portal      portal.Portal
 	benchmarker benchmarker.Benchmarker
 }
 
-func Prepare(portal portal.Portal, benchmarker benchmarker.Benchmarker) *Runner {
+func Prepare(portal portal.Portal, problemConfig config.Problem) (*Runner, error) {
+	newBenchmarkerFn, ok := problemBenchmarks[problemConfig.Name]
+	if !ok {
+		return nil, fmt.Errorf("unknown problem: %q", problemConfig.Name)
+	}
+
+	benchmarker, err := newBenchmarkerFn(problemConfig)
+	if err != nil {
+		return nil, fmt.Errorf("create benchmarker: %w", err)
+	}
+
 	return &Runner{
 		portal:      portal,
 		benchmarker: benchmarker,
-	}
+	}, nil
 }
 
 func (r *Runner) Run() error {

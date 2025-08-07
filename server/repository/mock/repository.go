@@ -348,6 +348,44 @@ func (c *MockRepositoryDeleteAdminsCall) DoAndReturn(f func(context.Context, []u
 	return c
 }
 
+// DeleteInstance mocks base method.
+func (m *MockRepository) DeleteInstance(ctx context.Context, id uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteInstance", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteInstance indicates an expected call of DeleteInstance.
+func (mr *MockRepositoryMockRecorder) DeleteInstance(ctx, id any) *MockRepositoryDeleteInstanceCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteInstance", reflect.TypeOf((*MockRepository)(nil).DeleteInstance), ctx, id)
+	return &MockRepositoryDeleteInstanceCall{Call: call}
+}
+
+// MockRepositoryDeleteInstanceCall wrap *gomock.Call
+type MockRepositoryDeleteInstanceCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockRepositoryDeleteInstanceCall) Return(arg0 error) *MockRepositoryDeleteInstanceCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockRepositoryDeleteInstanceCall) Do(f func(context.Context, uuid.UUID) error) *MockRepositoryDeleteInstanceCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockRepositoryDeleteInstanceCall) DoAndReturn(f func(context.Context, uuid.UUID) error) *MockRepositoryDeleteInstanceCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // DeleteSession mocks base method.
 func (m *MockRepository) DeleteSession(ctx context.Context, id string) error {
 	m.ctrl.T.Helper()
@@ -1120,44 +1158,6 @@ func (c *MockRepositoryUpdateBenchmarkLogCall) Do(f func(context.Context, uuid.U
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockRepositoryUpdateBenchmarkLogCall) DoAndReturn(f func(context.Context, uuid.UUID, domain.BenchmarkLog) error) *MockRepositoryUpdateBenchmarkLogCall {
-	c.Call = c.Call.DoAndReturn(f)
-	return c
-}
-
-// UpdateInstance mocks base method.
-func (m *MockRepository) UpdateInstance(ctx context.Context, instance domain.Instance) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateInstance", ctx, instance)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// UpdateInstance indicates an expected call of UpdateInstance.
-func (mr *MockRepositoryMockRecorder) UpdateInstance(ctx, instance any) *MockRepositoryUpdateInstanceCall {
-	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateInstance", reflect.TypeOf((*MockRepository)(nil).UpdateInstance), ctx, instance)
-	return &MockRepositoryUpdateInstanceCall{Call: call}
-}
-
-// MockRepositoryUpdateInstanceCall wrap *gomock.Call
-type MockRepositoryUpdateInstanceCall struct {
-	*gomock.Call
-}
-
-// Return rewrite *gomock.Call.Return
-func (c *MockRepositoryUpdateInstanceCall) Return(arg0 error) *MockRepositoryUpdateInstanceCall {
-	c.Call = c.Call.Return(arg0)
-	return c
-}
-
-// Do rewrite *gomock.Call.Do
-func (c *MockRepositoryUpdateInstanceCall) Do(f func(context.Context, domain.Instance) error) *MockRepositoryUpdateInstanceCall {
-	c.Call = c.Call.Do(f)
-	return c
-}
-
-// DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockRepositoryUpdateInstanceCall) DoAndReturn(f func(context.Context, domain.Instance) error) *MockRepositoryUpdateInstanceCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
