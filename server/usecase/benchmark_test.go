@@ -10,6 +10,7 @@ import (
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
 	"github.com/traPtitech/piscon-portal-v2/server/repository/mock"
+	instanceMock "github.com/traPtitech/piscon-portal-v2/server/services/instance/mock"
 	"github.com/traPtitech/piscon-portal-v2/server/usecase"
 	"github.com/traPtitech/piscon-portal-v2/server/utils/ptr"
 	"go.uber.org/mock/gomock"
@@ -21,15 +22,16 @@ func TestCreateBenchmark(t *testing.T) {
 	userID := uuid.New()
 	teamID := uuid.New()
 	instanceID := uuid.New()
+	providerInstanceID := "instance-id"
 
 	tests := []struct {
 		name        string
-		setup       func(mockRepo *mock.MockRepository)
+		setup       func(mockRepo *mock.MockRepository, mockManager *instanceMock.MockManager)
 		expectError bool
 	}{
 		{
 			name: "success: valid",
-			setup: func(mockRepo *mock.MockRepository) {
+			setup: func(mockRepo *mock.MockRepository, mockManager *instanceMock.MockManager) {
 				mockRepo.EXPECT().
 					FindUser(gomock.Any(), gomock.Eq(userID)).
 					Return(domain.User{
@@ -42,9 +44,15 @@ func TestCreateBenchmark(t *testing.T) {
 						ID:     instanceID,
 						TeamID: teamID,
 						Infra: domain.InfraInstance{
-							Status: domain.InstanceStatusRunning,
+							ProviderInstanceID: providerInstanceID,
 						},
 					}, nil)
+				mockManager.EXPECT().Get(gomock.Any(), providerInstanceID).Return(domain.InfraInstance{
+					ProviderInstanceID: providerInstanceID,
+					Status:             domain.InstanceStatusRunning,
+					PrivateIP:          ptr.Of("private ip"),
+					PublicIP:           ptr.Of("public ip"),
+				}, nil)
 				mockRepo.EXPECT().
 					Transaction(gomock.Any(), gomock.Any()).
 					DoAndReturn(func(ctx context.Context, f func(context.Context) error) error {
@@ -59,7 +67,7 @@ func TestCreateBenchmark(t *testing.T) {
 		},
 		{
 			name: "failure: instance is not running",
-			setup: func(mockRepo *mock.MockRepository) {
+			setup: func(mockRepo *mock.MockRepository, mockManager *instanceMock.MockManager) {
 				mockRepo.EXPECT().
 					Transaction(gomock.Any(), gomock.Any()).
 					DoAndReturn(func(ctx context.Context, f func(context.Context) error) error {
@@ -77,15 +85,19 @@ func TestCreateBenchmark(t *testing.T) {
 						ID:     instanceID,
 						TeamID: teamID,
 						Infra: domain.InfraInstance{
-							Status: domain.InstanceStatusStopped,
+							ProviderInstanceID: providerInstanceID,
 						},
 					}, nil)
+				mockManager.EXPECT().Get(gomock.Any(), providerInstanceID).Return(domain.InfraInstance{
+					ProviderInstanceID: providerInstanceID,
+					Status:             domain.InstanceStatusBuilding,
+				}, nil)
 			},
 			expectError: true,
 		},
 		{
 			name: "failure: instance not found",
-			setup: func(mockRepo *mock.MockRepository) {
+			setup: func(mockRepo *mock.MockRepository, _ *instanceMock.MockManager) {
 				mockRepo.EXPECT().
 					Transaction(gomock.Any(), gomock.Any()).
 					DoAndReturn(func(ctx context.Context, f func(context.Context) error) error {
@@ -105,7 +117,7 @@ func TestCreateBenchmark(t *testing.T) {
 		},
 		{
 			name: "failure: user's teamID does not match instance's teamID",
-			setup: func(mockRepo *mock.MockRepository) {
+			setup: func(mockRepo *mock.MockRepository, mockManager *instanceMock.MockManager) {
 				mockRepo.EXPECT().
 					Transaction(gomock.Any(), gomock.Any()).
 					DoAndReturn(func(ctx context.Context, f func(context.Context) error) error {
@@ -122,13 +134,22 @@ func TestCreateBenchmark(t *testing.T) {
 					Return(domain.Instance{
 						ID:     instanceID,
 						TeamID: uuid.New(),
+						Infra: domain.InfraInstance{
+							ProviderInstanceID: providerInstanceID,
+						},
 					}, nil)
+				mockManager.EXPECT().Get(gomock.Any(), providerInstanceID).Return(domain.InfraInstance{
+					ProviderInstanceID: providerInstanceID,
+					Status:             domain.InstanceStatusRunning,
+					PrivateIP:          ptr.Of("private ip"),
+					PublicIP:           ptr.Of("public ip"),
+				}, nil)
 			},
 			expectError: true,
 		},
 		{
 			name: "failure: benchmark already queued",
-			setup: func(mockRepo *mock.MockRepository) {
+			setup: func(mockRepo *mock.MockRepository, mockManager *instanceMock.MockManager) {
 				mockRepo.EXPECT().
 					FindUser(gomock.Any(), gomock.Eq(userID)).
 					Return(domain.User{
@@ -141,9 +162,15 @@ func TestCreateBenchmark(t *testing.T) {
 						ID:     instanceID,
 						TeamID: teamID,
 						Infra: domain.InfraInstance{
-							Status: domain.InstanceStatusRunning,
+							ProviderInstanceID: providerInstanceID,
 						},
 					}, nil)
+				mockManager.EXPECT().Get(gomock.Any(), providerInstanceID).Return(domain.InfraInstance{
+					ProviderInstanceID: providerInstanceID,
+					Status:             domain.InstanceStatusRunning,
+					PrivateIP:          ptr.Of("private ip"),
+					PublicIP:           ptr.Of("public ip"),
+				}, nil)
 				mockRepo.EXPECT().
 					Transaction(gomock.Any(), gomock.Any()).
 					DoAndReturn(func(ctx context.Context, f func(context.Context) error) error {
@@ -167,10 +194,11 @@ func TestCreateBenchmark(t *testing.T) {
 			defer ctrl.Finish()
 
 			mockRepo := mock.NewMockRepository(ctrl)
-			useCase := usecase.NewBenchmarkUseCase(mockRepo)
+			mockManager := instanceMock.NewMockManager(ctrl)
+			useCase := usecase.NewBenchmarkUseCase(mockRepo, mockManager)
 
 			if tt.setup != nil {
-				tt.setup(mockRepo)
+				tt.setup(mockRepo, mockManager)
 			}
 
 			_, err := useCase.CreateBenchmark(t.Context(), instanceID, userID)
@@ -308,7 +336,7 @@ func TestSaveBenchmarkProgress(t *testing.T) {
 					Return(testCase.UpdateBenchmarkLogResult.err)
 			}
 
-			uc := usecase.NewBenchmarkUseCase(repo)
+			uc := usecase.NewBenchmarkUseCase(repo, nil)
 
 			err := uc.SaveBenchmarkProgress(t.Context(), testCase.benchmarkID, testCase.benchLog, testCase.score, testCase.startedAt)
 			if testCase.isErr {
@@ -437,7 +465,7 @@ func TestFinalizeBenchmark(t *testing.T) {
 					Return(testCase.UpdateBenchmarkResult.err)
 			}
 
-			b := usecase.NewBenchmarkUseCase(repo)
+			b := usecase.NewBenchmarkUseCase(repo, nil)
 
 			err := b.FinalizeBenchmark(t.Context(), testCase.benchmarkID, testCase.result, testCase.finishedAt, testCase.errorMes)
 
