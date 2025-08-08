@@ -35,7 +35,7 @@ func New(config Config, repo repository.Repository, instanceManager instance.Man
 	return &useCaseImpl{
 		TeamUseCase:      NewTeamUseCase(repo),
 		UserUseCase:      NewUserUseCase(repo),
-		BenchmarkUseCase: NewBenchmarkUseCase(repo),
+		BenchmarkUseCase: NewBenchmarkUseCase(repo, instanceManager),
 		ScoreUseCase:     NewScoreUseCase(repo),
 		AdminUseCase:     NewAdminUseCase(repo),
 		DocumentUseCase:  NewDocumentUseCase(repo),
