@@ -491,7 +491,7 @@ func TestStartBenchmark(t *testing.T) {
 			GetOldestQueuedBenchmarkErr: assert.AnError,
 			err:                         assert.AnError,
 		},
-		"GetOldestQueuedBenchamrkがErrNotFoundなのでErrNotFound": {
+		"GetOldestQueuedBenchmarkがErrNotFoundなのでErrNotFound": {
 			GetOldestQueuedBenchmarkErr: repository.ErrNotFound,
 			err:                         usecase.ErrNotFound,
 		},
