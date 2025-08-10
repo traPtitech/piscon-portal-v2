@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS `benchmarks` (
     `instance_id` VARCHAR(36) NOT NULL,
     `team_id` VARCHAR (36) NOT NULL,
     `user_id` VARCHAR(36) NOT NULL,
-    `status` ENUM('waiting', 'running', 'finished') NOT NULL DEFAULT 'waiting',
+    `status` ENUM('waiting', 'readying', 'running', 'finished') NOT NULL DEFAULT 'waiting',
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `started_at` TIMESTAMP,
     `finished_at` TIMESTAMP,
