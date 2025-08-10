@@ -5,6 +5,7 @@ const { status } = defineProps<{ status: Status }>()
 
 const labels: Record<Status, string> = {
   waiting: 'WAITING',
+  readying: 'READYING',
   running: 'RUNNING',
   finished: 'FINISHED',
 }
@@ -26,6 +27,10 @@ const labels: Record<Status, string> = {
   text-align: center;
 }
 .status-chip.waiting {
+  background-color: #f0ad4e33;
+  color: #f0ad4e;
+}
+.status-chip.readying {
   background-color: #f0ad4e33;
   color: #f0ad4e;
 }
