@@ -8,6 +8,7 @@ export const startJobs = () => {
   setInterval(() => {
     const waitingBenchmarks = benchmarks.filter((b) => b.status === 'waiting')
     const runningBenchmarks = benchmarks.filter((b) => b.status === 'running')
+    const readyingBenchmarks = benchmarks.filter((b) => b.status === 'readying')
 
     // running のベンチマークにログを出力する
     for (const b of runningBenchmarks) {
@@ -39,17 +40,26 @@ export const startJobs = () => {
       }
     }
 
-    // 実行中のベンチマークが BENCHMARKER_CONCURRENCY 未満なら、waiting のベンチマークを running にする
+    // 実行中のベンチマークが BENCHMARKER_CONCURRENCY 未満なら、waiting のベンチマークを readying にする
     if (runningBenchmarks.length < BENCHMARKER_CONCURRENCY) {
       const waitingBenchmark = benchmarks.find((b) => b.status === 'waiting')
       if (waitingBenchmark !== undefined) {
         const index = benchmarks.findIndex((b) => b.id === waitingBenchmark.id)
         benchmarks[index] = {
           ...waitingBenchmark,
-          status: 'running',
-          startedAt: new Date().toISOString(),
-          score: 0,
+          status: 'readying',
         }
+      }
+    }
+
+    // readyingのベンチマークがあったら、runningにする
+    for (const b of readyingBenchmarks) {
+      const index = benchmarks.findIndex((bb) => bb.id === b.id)
+      benchmarks[index] = {
+        ...b,
+        status: 'running',
+        startedAt: new Date().toISOString(),
+        score: 0,
       }
     }
 
