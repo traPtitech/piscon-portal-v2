@@ -12,6 +12,7 @@ import (
 	"github.com/traPtitech/piscon-portal-v2/server/repository/mock"
 	"github.com/traPtitech/piscon-portal-v2/server/usecase"
 	"github.com/traPtitech/piscon-portal-v2/server/utils/ptr"
+	"github.com/traPtitech/piscon-portal-v2/server/utils/testutil"
 	"go.uber.org/mock/gomock"
 )
 
@@ -452,6 +453,102 @@ func TestFinalizeBenchmark(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 			}
+		})
+	}
+}
+
+func TestStartBenchmark(t *testing.T) {
+	t.Parallel()
+
+	ctrl := gomock.NewController(t)
+
+	bench := domain.Benchmark{
+		ID:        uuid.New(),
+		Instance:  domain.Instance{ID: uuid.New()},
+		TeamID:    uuid.New(),
+		UserID:    uuid.New(),
+		Status:    domain.BenchmarkStatusWaiting,
+		CreatedAt: time.Now(),
+	}
+	afterBench := domain.Benchmark{
+		ID:        bench.ID,
+		Instance:  bench.Instance,
+		TeamID:    bench.TeamID,
+		UserID:    bench.UserID,
+		Status:    domain.BenchmarkStatusReadying,
+		CreatedAt: bench.CreatedAt,
+	}
+
+	testCases := map[string]struct {
+		oldestBench                 domain.Benchmark
+		GetOldestQueuedBenchmarkErr error
+		executeUpdateBenchmark      bool
+		UpdateBenchmarkErr          error
+		bench                       domain.Benchmark
+		err                         error
+	}{
+		"GetOldestQueuedBenchmarkがエラーなのでエラー": {
+			GetOldestQueuedBenchmarkErr: assert.AnError,
+			err:                         assert.AnError,
+		},
+		"GetOldestQueuedBenchamrkがErrNotFoundなのでErrNotFound": {
+			GetOldestQueuedBenchmarkErr: repository.ErrNotFound,
+			err:                         usecase.ErrNotFound,
+		},
+		"UpdateBenchmarkがエラーなのでエラー": {
+			oldestBench:            bench,
+			executeUpdateBenchmark: true,
+			UpdateBenchmarkErr:     assert.AnError,
+			err:                    assert.AnError,
+		},
+		"UpdateBenchmarkがErrNotFoundなのでErrNotFound": {
+			oldestBench:            bench,
+			executeUpdateBenchmark: true,
+			UpdateBenchmarkErr:     repository.ErrNotFound,
+			err:                    usecase.ErrNotFound,
+		},
+		"正しく実行できる": {
+			oldestBench:            bench,
+			executeUpdateBenchmark: true,
+			bench:                  afterBench,
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			repoMock := mock.NewMockRepository(ctrl)
+			repoMock.EXPECT().Transaction(gomock.Any(), gomock.Any()).
+				DoAndReturn(func(ctx context.Context, f func(context.Context) error) error {
+					return f(ctx)
+				})
+			repoMock.EXPECT().
+				GetOldestQueuedBenchmark(gomock.Any()).
+				Return(testCase.oldestBench, testCase.GetOldestQueuedBenchmarkErr)
+			if testCase.executeUpdateBenchmark {
+				bench := testCase.oldestBench
+				bench.Status = domain.BenchmarkStatusReadying
+				repoMock.EXPECT().
+					UpdateBenchmark(gomock.Any(), bench.ID, bench).
+					Return(testCase.UpdateBenchmarkErr)
+			}
+
+			b := usecase.NewBenchmarkUseCase(repoMock)
+
+			bench, err := b.StartBenchmark(t.Context())
+
+			if testCase.err != nil {
+				assert.ErrorIs(t, err, testCase.err)
+			} else {
+				assert.NoError(t, err)
+			}
+
+			if err != nil {
+				return
+			}
+
+			testutil.CompareBenchmark(t, testCase.bench, bench)
 		})
 	}
 }
