@@ -11,6 +11,7 @@ type BenchmarkStatus string
 
 const (
 	BenchmarkStatusWaiting  BenchmarkStatus = "waiting"
+	BenchmarkStatusReadying BenchmarkStatus = "readying"
 	BenchmarkStatusRunning  BenchmarkStatus = "running"
 	BenchmarkStatusFinished BenchmarkStatus = "finished"
 )
