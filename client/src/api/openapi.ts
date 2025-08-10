@@ -4,1447 +4,1454 @@
  */
 
 export interface paths {
-  '/oauth2/code': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /**
-     * OAuth2認証コードの取得・traQの認可ページにリダイレクト
-     * @description OAuth2の認証に必要なCode Verifierを生成し、traQの認可ページにリダイレクトします。
-     */
-    get: operations['getOauth2Code']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/oauth2/callback': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /**
-     * traQからのリダイレクト
-     * @description traQ上での認証後にtraQから Authorization Codeがクエリパラメーターにつけられて、 リダイレクトされます。
-     */
-    get: operations['getOauth2Callback']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/oauth2/logout': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /**
-     * ログアウト
-     * @description ログアウトし、セッションを削除します
-     */
-    post: operations['postOauth2Logout']
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/users': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /**
-     * ユーザー一覧取得
-     * @description ユーザー一覧を取得します
-     */
-    get: operations['getUsers']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/users/me': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /**
-     * 自分の情報取得
-     * @description 自分の情報を取得します
-     */
-    get: operations['getMe']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/teams': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /**
-     * チーム一覧取得
-     * @description チーム一覧を取得します (0件の場合も200で空配列が返ります)
-     */
-    get: operations['getTeams']
-    put?: never
-    /**
-     * チーム作成
-     * @description チームを作成します
-     */
-    post: operations['postTeam']
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/teams/{teamId}': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /**
-     * チーム情報取得
-     * @description チーム情報を取得します
-     */
-    get: operations['getTeam']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    /**
-     * チーム情報更新
-     * @description チーム情報やメンバー、GitHub IDを更新します、指定されたフィールドのみを変更します。
-     *
-     */
-    patch: operations['patchTeam']
-    trace?: never
-  }
-  '/teams/{teamId}/instances': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /**
-     * インスタンス一覧取得
-     * @description チームに所属しているインスタンス一覧を取得します (0件の場合も200で空配列が返ります)
-     */
-    get: operations['getTeamInstances']
-    put?: never
-    /**
-     * インスタンス起動
-     * @description インスタンスを起動してチームに追加します
-     */
-    post: operations['createTeamInstance']
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/teams/{teamId}/instances/{instanceId}': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    post?: never
-    /**
-     * インスタンス削除
-     * @description インスタンスを削除します
-     */
-    delete: operations['deleteTeamInstance']
-    options?: never
-    head?: never
-    /**
-     * インスタンス状態変更
-     * @description インスタンスの状態を変更します
-     */
-    patch: operations['patchTeamInstance']
-    trace?: never
-  }
-  '/instances': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /**
-     * インスタンス一覧取得
-     * @description 全インスタンス一覧を取得します (0件の場合も200で空配列が返ります)
-     */
-    get: operations['getInstances']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/benchmarks': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /**
-     * ベンチマーク一覧取得
-     * @description 全チームのベンチマーク一覧を取得します (0件の場合も200で空配列が返ります)
-     */
-    get: operations['getBenchmarks']
-    put?: never
-    /**
-     * ベンチマーク実行
-     * @description 指定したインスタンスに向けてベンチマークを実行します
-     */
-    post: operations['postBenchmark']
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/benchmarks/queue': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /**
-     * ベンチマーク待ち行列取得
-     * @description ベンチマーク待ちのキューを取得します。
-     *     createdAtの昇順になっており、現在実行中のベンチマークと、実行待ちのベンチマークが含まれます。
-     *     0件の場合も200で空配列が返ります。
-     *
-     */
-    get: operations['getBenchmarkQueue']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/teams/{teamId}/benchmarks': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /**
-     * チームのベンチマーク一覧取得
-     * @description チームのベンチマーク一覧を取得します (0件の場合も200で空配列が返ります)
-     */
-    get: operations['getTeamBenchmarks']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/teams/{teamId}/benchmarks/{benchmarkId}': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /**
-     * ベンチマーク結果取得
-     * @description ベンチマークの結果を取得します
-     */
-    get: operations['getTeamBenchmarkResult']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/benchmarks/{benchmarkId}': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /**
-     * ベンチマーク結果取得
-     * @description ベンチマークの結果を取得します。
-     *     管理者のみがアクセス可能で、競技者用ログとは別に管理者用ログも含まれます。
-     *
-     */
-    get: operations['getBenchmarkResult']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/scores': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /**
-     * 全てのスコア取得
-     * @description 全てのベンチマークのスコアをチームごとに取得します (0件の場合も200で空配列が返ります)。スコアは古い順に並んでいます。チームの順番は任意です。
-     */
-    get: operations['getScores']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/scores/ranking': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /**
-     * ランキング取得
-     * @description ベンチマークのスコアランキングを取得します。1位から順に並んでいます。
-     *     同じスコアの場合は、ベンチマーク実行日時(createdAt)が早い順に並べます。
-     *      0件の場合も200で空配列が返ります
-     *
-     */
-    get: operations['getRanking']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/admins': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    /**
-     * 管理者権限設定
-     * @description 管理者一覧を設定します。
-     */
-    put: operations['putAdmins']
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/docs': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /**
-     * ドキュメント取得
-     * @description Markdown形式のドキュメントを取得します
-     */
-    get: operations['getDocs']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    /**
-     * ドキュメント更新
-     * @description Markdown形式のドキュメントを更新します
-     */
-    patch: operations['patchDocs']
-    trace?: never
-  }
+    "/oauth2/code": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * OAuth2認証コードの取得・traQの認可ページにリダイレクト
+         * @description OAuth2の認証に必要なCode Verifierを生成し、traQの認可ページにリダイレクトします。
+         */
+        get: operations["getOauth2Code"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/oauth2/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * traQからのリダイレクト
+         * @description traQ上での認証後にtraQから Authorization Codeがクエリパラメーターにつけられて、 リダイレクトされます。
+         */
+        get: operations["getOauth2Callback"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/oauth2/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * ログアウト
+         * @description ログアウトし、セッションを削除します
+         */
+        post: operations["postOauth2Logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * ユーザー一覧取得
+         * @description ユーザー一覧を取得します
+         */
+        get: operations["getUsers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 自分の情報取得
+         * @description 自分の情報を取得します
+         */
+        get: operations["getMe"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/teams": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * チーム一覧取得
+         * @description チーム一覧を取得します (0件の場合も200で空配列が返ります)
+         */
+        get: operations["getTeams"];
+        put?: never;
+        /**
+         * チーム作成
+         * @description チームを作成します
+         */
+        post: operations["postTeam"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/teams/{teamId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * チーム情報取得
+         * @description チーム情報を取得します
+         */
+        get: operations["getTeam"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * チーム情報更新
+         * @description チーム情報やメンバー、GitHub IDを更新します、指定されたフィールドのみを変更します。
+         *
+         */
+        patch: operations["patchTeam"];
+        trace?: never;
+    };
+    "/teams/{teamId}/instances": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * インスタンス一覧取得
+         * @description チームに所属しているインスタンス一覧を取得します (0件の場合も200で空配列が返ります)
+         */
+        get: operations["getTeamInstances"];
+        put?: never;
+        /**
+         * インスタンス起動
+         * @description インスタンスを起動してチームに追加します
+         */
+        post: operations["createTeamInstance"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/teams/{teamId}/instances/{instanceId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * インスタンス削除
+         * @description インスタンスを削除します
+         */
+        delete: operations["deleteTeamInstance"];
+        options?: never;
+        head?: never;
+        /**
+         * インスタンス状態変更
+         * @description インスタンスの状態を変更します
+         */
+        patch: operations["patchTeamInstance"];
+        trace?: never;
+    };
+    "/instances": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * インスタンス一覧取得
+         * @description 全インスタンス一覧を取得します (0件の場合も200で空配列が返ります)
+         */
+        get: operations["getInstances"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/benchmarks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * ベンチマーク一覧取得
+         * @description 全チームのベンチマーク一覧を取得します (0件の場合も200で空配列が返ります)
+         */
+        get: operations["getBenchmarks"];
+        put?: never;
+        /**
+         * ベンチマーク実行
+         * @description 指定したインスタンスに向けてベンチマークを実行します
+         */
+        post: operations["postBenchmark"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/benchmarks/queue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * ベンチマーク待ち行列取得
+         * @description ベンチマーク待ちのキューを取得します。
+         *     createdAtの昇順になっており、現在実行中のベンチマークと、実行待ちのベンチマークが含まれます。
+         *     0件の場合も200で空配列が返ります。
+         *
+         */
+        get: operations["getBenchmarkQueue"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/teams/{teamId}/benchmarks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * チームのベンチマーク一覧取得
+         * @description チームのベンチマーク一覧を取得します (0件の場合も200で空配列が返ります)
+         */
+        get: operations["getTeamBenchmarks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/teams/{teamId}/benchmarks/{benchmarkId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * ベンチマーク結果取得
+         * @description ベンチマークの結果を取得します
+         */
+        get: operations["getTeamBenchmarkResult"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/benchmarks/{benchmarkId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * ベンチマーク結果取得
+         * @description ベンチマークの結果を取得します。
+         *     管理者のみがアクセス可能で、競技者用ログとは別に管理者用ログも含まれます。
+         *
+         */
+        get: operations["getBenchmarkResult"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/scores": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 全てのスコア取得
+         * @description 全てのベンチマークのスコアをチームごとに取得します (0件の場合も200で空配列が返ります)。スコアは古い順に並んでいます。チームの順番は任意です。
+         */
+        get: operations["getScores"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/scores/ranking": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * ランキング取得
+         * @description ベンチマークのスコアランキングを取得します。1位から順に並んでいます。
+         *     同じスコアの場合は、ベンチマーク実行日時(createdAt)が早い順に並べます。
+         *      0件の場合も200で空配列が返ります
+         *
+         */
+        get: operations["getRanking"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admins": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * 管理者権限設定
+         * @description 管理者一覧を設定します。
+         */
+        put: operations["putAdmins"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/docs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * ドキュメント取得
+         * @description Markdown形式のドキュメントを取得します
+         */
+        get: operations["getDocs"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * ドキュメント更新
+         * @description Markdown形式のドキュメントを更新します
+         */
+        patch: operations["patchDocs"];
+        trace?: never;
+    };
 }
-export type webhooks = Record<string, never>
+export type webhooks = Record<string, never>;
 export interface components {
-  schemas: {
-    /**
-     * Format: uuid
-     * @example 00000000-0000-0000-0000-000000000000
-     */
-    InstanceId: string
-    /**
-     * @example running
-     * @enum {string}
-     */
-    InstanceStatus:
-      | 'building'
-      | 'starting'
-      | 'running'
-      | 'stopping'
-      | 'stopped'
-      | 'deleting'
-      | 'deleted'
-    /**
-     * @example start
-     * @enum {string}
-     */
-    InstanceOperation: 'start' | 'stop'
-    /** @description サーバーのインスタンス */
-    Instance: {
-      id: components['schemas']['InstanceId']
-      teamId: components['schemas']['TeamId']
-      /**
-       * @description サーバーのID。チームごとに1から始まる。表示用。
-       *     新しくインスタンスを起動する場合は、1以上の現在使われていない整数が採用される。
-       *     インスタンスを削除したら、そのIDは使用されていないものとし、再利用できる。
-       *
-       * @example 1
-       */
-      serverId: number
-      publicIPAddress: components['schemas']['IPAddress']
-      privateIPAddress: components['schemas']['IPAddress']
-      status: components['schemas']['InstanceStatus']
-      /**
-       * Format: date-time
-       * @example 2021-01-01T00:00:00Z
-       */
-      createdAt: string
-    }
-    /** @example 192.0.2.0 */
-    IPAddress: string
-    /**
-     * Format: uuid
-     * @description traQのUUID
-     * @example 00000000-0000-0000-0000-000000000000
-     */
-    UserId: string
-    /**
-     * @description traQのID
-     * @example ikura-hamu
-     */
-    UserName: string
-    /** @description 部員 */
-    User: {
-      id: components['schemas']['UserId']
-      name: components['schemas']['UserName']
-      teamId?: components['schemas']['TeamId']
-      /**
-       * @description 管理者権限を持っているかどうか
-       * @example false
-       */
-      isAdmin: boolean
-    }
-    /**
-     * Format: uuid
-     * @example 00000000-0000-0000-0000-000000000000
-     */
-    TeamId: string
-    /**
-     * @description チーム名
-     * @example team1
-     */
-    TeamName: string
-    /**
-     * @description GitHubのID
-     * @example ikura-hamu
-     */
-    GitHubId: string
-    /** @description チーム */
-    Team: {
-      id: components['schemas']['TeamId']
-      name: components['schemas']['TeamName']
-      /** @description チームに所属している部員のID */
-      members: components['schemas']['UserId'][]
-      /** @description チームに所属している部員のGitHub ID */
-      githubIds?: components['schemas']['GitHubId'][]
-      /**
-       * Format: date-time
-       * @example 2021-01-01T00:00:00Z
-       */
-      createdAt: string
-    }
-    /**
-     * Format: uuid
-     * @example 00000000-0000-0000-0000-000000000000
-     */
-    BenchmarkId: string
-    /**
-     * @example running
-     * @enum {string}
-     */
-    BenchmarkStatus: 'waiting' | 'running' | 'finished'
-    /**
-     * Format: date-time
-     * @description ベンチマークの実行リクエスト日時
-     * @example 2021-01-01T00:00:00Z
-     */
-    CreatedAt: string
-    /**
-     * Format: date-time
-     * @description ベンチマークの実行開始日時
-     * @example 2021-01-01T00:00:30Z
-     */
-    StartedAt: string
-    /**
-     * Format: date-time
-     * @description ベンチマークの実行終了日時
-     * @example 2021-01-01T00:01:00Z
-     */
-    FinishedAt: string
-    /**
-     * @description ベンチマークのスコア
-     * @example 100
-     */
-    Score: number
-    /** @description ベンチマーク */
-    BenchmarkListItem:
-      | components['schemas']['WaitingBenchmark']
-      | components['schemas']['RunningBenchmark']
-      | components['schemas']['FinishedBenchmark']
-    /** @description ベンチマーク結果 */
-    Benchmark: components['schemas']['BenchmarkListItem'] & {
-      /**
-       * @description ベンチマークの競技者用ログ（標準出力）
-       * @example log
-       */
-      log: string
-    }
-    /** @description Adminが見ることができるベンチマーク結果 */
-    BenchmarkAdminResult: components['schemas']['BenchmarkListItem'] & {
-      /**
-       * @description ベンチマークの競技者用ログ（標準出力）
-       * @example log
-       */
-      log: string
-      /**
-       * @description ベンチマークの管理者用ログ（標準エラー出力）
-       * @example admin log
-       */
-      adminLog: string
-    }
-    /** @description status=waiting のベンチマーク結果 */
-    WaitingBenchmark: {
-      id: components['schemas']['BenchmarkId']
-      instanceId: components['schemas']['InstanceId']
-      teamId: components['schemas']['TeamId']
-      userId: components['schemas']['UserId']
-      /** @enum {string} */
-      status: 'waiting'
-      createdAt: components['schemas']['CreatedAt']
-    }
-    /** @description status=running のベンチマーク結果 */
-    RunningBenchmark: {
-      id: components['schemas']['BenchmarkId']
-      instanceId: components['schemas']['InstanceId']
-      teamId: components['schemas']['TeamId']
-      userId: components['schemas']['UserId']
-      /** @enum {string} */
-      status: 'running'
-      score: components['schemas']['Score']
-      createdAt: components['schemas']['CreatedAt']
-      startedAt: components['schemas']['StartedAt']
-    }
-    /** @description status=finished のベンチマーク結果 */
-    FinishedBenchmark: {
-      id: components['schemas']['BenchmarkId']
-      instanceId: components['schemas']['InstanceId']
-      teamId: components['schemas']['TeamId']
-      userId: components['schemas']['UserId']
-      /** @enum {string} */
-      status: 'finished'
-      score: components['schemas']['Score']
-      /** @enum {string} */
-      result: 'passed' | 'failed' | 'error'
-      createdAt: components['schemas']['CreatedAt']
-      startedAt: components['schemas']['StartedAt']
-      finishedAt: components['schemas']['FinishedAt']
-    }
-    /** @description ベンチマークのスコア */
-    BenchScore: {
-      benchmarkId: components['schemas']['BenchmarkId']
-      teamId: components['schemas']['TeamId']
-      score: components['schemas']['Score']
-      createdAt: components['schemas']['CreatedAt']
-    }
-    /** @description チームのスコア一覧。 */
-    TeamScores: {
-      teamId: components['schemas']['TeamId']
-      /** @description createdAtの昇順 */
-      scores: components['schemas']['BenchScore'][]
-    }
-    /** @description ランキングの順位。まだベンチマークを1回も実行していない場合、createdAtはnull */
-    RankingItem: {
-      /**
-       * @description 順位
-       * @example 1
-       */
-      rank: number
-      teamId: components['schemas']['TeamId']
-      score: components['schemas']['Score']
-      createdAt: components['schemas']['CreatedAt']
-    }
-    /**
-     * @description Markdown形式のドキュメント
-     * @example # Title
-     *
-     *     ## Subtitle
-     *
-     *     Content
-     */
-    MarkdownDocument: string
-    ErrorBadRequest: {
-      /** @example Invalid xxx */
-      message?: string
-    }
-  }
-  responses: {
-    /** @description Bad Request. リクエストが不正です */
-    BadRequest: {
-      headers: {
-        [name: string]: unknown
-      }
-      content: {
-        'application/json': components['schemas']['ErrorBadRequest']
-      }
-    }
-    /** @description Unauthorized. 認証に失敗しました */
-    Unauthorized: {
-      headers: {
-        [name: string]: unknown
-      }
-      content: {
-        'application/json': {
-          /** @example Unauthorized */
-          message?: string
-        }
-      }
-    }
-    /** @description Forbidden. 権限がありません */
-    Forbidden: {
-      headers: {
-        [name: string]: unknown
-      }
-      content: {
-        'application/json': {
-          /** @example Forbidden */
-          message?: string
-        }
-      }
-    }
-    /** @description Not Found. リソースが見つかりません */
-    NotFound: {
-      headers: {
-        [name: string]: unknown
-      }
-      content: {
-        'application/json': {
-          /** @example xxx not found */
-          message?: string
-        }
-      }
-    }
-    /** @description Internal Server Error */
-    InternalServerError: {
-      headers: {
-        [name: string]: unknown
-      }
-      content: {
-        'application/json': {
-          /** @example Internal Server Error */
-          message?: string
-        }
-      }
-    }
-  }
-  parameters: {
-    /** @description チームID */
-    teamId: components['schemas']['TeamId']
-    /** @description インスタンスID */
-    instanceId: components['schemas']['InstanceId']
-    /** @description ベンチマークID */
-    benchmarkId: components['schemas']['BenchmarkId']
-    /** @description ベンチマークのステータス。指定が無い場合は全て */
-    benchmarkStatus: components['schemas']['BenchmarkStatus']
-    /** @description ランキングにどのスコアを使用するか。latestは最新のスコア、highestは最高スコアを使用する */
-    rankingOrderBy: 'latest' | 'highest'
-  }
-  requestBodies: {
-    NewTeam: {
-      content: {
-        'application/json': {
-          name: components['schemas']['TeamName']
-          /** @description チームに所属させる部員のID */
-          members: components['schemas']['UserId'][]
-        }
-      }
-    }
-    PatchTeam: {
-      content: {
-        'application/json': {
-          name?: components['schemas']['TeamName']
-          /** @description チームに所属させる部員のID */
-          members?: components['schemas']['UserId'][]
-          /** @description チームに所属させる部員のGitHub ID */
-          githubIds?: components['schemas']['GitHubId'][]
-        }
-      }
-    }
-    NewBenchmark: {
-      content: {
-        'application/json': {
-          instanceId: components['schemas']['InstanceId']
-        }
-      }
-    }
-  }
-  headers: never
-  pathItems: never
-}
-export type $defs = Record<string, never>
-export interface operations {
-  getOauth2Code: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
+    schemas: {
+        /**
+         * Format: uuid
+         * @example 00000000-0000-0000-0000-000000000000
+         */
+        InstanceId: string;
+        /**
+         * @example running
+         * @enum {string}
+         */
+        InstanceStatus: "building" | "starting" | "running" | "stopping" | "stopped" | "deleting" | "deleted";
+        /**
+         * @example start
+         * @enum {string}
+         */
+        InstanceOperation: "start" | "stop";
+        /** @description サーバーのインスタンス */
+        Instance: {
+            id: components["schemas"]["InstanceId"];
+            teamId: components["schemas"]["TeamId"];
+            /**
+             * @description サーバーのID。チームごとに1から始まる。表示用。
+             *     新しくインスタンスを起動する場合は、1以上の現在使われていない整数が採用される。
+             *     インスタンスを削除したら、そのIDは使用されていないものとし、再利用できる。
+             *
+             * @example 1
+             */
+            serverId: number;
+            publicIPAddress: components["schemas"]["IPAddress"];
+            privateIPAddress: components["schemas"]["IPAddress"];
+            status: components["schemas"]["InstanceStatus"];
+            /**
+             * Format: date-time
+             * @example 2021-01-01T00:00:00Z
+             */
+            createdAt: string;
+        };
+        /** @example 192.0.2.0 */
+        IPAddress: string;
+        /**
+         * Format: uuid
+         * @description traQのUUID
+         * @example 00000000-0000-0000-0000-000000000000
+         */
+        UserId: string;
+        /**
+         * @description traQのID
+         * @example ikura-hamu
+         */
+        UserName: string;
+        /** @description 部員 */
+        User: {
+            id: components["schemas"]["UserId"];
+            name: components["schemas"]["UserName"];
+            teamId?: components["schemas"]["TeamId"];
+            /**
+             * @description 管理者権限を持っているかどうか
+             * @example false
+             */
+            isAdmin: boolean;
+        };
+        /**
+         * Format: uuid
+         * @example 00000000-0000-0000-0000-000000000000
+         */
+        TeamId: string;
+        /**
+         * @description チーム名
+         * @example team1
+         */
+        TeamName: string;
+        /**
+         * @description GitHubのID
+         * @example ikura-hamu
+         */
+        GitHubId: string;
+        /** @description チーム */
+        Team: {
+            id: components["schemas"]["TeamId"];
+            name: components["schemas"]["TeamName"];
+            /** @description チームに所属している部員のID */
+            members: components["schemas"]["UserId"][];
+            /** @description チームに所属している部員のGitHub ID */
+            githubIds?: components["schemas"]["GitHubId"][];
+            /**
+             * Format: date-time
+             * @example 2021-01-01T00:00:00Z
+             */
+            createdAt: string;
+        };
+        /**
+         * Format: uuid
+         * @example 00000000-0000-0000-0000-000000000000
+         */
+        BenchmarkId: string;
+        /**
+         * @description ベンチマークのステータス
+         *
+         *     - waiting: ベンチマークキューの中で実行を待っている
+         *     - readying: ベンチマークキューから取り出され、実行が始まるのを待っている
+         *     - running: ベンチマークが実行されている
+         *     - finished: ベンチマークが終了している
+         *
+         * @example running
+         * @enum {string}
+         */
+        BenchmarkStatus: "waiting" | "readying" | "running" | "finished";
+        /**
+         * Format: date-time
+         * @description ベンチマークの実行リクエスト日時
+         * @example 2021-01-01T00:00:00Z
+         */
+        CreatedAt: string;
+        /**
+         * Format: date-time
+         * @description ベンチマークの実行開始日時
+         * @example 2021-01-01T00:00:30Z
+         */
+        StartedAt: string;
+        /**
+         * Format: date-time
+         * @description ベンチマークの実行終了日時
+         * @example 2021-01-01T00:01:00Z
+         */
+        FinishedAt: string;
+        /**
+         * @description ベンチマークのスコア
+         * @example 100
+         */
+        Score: number;
+        /** @description ベンチマーク */
+        BenchmarkListItem: components["schemas"]["WaitingBenchmark"] | components["schemas"]["ReadyingBenchmark"] | components["schemas"]["RunningBenchmark"] | components["schemas"]["FinishedBenchmark"];
+        /** @description ベンチマーク結果 */
+        Benchmark: components["schemas"]["BenchmarkListItem"] & {
+            /**
+             * @description ベンチマークの競技者用ログ（標準出力）
+             * @example log
+             */
+            log: string;
+        };
+        /** @description Adminが見ることができるベンチマーク結果 */
+        BenchmarkAdminResult: components["schemas"]["BenchmarkListItem"] & {
+            /**
+             * @description ベンチマークの競技者用ログ（標準出力）
+             * @example log
+             */
+            log: string;
+            /**
+             * @description ベンチマークの管理者用ログ（標準エラー出力）
+             * @example admin log
+             */
+            adminLog: string;
+        };
+        /** @description status=waiting のベンチマーク結果 */
+        WaitingBenchmark: {
+            id: components["schemas"]["BenchmarkId"];
+            instanceId: components["schemas"]["InstanceId"];
+            teamId: components["schemas"]["TeamId"];
+            userId: components["schemas"]["UserId"];
+            /** @enum {string} */
+            status: "waiting";
+            createdAt: components["schemas"]["CreatedAt"];
+        };
+        /** @description status=readying のベンチマーク結果 */
+        ReadyingBenchmark: {
+            id: components["schemas"]["BenchmarkId"];
+            instanceId: components["schemas"]["InstanceId"];
+            teamId: components["schemas"]["TeamId"];
+            userId: components["schemas"]["UserId"];
+            /** @enum {string} */
+            status: "readying";
+            createdAt: components["schemas"]["CreatedAt"];
+        };
+        /** @description status=running のベンチマーク結果 */
+        RunningBenchmark: {
+            id: components["schemas"]["BenchmarkId"];
+            instanceId: components["schemas"]["InstanceId"];
+            teamId: components["schemas"]["TeamId"];
+            userId: components["schemas"]["UserId"];
+            /** @enum {string} */
+            status: "running";
+            score: components["schemas"]["Score"];
+            createdAt: components["schemas"]["CreatedAt"];
+            startedAt: components["schemas"]["StartedAt"];
+        };
+        /** @description status=finished のベンチマーク結果 */
+        FinishedBenchmark: {
+            id: components["schemas"]["BenchmarkId"];
+            instanceId: components["schemas"]["InstanceId"];
+            teamId: components["schemas"]["TeamId"];
+            userId: components["schemas"]["UserId"];
+            /** @enum {string} */
+            status: "finished";
+            score: components["schemas"]["Score"];
+            /** @enum {string} */
+            result: "passed" | "failed" | "error";
+            createdAt: components["schemas"]["CreatedAt"];
+            startedAt: components["schemas"]["StartedAt"];
+            finishedAt: components["schemas"]["FinishedAt"];
+        };
+        /** @description ベンチマークのスコア */
+        BenchScore: {
+            benchmarkId: components["schemas"]["BenchmarkId"];
+            teamId: components["schemas"]["TeamId"];
+            score: components["schemas"]["Score"];
+            createdAt: components["schemas"]["CreatedAt"];
+        };
+        /** @description チームのスコア一覧。 */
+        TeamScores: {
+            teamId: components["schemas"]["TeamId"];
+            /** @description createdAtの昇順 */
+            scores: components["schemas"]["BenchScore"][];
+        };
+        /** @description ランキングの順位。まだベンチマークを1回も実行していない場合、createdAtはnull */
+        RankingItem: {
+            /**
+             * @description 順位
+             * @example 1
+             */
+            rank: number;
+            teamId: components["schemas"]["TeamId"];
+            score: components["schemas"]["Score"];
+            createdAt: components["schemas"]["CreatedAt"];
+        };
+        /**
+         * @description Markdown形式のドキュメント
+         * @example # Title
+         *
+         *     ## Subtitle
+         *
+         *     Content
+         */
+        MarkdownDocument: string;
+        ErrorBadRequest: {
+            /** @example Invalid xxx */
+            message?: string;
+        };
+    };
     responses: {
-      /** @description traQの認可ページにリダイレクトします。 */
-      303: {
-        headers: {
-          Location?: string
-          [name: string]: unknown
-        }
-        content?: never
-      }
-      500: components['responses']['InternalServerError']
-    }
-  }
-  getOauth2Callback: {
+        /** @description Bad Request. リクエストが不正です */
+        BadRequest: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ErrorBadRequest"];
+            };
+        };
+        /** @description Unauthorized. 認証に失敗しました */
+        Unauthorized: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": {
+                    /** @example Unauthorized */
+                    message?: string;
+                };
+            };
+        };
+        /** @description Forbidden. 権限がありません */
+        Forbidden: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": {
+                    /** @example Forbidden */
+                    message?: string;
+                };
+            };
+        };
+        /** @description Not Found. リソースが見つかりません */
+        NotFound: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": {
+                    /** @example xxx not found */
+                    message?: string;
+                };
+            };
+        };
+        /** @description Internal Server Error */
+        InternalServerError: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": {
+                    /** @example Internal Server Error */
+                    message?: string;
+                };
+            };
+        };
+    };
     parameters: {
-      query: {
-        /** @description traQからのAuthorization Code */
-        code: string
-      }
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description 認証に成功し、トップページにリダイレクトします。 */
-      303: {
-        headers: {
-          Location?: string
-          [name: string]: unknown
-        }
-        content?: never
-      }
-      /** @description セッションやAuthorization Codeに誤りがあり、認証に失敗しました */
-      400: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            /** @example 認証に失敗しました。 */
-            message?: string
-          }
-        }
-      }
-      500: components['responses']['InternalServerError']
-    }
-  }
-  postOauth2Logout: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description ログアウトしました。 */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-      /** @description セッションに誤りがあり、認証に失敗しました */
-      400: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            /** @example 誤りの内容 */
-            message?: string
-          }
-        }
-      }
-      401: components['responses']['Unauthorized']
-      500: components['responses']['InternalServerError']
-    }
-  }
-  getUsers: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description 部員一覧の取得に成功 */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['User'][]
-        }
-      }
-      401: components['responses']['Unauthorized']
-      500: components['responses']['InternalServerError']
-    }
-  }
-  getMe: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description 自分の情報の取得に成功 */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['User']
-        }
-      }
-      401: components['responses']['Unauthorized']
-      500: components['responses']['InternalServerError']
-    }
-  }
-  getTeams: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description チーム一覧の取得に成功 */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['Team'][]
-        }
-      }
-      401: components['responses']['Unauthorized']
-      500: components['responses']['InternalServerError']
-    }
-  }
-  postTeam: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: components['requestBodies']['NewTeam']
-    responses: {
-      /** @description チームの作成に成功 */
-      201: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['Team']
-        }
-      }
-      400: components['responses']['BadRequest']
-      401: components['responses']['Unauthorized']
-      500: components['responses']['InternalServerError']
-    }
-  }
-  getTeam: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
         /** @description チームID */
-        teamId: components['parameters']['teamId']
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description チーム情報の取得に成功 */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['Team']
-        }
-      }
-      401: components['responses']['Unauthorized']
-      404: components['responses']['NotFound']
-      500: components['responses']['InternalServerError']
-    }
-  }
-  patchTeam: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        /** @description チームID */
-        teamId: components['parameters']['teamId']
-      }
-      cookie?: never
-    }
-    requestBody?: components['requestBodies']['PatchTeam']
-    responses: {
-      /** @description チーム情報の更新に成功 */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['Team']
-        }
-      }
-      400: components['responses']['BadRequest']
-      401: components['responses']['Unauthorized']
-      403: components['responses']['Forbidden']
-      404: components['responses']['NotFound']
-      500: components['responses']['InternalServerError']
-    }
-  }
-  getTeamInstances: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        /** @description チームID */
-        teamId: components['parameters']['teamId']
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description インスタンス一覧の取得に成功 */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['Instance'][]
-        }
-      }
-      401: components['responses']['Unauthorized']
-      403: components['responses']['Forbidden']
-      404: components['responses']['NotFound']
-      500: components['responses']['InternalServerError']
-    }
-  }
-  createTeamInstance: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        /** @description チームID */
-        teamId: components['parameters']['teamId']
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description インスタンスの起動に成功 */
-      201: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['Instance']
-        }
-      }
-      /** @description インスタンス数の上限に達しているなど */
-      400: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['ErrorBadRequest']
-        }
-      }
-      401: components['responses']['Unauthorized']
-      403: components['responses']['Forbidden']
-      404: components['responses']['NotFound']
-      500: components['responses']['InternalServerError']
-    }
-  }
-  deleteTeamInstance: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        /** @description チームID */
-        teamId: components['parameters']['teamId']
+        teamId: components["schemas"]["TeamId"];
         /** @description インスタンスID */
-        instanceId: components['parameters']['instanceId']
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description インスタンスの削除に成功 */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-      401: components['responses']['Unauthorized']
-      403: components['responses']['Forbidden']
-      404: components['responses']['NotFound']
-      500: components['responses']['InternalServerError']
-    }
-  }
-  patchTeamInstance: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        /** @description チームID */
-        teamId: components['parameters']['teamId']
-        /** @description インスタンスID */
-        instanceId: components['parameters']['instanceId']
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        'application/json': {
-          operation: components['schemas']['InstanceOperation']
-        }
-      }
-    }
-    responses: {
-      /** @description インスタンスの操作に成功 */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-      /** @description 操作後も現在と同じステータスである、無効な操作である。 */
-      400: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['ErrorBadRequest']
-        }
-      }
-      401: components['responses']['Unauthorized']
-      403: components['responses']['Forbidden']
-      404: components['responses']['NotFound']
-      500: components['responses']['InternalServerError']
-    }
-  }
-  getInstances: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description インスタンス一覧の取得に成功。チームIDの昇順で返す */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['Instance'][]
-        }
-      }
-      401: components['responses']['Unauthorized']
-      403: components['responses']['Forbidden']
-      500: components['responses']['InternalServerError']
-    }
-  }
-  getBenchmarks: {
-    parameters: {
-      query?: {
-        /** @description ベンチマークのステータス。指定が無い場合は全て */
-        status?: components['parameters']['benchmarkStatus']
-      }
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description ベンチマーク一覧の取得に成功 */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['BenchmarkListItem'][]
-        }
-      }
-      401: components['responses']['Unauthorized']
-      403: components['responses']['Forbidden']
-      500: components['responses']['InternalServerError']
-    }
-  }
-  postBenchmark: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: components['requestBodies']['NewBenchmark']
-    responses: {
-      /** @description ベンチマークの実行(enqueue)に成功 */
-      201: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['BenchmarkListItem']
-        }
-      }
-      /** @description インスタンスが存在しない、チームに所属していない、すでにそのチームのベンチマークがキューに入っているなど */
-      400: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['ErrorBadRequest']
-        }
-      }
-      401: components['responses']['Unauthorized']
-      403: components['responses']['Forbidden']
-      500: components['responses']['InternalServerError']
-    }
-  }
-  getBenchmarkQueue: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description ベンチマーク待ち行列の取得に成功 */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['BenchmarkListItem'][]
-        }
-      }
-      401: components['responses']['Unauthorized']
-      500: components['responses']['InternalServerError']
-    }
-  }
-  getTeamBenchmarks: {
-    parameters: {
-      query?: {
-        /** @description ベンチマークのステータス。指定が無い場合は全て */
-        status?: components['parameters']['benchmarkStatus']
-      }
-      header?: never
-      path: {
-        /** @description チームID */
-        teamId: components['parameters']['teamId']
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description チームのベンチマーク一覧の取得に成功 */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['BenchmarkListItem'][]
-        }
-      }
-      401: components['responses']['Unauthorized']
-      403: components['responses']['Forbidden']
-      404: components['responses']['NotFound']
-      500: components['responses']['InternalServerError']
-    }
-  }
-  getTeamBenchmarkResult: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        /** @description チームID */
-        teamId: components['parameters']['teamId']
+        instanceId: components["schemas"]["InstanceId"];
         /** @description ベンチマークID */
-        benchmarkId: components['parameters']['benchmarkId']
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description ベンチマーク結果の取得に成功 */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['Benchmark']
-        }
-      }
-      401: components['responses']['Unauthorized']
-      403: components['responses']['Forbidden']
-      404: components['responses']['NotFound']
-      500: components['responses']['InternalServerError']
-    }
-  }
-  getBenchmarkResult: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        /** @description ベンチマークID */
-        benchmarkId: components['parameters']['benchmarkId']
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description ベンチマーク結果の取得に成功 */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['BenchmarkAdminResult']
-        }
-      }
-      401: components['responses']['Unauthorized']
-      403: components['responses']['Forbidden']
-      404: components['responses']['NotFound']
-      500: components['responses']['InternalServerError']
-    }
-  }
-  getScores: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description 全てのスコアの取得に成功 */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['TeamScores'][]
-        }
-      }
-      401: components['responses']['Unauthorized']
-      500: components['responses']['InternalServerError']
-    }
-  }
-  getRanking: {
-    parameters: {
-      query: {
+        benchmarkId: components["schemas"]["BenchmarkId"];
+        /** @description ベンチマークのステータス。指定が無い場合は全て */
+        benchmarkStatus: components["schemas"]["BenchmarkStatus"];
         /** @description ランキングにどのスコアを使用するか。latestは最新のスコア、highestは最高スコアを使用する */
-        orderBy: components['parameters']['rankingOrderBy']
-      }
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description ランキングの取得に成功 */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['RankingItem'][]
-        }
-      }
-      401: components['responses']['Unauthorized']
-      500: components['responses']['InternalServerError']
-    }
-  }
-  putAdmins: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['UserId'][]
-      }
-    }
-    responses: {
-      /** @description 管理者権限の設定に成功 */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-      /** @description - 指定された部員が存在しない。
-       *     - 配列の長さが0。
-       *     - 自分が含まれていない。
-       *      */
-      400: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['ErrorBadRequest']
-        }
-      }
-      401: components['responses']['Unauthorized']
-      403: components['responses']['Forbidden']
-      500: components['responses']['InternalServerError']
-    }
-  }
-  getDocs: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description ドキュメントの取得に成功 */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            body?: components['schemas']['MarkdownDocument']
-          }
-        }
-      }
-      401: components['responses']['Unauthorized']
-      500: components['responses']['InternalServerError']
-    }
-  }
-  patchDocs: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        'application/json': {
-          body: components['schemas']['MarkdownDocument']
-        }
-      }
-    }
-    responses: {
-      /** @description ドキュメントの更新に成功 */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            body?: components['schemas']['MarkdownDocument']
-          }
-        }
-      }
-      400: components['responses']['BadRequest']
-      401: components['responses']['Unauthorized']
-      403: components['responses']['Forbidden']
-      500: components['responses']['InternalServerError']
-    }
-  }
+        rankingOrderBy: "latest" | "highest";
+    };
+    requestBodies: {
+        NewTeam: {
+            content: {
+                "application/json": {
+                    name: components["schemas"]["TeamName"];
+                    /** @description チームに所属させる部員のID */
+                    members: components["schemas"]["UserId"][];
+                };
+            };
+        };
+        PatchTeam: {
+            content: {
+                "application/json": {
+                    name?: components["schemas"]["TeamName"];
+                    /** @description チームに所属させる部員のID */
+                    members?: components["schemas"]["UserId"][];
+                    /** @description チームに所属させる部員のGitHub ID */
+                    githubIds?: components["schemas"]["GitHubId"][];
+                };
+            };
+        };
+        NewBenchmark: {
+            content: {
+                "application/json": {
+                    instanceId: components["schemas"]["InstanceId"];
+                };
+            };
+        };
+    };
+    headers: never;
+    pathItems: never;
+}
+export type $defs = Record<string, never>;
+export interface operations {
+    getOauth2Code: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description traQの認可ページにリダイレクトします。 */
+            303: {
+                headers: {
+                    Location?: string;
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            500: components["responses"]["InternalServerError"];
+        };
+    };
+    getOauth2Callback: {
+        parameters: {
+            query: {
+                /** @description traQからのAuthorization Code */
+                code: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 認証に成功し、トップページにリダイレクトします。 */
+            303: {
+                headers: {
+                    Location?: string;
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description セッションやAuthorization Codeに誤りがあり、認証に失敗しました */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 認証に失敗しました。 */
+                        message?: string;
+                    };
+                };
+            };
+            500: components["responses"]["InternalServerError"];
+        };
+    };
+    postOauth2Logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ログアウトしました。 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description セッションに誤りがあり、認証に失敗しました */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 誤りの内容 */
+                        message?: string;
+                    };
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            500: components["responses"]["InternalServerError"];
+        };
+    };
+    getUsers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 部員一覧の取得に成功 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            500: components["responses"]["InternalServerError"];
+        };
+    };
+    getMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 自分の情報の取得に成功 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            500: components["responses"]["InternalServerError"];
+        };
+    };
+    getTeams: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description チーム一覧の取得に成功 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Team"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            500: components["responses"]["InternalServerError"];
+        };
+    };
+    postTeam: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: components["requestBodies"]["NewTeam"];
+        responses: {
+            /** @description チームの作成に成功 */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Team"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            500: components["responses"]["InternalServerError"];
+        };
+    };
+    getTeam: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description チームID */
+                teamId: components["parameters"]["teamId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description チーム情報の取得に成功 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Team"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerError"];
+        };
+    };
+    patchTeam: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description チームID */
+                teamId: components["parameters"]["teamId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: components["requestBodies"]["PatchTeam"];
+        responses: {
+            /** @description チーム情報の更新に成功 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Team"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerError"];
+        };
+    };
+    getTeamInstances: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description チームID */
+                teamId: components["parameters"]["teamId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description インスタンス一覧の取得に成功 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Instance"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerError"];
+        };
+    };
+    createTeamInstance: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description チームID */
+                teamId: components["parameters"]["teamId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description インスタンスの起動に成功 */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Instance"];
+                };
+            };
+            /** @description インスタンス数の上限に達しているなど */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBadRequest"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerError"];
+        };
+    };
+    deleteTeamInstance: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description チームID */
+                teamId: components["parameters"]["teamId"];
+                /** @description インスタンスID */
+                instanceId: components["parameters"]["instanceId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description インスタンスの削除に成功 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerError"];
+        };
+    };
+    patchTeamInstance: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description チームID */
+                teamId: components["parameters"]["teamId"];
+                /** @description インスタンスID */
+                instanceId: components["parameters"]["instanceId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    operation: components["schemas"]["InstanceOperation"];
+                };
+            };
+        };
+        responses: {
+            /** @description インスタンスの操作に成功 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description 操作後も現在と同じステータスである、無効な操作である。 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBadRequest"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerError"];
+        };
+    };
+    getInstances: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description インスタンス一覧の取得に成功。チームIDの昇順で返す */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Instance"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalServerError"];
+        };
+    };
+    getBenchmarks: {
+        parameters: {
+            query?: {
+                /** @description ベンチマークのステータス。指定が無い場合は全て */
+                status?: components["parameters"]["benchmarkStatus"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ベンチマーク一覧の取得に成功 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BenchmarkListItem"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalServerError"];
+        };
+    };
+    postBenchmark: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: components["requestBodies"]["NewBenchmark"];
+        responses: {
+            /** @description ベンチマークの実行(enqueue)に成功 */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BenchmarkListItem"];
+                };
+            };
+            /** @description インスタンスが存在しない、チームに所属していない、すでにそのチームのベンチマークがキューに入っているなど */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBadRequest"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalServerError"];
+        };
+    };
+    getBenchmarkQueue: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ベンチマーク待ち行列の取得に成功 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BenchmarkListItem"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            500: components["responses"]["InternalServerError"];
+        };
+    };
+    getTeamBenchmarks: {
+        parameters: {
+            query?: {
+                /** @description ベンチマークのステータス。指定が無い場合は全て */
+                status?: components["parameters"]["benchmarkStatus"];
+            };
+            header?: never;
+            path: {
+                /** @description チームID */
+                teamId: components["parameters"]["teamId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description チームのベンチマーク一覧の取得に成功 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BenchmarkListItem"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerError"];
+        };
+    };
+    getTeamBenchmarkResult: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description チームID */
+                teamId: components["parameters"]["teamId"];
+                /** @description ベンチマークID */
+                benchmarkId: components["parameters"]["benchmarkId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ベンチマーク結果の取得に成功 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Benchmark"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerError"];
+        };
+    };
+    getBenchmarkResult: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description ベンチマークID */
+                benchmarkId: components["parameters"]["benchmarkId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ベンチマーク結果の取得に成功 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BenchmarkAdminResult"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerError"];
+        };
+    };
+    getScores: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 全てのスコアの取得に成功 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamScores"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            500: components["responses"]["InternalServerError"];
+        };
+    };
+    getRanking: {
+        parameters: {
+            query: {
+                /** @description ランキングにどのスコアを使用するか。latestは最新のスコア、highestは最高スコアを使用する */
+                orderBy: components["parameters"]["rankingOrderBy"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ランキングの取得に成功 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RankingItem"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            500: components["responses"]["InternalServerError"];
+        };
+    };
+    putAdmins: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserId"][];
+            };
+        };
+        responses: {
+            /** @description 管理者権限の設定に成功 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description - 指定された部員が存在しない。
+             *     - 配列の長さが0。
+             *     - 自分が含まれていない。
+             *      */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBadRequest"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalServerError"];
+        };
+    };
+    getDocs: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ドキュメントの取得に成功 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        body?: components["schemas"]["MarkdownDocument"];
+                    };
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            500: components["responses"]["InternalServerError"];
+        };
+    };
+    patchDocs: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    body: components["schemas"]["MarkdownDocument"];
+                };
+            };
+        };
+        responses: {
+            /** @description ドキュメントの更新に成功 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        body?: components["schemas"]["MarkdownDocument"];
+                    };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalServerError"];
+        };
+    };
 }

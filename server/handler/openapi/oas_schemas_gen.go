@@ -160,6 +160,7 @@ func (*BenchmarkAdminResult) getBenchmarkResultRes() {}
 type BenchmarkAdminResultSum struct {
 	Type              BenchmarkAdminResultSumType // switch on this field
 	WaitingBenchmark  WaitingBenchmark
+	ReadyingBenchmark ReadyingBenchmark
 	RunningBenchmark  RunningBenchmark
 	FinishedBenchmark FinishedBenchmark
 }
@@ -170,6 +171,7 @@ type BenchmarkAdminResultSumType string
 // Possible values for BenchmarkAdminResultSumType.
 const (
 	WaitingBenchmarkBenchmarkAdminResultSum  BenchmarkAdminResultSumType = "waiting"
+	ReadyingBenchmarkBenchmarkAdminResultSum BenchmarkAdminResultSumType = "readying"
 	RunningBenchmarkBenchmarkAdminResultSum  BenchmarkAdminResultSumType = "running"
 	FinishedBenchmarkBenchmarkAdminResultSum BenchmarkAdminResultSumType = "finished"
 )
@@ -177,6 +179,11 @@ const (
 // IsWaitingBenchmark reports whether BenchmarkAdminResultSum is WaitingBenchmark.
 func (s BenchmarkAdminResultSum) IsWaitingBenchmark() bool {
 	return s.Type == WaitingBenchmarkBenchmarkAdminResultSum
+}
+
+// IsReadyingBenchmark reports whether BenchmarkAdminResultSum is ReadyingBenchmark.
+func (s BenchmarkAdminResultSum) IsReadyingBenchmark() bool {
+	return s.Type == ReadyingBenchmarkBenchmarkAdminResultSum
 }
 
 // IsRunningBenchmark reports whether BenchmarkAdminResultSum is RunningBenchmark.
@@ -207,6 +214,27 @@ func (s BenchmarkAdminResultSum) GetWaitingBenchmark() (v WaitingBenchmark, ok b
 func NewWaitingBenchmarkBenchmarkAdminResultSum(v WaitingBenchmark) BenchmarkAdminResultSum {
 	var s BenchmarkAdminResultSum
 	s.SetWaitingBenchmark(v)
+	return s
+}
+
+// SetReadyingBenchmark sets BenchmarkAdminResultSum to ReadyingBenchmark.
+func (s *BenchmarkAdminResultSum) SetReadyingBenchmark(v ReadyingBenchmark) {
+	s.Type = ReadyingBenchmarkBenchmarkAdminResultSum
+	s.ReadyingBenchmark = v
+}
+
+// GetReadyingBenchmark returns ReadyingBenchmark and true boolean if BenchmarkAdminResultSum is ReadyingBenchmark.
+func (s BenchmarkAdminResultSum) GetReadyingBenchmark() (v ReadyingBenchmark, ok bool) {
+	if !s.IsReadyingBenchmark() {
+		return v, false
+	}
+	return s.ReadyingBenchmark, true
+}
+
+// NewReadyingBenchmarkBenchmarkAdminResultSum returns new BenchmarkAdminResultSum from ReadyingBenchmark.
+func NewReadyingBenchmarkBenchmarkAdminResultSum(v ReadyingBenchmark) BenchmarkAdminResultSum {
+	var s BenchmarkAdminResultSum
+	s.SetReadyingBenchmark(v)
 	return s
 }
 
@@ -276,6 +304,7 @@ func (*BenchmarkListItem) postBenchmarkRes() {}
 type BenchmarkListItemSum struct {
 	Type              BenchmarkListItemSumType // switch on this field
 	WaitingBenchmark  WaitingBenchmark
+	ReadyingBenchmark ReadyingBenchmark
 	RunningBenchmark  RunningBenchmark
 	FinishedBenchmark FinishedBenchmark
 }
@@ -286,6 +315,7 @@ type BenchmarkListItemSumType string
 // Possible values for BenchmarkListItemSumType.
 const (
 	WaitingBenchmarkBenchmarkListItemSum  BenchmarkListItemSumType = "waiting"
+	ReadyingBenchmarkBenchmarkListItemSum BenchmarkListItemSumType = "readying"
 	RunningBenchmarkBenchmarkListItemSum  BenchmarkListItemSumType = "running"
 	FinishedBenchmarkBenchmarkListItemSum BenchmarkListItemSumType = "finished"
 )
@@ -293,6 +323,11 @@ const (
 // IsWaitingBenchmark reports whether BenchmarkListItemSum is WaitingBenchmark.
 func (s BenchmarkListItemSum) IsWaitingBenchmark() bool {
 	return s.Type == WaitingBenchmarkBenchmarkListItemSum
+}
+
+// IsReadyingBenchmark reports whether BenchmarkListItemSum is ReadyingBenchmark.
+func (s BenchmarkListItemSum) IsReadyingBenchmark() bool {
+	return s.Type == ReadyingBenchmarkBenchmarkListItemSum
 }
 
 // IsRunningBenchmark reports whether BenchmarkListItemSum is RunningBenchmark.
@@ -323,6 +358,27 @@ func (s BenchmarkListItemSum) GetWaitingBenchmark() (v WaitingBenchmark, ok bool
 func NewWaitingBenchmarkBenchmarkListItemSum(v WaitingBenchmark) BenchmarkListItemSum {
 	var s BenchmarkListItemSum
 	s.SetWaitingBenchmark(v)
+	return s
+}
+
+// SetReadyingBenchmark sets BenchmarkListItemSum to ReadyingBenchmark.
+func (s *BenchmarkListItemSum) SetReadyingBenchmark(v ReadyingBenchmark) {
+	s.Type = ReadyingBenchmarkBenchmarkListItemSum
+	s.ReadyingBenchmark = v
+}
+
+// GetReadyingBenchmark returns ReadyingBenchmark and true boolean if BenchmarkListItemSum is ReadyingBenchmark.
+func (s BenchmarkListItemSum) GetReadyingBenchmark() (v ReadyingBenchmark, ok bool) {
+	if !s.IsReadyingBenchmark() {
+		return v, false
+	}
+	return s.ReadyingBenchmark, true
+}
+
+// NewReadyingBenchmarkBenchmarkListItemSum returns new BenchmarkListItemSum from ReadyingBenchmark.
+func NewReadyingBenchmarkBenchmarkListItemSum(v ReadyingBenchmark) BenchmarkListItemSum {
+	var s BenchmarkListItemSum
+	s.SetReadyingBenchmark(v)
 	return s
 }
 
@@ -368,11 +424,18 @@ func NewFinishedBenchmarkBenchmarkListItemSum(v FinishedBenchmark) BenchmarkList
 	return s
 }
 
+// ベンチマークのステータス
+// - waiting: ベンチマークキューの中で実行を待っている
+// - readying:
+// ベンチマークキューから取り出され、実行が始まるのを待っている
+// - running: ベンチマークが実行されている
+// - finished: ベンチマークが終了している.
 // Ref: #/components/schemas/BenchmarkStatus
 type BenchmarkStatus string
 
 const (
 	BenchmarkStatusWaiting  BenchmarkStatus = "waiting"
+	BenchmarkStatusReadying BenchmarkStatus = "readying"
 	BenchmarkStatusRunning  BenchmarkStatus = "running"
 	BenchmarkStatusFinished BenchmarkStatus = "finished"
 )
@@ -381,6 +444,7 @@ const (
 func (BenchmarkStatus) AllValues() []BenchmarkStatus {
 	return []BenchmarkStatus{
 		BenchmarkStatusWaiting,
+		BenchmarkStatusReadying,
 		BenchmarkStatusRunning,
 		BenchmarkStatusFinished,
 	}
@@ -390,6 +454,8 @@ func (BenchmarkStatus) AllValues() []BenchmarkStatus {
 func (s BenchmarkStatus) MarshalText() ([]byte, error) {
 	switch s {
 	case BenchmarkStatusWaiting:
+		return []byte(s), nil
+	case BenchmarkStatusReadying:
 		return []byte(s), nil
 	case BenchmarkStatusRunning:
 		return []byte(s), nil
@@ -406,6 +472,9 @@ func (s *BenchmarkStatus) UnmarshalText(data []byte) error {
 	case BenchmarkStatusWaiting:
 		*s = BenchmarkStatusWaiting
 		return nil
+	case BenchmarkStatusReadying:
+		*s = BenchmarkStatusReadying
+		return nil
 	case BenchmarkStatusRunning:
 		*s = BenchmarkStatusRunning
 		return nil
@@ -421,6 +490,7 @@ func (s *BenchmarkStatus) UnmarshalText(data []byte) error {
 type BenchmarkSum struct {
 	Type              BenchmarkSumType // switch on this field
 	WaitingBenchmark  WaitingBenchmark
+	ReadyingBenchmark ReadyingBenchmark
 	RunningBenchmark  RunningBenchmark
 	FinishedBenchmark FinishedBenchmark
 }
@@ -431,12 +501,16 @@ type BenchmarkSumType string
 // Possible values for BenchmarkSumType.
 const (
 	WaitingBenchmarkBenchmarkSum  BenchmarkSumType = "waiting"
+	ReadyingBenchmarkBenchmarkSum BenchmarkSumType = "readying"
 	RunningBenchmarkBenchmarkSum  BenchmarkSumType = "running"
 	FinishedBenchmarkBenchmarkSum BenchmarkSumType = "finished"
 )
 
 // IsWaitingBenchmark reports whether BenchmarkSum is WaitingBenchmark.
 func (s BenchmarkSum) IsWaitingBenchmark() bool { return s.Type == WaitingBenchmarkBenchmarkSum }
+
+// IsReadyingBenchmark reports whether BenchmarkSum is ReadyingBenchmark.
+func (s BenchmarkSum) IsReadyingBenchmark() bool { return s.Type == ReadyingBenchmarkBenchmarkSum }
 
 // IsRunningBenchmark reports whether BenchmarkSum is RunningBenchmark.
 func (s BenchmarkSum) IsRunningBenchmark() bool { return s.Type == RunningBenchmarkBenchmarkSum }
@@ -462,6 +536,27 @@ func (s BenchmarkSum) GetWaitingBenchmark() (v WaitingBenchmark, ok bool) {
 func NewWaitingBenchmarkBenchmarkSum(v WaitingBenchmark) BenchmarkSum {
 	var s BenchmarkSum
 	s.SetWaitingBenchmark(v)
+	return s
+}
+
+// SetReadyingBenchmark sets BenchmarkSum to ReadyingBenchmark.
+func (s *BenchmarkSum) SetReadyingBenchmark(v ReadyingBenchmark) {
+	s.Type = ReadyingBenchmarkBenchmarkSum
+	s.ReadyingBenchmark = v
+}
+
+// GetReadyingBenchmark returns ReadyingBenchmark and true boolean if BenchmarkSum is ReadyingBenchmark.
+func (s BenchmarkSum) GetReadyingBenchmark() (v ReadyingBenchmark, ok bool) {
+	if !s.IsReadyingBenchmark() {
+		return v, false
+	}
+	return s.ReadyingBenchmark, true
+}
+
+// NewReadyingBenchmarkBenchmarkSum returns new BenchmarkSum from ReadyingBenchmark.
+func NewReadyingBenchmarkBenchmarkSum(v ReadyingBenchmark) BenchmarkSum {
+	var s BenchmarkSum
+	s.SetReadyingBenchmark(v)
 	return s
 }
 
@@ -1796,6 +1891,111 @@ func (s *RankingOrderBy) UnmarshalText(data []byte) error {
 		return nil
 	case RankingOrderByHighest:
 		*s = RankingOrderByHighest
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Status=readying のベンチマーク結果.
+// Ref: #/components/schemas/ReadyingBenchmark
+type ReadyingBenchmark struct {
+	ID         BenchmarkId             `json:"id"`
+	InstanceId InstanceId              `json:"instanceId"`
+	TeamId     TeamId                  `json:"teamId"`
+	UserId     UserId                  `json:"userId"`
+	Status     ReadyingBenchmarkStatus `json:"status"`
+	CreatedAt  CreatedAt               `json:"createdAt"`
+}
+
+// GetID returns the value of ID.
+func (s *ReadyingBenchmark) GetID() BenchmarkId {
+	return s.ID
+}
+
+// GetInstanceId returns the value of InstanceId.
+func (s *ReadyingBenchmark) GetInstanceId() InstanceId {
+	return s.InstanceId
+}
+
+// GetTeamId returns the value of TeamId.
+func (s *ReadyingBenchmark) GetTeamId() TeamId {
+	return s.TeamId
+}
+
+// GetUserId returns the value of UserId.
+func (s *ReadyingBenchmark) GetUserId() UserId {
+	return s.UserId
+}
+
+// GetStatus returns the value of Status.
+func (s *ReadyingBenchmark) GetStatus() ReadyingBenchmarkStatus {
+	return s.Status
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *ReadyingBenchmark) GetCreatedAt() CreatedAt {
+	return s.CreatedAt
+}
+
+// SetID sets the value of ID.
+func (s *ReadyingBenchmark) SetID(val BenchmarkId) {
+	s.ID = val
+}
+
+// SetInstanceId sets the value of InstanceId.
+func (s *ReadyingBenchmark) SetInstanceId(val InstanceId) {
+	s.InstanceId = val
+}
+
+// SetTeamId sets the value of TeamId.
+func (s *ReadyingBenchmark) SetTeamId(val TeamId) {
+	s.TeamId = val
+}
+
+// SetUserId sets the value of UserId.
+func (s *ReadyingBenchmark) SetUserId(val UserId) {
+	s.UserId = val
+}
+
+// SetStatus sets the value of Status.
+func (s *ReadyingBenchmark) SetStatus(val ReadyingBenchmarkStatus) {
+	s.Status = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *ReadyingBenchmark) SetCreatedAt(val CreatedAt) {
+	s.CreatedAt = val
+}
+
+type ReadyingBenchmarkStatus string
+
+const (
+	ReadyingBenchmarkStatusReadying ReadyingBenchmarkStatus = "readying"
+)
+
+// AllValues returns all ReadyingBenchmarkStatus values.
+func (ReadyingBenchmarkStatus) AllValues() []ReadyingBenchmarkStatus {
+	return []ReadyingBenchmarkStatus{
+		ReadyingBenchmarkStatusReadying,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ReadyingBenchmarkStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case ReadyingBenchmarkStatusReadying:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ReadyingBenchmarkStatus) UnmarshalText(data []byte) error {
+	switch ReadyingBenchmarkStatus(data) {
+	case ReadyingBenchmarkStatusReadying:
+		*s = ReadyingBenchmarkStatusReadying
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
