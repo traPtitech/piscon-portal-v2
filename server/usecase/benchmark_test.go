@@ -562,7 +562,7 @@ func TestStartBenchmark(t *testing.T) {
 					Return(testCase.UpdateBenchmarkErr)
 			}
 
-			b := usecase.NewBenchmarkUseCase(repoMock)
+			b := usecase.NewBenchmarkUseCase(repoMock, nil)
 
 			bench, err := b.StartBenchmark(t.Context())
 
