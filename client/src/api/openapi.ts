@@ -523,10 +523,17 @@ export interface components {
      */
     BenchmarkId: string
     /**
+     * @description ベンチマークのステータス
+     *
+     *     - waiting: ベンチマークキューの中で実行を待っている
+     *     - readying: ベンチマークキューから取り出され、実行が始まるのを待っている
+     *     - running: ベンチマークが実行されている
+     *     - finished: ベンチマークが終了している
+     *
      * @example running
      * @enum {string}
      */
-    BenchmarkStatus: 'waiting' | 'running' | 'finished'
+    BenchmarkStatus: 'waiting' | 'readying' | 'running' | 'finished'
     /**
      * Format: date-time
      * @description ベンチマークの実行リクエスト日時
@@ -553,6 +560,7 @@ export interface components {
     /** @description ベンチマーク */
     BenchmarkListItem:
       | components['schemas']['WaitingBenchmark']
+      | components['schemas']['ReadyingBenchmark']
       | components['schemas']['RunningBenchmark']
       | components['schemas']['FinishedBenchmark']
     /** @description ベンチマーク結果 */
@@ -584,6 +592,16 @@ export interface components {
       userId: components['schemas']['UserId']
       /** @enum {string} */
       status: 'waiting'
+      createdAt: components['schemas']['CreatedAt']
+    }
+    /** @description status=readying のベンチマーク結果 */
+    ReadyingBenchmark: {
+      id: components['schemas']['BenchmarkId']
+      instanceId: components['schemas']['InstanceId']
+      teamId: components['schemas']['TeamId']
+      userId: components['schemas']['UserId']
+      /** @enum {string} */
+      status: 'readying'
       createdAt: components['schemas']['CreatedAt']
     }
     /** @description status=running のベンチマーク結果 */

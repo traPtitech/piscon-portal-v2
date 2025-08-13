@@ -86,6 +86,11 @@ func (s BenchmarkAdminResultSum) Validate() error {
 			return err
 		}
 		return nil
+	case ReadyingBenchmarkBenchmarkAdminResultSum:
+		if err := s.ReadyingBenchmark.Validate(); err != nil {
+			return err
+		}
+		return nil
 	case RunningBenchmarkBenchmarkAdminResultSum:
 		if err := s.RunningBenchmark.Validate(); err != nil {
 			return err
@@ -131,6 +136,11 @@ func (s BenchmarkListItemSum) Validate() error {
 			return err
 		}
 		return nil
+	case ReadyingBenchmarkBenchmarkListItemSum:
+		if err := s.ReadyingBenchmark.Validate(); err != nil {
+			return err
+		}
+		return nil
 	case RunningBenchmarkBenchmarkListItemSum:
 		if err := s.RunningBenchmark.Validate(); err != nil {
 			return err
@@ -150,6 +160,8 @@ func (s BenchmarkStatus) Validate() error {
 	switch s {
 	case "waiting":
 		return nil
+	case "readying":
+		return nil
 	case "running":
 		return nil
 	case "finished":
@@ -163,6 +175,11 @@ func (s BenchmarkSum) Validate() error {
 	switch s.Type {
 	case WaitingBenchmarkBenchmarkSum:
 		if err := s.WaitingBenchmark.Validate(); err != nil {
+			return err
+		}
+		return nil
+	case ReadyingBenchmarkBenchmarkSum:
+		if err := s.ReadyingBenchmark.Validate(); err != nil {
 			return err
 		}
 		return nil
@@ -663,6 +680,38 @@ func (s RankingOrderBy) Validate() error {
 	case "latest":
 		return nil
 	case "highest":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s *ReadyingBenchmark) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Status.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "status",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s ReadyingBenchmarkStatus) Validate() error {
+	switch s {
+	case "readying":
 		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)

@@ -234,6 +234,8 @@ func fromDomainBenchmarkStatus(status domain.BenchmarkStatus) (models.Benchmarks
 	switch status {
 	case domain.BenchmarkStatusWaiting:
 		return models.BenchmarksStatusWaiting, nil
+	case domain.BenchmarkStatusReadying:
+		return models.BenchmarksStatusReadying, nil
 	case domain.BenchmarkStatusRunning:
 		return models.BenchmarksStatusRunning, nil
 	case domain.BenchmarkStatusFinished:
@@ -247,6 +249,8 @@ func toDomainBenchmarkStatus(status models.BenchmarksStatus) (domain.BenchmarkSt
 	switch status {
 	case models.BenchmarksStatusWaiting:
 		return domain.BenchmarkStatusWaiting, nil
+	case models.BenchmarksStatusReadying:
+		return domain.BenchmarkStatusReadying, nil
 	case models.BenchmarksStatusRunning:
 		return domain.BenchmarkStatusRunning, nil
 	case models.BenchmarksStatusFinished:

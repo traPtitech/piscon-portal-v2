@@ -246,3 +246,5 @@ export const dummyInstances: Instance[] = [...Array(DUMMY_TEAM_COUNT).keys()].ma
 }))
 
 instances.push(...dummyInstances)
+
+export const benchmarkReadyingAt: { id: string; readyingAt: Date }[] = []

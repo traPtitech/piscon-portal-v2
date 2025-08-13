@@ -156,7 +156,7 @@ export const handlers = [
   }),
   http.get(`/benchmarks`, () => HttpResponse.json(benchmarks)),
   http.get(`/benchmarks/queue`, () => {
-    const res = benchmarks.filter((b) => b.status === 'waiting' || b.status === 'running')
+    const res = benchmarks.filter((b) => b.status !== 'finished')
     return HttpResponse.json(res)
   }),
   http.get('/teams/{teamId}/benchmarks', (c) => {

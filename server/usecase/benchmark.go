@@ -159,7 +159,7 @@ func (u *benchmarkUseCaseImpl) StartBenchmark(ctx context.Context) (domain.Bench
 			return ErrNotFound
 		}
 		if err != nil {
-			return fmt.Errorf("get oldest queued benchmark: %v", err)
+			return fmt.Errorf("get oldest queued benchmark: %w", err)
 		}
 
 		startedBenchmark = domain.Benchmark{
@@ -167,7 +167,7 @@ func (u *benchmarkUseCaseImpl) StartBenchmark(ctx context.Context) (domain.Bench
 			Instance:  bench.Instance,
 			TeamID:    bench.TeamID,
 			UserID:    bench.UserID,
-			Status:    domain.BenchmarkStatusRunning,
+			Status:    domain.BenchmarkStatusReadying, // ステータスをreadyingに更新
 			CreatedAt: bench.CreatedAt,
 		}
 		err = u.repo.UpdateBenchmark(ctx, bench.ID, startedBenchmark)
@@ -175,7 +175,7 @@ func (u *benchmarkUseCaseImpl) StartBenchmark(ctx context.Context) (domain.Bench
 			return ErrNotFound
 		}
 		if err != nil {
-			return fmt.Errorf("update benchmark: %v", err)
+			return fmt.Errorf("update benchmark: %w", err)
 		}
 
 		return nil

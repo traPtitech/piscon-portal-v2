@@ -357,6 +357,7 @@ func TestUpdateBenchmark(t *testing.T) {
 
 	benchID := uuid.New()
 	benchID2 := uuid.New()
+	benchID3 := uuid.New()
 	instance := domain.Instance{
 		ID:     uuid.New(),
 		TeamID: uuid.New(),
@@ -423,6 +424,25 @@ func TestUpdateBenchmark(t *testing.T) {
 				FinishedAt: &finishedAt,
 				Score:      300,
 				Result:     ptr.Of(domain.BenchmarkResultStatusPassed),
+			},
+		},
+		"statusを更新できる": {
+			id: benchID3,
+			beforeBench: domain.Benchmark{
+				ID:        benchID3,
+				Instance:  instance,
+				TeamID:    uuid.New(),
+				UserID:    uuid.New(),
+				Status:    domain.BenchmarkStatusWaiting,
+				CreatedAt: createdAt,
+			},
+			afterBench: domain.Benchmark{
+				ID:        benchID3,
+				Instance:  instance,
+				TeamID:    uuid.New(),
+				UserID:    uuid.New(),
+				Status:    domain.BenchmarkStatusReadying,
+				CreatedAt: createdAt,
 			},
 		},
 	}
