@@ -1,4 +1,11 @@
-import { benchmarks, dummyInstances, dummyTeams, instances, userIds } from '@/mock/data'
+import {
+  benchmarks,
+  dummyInstances,
+  dummyTeams,
+  instances,
+  userIds,
+  benchmarkReadyingAt,
+} from '@/mock/data'
 import { uuidv7 } from 'uuidv7'
 
 const BENCHMARKER_CONCURRENCY = 3
@@ -41,7 +48,7 @@ export const startJobs = () => {
     }
 
     // 実行中のベンチマークが BENCHMARKER_CONCURRENCY 未満なら、waiting のベンチマークを readying にする
-    if (runningBenchmarks.length < BENCHMARKER_CONCURRENCY) {
+    if (runningBenchmarks.length + readyingBenchmarks.length < BENCHMARKER_CONCURRENCY) {
       const waitingBenchmark = benchmarks.find((b) => b.status === 'waiting')
       if (waitingBenchmark !== undefined) {
         const index = benchmarks.findIndex((b) => b.id === waitingBenchmark.id)
@@ -49,11 +56,16 @@ export const startJobs = () => {
           ...waitingBenchmark,
           status: 'readying',
         }
+        benchmarkReadyingAt.push({ id: waitingBenchmark.id, readyingAt: new Date() })
       }
     }
 
-    // readyingのベンチマークがあったら、runningにする
+    // readyingになって3秒以上たったベンチマークがあったら、runningにする
     for (const b of readyingBenchmarks) {
+      const readyingAt = benchmarkReadyingAt.find((bb) => bb.id === b.id)?.readyingAt
+      if (readyingAt && readyingAt?.getTime() + 3000 > Date.now()) {
+        continue
+      }
       const index = benchmarks.findIndex((bb) => bb.id === b.id)
       benchmarks[index] = {
         ...b,
