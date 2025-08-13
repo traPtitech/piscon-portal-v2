@@ -5,7 +5,7 @@ const { status } = defineProps<{ status: Status }>()
 
 const labels: Record<Status, string> = {
   waiting: 'WAITING',
-  readying: 'READYING',
+  readying: 'READY',
   running: 'RUNNING',
   finished: 'FINISHED',
 }
