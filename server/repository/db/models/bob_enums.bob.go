@@ -82,6 +82,7 @@ func (e *BenchmarksResult) Scan(value any) error {
 // Enum values for BenchmarksStatus
 const (
 	BenchmarksStatusWaiting  BenchmarksStatus = "waiting"
+	BenchmarksStatusReadying BenchmarksStatus = "readying"
 	BenchmarksStatusRunning  BenchmarksStatus = "running"
 	BenchmarksStatusFinished BenchmarksStatus = "finished"
 )
@@ -89,6 +90,7 @@ const (
 func AllBenchmarksStatus() []BenchmarksStatus {
 	return []BenchmarksStatus{
 		BenchmarksStatusWaiting,
+		BenchmarksStatusReadying,
 		BenchmarksStatusRunning,
 		BenchmarksStatusFinished,
 	}
@@ -103,6 +105,7 @@ func (e BenchmarksStatus) String() string {
 func (e BenchmarksStatus) Valid() bool {
 	switch e {
 	case BenchmarksStatusWaiting,
+		BenchmarksStatusReadying,
 		BenchmarksStatusRunning,
 		BenchmarksStatusFinished:
 		return true

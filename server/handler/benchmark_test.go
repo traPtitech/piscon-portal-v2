@@ -511,6 +511,16 @@ func compareWaitingBenchmark(t *testing.T, expected domain.Benchmark, actual ope
 	assert.WithinDuration(t, expected.CreatedAt, time.Time(actual.CreatedAt), time.Second)
 }
 
+func compareReadyingBenchmark(t *testing.T, expected domain.Benchmark, actual openapi.ReadyingBenchmark) {
+	t.Helper()
+	assert.Equal(t, expected.ID, uuid.UUID(actual.ID))
+	assert.Equal(t, expected.Instance.ID, uuid.UUID(actual.InstanceId))
+	assert.Equal(t, expected.TeamID, uuid.UUID(actual.TeamId))
+	assert.Equal(t, expected.UserID, uuid.UUID(actual.UserId))
+	assert.Equal(t, string(expected.Status), string(actual.Status))
+	assert.WithinDuration(t, expected.CreatedAt, time.Time(actual.CreatedAt), time.Second)
+}
+
 func compareRunningBenchmark(t *testing.T, expected domain.Benchmark, actual openapi.RunningBenchmark) {
 	t.Helper()
 	assert.Equal(t, expected.ID, uuid.UUID(actual.ID))
@@ -546,6 +556,8 @@ func compareBenchmarks(t *testing.T, expected []domain.Benchmark, actual []*open
 		switch b.Status {
 		case domain.BenchmarkStatusWaiting:
 			compareWaitingBenchmark(t, b, actual[i].OneOf.WaitingBenchmark)
+		case domain.BenchmarkStatusReadying:
+			compareReadyingBenchmark(t, b, actual[i].OneOf.ReadyingBenchmark)
 		case domain.BenchmarkStatusRunning:
 			compareRunningBenchmark(t, b, actual[i].OneOf.RunningBenchmark)
 		case domain.BenchmarkStatusFinished:

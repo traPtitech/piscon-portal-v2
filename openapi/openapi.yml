@@ -941,8 +941,16 @@ components:
       type: "string"
       enum:
         - "waiting"
+        - "readying"
         - "running"
         - "finished"
+      description: |
+        ベンチマークのステータス
+
+        - waiting: ベンチマークキューの中で実行を待っている
+        - readying: ベンチマークキューから取り出され、実行が始まるのを待っている
+        - running: ベンチマークが実行されている
+        - finished: ベンチマークが終了している
       example: "running"
 
     CreatedAt:
@@ -973,10 +981,12 @@ components:
         propertyName: status
         mapping:
           waiting: "#/components/schemas/WaitingBenchmark"
+          readying: "#/components/schemas/ReadyingBenchmark"
           running: "#/components/schemas/RunningBenchmark"
           finished: "#/components/schemas/FinishedBenchmark"
       oneOf:
         - $ref: "#/components/schemas/WaitingBenchmark"
+        - $ref: "#/components/schemas/ReadyingBenchmark"
         - $ref: "#/components/schemas/RunningBenchmark"
         - $ref: "#/components/schemas/FinishedBenchmark"
 
@@ -1027,6 +1037,32 @@ components:
           type: "string"
           enum:
             - "waiting"
+        createdAt:
+          $ref: "#/components/schemas/CreatedAt"
+      required:
+        - id
+        - instanceId
+        - teamId
+        - userId
+        - status
+        - createdAt
+
+    ReadyingBenchmark:
+      type: "object"
+      description: "status=readying のベンチマーク結果"
+      properties:
+        id:
+          $ref: "#/components/schemas/BenchmarkId"
+        instanceId:
+          $ref: "#/components/schemas/InstanceId"
+        teamId:
+          $ref: "#/components/schemas/TeamId"
+        userId:
+          $ref: "#/components/schemas/UserId"
+        status:
+          type: "string"
+          enum:
+            - "readying"
         createdAt:
           $ref: "#/components/schemas/CreatedAt"
       required:

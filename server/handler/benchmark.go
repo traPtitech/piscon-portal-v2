@@ -199,6 +199,15 @@ func toOpenAPIBenchmarkListItem(benchmark domain.Benchmark) (openapi.BenchmarkLi
 			Status:     openapi.WaitingBenchmarkStatusWaiting,
 			CreatedAt:  openapi.CreatedAt(benchmark.CreatedAt),
 		}), nil
+	case domain.BenchmarkStatusReadying:
+		return openapi.NewReadyingBenchmarkBenchmarkListItemSum(openapi.ReadyingBenchmark{
+			ID:         openapi.BenchmarkId(benchmark.ID),
+			InstanceId: openapi.InstanceId(benchmark.Instance.ID),
+			TeamId:     openapi.TeamId(benchmark.TeamID),
+			UserId:     openapi.UserId(benchmark.UserID),
+			Status:     openapi.ReadyingBenchmarkStatusReadying,
+			CreatedAt:  openapi.CreatedAt(benchmark.CreatedAt),
+		}), nil
 	case domain.BenchmarkStatusRunning:
 		return openapi.NewRunningBenchmarkBenchmarkListItemSum(openapi.RunningBenchmark{
 			ID:         openapi.BenchmarkId(benchmark.ID),

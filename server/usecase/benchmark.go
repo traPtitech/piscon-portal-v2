@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
+	"github.com/traPtitech/piscon-portal-v2/server/services/instance"
 	"github.com/traPtitech/piscon-portal-v2/server/utils/optional"
 )
 
@@ -36,11 +37,12 @@ type BenchmarkUseCase interface {
 }
 
 type benchmarkUseCaseImpl struct {
-	repo repository.Repository
+	repo    repository.Repository
+	manager instance.Manager
 }
 
-func NewBenchmarkUseCase(repo repository.Repository) BenchmarkUseCase {
-	return &benchmarkUseCaseImpl{repo: repo}
+func NewBenchmarkUseCase(repo repository.Repository, manager instance.Manager) BenchmarkUseCase {
+	return &benchmarkUseCaseImpl{repo: repo, manager: manager}
 }
 
 func (u *benchmarkUseCaseImpl) GetBenchmark(ctx context.Context, id uuid.UUID) (domain.Benchmark, error) {
@@ -70,6 +72,12 @@ func (u *benchmarkUseCaseImpl) CreateBenchmark(ctx context.Context, instanceID u
 			}
 			return fmt.Errorf("find instance: %v", err)
 		}
+
+		infraInstance, err := u.manager.Get(ctx, instance.Infra.ProviderInstanceID)
+		if err != nil {
+			return fmt.Errorf("get infra instance: %w", err)
+		}
+		instance.Infra = infraInstance
 
 		benchmark, err = domain.NewBenchmark(instance, user)
 		if err != nil {
@@ -151,7 +159,12 @@ func (u *benchmarkUseCaseImpl) StartBenchmark(ctx context.Context) (domain.Bench
 			return ErrNotFound
 		}
 		if err != nil {
-			return fmt.Errorf("get oldest queued benchmark: %v", err)
+			return fmt.Errorf("get oldest queued benchmark: %w", err)
+		}
+
+		bench.Instance.Infra, err = u.manager.Get(ctx, bench.Instance.Infra.ProviderInstanceID)
+		if err != nil {
+			return fmt.Errorf("get infra instance: %w", err)
 		}
 
 		startedBenchmark = domain.Benchmark{
@@ -159,7 +172,7 @@ func (u *benchmarkUseCaseImpl) StartBenchmark(ctx context.Context) (domain.Bench
 			Instance:  bench.Instance,
 			TeamID:    bench.TeamID,
 			UserID:    bench.UserID,
-			Status:    domain.BenchmarkStatusRunning,
+			Status:    domain.BenchmarkStatusReadying, // ステータスをreadyingに更新
 			CreatedAt: bench.CreatedAt,
 		}
 		err = u.repo.UpdateBenchmark(ctx, bench.ID, startedBenchmark)
@@ -167,7 +180,7 @@ func (u *benchmarkUseCaseImpl) StartBenchmark(ctx context.Context) (domain.Bench
 			return ErrNotFound
 		}
 		if err != nil {
-			return fmt.Errorf("update benchmark: %v", err)
+			return fmt.Errorf("update benchmark: %w", err)
 		}
 
 		return nil
