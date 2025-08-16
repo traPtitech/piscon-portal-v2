@@ -252,6 +252,7 @@ func toOpenAPIBenchmark(benchmark domain.Benchmark, log domain.BenchmarkLog) (*o
 			Type:              openapi.BenchmarkSumType(listItem.Type),
 			WaitingBenchmark:  listItem.WaitingBenchmark,
 			RunningBenchmark:  listItem.RunningBenchmark,
+			ReadyingBenchmark: listItem.ReadyingBenchmark,
 			FinishedBenchmark: listItem.FinishedBenchmark,
 		},
 	}, nil
@@ -281,6 +282,7 @@ func toOpenAPIBenchmarkAdminResult(benchmark domain.Benchmark, log domain.Benchm
 		OneOf: openapi.BenchmarkAdminResultSum{
 			Type:              openapi.BenchmarkAdminResultSumType(listItem.Type),
 			WaitingBenchmark:  listItem.WaitingBenchmark,
+			ReadyingBenchmark: listItem.ReadyingBenchmark,
 			RunningBenchmark:  listItem.RunningBenchmark,
 			FinishedBenchmark: listItem.FinishedBenchmark,
 		},
