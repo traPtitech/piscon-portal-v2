@@ -510,6 +510,8 @@ func TestStartBenchmark(t *testing.T) {
 	testCases := map[string]struct {
 		oldestBench                 domain.Benchmark
 		GetOldestQueuedBenchmarkErr error
+		executeGetInfraInstance     bool
+		GetInfraInstanceErr         error
 		executeUpdateBenchmark      bool
 		UpdateBenchmarkErr          error
 		bench                       domain.Benchmark
@@ -523,22 +525,31 @@ func TestStartBenchmark(t *testing.T) {
 			GetOldestQueuedBenchmarkErr: repository.ErrNotFound,
 			err:                         usecase.ErrNotFound,
 		},
+		"GetInfraInstanceがエラーなのでエラー": {
+			oldestBench:             bench,
+			executeGetInfraInstance: true,
+			GetInfraInstanceErr:     assert.AnError,
+			err:                     assert.AnError,
+		},
 		"UpdateBenchmarkがエラーなのでエラー": {
-			oldestBench:            bench,
-			executeUpdateBenchmark: true,
-			UpdateBenchmarkErr:     assert.AnError,
-			err:                    assert.AnError,
+			oldestBench:             bench,
+			executeGetInfraInstance: true,
+			executeUpdateBenchmark:  true,
+			UpdateBenchmarkErr:      assert.AnError,
+			err:                     assert.AnError,
 		},
 		"UpdateBenchmarkがErrNotFoundなのでErrNotFound": {
-			oldestBench:            bench,
-			executeUpdateBenchmark: true,
-			UpdateBenchmarkErr:     repository.ErrNotFound,
-			err:                    usecase.ErrNotFound,
+			oldestBench:             bench,
+			executeGetInfraInstance: true,
+			executeUpdateBenchmark:  true,
+			UpdateBenchmarkErr:      repository.ErrNotFound,
+			err:                     usecase.ErrNotFound,
 		},
 		"正しく実行できる": {
-			oldestBench:            bench,
-			executeUpdateBenchmark: true,
-			bench:                  afterBench,
+			oldestBench:             bench,
+			executeGetInfraInstance: true,
+			executeUpdateBenchmark:  true,
+			bench:                   afterBench,
 		},
 	}
 
@@ -547,6 +558,8 @@ func TestStartBenchmark(t *testing.T) {
 			t.Parallel()
 
 			repoMock := mock.NewMockRepository(ctrl)
+			infraMock := instanceMock.NewMockManager(ctrl)
+
 			repoMock.EXPECT().Transaction(gomock.Any(), gomock.Any()).
 				DoAndReturn(func(ctx context.Context, f func(context.Context) error) error {
 					return f(ctx)
@@ -554,6 +567,11 @@ func TestStartBenchmark(t *testing.T) {
 			repoMock.EXPECT().
 				GetOldestQueuedBenchmark(gomock.Any()).
 				Return(testCase.oldestBench, testCase.GetOldestQueuedBenchmarkErr)
+			if testCase.executeGetInfraInstance {
+				infraMock.EXPECT().
+					Get(gomock.Any(), testCase.oldestBench.Instance.Infra.ProviderInstanceID).
+					Return(testCase.oldestBench.Instance.Infra, testCase.GetInfraInstanceErr)
+			}
 			if testCase.executeUpdateBenchmark {
 				bench := testCase.oldestBench
 				bench.Status = domain.BenchmarkStatusReadying
@@ -562,7 +580,7 @@ func TestStartBenchmark(t *testing.T) {
 					Return(testCase.UpdateBenchmarkErr)
 			}
 
-			b := usecase.NewBenchmarkUseCase(repoMock, nil)
+			b := usecase.NewBenchmarkUseCase(repoMock, infraMock)
 
 			bench, err := b.StartBenchmark(t.Context())
 

@@ -162,6 +162,11 @@ func (u *benchmarkUseCaseImpl) StartBenchmark(ctx context.Context) (domain.Bench
 			return fmt.Errorf("get oldest queued benchmark: %w", err)
 		}
 
+		bench.Instance.Infra, err = u.manager.Get(ctx, bench.Instance.Infra.ProviderInstanceID)
+		if err != nil {
+			return fmt.Errorf("get infra instance: %w", err)
+		}
+
 		startedBenchmark = domain.Benchmark{
 			ID:        bench.ID,
 			Instance:  bench.Instance,
