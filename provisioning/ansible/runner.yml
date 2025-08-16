@@ -1,0 +1,10 @@
+- name: Deploy Piscon Runner
+  hosts: runner
+  remote_user: ubuntu
+  vars:
+    hostname: runner
+  become: true
+  roles:
+    - common
+    - docker
+    - runner

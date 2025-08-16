@@ -1,0 +1,17 @@
+---
+- name: Restart runner service
+  ansible.builtin.systemd:
+    name: piscon-runner
+    state: restarted
+  become: true
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+  become: true
+
+- name: Start runner service
+  ansible.builtin.systemd:
+    name: piscon-runner
+    state: started
+  become: true

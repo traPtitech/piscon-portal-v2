@@ -10,7 +10,8 @@ WorkingDirectory=/srv/portal
 ExecStart=/usr/bin/docker compose -f /srv/portal/compose.yaml up --detach
 ExecStop=/usr/bin/docker compose -f /srv/portal/compose.yaml down
 ExecReload=/usr/bin/docker compose -f /srv/portal/compose.yaml restart
-TimeoutStartSec=0
+TimeoutStartSec=300
+Restart=no
 
 [Install]
 WantedBy=multi-user.target

@@ -2,6 +2,8 @@ portal:
   domain: piscon.ikura-hamu.work
   git_ref: main
   git_ref_type: heads
+  private_ip: "{{ local.portal.private_ip }}"
+
   frontend:
     host_port: 3000
   backend:
@@ -18,7 +20,14 @@ portal:
     id: "{{ secrets.traq_client.id }}"
     secret: "{{ secrets.traq_client.secret }}"
 
+runner:
+  git_ref: "{{ portal.git_ref }}"
+  problem_volumes:
+    private_isu:
+      - /home/isucon/private_isu/benchmarker:/benchmarker
+
 problem:
+  name: "{{ local.problem.name }}"
   instance_limit: "{{ local.problem.instance_limit }}"
   image_id: "{{ local.problem.image_id }}"
   instance_type: "{{ local.problem.instance_type }}"

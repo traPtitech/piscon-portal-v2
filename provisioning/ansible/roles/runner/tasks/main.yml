@@ -1,0 +1,40 @@
+---
+- name: Make runner directory
+  ansible.builtin.file:
+    path: /srv/runner
+    state: directory
+    mode: "0755"
+  become: true
+
+- name: Set runner compose.yaml
+  ansible.builtin.template:
+    src: compose.yaml.j2
+    dest: /srv/runner/compose.yaml
+    mode: "0644"
+  notify:
+    - Restart runner service
+
+- name: Set runner config file
+  ansible.builtin.template:
+    src: "problems/{{ problem.name }}.yaml.j2"
+    dest: /srv/runner/piscon_runner.yaml
+    mode: "0644"
+  notify:
+    - Restart runner service
+
+- name: Create piscon-runner service
+  ansible.builtin.copy:
+    src: piscon-runner.service
+    dest: /etc/systemd/system/piscon-runner.service
+    mode: "0644"
+  become: true
+  notify:
+    - Reload systemd
+    - Restart runner service
+
+- name: Enable piscon-runner service
+  ansible.builtin.systemd:
+    name: piscon-runner
+    enabled: true
+    state: started
+  become: true
