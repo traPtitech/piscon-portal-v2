@@ -3,8 +3,7 @@
   remote_user: ubuntu
   vars:
     hostname: runner
-  become: true
   roles:
     - common
-    - docker
+    - go
     - runner

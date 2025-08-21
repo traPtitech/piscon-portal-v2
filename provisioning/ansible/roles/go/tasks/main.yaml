@@ -1,0 +1,13 @@
+- name: Check Go installed
+  ansible.builtin.command:
+    cmd: go version
+  changed_when: false
+  register: go_version
+  failed_when: false
+
+- name: Install Go if not exist
+  ansible.builtin.apt:
+    name: golang
+    state: present
+  become: true
+  when: go_version.rc != 0

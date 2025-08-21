@@ -15,3 +15,10 @@
     name: piscon-runner
     state: started
   become: true
+
+- name: Enable runner service
+  ansible.builtin.systemd:
+    name: piscon-runner
+    enabled: true
+    state: started
+  become: true
