@@ -202,9 +202,9 @@ func (u *benchmarkUseCaseImpl) SaveBenchmarkProgress(ctx context.Context, benchI
 			return fmt.Errorf("find benchmark: %w", err)
 		}
 
-		// Ensure that progress updates are only applied to benchmarks that are actively running.
-		if bench.Status != domain.BenchmarkStatusRunning {
-			return NewUseCaseErrorFromMsg("benchmark is not running")
+		// Ensure that progress updates are only applied to benchmarks that are actively running or readying.
+		if bench.Status != domain.BenchmarkStatusRunning && bench.Status != domain.BenchmarkStatusReadying {
+			return NewUseCaseErrorFromMsg("benchmark is not running or readying")
 		}
 
 		err = u.repo.UpdateBenchmark(ctx, benchID, domain.Benchmark{
@@ -245,8 +245,9 @@ func (u *benchmarkUseCaseImpl) FinalizeBenchmark(ctx context.Context, benchmarkI
 			return fmt.Errorf("find benchmark: %w", err)
 		}
 
-		if bench.Status != domain.BenchmarkStatusRunning {
-			return NewUseCaseErrorFromMsg("benchmark is not running")
+		// runningとreadyingのときのみFinalizeできる
+		if bench.Status != domain.BenchmarkStatusRunning && bench.Status != domain.BenchmarkStatusReadying {
+			return NewUseCaseErrorFromMsg("benchmark is not running or readying")
 		}
 
 		err = u.repo.UpdateBenchmark(ctx, benchmarkID, domain.Benchmark{
