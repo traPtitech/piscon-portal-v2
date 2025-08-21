@@ -41,8 +41,8 @@ func (bs *BenchmarkService) GetBenchmarkJob(ctx context.Context, _ *portalv1.Get
 
 	return &portalv1.GetBenchmarkJobResponse{
 		BenchmarkJob: &portalv1.BenchmarkJob{
-			BenchmarkId: bench.ID.String(),
-			TargetUrl:   *bench.Instance.Infra.PrivateIP,
+			BenchmarkId:     bench.ID.String(),
+			TargetIpAddress: *bench.Instance.Infra.PrivateIP,
 		},
 	}, nil
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"os/exec"
 	"time"
 
@@ -42,9 +43,14 @@ func New(conf config.Problem) (*PrivateIsu, error) {
 var _ benchmarker.Benchmarker = (*PrivateIsu)(nil)
 
 func (b *PrivateIsu) Start(ctx context.Context, job *domain.Job) (benchmarker.Outputs, time.Time, error) {
+	targetURL := url.URL{
+		Scheme: "http",
+		Host:   job.GetTargetIPAdress(),
+	}
+
 	cmd := exec.CommandContext(ctx, b.conf.execPath,
 		"--userdata", b.conf.userDataDir,
-		"--target", job.GetTargetURL(),
+		"--target", targetURL.String(),
 	)
 
 	stdout, err := cmd.StdoutPipe()
