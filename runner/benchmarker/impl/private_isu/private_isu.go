@@ -44,7 +44,7 @@ var _ benchmarker.Benchmarker = (*PrivateIsu)(nil)
 func (b *PrivateIsu) Start(ctx context.Context, job *domain.Job) (benchmarker.Outputs, time.Time, error) {
 	cmd := exec.CommandContext(ctx, b.conf.execPath,
 		"--userdata", b.conf.userDataDir,
-		"--target", job.GetTargetURL(),
+		"--target", job.GetTargetIPAdress(),
 	)
 
 	stdout, err := cmd.StdoutPipe()

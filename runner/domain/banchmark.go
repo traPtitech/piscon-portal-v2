@@ -3,14 +3,14 @@ package domain
 import "time"
 
 type Job struct {
-	id        string
-	targetURL string
+	id       string
+	targetIP string
 }
 
-func NewJob(id string, targetURL string) *Job {
+func NewJob(id string, targetIP string) *Job {
 	return &Job{
-		id:        id,
-		targetURL: targetURL,
+		id:       id,
+		targetIP: targetIP,
 	}
 }
 
@@ -18,8 +18,8 @@ func (j *Job) GetID() string {
 	return j.id
 }
 
-func (j *Job) GetTargetURL() string {
-	return j.targetURL
+func (j *Job) GetTargetIPAdress() string {
+	return j.targetIP
 }
 
 type Result int

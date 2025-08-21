@@ -34,7 +34,7 @@ func (p *Portal) GetJob(ctx context.Context) (*domain.Job, error) {
 
 		job := jobRes.GetBenchmarkJob()
 		if job != nil {
-			return domain.NewJob(job.GetBenchmarkId(), job.GetTargetUrl()), nil
+			return domain.NewJob(job.GetBenchmarkId(), job.GetTargetIpAddress()), nil
 		}
 
 		time.Sleep(p.pollingInterval)

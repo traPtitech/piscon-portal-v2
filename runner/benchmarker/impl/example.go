@@ -28,7 +28,7 @@ func NewExample() *Example {
 var _ benchmarker.Benchmarker = (*Example)(nil)
 
 func (b *Example) Start(ctx context.Context, job *domain.Job) (benchmarker.Outputs, time.Time, error) {
-	cmd := exec.CommandContext(ctx, "/bin/example.sh", job.GetTargetURL())
+	cmd := exec.CommandContext(ctx, "/bin/example.sh", job.GetTargetIPAdress())
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
