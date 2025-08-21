@@ -8,7 +8,7 @@ message GetBenchmarkJobRequest {}
 
 message BenchmarkJob {
   string benchmark_id = 1;
-  string target_url = 2;
+  string target_ip_address = 2;
 }
 
 message GetBenchmarkJobResponse {
