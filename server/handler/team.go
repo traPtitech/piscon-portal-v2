@@ -25,10 +25,14 @@ func (h *Handler) GetTeams(c echo.Context) error {
 		members := lo.Map(team.Members, func(u domain.User, _ int) openapi.UserId {
 			return openapi.UserId(u.ID)
 		})
+		githubIDs := lo.Map(team.GitHubIDs, func(id string, _ int) openapi.GitHubId {
+			return openapi.GitHubId(id)
+		})
 		res = append(res, openapi.Team{
 			ID:        openapi.TeamId(team.ID),
 			Name:      openapi.TeamName(team.Name),
 			Members:   members,
+			GithubIds: githubIDs,
 			CreatedAt: team.CreatedAt,
 		})
 	}
@@ -49,6 +53,7 @@ func (h *Handler) CreateTeam(c echo.Context) error {
 		Name:      string(req.Name),
 		MemberIDs: lo.Map(req.Members, func(id openapi.UserId, _ int) uuid.UUID { return uuid.UUID(id) }),
 		CreatorID: userID,
+		GitHubIDs: lo.Map(req.GithubIds, func(id openapi.GitHubId, _ int) string { return string(id) }),
 	})
 	if err != nil {
 		if usecase.IsUseCaseError(err) {
@@ -95,6 +100,7 @@ func (h *Handler) UpdateTeam(c echo.Context) error {
 		ID:        teamID,
 		Name:      string(req.Name.Value),
 		MemberIDs: lo.Map(req.Members, func(id openapi.UserId, _ int) uuid.UUID { return uuid.UUID(id) }),
+		GitHubIDs: lo.Map(req.GithubIds, func(id openapi.GitHubId, _ int) string { return string(id) }),
 	})
 	if err != nil {
 		if usecase.IsUseCaseError(err) {
@@ -111,7 +117,7 @@ func toOpenAPITeam(team domain.Team) openapi.Team {
 		ID:        openapi.TeamId(team.ID),
 		Name:      openapi.TeamName(team.Name),
 		Members:   lo.Map(team.Members, func(m domain.User, _ int) openapi.UserId { return openapi.UserId(m.ID) }),
-		GithubIds: []openapi.GitHubId{}, // TODO: Implement
+		GithubIds: lo.Map(team.GitHubIDs, func(id string, _ int) openapi.GitHubId { return openapi.GitHubId(id) }),
 		CreatedAt: team.CreatedAt,
 	}
 }

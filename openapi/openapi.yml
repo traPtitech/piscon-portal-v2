@@ -726,6 +726,13 @@ components:
                 type: "array"
                 items:
                   $ref: "#/components/schemas/UserId"
+              githubIds:
+                description: "メンバーのGitHub のID"
+                maxItems: 3
+                minItems: 0
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/GitHubId"
             required:
               - name
               - members
