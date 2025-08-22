@@ -42,7 +42,8 @@ type TeamsQuery = *mysql.ViewQuery[*Team, TeamSlice]
 
 // teamR is where relationships are stored.
 type teamR struct {
-	Users UserSlice // users_ibfk_1
+	TeamGithubAccounts TeamGithubAccountSlice // team_github_accounts_ibfk_1
+	Users              UserSlice              // users_ibfk_1
 }
 
 type teamColumnNames struct {
@@ -425,8 +426,9 @@ func (o TeamSlice) ReloadAll(ctx context.Context, exec bob.Executor) error {
 }
 
 type teamJoins[Q dialect.Joinable] struct {
-	typ   string
-	Users modAs[Q, userColumns]
+	typ                string
+	TeamGithubAccounts modAs[Q, teamGithubAccountColumns]
+	Users              modAs[Q, userColumns]
 }
 
 func (j teamJoins[Q]) aliasedAs(alias string) teamJoins[Q] {
@@ -436,6 +438,20 @@ func (j teamJoins[Q]) aliasedAs(alias string) teamJoins[Q] {
 func buildTeamJoins[Q dialect.Joinable](cols teamColumns, typ string) teamJoins[Q] {
 	return teamJoins[Q]{
 		typ: typ,
+		TeamGithubAccounts: modAs[Q, teamGithubAccountColumns]{
+			c: TeamGithubAccountColumns,
+			f: func(to teamGithubAccountColumns) bob.Mod[Q] {
+				mods := make(mods.QueryMods[Q], 0, 1)
+
+				{
+					mods = append(mods, dialect.Join[Q](typ, TeamGithubAccounts.Name().As(to.Alias())).On(
+						to.TeamID.EQ(cols.ID),
+					))
+				}
+
+				return mods
+			},
+		},
 		Users: modAs[Q, userColumns]{
 			c: UserColumns,
 			f: func(to userColumns) bob.Mod[Q] {
@@ -451,6 +467,25 @@ func buildTeamJoins[Q dialect.Joinable](cols teamColumns, typ string) teamJoins[
 			},
 		},
 	}
+}
+
+// TeamGithubAccounts starts a query for related objects on team_github_accounts
+func (o *Team) TeamGithubAccounts(mods ...bob.Mod[*dialect.SelectQuery]) TeamGithubAccountsQuery {
+	return TeamGithubAccounts.Query(append(mods,
+		sm.Where(TeamGithubAccountColumns.TeamID.EQ(mysql.Arg(o.ID))),
+	)...)
+}
+
+func (os TeamSlice) TeamGithubAccounts(mods ...bob.Mod[*dialect.SelectQuery]) TeamGithubAccountsQuery {
+	PKArgSlice := make([]bob.Expression, len(os))
+	for i, o := range os {
+		PKArgSlice[i] = mysql.ArgGroup(o.ID)
+	}
+	PKArgExpr := mysql.Group(PKArgSlice...)
+
+	return TeamGithubAccounts.Query(append(mods,
+		sm.Where(mysql.Group(TeamGithubAccountColumns.TeamID).OP("IN", PKArgExpr)),
+	)...)
 }
 
 // Users starts a query for related objects on users
@@ -478,6 +513,20 @@ func (o *Team) Preload(name string, retrieved any) error {
 	}
 
 	switch name {
+	case "TeamGithubAccounts":
+		rels, ok := retrieved.(TeamGithubAccountSlice)
+		if !ok {
+			return fmt.Errorf("team cannot load %T as %q", retrieved, name)
+		}
+
+		o.R.TeamGithubAccounts = rels
+
+		for _, rel := range rels {
+			if rel != nil {
+				rel.R.Team = o
+			}
+		}
+		return nil
 	case "Users":
 		rels, ok := retrieved.(UserSlice)
 		if !ok {
@@ -504,15 +553,25 @@ func buildTeamPreloader() teamPreloader {
 }
 
 type teamThenLoader[Q orm.Loadable] struct {
-	Users func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
+	TeamGithubAccounts func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
+	Users              func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
 }
 
 func buildTeamThenLoader[Q orm.Loadable]() teamThenLoader[Q] {
+	type TeamGithubAccountsLoadInterface interface {
+		LoadTeamGithubAccounts(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
+	}
 	type UsersLoadInterface interface {
 		LoadUsers(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
 	}
 
 	return teamThenLoader[Q]{
+		TeamGithubAccounts: thenLoadBuilder[Q](
+			"TeamGithubAccounts",
+			func(ctx context.Context, exec bob.Executor, retrieved TeamGithubAccountsLoadInterface, mods ...bob.Mod[*dialect.SelectQuery]) error {
+				return retrieved.LoadTeamGithubAccounts(ctx, exec, mods...)
+			},
+		),
 		Users: thenLoadBuilder[Q](
 			"Users",
 			func(ctx context.Context, exec bob.Executor, retrieved UsersLoadInterface, mods ...bob.Mod[*dialect.SelectQuery]) error {
@@ -520,6 +579,58 @@ func buildTeamThenLoader[Q orm.Loadable]() teamThenLoader[Q] {
 			},
 		),
 	}
+}
+
+// LoadTeamGithubAccounts loads the team's TeamGithubAccounts into the .R struct
+func (o *Team) LoadTeamGithubAccounts(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if o == nil {
+		return nil
+	}
+
+	// Reset the relationship
+	o.R.TeamGithubAccounts = nil
+
+	related, err := o.TeamGithubAccounts(mods...).All(ctx, exec)
+	if err != nil {
+		return err
+	}
+
+	for _, rel := range related {
+		rel.R.Team = o
+	}
+
+	o.R.TeamGithubAccounts = related
+	return nil
+}
+
+// LoadTeamGithubAccounts loads the team's TeamGithubAccounts into the .R struct
+func (os TeamSlice) LoadTeamGithubAccounts(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if len(os) == 0 {
+		return nil
+	}
+
+	teamGithubAccounts, err := os.TeamGithubAccounts(mods...).All(ctx, exec)
+	if err != nil {
+		return err
+	}
+
+	for _, o := range os {
+		o.R.TeamGithubAccounts = nil
+	}
+
+	for _, o := range os {
+		for _, rel := range teamGithubAccounts {
+			if o.ID != rel.TeamID {
+				continue
+			}
+
+			rel.R.Team = o
+
+			o.R.TeamGithubAccounts = append(o.R.TeamGithubAccounts, rel)
+		}
+	}
+
+	return nil
 }
 
 // LoadUsers loads the team's Users into the .R struct
@@ -569,6 +680,74 @@ func (os TeamSlice) LoadUsers(ctx context.Context, exec bob.Executor, mods ...bo
 
 			o.R.Users = append(o.R.Users, rel)
 		}
+	}
+
+	return nil
+}
+
+func insertTeamTeamGithubAccounts0(ctx context.Context, exec bob.Executor, teamGithubAccounts1 []*TeamGithubAccountSetter, team0 *Team) (TeamGithubAccountSlice, error) {
+	for i := range teamGithubAccounts1 {
+		teamGithubAccounts1[i].TeamID = &team0.ID
+	}
+
+	ret, err := TeamGithubAccounts.Insert(bob.ToMods(teamGithubAccounts1...)).All(ctx, exec)
+	if err != nil {
+		return ret, fmt.Errorf("insertTeamTeamGithubAccounts0: %w", err)
+	}
+
+	return ret, nil
+}
+
+func attachTeamTeamGithubAccounts0(ctx context.Context, exec bob.Executor, count int, teamGithubAccounts1 TeamGithubAccountSlice, team0 *Team) (TeamGithubAccountSlice, error) {
+	setter := &TeamGithubAccountSetter{
+		TeamID: &team0.ID,
+	}
+
+	err := teamGithubAccounts1.UpdateAll(ctx, exec, *setter)
+	if err != nil {
+		return nil, fmt.Errorf("attachTeamTeamGithubAccounts0: %w", err)
+	}
+
+	return teamGithubAccounts1, nil
+}
+
+func (team0 *Team) InsertTeamGithubAccounts(ctx context.Context, exec bob.Executor, related ...*TeamGithubAccountSetter) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+
+	teamGithubAccounts1, err := insertTeamTeamGithubAccounts0(ctx, exec, related, team0)
+	if err != nil {
+		return err
+	}
+
+	team0.R.TeamGithubAccounts = append(team0.R.TeamGithubAccounts, teamGithubAccounts1...)
+
+	for _, rel := range teamGithubAccounts1 {
+		rel.R.Team = team0
+	}
+	return nil
+}
+
+func (team0 *Team) AttachTeamGithubAccounts(ctx context.Context, exec bob.Executor, related ...*TeamGithubAccount) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	teamGithubAccounts1 := TeamGithubAccountSlice(related)
+
+	_, err = attachTeamTeamGithubAccounts0(ctx, exec, len(related), teamGithubAccounts1, team0)
+	if err != nil {
+		return err
+	}
+
+	team0.R.TeamGithubAccounts = append(team0.R.TeamGithubAccounts, teamGithubAccounts1...)
+
+	for _, rel := range related {
+		rel.R.Team = team0
 	}
 
 	return nil

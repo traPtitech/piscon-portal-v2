@@ -6,13 +6,14 @@ package factory
 import "context"
 
 type Factory struct {
-	baseBenchmarkLogMods BenchmarkLogModSlice
-	baseBenchmarkMods    BenchmarkModSlice
-	baseDocumentMods     DocumentModSlice
-	baseInstanceMods     InstanceModSlice
-	baseSessionMods      SessionModSlice
-	baseTeamMods         TeamModSlice
-	baseUserMods         UserModSlice
+	baseBenchmarkLogMods      BenchmarkLogModSlice
+	baseBenchmarkMods         BenchmarkModSlice
+	baseDocumentMods          DocumentModSlice
+	baseInstanceMods          InstanceModSlice
+	baseSessionMods           SessionModSlice
+	baseTeamGithubAccountMods TeamGithubAccountModSlice
+	baseTeamMods              TeamModSlice
+	baseUserMods              UserModSlice
 }
 
 func New() *Factory {
@@ -79,6 +80,18 @@ func (f *Factory) NewSession(ctx context.Context, mods ...SessionMod) *SessionTe
 	return o
 }
 
+func (f *Factory) NewTeamGithubAccount(ctx context.Context, mods ...TeamGithubAccountMod) *TeamGithubAccountTemplate {
+	o := &TeamGithubAccountTemplate{f: f}
+
+	if f != nil {
+		f.baseTeamGithubAccountMods.Apply(ctx, o)
+	}
+
+	TeamGithubAccountModSlice(mods).Apply(ctx, o)
+
+	return o
+}
+
 func (f *Factory) NewTeam(ctx context.Context, mods ...TeamMod) *TeamTemplate {
 	o := &TeamTemplate{f: f}
 
@@ -141,6 +154,14 @@ func (f *Factory) ClearBaseSessionMods() {
 
 func (f *Factory) AddBaseSessionMod(mods ...SessionMod) {
 	f.baseSessionMods = append(f.baseSessionMods, mods...)
+}
+
+func (f *Factory) ClearBaseTeamGithubAccountMods() {
+	f.baseTeamGithubAccountMods = nil
+}
+
+func (f *Factory) AddBaseTeamGithubAccountMod(mods ...TeamGithubAccountMod) {
+	f.baseTeamGithubAccountMods = append(f.baseTeamGithubAccountMods, mods...)
 }
 
 func (f *Factory) ClearBaseTeamMods() {

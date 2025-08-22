@@ -20,31 +20,34 @@ import (
 )
 
 var TableNames = struct {
-	BenchmarkLogs string
-	Benchmarks    string
-	Documents     string
-	Instances     string
-	Sessions      string
-	Teams         string
-	Users         string
+	BenchmarkLogs      string
+	Benchmarks         string
+	Documents          string
+	Instances          string
+	Sessions           string
+	TeamGithubAccounts string
+	Teams              string
+	Users              string
 }{
-	BenchmarkLogs: "benchmark_logs",
-	Benchmarks:    "benchmarks",
-	Documents:     "documents",
-	Instances:     "instances",
-	Sessions:      "sessions",
-	Teams:         "teams",
-	Users:         "users",
+	BenchmarkLogs:      "benchmark_logs",
+	Benchmarks:         "benchmarks",
+	Documents:          "documents",
+	Instances:          "instances",
+	Sessions:           "sessions",
+	TeamGithubAccounts: "team_github_accounts",
+	Teams:              "teams",
+	Users:              "users",
 }
 
 var ColumnNames = struct {
-	BenchmarkLogs benchmarkLogColumnNames
-	Benchmarks    benchmarkColumnNames
-	Documents     documentColumnNames
-	Instances     instanceColumnNames
-	Sessions      sessionColumnNames
-	Teams         teamColumnNames
-	Users         userColumnNames
+	BenchmarkLogs      benchmarkLogColumnNames
+	Benchmarks         benchmarkColumnNames
+	Documents          documentColumnNames
+	Instances          instanceColumnNames
+	Sessions           sessionColumnNames
+	TeamGithubAccounts teamGithubAccountColumnNames
+	Teams              teamColumnNames
+	Users              userColumnNames
 }{
 	BenchmarkLogs: benchmarkLogColumnNames{
 		BenchmarkID: "benchmark_id",
@@ -83,6 +86,11 @@ var ColumnNames = struct {
 		CreatedAt: "created_at",
 		ExpiredAt: "expired_at",
 	},
+	TeamGithubAccounts: teamGithubAccountColumnNames{
+		ID:       "id",
+		TeamID:   "team_id",
+		GithubID: "github_id",
+	},
 	Teams: teamColumnNames{
 		ID:        "id",
 		Name:      "name",
@@ -103,74 +111,81 @@ var (
 )
 
 func Where[Q mysql.Filterable]() struct {
-	BenchmarkLogs benchmarkLogWhere[Q]
-	Benchmarks    benchmarkWhere[Q]
-	Documents     documentWhere[Q]
-	Instances     instanceWhere[Q]
-	Sessions      sessionWhere[Q]
-	Teams         teamWhere[Q]
-	Users         userWhere[Q]
+	BenchmarkLogs      benchmarkLogWhere[Q]
+	Benchmarks         benchmarkWhere[Q]
+	Documents          documentWhere[Q]
+	Instances          instanceWhere[Q]
+	Sessions           sessionWhere[Q]
+	TeamGithubAccounts teamGithubAccountWhere[Q]
+	Teams              teamWhere[Q]
+	Users              userWhere[Q]
 } {
 	return struct {
-		BenchmarkLogs benchmarkLogWhere[Q]
-		Benchmarks    benchmarkWhere[Q]
-		Documents     documentWhere[Q]
-		Instances     instanceWhere[Q]
-		Sessions      sessionWhere[Q]
-		Teams         teamWhere[Q]
-		Users         userWhere[Q]
+		BenchmarkLogs      benchmarkLogWhere[Q]
+		Benchmarks         benchmarkWhere[Q]
+		Documents          documentWhere[Q]
+		Instances          instanceWhere[Q]
+		Sessions           sessionWhere[Q]
+		TeamGithubAccounts teamGithubAccountWhere[Q]
+		Teams              teamWhere[Q]
+		Users              userWhere[Q]
 	}{
-		BenchmarkLogs: buildBenchmarkLogWhere[Q](BenchmarkLogColumns),
-		Benchmarks:    buildBenchmarkWhere[Q](BenchmarkColumns),
-		Documents:     buildDocumentWhere[Q](DocumentColumns),
-		Instances:     buildInstanceWhere[Q](InstanceColumns),
-		Sessions:      buildSessionWhere[Q](SessionColumns),
-		Teams:         buildTeamWhere[Q](TeamColumns),
-		Users:         buildUserWhere[Q](UserColumns),
+		BenchmarkLogs:      buildBenchmarkLogWhere[Q](BenchmarkLogColumns),
+		Benchmarks:         buildBenchmarkWhere[Q](BenchmarkColumns),
+		Documents:          buildDocumentWhere[Q](DocumentColumns),
+		Instances:          buildInstanceWhere[Q](InstanceColumns),
+		Sessions:           buildSessionWhere[Q](SessionColumns),
+		TeamGithubAccounts: buildTeamGithubAccountWhere[Q](TeamGithubAccountColumns),
+		Teams:              buildTeamWhere[Q](TeamColumns),
+		Users:              buildUserWhere[Q](UserColumns),
 	}
 }
 
 var Preload = getPreloaders()
 
 type preloaders struct {
-	BenchmarkLog benchmarkLogPreloader
-	Benchmark    benchmarkPreloader
-	Instance     instancePreloader
-	Session      sessionPreloader
-	Team         teamPreloader
-	User         userPreloader
+	BenchmarkLog      benchmarkLogPreloader
+	Benchmark         benchmarkPreloader
+	Instance          instancePreloader
+	Session           sessionPreloader
+	TeamGithubAccount teamGithubAccountPreloader
+	Team              teamPreloader
+	User              userPreloader
 }
 
 func getPreloaders() preloaders {
 	return preloaders{
-		BenchmarkLog: buildBenchmarkLogPreloader(),
-		Benchmark:    buildBenchmarkPreloader(),
-		Instance:     buildInstancePreloader(),
-		Session:      buildSessionPreloader(),
-		Team:         buildTeamPreloader(),
-		User:         buildUserPreloader(),
+		BenchmarkLog:      buildBenchmarkLogPreloader(),
+		Benchmark:         buildBenchmarkPreloader(),
+		Instance:          buildInstancePreloader(),
+		Session:           buildSessionPreloader(),
+		TeamGithubAccount: buildTeamGithubAccountPreloader(),
+		Team:              buildTeamPreloader(),
+		User:              buildUserPreloader(),
 	}
 }
 
 var SelectThenLoad = getThenLoaders[*dialect.SelectQuery]()
 
 type thenLoaders[Q orm.Loadable] struct {
-	BenchmarkLog benchmarkLogThenLoader[Q]
-	Benchmark    benchmarkThenLoader[Q]
-	Instance     instanceThenLoader[Q]
-	Session      sessionThenLoader[Q]
-	Team         teamThenLoader[Q]
-	User         userThenLoader[Q]
+	BenchmarkLog      benchmarkLogThenLoader[Q]
+	Benchmark         benchmarkThenLoader[Q]
+	Instance          instanceThenLoader[Q]
+	Session           sessionThenLoader[Q]
+	TeamGithubAccount teamGithubAccountThenLoader[Q]
+	Team              teamThenLoader[Q]
+	User              userThenLoader[Q]
 }
 
 func getThenLoaders[Q orm.Loadable]() thenLoaders[Q] {
 	return thenLoaders[Q]{
-		BenchmarkLog: buildBenchmarkLogThenLoader[Q](),
-		Benchmark:    buildBenchmarkThenLoader[Q](),
-		Instance:     buildInstanceThenLoader[Q](),
-		Session:      buildSessionThenLoader[Q](),
-		Team:         buildTeamThenLoader[Q](),
-		User:         buildUserThenLoader[Q](),
+		BenchmarkLog:      buildBenchmarkLogThenLoader[Q](),
+		Benchmark:         buildBenchmarkThenLoader[Q](),
+		Instance:          buildInstanceThenLoader[Q](),
+		Session:           buildSessionThenLoader[Q](),
+		TeamGithubAccount: buildTeamGithubAccountThenLoader[Q](),
+		Team:              buildTeamThenLoader[Q](),
+		User:              buildUserThenLoader[Q](),
 	}
 }
 
@@ -215,12 +230,13 @@ func (j joinSet[Q]) AliasedAs(alias string) joinSet[Q] {
 }
 
 type joins[Q dialect.Joinable] struct {
-	BenchmarkLogs joinSet[benchmarkLogJoins[Q]]
-	Benchmarks    joinSet[benchmarkJoins[Q]]
-	Instances     joinSet[instanceJoins[Q]]
-	Sessions      joinSet[sessionJoins[Q]]
-	Teams         joinSet[teamJoins[Q]]
-	Users         joinSet[userJoins[Q]]
+	BenchmarkLogs      joinSet[benchmarkLogJoins[Q]]
+	Benchmarks         joinSet[benchmarkJoins[Q]]
+	Instances          joinSet[instanceJoins[Q]]
+	Sessions           joinSet[sessionJoins[Q]]
+	TeamGithubAccounts joinSet[teamGithubAccountJoins[Q]]
+	Teams              joinSet[teamJoins[Q]]
+	Users              joinSet[userJoins[Q]]
 }
 
 func buildJoinSet[Q interface{ aliasedAs(string) Q }, C any, F func(C, string) Q](c C, f F) joinSet[Q] {
@@ -233,12 +249,13 @@ func buildJoinSet[Q interface{ aliasedAs(string) Q }, C any, F func(C, string) Q
 
 func getJoins[Q dialect.Joinable]() joins[Q] {
 	return joins[Q]{
-		BenchmarkLogs: buildJoinSet[benchmarkLogJoins[Q]](BenchmarkLogColumns, buildBenchmarkLogJoins),
-		Benchmarks:    buildJoinSet[benchmarkJoins[Q]](BenchmarkColumns, buildBenchmarkJoins),
-		Instances:     buildJoinSet[instanceJoins[Q]](InstanceColumns, buildInstanceJoins),
-		Sessions:      buildJoinSet[sessionJoins[Q]](SessionColumns, buildSessionJoins),
-		Teams:         buildJoinSet[teamJoins[Q]](TeamColumns, buildTeamJoins),
-		Users:         buildJoinSet[userJoins[Q]](UserColumns, buildUserJoins),
+		BenchmarkLogs:      buildJoinSet[benchmarkLogJoins[Q]](BenchmarkLogColumns, buildBenchmarkLogJoins),
+		Benchmarks:         buildJoinSet[benchmarkJoins[Q]](BenchmarkColumns, buildBenchmarkJoins),
+		Instances:          buildJoinSet[instanceJoins[Q]](InstanceColumns, buildInstanceJoins),
+		Sessions:           buildJoinSet[sessionJoins[Q]](SessionColumns, buildSessionJoins),
+		TeamGithubAccounts: buildJoinSet[teamGithubAccountJoins[Q]](TeamGithubAccountColumns, buildTeamGithubAccountJoins),
+		Teams:              buildJoinSet[teamJoins[Q]](TeamColumns, buildTeamJoins),
+		Users:              buildJoinSet[userJoins[Q]](UserColumns, buildUserJoins),
 	}
 }
 
