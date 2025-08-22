@@ -2,7 +2,9 @@ package aws
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -15,6 +17,10 @@ import (
 )
 
 var _ instance.Manager = (*Client)(nil)
+
+type GitHubKey struct {
+	Key string `json:"key"`
+}
 
 type Client struct {
 	client *ec2.Client
@@ -65,7 +71,48 @@ var pisconTagFilter = types.Filter{
 	Values: []string{"true"},
 }
 
-func (a *Client) Create(ctx context.Context, name string, sshPubKeys []string) (string, error) {
+// fetchGitHubSSHKeys fetches SSH keys for given GitHub usernames
+func fetchGitHubSSHKeys(ctx context.Context, githubIDs []string) ([]string, error) {
+	var allKeys []string
+
+	for _, githubID := range githubIDs {
+		url := fmt.Sprintf("https://api.github.com/users/%s/keys", githubID)
+
+		req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+		if err != nil {
+			return nil, fmt.Errorf("create request for user %s: %w", githubID, err)
+		}
+
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			return nil, fmt.Errorf("fetch keys for user %s: %w", githubID, err)
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("GitHub API returned status %d for user %s", resp.StatusCode, githubID)
+		}
+
+		var keys []GitHubKey
+		if err := json.NewDecoder(resp.Body).Decode(&keys); err != nil {
+			return nil, fmt.Errorf("decode response for user %s: %w", githubID, err)
+		}
+
+		for _, key := range keys {
+			allKeys = append(allKeys, key.Key)
+		}
+	}
+
+	return allKeys, nil
+}
+
+func (a *Client) Create(ctx context.Context, name string, githubIDs []string) (string, error) {
+	// Fetch SSH keys from GitHub
+	sshPubKeys, err := fetchGitHubSSHKeys(ctx, githubIDs)
+	if err != nil {
+		return "", fmt.Errorf("fetch GitHub SSH keys: %w", err)
+	}
+
 	tagSpec := types.TagSpecification{
 		ResourceType: types.ResourceTypeInstance,
 		Tags: []types.Tag{

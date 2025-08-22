@@ -74,7 +74,13 @@ func (i *InstanceUseCaseImpl) CreateInstance(ctx context.Context, teamID uuid.UU
 			return NewUseCaseError(err)
 		}
 
-		providerInstanceID, err := i.manager.Create(ctx, instanceName(teamID, instance.Index), nil) // TODO: pass team members' ssh keys
+		// Get team information to retrieve GitHub IDs
+		team, err := i.repo.FindTeam(ctx, teamID)
+		if err != nil {
+			return fmt.Errorf("find team: %w", err)
+		}
+
+		providerInstanceID, err := i.manager.Create(ctx, instanceName(teamID, instance.Index), team.GitHubIDs)
 		if err != nil {
 			return fmt.Errorf("create infra instance: %w", err)
 		}

@@ -45,6 +45,32 @@ func TestCreateTeam(t *testing.T) {
 			},
 		},
 		{
+			name: "valid with github ids",
+			input: usecase.CreateTeamInput{
+				Name:      "valid-test-team-with-github",
+				MemberIDs: []uuid.UUID{userID},
+				CreatorID: userID,
+				GitHubIDs: []string{"user1"},
+			},
+			expectError: false,
+			setup: func() {
+				mockRepo.EXPECT().FindUser(gomock.Any(), gomock.Any()).
+					DoAndReturn(func(_ context.Context, id uuid.UUID) (domain.User, error) {
+						return domain.User{ID: id}, nil
+					})
+				mockRepo.EXPECT().CreateTeam(gomock.Any(), gomock.Any()).
+					Do(func(_ context.Context, team domain.Team) error {
+						if len(team.GitHubIDs) != 1 {
+							t.Errorf("expected 1 GitHub IDs, got %d", len(team.GitHubIDs))
+						}
+						if team.GitHubIDs[0] != "user1" {
+							t.Errorf("unexpected GitHub IDs: %v", team.GitHubIDs)
+						}
+						return nil
+					})
+			},
+		},
+		{
 			name: "multiple members",
 			input: usecase.CreateTeamInput{
 				Name:      "multiple-members-test-team",
@@ -140,6 +166,39 @@ func TestUpdateTeam(t *testing.T) {
 						return domain.User{ID: id}, nil
 					})
 				mockRepo.EXPECT().UpdateTeam(gomock.Any(), gomock.Any())
+			},
+		},
+		{
+			name: "valid with github ids",
+			input: usecase.UpdateTeamInput{
+				ID:        uuid.New(),
+				Name:      "valid-test-team-with-github",
+				MemberIDs: []uuid.UUID{userID},
+				GitHubIDs: []string{"user1"},
+			},
+			expectError: false,
+			setup: func() {
+				mockRepo.EXPECT().FindTeam(gomock.Any(), gomock.Any()).
+					DoAndReturn(func(_ context.Context, id uuid.UUID) (domain.Team, error) {
+						return domain.Team{
+							ID:      id,
+							Members: []domain.User{{ID: userID, TeamID: uuid.NullUUID{UUID: id, Valid: true}}},
+						}, nil
+					})
+				mockRepo.EXPECT().FindUser(gomock.Any(), gomock.Any()).
+					DoAndReturn(func(_ context.Context, id uuid.UUID) (domain.User, error) {
+						return domain.User{ID: id}, nil
+					})
+				mockRepo.EXPECT().UpdateTeam(gomock.Any(), gomock.Any()).
+					Do(func(_ context.Context, team domain.Team) error {
+						if len(team.GitHubIDs) != 1 {
+							t.Errorf("expected 1 GitHub IDs, got %d", len(team.GitHubIDs))
+						}
+						if team.GitHubIDs[0] != "user1" {
+							t.Errorf("unexpected GitHub IDs: %v", team.GitHubIDs)
+						}
+						return nil
+					})
 			},
 		},
 		{

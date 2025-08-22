@@ -31,9 +31,13 @@ func TestCreateInstance(t *testing.T) {
 		return f(ctx)
 	})
 	repo.EXPECT().GetTeamInstances(gomock.Any(), teamID).Times(1)
+	repo.EXPECT().FindTeam(gomock.Any(), teamID).Return(domain.Team{
+		ID:        teamID,
+		GitHubIDs: []string{"user1", "user2"},
+	}, nil).Times(1)
 	repo.EXPECT().CreateInstance(gomock.Any(), gomock.Any()).Times(1)
 
-	manager.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Times(1)
+	manager.EXPECT().Create(gomock.Any(), gomock.Any(), []string{"user1", "user2"}).Times(1)
 
 	instance, err := usecase.CreateInstance(t.Context(), teamID)
 	assert.NoError(t, err)

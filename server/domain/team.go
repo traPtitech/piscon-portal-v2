@@ -14,6 +14,7 @@ type Team struct {
 	ID        uuid.UUID
 	Name      string
 	Members   []User
+	GitHubIDs []string
 	CreatedAt time.Time
 }
 

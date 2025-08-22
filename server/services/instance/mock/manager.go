@@ -42,18 +42,18 @@ func (m *MockManager) EXPECT() *MockManagerMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockManager) Create(ctx context.Context, name string, sshPubKeys []string) (string, error) {
+func (m *MockManager) Create(ctx context.Context, name string, githubIDs []string) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", ctx, name, sshPubKeys)
+	ret := m.ctrl.Call(m, "Create", ctx, name, githubIDs)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockManagerMockRecorder) Create(ctx, name, sshPubKeys any) *MockManagerCreateCall {
+func (mr *MockManagerMockRecorder) Create(ctx, name, githubIDs any) *MockManagerCreateCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockManager)(nil).Create), ctx, name, sshPubKeys)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockManager)(nil).Create), ctx, name, githubIDs)
 	return &MockManagerCreateCall{Call: call}
 }
 
