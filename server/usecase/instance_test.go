@@ -25,7 +25,7 @@ func TestCreateInstance(t *testing.T) {
 
 	repo := repomock.NewMockRepository(ctrl)
 	manager := instancemock.NewMockManager(ctrl)
-	githubService := githubmock.NewMockGitHubService(ctrl)
+	githubService := githubmock.NewMockService(ctrl)
 	usecase := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager, githubService)
 
 	teamID := uuid.New()
@@ -56,7 +56,7 @@ func TestCreateInstance_githubUserNotFound(t *testing.T) {
 
 	repo := repomock.NewMockRepository(ctrl)
 	manager := instancemock.NewMockManager(ctrl)
-	githubService := githubmock.NewMockGitHubService(ctrl)
+	githubService := githubmock.NewMockService(ctrl)
 	usecase := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager, githubService)
 
 	teamID := uuid.New()
@@ -84,7 +84,7 @@ func TestCreateInstance_tooManyInstances(t *testing.T) {
 
 	repo := repomock.NewMockRepository(ctrl)
 	manager := instancemock.NewMockManager(ctrl)
-	githubService := githubmock.NewMockGitHubService(ctrl)
+	githubService := githubmock.NewMockService(ctrl)
 	instanceUseCase := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager, githubService)
 
 	teamID := uuid.New()
@@ -105,7 +105,7 @@ func TestDeleteInstance(t *testing.T) {
 
 	repo := repomock.NewMockRepository(ctrl)
 	manager := instancemock.NewMockManager(ctrl)
-	githubService := githubmock.NewMockGitHubService(ctrl)
+	githubService := githubmock.NewMockService(ctrl)
 	usecase := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager, githubService)
 
 	instanceID := uuid.New()
@@ -139,7 +139,7 @@ func TestDeleteInstance_instanceNotFound(t *testing.T) {
 
 	repo := repomock.NewMockRepository(ctrl)
 	manager := instancemock.NewMockManager(ctrl)
-	githubService := githubmock.NewMockGitHubService(ctrl)
+	githubService := githubmock.NewMockService(ctrl)
 	instanceUsecase := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager, githubService)
 
 	instanceID := uuid.New()
@@ -254,7 +254,7 @@ func TestUpdateInstance(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			repo := repomock.NewMockRepository(ctrl)
 			manager := instancemock.NewMockManager(ctrl)
-			githubService := githubmock.NewMockGitHubService(ctrl)
+			githubService := githubmock.NewMockService(ctrl)
 			instanceUsecase := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager, githubService)
 
 			instanceID := tt.fields.instance.ID
@@ -288,7 +288,7 @@ func TestGetInstance(t *testing.T) {
 	t.Parallel()
 
 	ctrl := gomock.NewController(t)
-	githubService := githubmock.NewMockGitHubService(ctrl)
+	githubService := githubmock.NewMockService(ctrl)
 
 	instanceID := uuid.New()
 	infraInstanceID := uuid.New().String()
@@ -375,7 +375,7 @@ func TestGetTeamInstances(t *testing.T) {
 	t.Parallel()
 
 	ctrl := gomock.NewController(t)
-	githubService := githubmock.NewMockGitHubService(ctrl)
+	githubService := githubmock.NewMockService(ctrl)
 
 	teamID := uuid.New()
 	instance1 := domain.Instance{
@@ -482,7 +482,7 @@ func TestGetAllInstances(t *testing.T) {
 	t.Parallel()
 
 	ctrl := gomock.NewController(t)
-	githubService := githubmock.NewMockGitHubService(ctrl)
+	githubService := githubmock.NewMockService(ctrl)
 
 	teamID := uuid.New()
 	instance1 := domain.Instance{
