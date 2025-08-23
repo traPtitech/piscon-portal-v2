@@ -16,32 +16,32 @@ import (
 	gomock "go.uber.org/mock/gomock"
 )
 
-// MockGitHubService is a mock of GitHubService interface.
-type MockGitHubService struct {
+// MockService is a mock of Service interface.
+type MockService struct {
 	ctrl     *gomock.Controller
-	recorder *MockGitHubServiceMockRecorder
+	recorder *MockServiceMockRecorder
 	isgomock struct{}
 }
 
-// MockGitHubServiceMockRecorder is the mock recorder for MockGitHubService.
-type MockGitHubServiceMockRecorder struct {
-	mock *MockGitHubService
+// MockServiceMockRecorder is the mock recorder for MockService.
+type MockServiceMockRecorder struct {
+	mock *MockService
 }
 
-// NewMockGitHubService creates a new mock instance.
-func NewMockGitHubService(ctrl *gomock.Controller) *MockGitHubService {
-	mock := &MockGitHubService{ctrl: ctrl}
-	mock.recorder = &MockGitHubServiceMockRecorder{mock}
+// NewMockService creates a new mock instance.
+func NewMockService(ctrl *gomock.Controller) *MockService {
+	mock := &MockService{ctrl: ctrl}
+	mock.recorder = &MockServiceMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockGitHubService) EXPECT() *MockGitHubServiceMockRecorder {
+func (m *MockService) EXPECT() *MockServiceMockRecorder {
 	return m.recorder
 }
 
 // GetSSHKeys mocks base method.
-func (m *MockGitHubService) GetSSHKeys(ctx context.Context, githubIDs []string) ([]string, error) {
+func (m *MockService) GetSSHKeys(ctx context.Context, githubIDs []string) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSSHKeys", ctx, githubIDs)
 	ret0, _ := ret[0].([]string)
@@ -50,31 +50,31 @@ func (m *MockGitHubService) GetSSHKeys(ctx context.Context, githubIDs []string) 
 }
 
 // GetSSHKeys indicates an expected call of GetSSHKeys.
-func (mr *MockGitHubServiceMockRecorder) GetSSHKeys(ctx, githubIDs any) *MockGitHubServiceGetSSHKeysCall {
+func (mr *MockServiceMockRecorder) GetSSHKeys(ctx, githubIDs any) *MockServiceGetSSHKeysCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSSHKeys", reflect.TypeOf((*MockGitHubService)(nil).GetSSHKeys), ctx, githubIDs)
-	return &MockGitHubServiceGetSSHKeysCall{Call: call}
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSSHKeys", reflect.TypeOf((*MockService)(nil).GetSSHKeys), ctx, githubIDs)
+	return &MockServiceGetSSHKeysCall{Call: call}
 }
 
-// MockGitHubServiceGetSSHKeysCall wrap *gomock.Call
-type MockGitHubServiceGetSSHKeysCall struct {
+// MockServiceGetSSHKeysCall wrap *gomock.Call
+type MockServiceGetSSHKeysCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockGitHubServiceGetSSHKeysCall) Return(arg0 []string, arg1 error) *MockGitHubServiceGetSSHKeysCall {
+func (c *MockServiceGetSSHKeysCall) Return(arg0 []string, arg1 error) *MockServiceGetSSHKeysCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockGitHubServiceGetSSHKeysCall) Do(f func(context.Context, []string) ([]string, error)) *MockGitHubServiceGetSSHKeysCall {
+func (c *MockServiceGetSSHKeysCall) Do(f func(context.Context, []string) ([]string, error)) *MockServiceGetSSHKeysCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockGitHubServiceGetSSHKeysCall) DoAndReturn(f func(context.Context, []string) ([]string, error)) *MockGitHubServiceGetSSHKeysCall {
+func (c *MockServiceGetSSHKeysCall) DoAndReturn(f func(context.Context, []string) ([]string, error)) *MockServiceGetSSHKeysCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
