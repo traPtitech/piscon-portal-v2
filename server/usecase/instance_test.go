@@ -10,6 +10,8 @@ import (
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
 	repomock "github.com/traPtitech/piscon-portal-v2/server/repository/mock"
+	"github.com/traPtitech/piscon-portal-v2/server/services/github"
+	githubmock "github.com/traPtitech/piscon-portal-v2/server/services/github/mock"
 	instancemock "github.com/traPtitech/piscon-portal-v2/server/services/instance/mock"
 	"github.com/traPtitech/piscon-portal-v2/server/usecase"
 	"github.com/traPtitech/piscon-portal-v2/server/utils/ptr"
@@ -23,7 +25,8 @@ func TestCreateInstance(t *testing.T) {
 
 	repo := repomock.NewMockRepository(ctrl)
 	manager := instancemock.NewMockManager(ctrl)
-	usecase := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager)
+	githubService := githubmock.NewMockGitHubService(ctrl)
+	usecase := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager, githubService)
 
 	teamID := uuid.New()
 
@@ -37,12 +40,42 @@ func TestCreateInstance(t *testing.T) {
 	}, nil).Times(1)
 	repo.EXPECT().CreateInstance(gomock.Any(), gomock.Any()).Times(1)
 
-	manager.EXPECT().Create(gomock.Any(), gomock.Any(), []string{"user1", "user2"}).Times(1)
+	githubService.EXPECT().GetSSHKeys(gomock.Any(), []string{"user1", "user2"}).Return([]string{"ssh-rsa key1", "ssh-rsa key2"}, nil).Times(1)
+
+	manager.EXPECT().Create(gomock.Any(), gomock.Any(), []string{"ssh-rsa key1", "ssh-rsa key2"}).Times(1)
 
 	instance, err := usecase.CreateInstance(t.Context(), teamID)
 	assert.NoError(t, err)
 
 	assert.Equal(t, teamID, instance.TeamID)
+}
+
+func TestCreateInstance_githubUserNotFound(t *testing.T) {
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+
+	repo := repomock.NewMockRepository(ctrl)
+	manager := instancemock.NewMockManager(ctrl)
+	githubService := githubmock.NewMockGitHubService(ctrl)
+	usecase := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager, githubService)
+
+	teamID := uuid.New()
+
+	repo.EXPECT().Transaction(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, f func(context.Context) error) error {
+		return f(ctx)
+	})
+	repo.EXPECT().GetTeamInstances(gomock.Any(), teamID).Times(1)
+	repo.EXPECT().FindTeam(gomock.Any(), teamID).Return(domain.Team{
+		ID:        teamID,
+		GitHubIDs: []string{"nonexistentuser"},
+	}, nil).Times(1)
+
+	// GitHubユーザーが存在しない場合のエラー
+	githubService.EXPECT().GetSSHKeys(gomock.Any(), []string{"nonexistentuser"}).Return(nil, &github.UserNotFoundError{Username: "nonexistentuser"}).Times(1)
+
+	_, err := usecase.CreateInstance(t.Context(), teamID)
+	assert.Error(t, err)
+	assert.True(t, github.IsNotFound(err))
 }
 
 func TestCreateInstance_tooManyInstances(t *testing.T) {
@@ -51,7 +84,8 @@ func TestCreateInstance_tooManyInstances(t *testing.T) {
 
 	repo := repomock.NewMockRepository(ctrl)
 	manager := instancemock.NewMockManager(ctrl)
-	instanceUseCase := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager)
+	githubService := githubmock.NewMockGitHubService(ctrl)
+	instanceUseCase := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager, githubService)
 
 	teamID := uuid.New()
 
@@ -71,7 +105,8 @@ func TestDeleteInstance(t *testing.T) {
 
 	repo := repomock.NewMockRepository(ctrl)
 	manager := instancemock.NewMockManager(ctrl)
-	usecase := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager)
+	githubService := githubmock.NewMockGitHubService(ctrl)
+	usecase := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager, githubService)
 
 	instanceID := uuid.New()
 	providerID := uuid.New()
@@ -104,7 +139,8 @@ func TestDeleteInstance_instanceNotFound(t *testing.T) {
 
 	repo := repomock.NewMockRepository(ctrl)
 	manager := instancemock.NewMockManager(ctrl)
-	instanceUsecase := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager)
+	githubService := githubmock.NewMockGitHubService(ctrl)
+	instanceUsecase := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager, githubService)
 
 	instanceID := uuid.New()
 
@@ -218,7 +254,8 @@ func TestUpdateInstance(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			repo := repomock.NewMockRepository(ctrl)
 			manager := instancemock.NewMockManager(ctrl)
-			instanceUsecase := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager)
+			githubService := githubmock.NewMockGitHubService(ctrl)
+			instanceUsecase := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager, githubService)
 
 			instanceID := tt.fields.instance.ID
 			if instanceID == uuid.Nil {
@@ -251,6 +288,7 @@ func TestGetInstance(t *testing.T) {
 	t.Parallel()
 
 	ctrl := gomock.NewController(t)
+	githubService := githubmock.NewMockGitHubService(ctrl)
 
 	instanceID := uuid.New()
 	infraInstanceID := uuid.New().String()
@@ -313,7 +351,7 @@ func TestGetInstance(t *testing.T) {
 
 			repo := repomock.NewMockRepository(ctrl)
 			manager := instancemock.NewMockManager(ctrl)
-			u := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager)
+			u := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager, githubService)
 
 			repo.EXPECT().FindInstance(gomock.Any(), testCase.instanceID).
 				Return(testCase.instance, testCase.FindInstanceErr)
@@ -337,6 +375,7 @@ func TestGetTeamInstances(t *testing.T) {
 	t.Parallel()
 
 	ctrl := gomock.NewController(t)
+	githubService := githubmock.NewMockGitHubService(ctrl)
 
 	teamID := uuid.New()
 	instance1 := domain.Instance{
@@ -405,7 +444,7 @@ func TestGetTeamInstances(t *testing.T) {
 
 			repo := repomock.NewMockRepository(ctrl)
 			manager := instancemock.NewMockManager(ctrl)
-			u := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager)
+			u := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager, githubService)
 
 			repo.EXPECT().GetTeamInstances(gomock.Any(), testCase.teamID).
 				Return(testCase.instances, testCase.GetTeamInstancesErr)
@@ -443,6 +482,7 @@ func TestGetAllInstances(t *testing.T) {
 	t.Parallel()
 
 	ctrl := gomock.NewController(t)
+	githubService := githubmock.NewMockGitHubService(ctrl)
 
 	teamID := uuid.New()
 	instance1 := domain.Instance{
@@ -496,7 +536,7 @@ func TestGetAllInstances(t *testing.T) {
 
 			repo := repomock.NewMockRepository(ctrl)
 			manager := instancemock.NewMockManager(ctrl)
-			u := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager)
+			u := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager, githubService)
 
 			repo.EXPECT().GetAllInstances(gomock.Any()).
 				Return(testCase.instances, testCase.GetAllInstancesErr)

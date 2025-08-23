@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
+	"github.com/traPtitech/piscon-portal-v2/server/services/github"
 	"github.com/traPtitech/piscon-portal-v2/server/services/instance"
 )
 
@@ -29,16 +30,18 @@ type InstanceUseCase interface {
 }
 
 type InstanceUseCaseImpl struct {
-	repo    repository.Repository
-	factory *domain.InstanceFactory
-	manager instance.Manager
+	repo          repository.Repository
+	factory       *domain.InstanceFactory
+	manager       instance.Manager
+	githubService github.Service
 }
 
-func NewInstanceUseCase(repo repository.Repository, factory *domain.InstanceFactory, manager instance.Manager) InstanceUseCase {
+func NewInstanceUseCase(repo repository.Repository, factory *domain.InstanceFactory, manager instance.Manager, githubService github.Service) InstanceUseCase {
 	return &InstanceUseCaseImpl{
-		repo:    repo,
-		factory: factory,
-		manager: manager,
+		repo:          repo,
+		factory:       factory,
+		manager:       manager,
+		githubService: githubService,
 	}
 }
 
@@ -80,7 +83,16 @@ func (i *InstanceUseCaseImpl) CreateInstance(ctx context.Context, teamID uuid.UU
 			return fmt.Errorf("find team: %w", err)
 		}
 
-		providerInstanceID, err := i.manager.Create(ctx, instanceName(teamID, instance.Index), team.GitHubIDs)
+		// Get SSH keys from GitHub
+		sshKeys, err := i.githubService.GetSSHKeys(ctx, team.GitHubIDs)
+		if err != nil {
+			if github.IsNotFound(err) {
+				return NewUseCaseError(err)
+			}
+			return fmt.Errorf("get SSH keys from GitHub: %w", err)
+		}
+
+		providerInstanceID, err := i.manager.Create(ctx, instanceName(teamID, instance.Index), sshKeys)
 		if err != nil {
 			return fmt.Errorf("create infra instance: %w", err)
 		}

@@ -10,9 +10,9 @@ import (
 
 // Manager is an interface for managing infrastructure instances.
 type Manager interface {
-	// Create creates a new infrastructure instance with the given name and GitHub IDs.
+	// Create creates a new infrastructure instance with the given name and SSH public keys.
 	// Returns the provider instance ID or an error if the creation fails.
-	Create(ctx context.Context, name string, githubIDs []string) (string, error)
+	Create(ctx context.Context, name string, sshPubKeys []string) (string, error)
 	// Get retrieves an infrastructure instance by its provider ID.
 	// Returns the instance or an error if the retrieval fails.
 	Get(ctx context.Context, id string) (domain.InfraInstance, error)
