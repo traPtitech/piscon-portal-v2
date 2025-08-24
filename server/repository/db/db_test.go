@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/stephenafamo/bob"
 	"github.com/testcontainers/testcontainers-go/modules/mysql"
 	dbrepo "github.com/traPtitech/piscon-portal-v2/server/repository/db"

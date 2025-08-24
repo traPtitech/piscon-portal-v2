@@ -14,6 +14,7 @@ import (
 	"github.com/stephenafamo/bob/dialect/mysql/um"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
+	"github.com/traPtitech/piscon-portal-v2/server/repository/db/dbinfo"
 	"github.com/traPtitech/piscon-portal-v2/server/repository/db/models"
 )
 
@@ -76,7 +77,7 @@ func (r *Repository) GetUsersByIDs(ctx context.Context, ids []uuid.UUID) ([]doma
 		anyIDs[i] = id.String()
 	}
 	users, err := models.Users.Query(
-		sm.Where(models.UserColumns.ID.In(mysql.Arg(anyIDs...))),
+		sm.Where(models.Users.Columns.ID.In(mysql.Arg(anyIDs...))),
 	).All(ctx, r.executor(ctx))
 	if err != nil {
 		return nil, fmt.Errorf("get users by ids: %w", err)
@@ -95,7 +96,7 @@ func (r *Repository) GetUsersByIDs(ctx context.Context, ids []uuid.UUID) ([]doma
 
 func (r *Repository) GetAdmins(ctx context.Context) ([]domain.User, error) {
 	adminUsers, err := models.Users.Query(
-		sm.Where(models.UserColumns.IsAdmin.EQ(mysql.Arg(true))),
+		sm.Where(models.Users.Columns.IsAdmin.EQ(mysql.Arg(true))),
 	).All(ctx, r.executor(ctx))
 	if err != nil {
 		return nil, fmt.Errorf("get admins: %w", err)
@@ -123,8 +124,8 @@ func (r *Repository) AddAdmins(ctx context.Context, userIDs []uuid.UUID) error {
 		anyIDs[i] = id.String()
 	}
 	_, err := models.Users.Update(
-		um.SetCol(models.ColumnNames.Users.IsAdmin).To(true),
-		um.Where(models.UserColumns.ID.In(mysql.Arg(anyIDs...))),
+		um.SetCol(dbinfo.Users.Columns.IsAdmin.Name).To(true),
+		um.Where(models.Users.Columns.ID.In(mysql.Arg(anyIDs...))),
 	).Exec(ctx, r.executor(ctx))
 	if err != nil {
 		return fmt.Errorf("add admins: %w", err)
@@ -143,8 +144,8 @@ func (r *Repository) DeleteAdmins(ctx context.Context, userIDs []uuid.UUID) erro
 		anyIDs[i] = id.String()
 	}
 	_, err := models.Users.Update(
-		um.SetCol(models.ColumnNames.Users.IsAdmin).To(false),
-		um.Where(models.UserColumns.ID.In(mysql.Arg(anyIDs...))),
+		um.SetCol(dbinfo.Users.Columns.IsAdmin.Name).To(false),
+		um.Where(models.Users.Columns.ID.In(mysql.Arg(anyIDs...))),
 	).Exec(ctx, r.executor(ctx))
 	if err != nil {
 		return fmt.Errorf("delete admins: %w", err)

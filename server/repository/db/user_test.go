@@ -175,7 +175,7 @@ func TestAddAdmins(t *testing.T) {
 	assert.NoError(t, err)
 
 	resultAdmins, err := models.Users.Query(
-		sm.Where(models.UserColumns.ID.In(mysql.Arg(adminUser.ID, normalUser.ID))),
+		sm.Where(models.Users.Columns.ID.In(mysql.Arg(adminUser.ID, normalUser.ID))),
 	).All(t.Context(), db)
 	assert.NoError(t, err)
 	assert.Len(t, resultAdmins, 2)
@@ -205,7 +205,7 @@ func TestDeleteAdmins(t *testing.T) {
 	assert.NoError(t, err)
 
 	resultAdmins, err := models.Users.Query(
-		sm.Where(models.UserColumns.ID.In(mysql.Arg(adminUser.ID, normalUser.ID))),
+		sm.Where(models.Users.Columns.ID.In(mysql.Arg(adminUser.ID, normalUser.ID))),
 	).All(t.Context(), db)
 	assert.NoError(t, err)
 	assert.Len(t, resultAdmins, 2)

@@ -1,5 +1,20 @@
+plugins:
+  dbinfo:
+    pkgname: dbinfo
+    destination: repository/db/dbinfo
+  enums:
+    pkgname: enums
+    destination: repository/db/enums
+  models:
+    pkgname: models
+    destination: repository/db/models
+  factory:
+    disabled: true
+  dberrors:
+    disabled: true
+
+type_system: database/sql
 no_tests: true
 
 mysql:
   dsn: root:password@tcp(127.0.0.1:3306)/portal
-  output: repository/db/models
