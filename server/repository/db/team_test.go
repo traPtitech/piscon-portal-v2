@@ -176,3 +176,63 @@ func TestUpdateTeam(t *testing.T) {
 
 	testutil.CompareTeam(t, team, got)
 }
+
+func TestCreateTeamWithGitHubIDs(t *testing.T) {
+	t.Parallel()
+
+	repo, db := setupRepository(t)
+
+	teamID := uuid.New()
+	member := domain.User{
+		ID:   uuid.New(),
+		Name: "user1",
+	}
+
+	team := domain.Team{
+		ID:        teamID,
+		Name:      "team-with-github",
+		Members:   []domain.User{member},
+		GitHubIDs: []string{"user1", "user2"},
+		CreatedAt: time.Now(),
+	}
+
+	mustMakeUser(t, db, member)
+
+	err := repo.CreateTeam(t.Context(), team)
+	require.NoError(t, err)
+
+	got, err := repo.FindTeam(t.Context(), team.ID)
+	require.NoError(t, err)
+
+	assert.Equal(t, team.ID, got.ID)
+	assert.Equal(t, team.Name, got.Name)
+	assert.Equal(t, len(team.GitHubIDs), len(got.GitHubIDs))
+	assert.ElementsMatch(t, team.GitHubIDs, got.GitHubIDs)
+}
+
+func TestUpdateTeamWithGitHubIDs(t *testing.T) {
+	t.Parallel()
+
+	repo, db := setupRepository(t)
+
+	team := domain.Team{
+		ID:        uuid.New(),
+		Name:      "team1",
+		Members:   nil,
+		GitHubIDs: []string{"original1", "original2"},
+		CreatedAt: time.Now(),
+	}
+	mustMakeTeam(t, db, team)
+
+	// Update GitHub IDs
+	team.GitHubIDs = []string{"updated1", "updated2", "updated3"}
+
+	err := repo.UpdateTeam(t.Context(), team)
+	assert.NoError(t, err)
+
+	got, err := repo.FindTeam(t.Context(), team.ID)
+	require.NoError(t, err)
+
+	assert.Equal(t, len(team.GitHubIDs), len(got.GitHubIDs))
+	assert.ElementsMatch(t, team.GitHubIDs, got.GitHubIDs)
+}

@@ -14,6 +14,7 @@ import (
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
 	dbrepo "github.com/traPtitech/piscon-portal-v2/server/repository/db"
 	"github.com/traPtitech/piscon-portal-v2/server/server"
+	"github.com/traPtitech/piscon-portal-v2/server/services/github"
 	"github.com/traPtitech/piscon-portal-v2/server/services/instance"
 	"github.com/traPtitech/piscon-portal-v2/server/services/instance/aws"
 	"github.com/traPtitech/piscon-portal-v2/server/services/instance/fake"
@@ -50,8 +51,9 @@ func main() {
 	if err != nil {
 		log.Fatal("failed to create repository:", err)
 	}
+	githubService := github.NewHTTPGitHubService()
 
-	useCase := usecase.New(useCaseConfig, repo, manager)
+	useCase := usecase.New(useCaseConfig, repo, manager, githubService)
 	handler, err := handler.New(useCase, repo, handlerConfig)
 	if err != nil {
 		panic(err)

@@ -3,6 +3,7 @@ package usecase
 import (
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
+	"github.com/traPtitech/piscon-portal-v2/server/services/github"
 	"github.com/traPtitech/piscon-portal-v2/server/services/instance"
 )
 
@@ -31,7 +32,7 @@ type Config struct {
 	InstanceLimit int
 }
 
-func New(config Config, repo repository.Repository, instanceManager instance.Manager) UseCase {
+func New(config Config, repo repository.Repository, instanceManager instance.Manager, githubService github.Service) UseCase {
 	return &useCaseImpl{
 		TeamUseCase:      NewTeamUseCase(repo),
 		UserUseCase:      NewUserUseCase(repo),
@@ -39,6 +40,6 @@ func New(config Config, repo repository.Repository, instanceManager instance.Man
 		ScoreUseCase:     NewScoreUseCase(repo),
 		AdminUseCase:     NewAdminUseCase(repo),
 		DocumentUseCase:  NewDocumentUseCase(repo),
-		InstanceUseCase:  NewInstanceUseCase(repo, domain.NewInstanceFactory(config.InstanceLimit), instanceManager),
+		InstanceUseCase:  NewInstanceUseCase(repo, domain.NewInstanceFactory(config.InstanceLimit), instanceManager, githubService),
 	}
 }

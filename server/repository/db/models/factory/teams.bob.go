@@ -44,9 +44,14 @@ type TeamTemplate struct {
 }
 
 type teamR struct {
-	Users []*teamRUsersR
+	TeamGithubAccounts []*teamRTeamGithubAccountsR
+	Users              []*teamRUsersR
 }
 
+type teamRTeamGithubAccountsR struct {
+	number int
+	o      *TeamGithubAccountTemplate
+}
 type teamRUsersR struct {
 	number int
 	o      *UserTemplate
@@ -62,6 +67,19 @@ func (o *TeamTemplate) Apply(ctx context.Context, mods ...TeamMod) {
 // setModelRels creates and sets the relationships on *models.Team
 // according to the relationships in the template. Nothing is inserted into the db
 func (t TeamTemplate) setModelRels(o *models.Team) {
+	if t.r.TeamGithubAccounts != nil {
+		rel := models.TeamGithubAccountSlice{}
+		for _, r := range t.r.TeamGithubAccounts {
+			related := r.o.BuildMany(r.number)
+			for _, rel := range related {
+				rel.TeamID = o.ID // h2
+				rel.R.Team = o
+			}
+			rel = append(rel, related...)
+		}
+		o.R.TeamGithubAccounts = rel
+	}
+
 	if t.r.Users != nil {
 		rel := models.UserSlice{}
 		for _, r := range t.r.Users {
@@ -160,17 +178,34 @@ func ensureCreatableTeam(m *models.TeamSetter) {
 func (o *TeamTemplate) insertOptRels(ctx context.Context, exec bob.Executor, m *models.Team) (context.Context, error) {
 	var err error
 
-	isUsersDone, _ := teamRelUsersCtx.Value(ctx)
-	if !isUsersDone && o.r.Users != nil {
-		ctx = teamRelUsersCtx.WithValue(ctx, true)
-		for _, r := range o.r.Users {
-			var rel0 models.UserSlice
+	isTeamGithubAccountsDone, _ := teamRelTeamGithubAccountsCtx.Value(ctx)
+	if !isTeamGithubAccountsDone && o.r.TeamGithubAccounts != nil {
+		ctx = teamRelTeamGithubAccountsCtx.WithValue(ctx, true)
+		for _, r := range o.r.TeamGithubAccounts {
+			var rel0 models.TeamGithubAccountSlice
 			ctx, rel0, err = r.o.createMany(ctx, exec, r.number)
 			if err != nil {
 				return ctx, err
 			}
 
-			err = m.AttachUsers(ctx, exec, rel0...)
+			err = m.AttachTeamGithubAccounts(ctx, exec, rel0...)
+			if err != nil {
+				return ctx, err
+			}
+		}
+	}
+
+	isUsersDone, _ := teamRelUsersCtx.Value(ctx)
+	if !isUsersDone && o.r.Users != nil {
+		ctx = teamRelUsersCtx.WithValue(ctx, true)
+		for _, r := range o.r.Users {
+			var rel1 models.UserSlice
+			ctx, rel1, err = r.o.createMany(ctx, exec, r.number)
+			if err != nil {
+				return ctx, err
+			}
+
+			err = m.AttachUsers(ctx, exec, rel1...)
 			if err != nil {
 				return ctx, err
 			}
@@ -389,6 +424,44 @@ func (m teamMods) WithParentsCascading() TeamMod {
 			return
 		}
 		ctx = teamWithParentsCascadingCtx.WithValue(ctx, true)
+	})
+}
+
+func (m teamMods) WithTeamGithubAccounts(number int, related *TeamGithubAccountTemplate) TeamMod {
+	return TeamModFunc(func(ctx context.Context, o *TeamTemplate) {
+		o.r.TeamGithubAccounts = []*teamRTeamGithubAccountsR{{
+			number: number,
+			o:      related,
+		}}
+	})
+}
+
+func (m teamMods) WithNewTeamGithubAccounts(number int, mods ...TeamGithubAccountMod) TeamMod {
+	return TeamModFunc(func(ctx context.Context, o *TeamTemplate) {
+		related := o.f.NewTeamGithubAccount(ctx, mods...)
+		m.WithTeamGithubAccounts(number, related).Apply(ctx, o)
+	})
+}
+
+func (m teamMods) AddTeamGithubAccounts(number int, related *TeamGithubAccountTemplate) TeamMod {
+	return TeamModFunc(func(ctx context.Context, o *TeamTemplate) {
+		o.r.TeamGithubAccounts = append(o.r.TeamGithubAccounts, &teamRTeamGithubAccountsR{
+			number: number,
+			o:      related,
+		})
+	})
+}
+
+func (m teamMods) AddNewTeamGithubAccounts(number int, mods ...TeamGithubAccountMod) TeamMod {
+	return TeamModFunc(func(ctx context.Context, o *TeamTemplate) {
+		related := o.f.NewTeamGithubAccount(ctx, mods...)
+		m.AddTeamGithubAccounts(number, related).Apply(ctx, o)
+	})
+}
+
+func (m teamMods) WithoutTeamGithubAccounts() TeamMod {
+	return TeamModFunc(func(ctx context.Context, o *TeamTemplate) {
+		o.r.TeamGithubAccounts = nil
 	})
 }
 

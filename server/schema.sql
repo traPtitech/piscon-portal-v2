@@ -15,6 +15,14 @@ CREATE TABLE IF NOT EXISTS `users` (
     FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS `team_github_accounts` (
+    `id` VARCHAR(36) NOT NULL,
+    `team_id` VARCHAR(36) NOT NULL,
+    `github_id` VARCHAR(255) NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS `sessions` (
     `id` VARCHAR(50) NOT NULL,
     `user_id` VARCHAR(36) NOT NULL,

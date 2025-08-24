@@ -14,13 +14,14 @@ type contextKey string
 var (
 	// Table context
 
-	benchmarkLogCtx = newContextual[*models.BenchmarkLog]("benchmarkLog")
-	benchmarkCtx    = newContextual[*models.Benchmark]("benchmark")
-	documentCtx     = newContextual[*models.Document]("document")
-	instanceCtx     = newContextual[*models.Instance]("instance")
-	sessionCtx      = newContextual[*models.Session]("session")
-	teamCtx         = newContextual[*models.Team]("team")
-	userCtx         = newContextual[*models.User]("user")
+	benchmarkLogCtx      = newContextual[*models.BenchmarkLog]("benchmarkLog")
+	benchmarkCtx         = newContextual[*models.Benchmark]("benchmark")
+	documentCtx          = newContextual[*models.Document]("document")
+	instanceCtx          = newContextual[*models.Instance]("instance")
+	sessionCtx           = newContextual[*models.Session]("session")
+	teamGithubAccountCtx = newContextual[*models.TeamGithubAccount]("teamGithubAccount")
+	teamCtx              = newContextual[*models.Team]("team")
+	userCtx              = newContextual[*models.User]("user")
 
 	// Relationship Contexts for benchmark_logs
 	benchmarkLogWithParentsCascadingCtx = newContextual[bool]("benchmarkLogWithParentsCascading")
@@ -42,9 +43,14 @@ var (
 	sessionWithParentsCascadingCtx = newContextual[bool]("sessionWithParentsCascading")
 	sessionRelUserCtx              = newContextual[bool]("sessions.users.sessions_ibfk_1")
 
+	// Relationship Contexts for team_github_accounts
+	teamGithubAccountWithParentsCascadingCtx = newContextual[bool]("teamGithubAccountWithParentsCascading")
+	teamGithubAccountRelTeamCtx              = newContextual[bool]("team_github_accounts.teams.team_github_accounts_ibfk_1")
+
 	// Relationship Contexts for teams
-	teamWithParentsCascadingCtx = newContextual[bool]("teamWithParentsCascading")
-	teamRelUsersCtx             = newContextual[bool]("teams.users.users_ibfk_1")
+	teamWithParentsCascadingCtx  = newContextual[bool]("teamWithParentsCascading")
+	teamRelTeamGithubAccountsCtx = newContextual[bool]("team_github_accounts.teams.team_github_accounts_ibfk_1")
+	teamRelUsersCtx              = newContextual[bool]("teams.users.users_ibfk_1")
 
 	// Relationship Contexts for users
 	userWithParentsCascadingCtx = newContextual[bool]("userWithParentsCascading")

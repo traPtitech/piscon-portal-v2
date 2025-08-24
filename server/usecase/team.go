@@ -52,6 +52,7 @@ type CreateTeamInput struct {
 	MemberIDs []uuid.UUID
 	// CreatorID is the ID of the user who creates the team
 	CreatorID uuid.UUID
+	GitHubIDs []string
 }
 
 func (u *teamUseCaseImpl) CreateTeam(ctx context.Context, input CreateTeamInput) (domain.Team, error) {
@@ -62,6 +63,8 @@ func (u *teamUseCaseImpl) CreateTeam(ctx context.Context, input CreateTeamInput)
 	}
 
 	team := domain.NewTeam(input.Name)
+	team.GitHubIDs = input.GitHubIDs
+
 	for _, memberID := range input.MemberIDs {
 		user, err := u.repo.FindUser(ctx, memberID)
 		if err != nil {
@@ -86,6 +89,7 @@ type UpdateTeamInput struct {
 	ID        uuid.UUID
 	Name      string
 	MemberIDs []uuid.UUID
+	GitHubIDs []string
 }
 
 func (u *teamUseCaseImpl) UpdateTeam(ctx context.Context, input UpdateTeamInput) (domain.Team, error) {
@@ -96,6 +100,11 @@ func (u *teamUseCaseImpl) UpdateTeam(ctx context.Context, input UpdateTeamInput)
 
 	if input.Name != "" {
 		team.Name = input.Name
+	}
+
+	// Update GitHub IDs if provided
+	if len(input.GitHubIDs) != 0 {
+		team.GitHubIDs = input.GitHubIDs
 	}
 
 	for _, memberID := range input.MemberIDs {

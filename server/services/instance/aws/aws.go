@@ -16,6 +16,10 @@ import (
 
 var _ instance.Manager = (*Client)(nil)
 
+type GitHubKey struct {
+	Key string `json:"key"`
+}
+
 type Client struct {
 	client *ec2.Client
 	cfg    Config

@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
@@ -38,9 +39,10 @@ func TestGetTeams(t *testing.T) {
 			Members: members,
 		},
 		{
-			ID:      uuid.New(),
-			Name:    "Team B",
-			Members: members,
+			ID:        uuid.New(),
+			Name:      "Team B",
+			Members:   members,
+			GitHubIDs: []string{"user1", "user2"},
 		},
 	}
 
@@ -91,8 +93,9 @@ func TestCreateTeam(t *testing.T) {
 
 	e := echo.New()
 	req := &openapi.PostTeamReq{
-		Name:    "Team A",
-		Members: []openapi.UserId{openapi.UserId(userID)},
+		Name:      "Team A",
+		Members:   []openapi.UserId{openapi.UserId(userID)},
+		GithubIds: []openapi.GitHubId{"user1", "user2"},
 	}
 	httpReq := newJSONRequest(http.MethodPost, "/teams", req)
 	rec := httptest.NewRecorder()
@@ -105,6 +108,7 @@ func TestCreateTeam(t *testing.T) {
 		Name:      "Team A",
 		MemberIDs: []uuid.UUID{userID},
 		CreatorID: userID,
+		GitHubIDs: []string{"user1", "user2"},
 	}).Return(domain.Team{
 		ID:      teamID,
 		Name:    "Team A",
@@ -144,6 +148,7 @@ func TestCreateTeam_Error(t *testing.T) {
 		Name:      "Team A",
 		MemberIDs: []uuid.UUID{userID},
 		CreatorID: userID,
+		GitHubIDs: []string{},
 	}).Return(domain.Team{}, usecase.NewUseCaseErrorFromMsg("user is already in another team"))
 
 	_ = h.CreateTeam(c)
@@ -174,6 +179,7 @@ func TestGetTeam(t *testing.T) {
 		Members: []domain.User{
 			{ID: uuid.New()},
 		},
+		GitHubIDs: []string{"user1"},
 	}
 
 	useCaseMock.EXPECT().GetTeam(gomock.Any(), teamID).Return(team, nil)
@@ -236,6 +242,7 @@ func TestUpdateTeam(t *testing.T) {
 		ID:        teamID,
 		Name:      "Updated Team",
 		MemberIDs: []uuid.UUID{newMemberID},
+		GitHubIDs: []string{},
 	}).Return(domain.Team{
 		ID:      teamID,
 		Name:    "Updated Team",
@@ -250,6 +257,50 @@ func TestUpdateTeam(t *testing.T) {
 	var res openapi.Team
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &res))
 	assert.Equal(t, teamID, uuid.UUID(res.ID))
+}
+
+func TestUpdateTeamWithGitHubIDs(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	repoMock := repomock.NewMockRepository(ctrl)
+	useCaseMock := usecasemock.NewMockUseCase(ctrl)
+
+	e := echo.New()
+	teamID := uuid.New()
+	newMemberID := uuid.New()
+	req := &openapi.PatchTeamReq{
+		Name:      openapi.NewOptTeamName("Updated Team"),
+		Members:   []openapi.UserId{openapi.UserId(newMemberID)},
+		GithubIds: []openapi.GitHubId{"updated1", "updated2"},
+	}
+	httpReq := newJSONRequest(http.MethodPatch, "/teams/"+teamID.String(), req)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(httpReq, rec)
+	c.SetParamNames("teamID")
+	c.SetParamValues(teamID.String())
+	h := NewHandler(useCaseMock, repoMock, nil)
+
+	useCaseMock.EXPECT().UpdateTeam(gomock.Any(), usecase.UpdateTeamInput{
+		ID:        teamID,
+		Name:      "Updated Team",
+		MemberIDs: []uuid.UUID{newMemberID},
+		GitHubIDs: []string{"updated1", "updated2"},
+	}).Return(domain.Team{
+		ID:        teamID,
+		Name:      "Updated Team",
+		Members:   []domain.User{{ID: newMemberID}},
+		GitHubIDs: []string{"updated1", "updated2"},
+	}, nil)
+
+	_ = h.UpdateTeam(c)
+
+	if !assert.Equal(t, http.StatusOK, rec.Code, "status code") {
+		t.Log(rec.Body.String())
+	}
+	var res openapi.Team
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &res))
+	assert.Equal(t, teamID, uuid.UUID(res.ID))
+	assert.Equal(t, []openapi.GitHubId{"updated1", "updated2"}, res.GithubIds)
 }
 
 func TestUpdateTeam_Error(t *testing.T) {
@@ -276,6 +327,7 @@ func TestUpdateTeam_Error(t *testing.T) {
 		ID:        teamID,
 		Name:      "Updated Team",
 		MemberIDs: []uuid.UUID{newMemberID},
+		GitHubIDs: []string{},
 	}).Return(domain.Team{}, usecase.NewUseCaseErrorFromMsg("team is full"))
 
 	_ = h.UpdateTeam(c)
@@ -293,4 +345,6 @@ func compareTeam(t *testing.T, expected domain.Team, actual openapi.Team) {
 	for i, member := range expected.Members {
 		assert.Equal(t, member.ID, uuid.UUID(actual.Members[i]))
 	}
+	assert.ElementsMatch(t, expected.GitHubIDs,
+		lo.Map(actual.GithubIds, func(id openapi.GitHubId, _ int) string { return string(id) }))
 }

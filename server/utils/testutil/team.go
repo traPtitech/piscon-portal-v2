@@ -31,5 +31,6 @@ func CompareTeam(t *testing.T, want, got domain.Team) {
 	assert.Equal(t, want.ID, got.ID, "team.ID mismatch")
 	assert.Equal(t, want.Name, got.Name, "team.Name mismatch")
 	assert.WithinDuration(t, want.CreatedAt, got.CreatedAt, time.Second, "team.CreatedAt mismatch")
+	assert.ElementsMatch(t, want.GitHubIDs, got.GitHubIDs, "team.GitHubIDs mismatch")
 	CompareUsers(t, want.Members, got.Members)
 }

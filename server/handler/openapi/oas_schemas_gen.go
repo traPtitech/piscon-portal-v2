@@ -1779,6 +1779,8 @@ type PostTeamReq struct {
 	Name TeamName `json:"name"`
 	// チームに所属させる部員のID.
 	Members []UserId `json:"members"`
+	// メンバーのGitHub のID.
+	GithubIds []GitHubId `json:"githubIds"`
 }
 
 // GetName returns the value of Name.
@@ -1791,6 +1793,11 @@ func (s *PostTeamReq) GetMembers() []UserId {
 	return s.Members
 }
 
+// GetGithubIds returns the value of GithubIds.
+func (s *PostTeamReq) GetGithubIds() []GitHubId {
+	return s.GithubIds
+}
+
 // SetName sets the value of Name.
 func (s *PostTeamReq) SetName(val TeamName) {
 	s.Name = val
@@ -1799,6 +1806,11 @@ func (s *PostTeamReq) SetName(val TeamName) {
 // SetMembers sets the value of Members.
 func (s *PostTeamReq) SetMembers(val []UserId) {
 	s.Members = val
+}
+
+// SetGithubIds sets the value of GithubIds.
+func (s *PostTeamReq) SetGithubIds(val []GitHubId) {
+	s.GithubIds = val
 }
 
 // PutAdminsOK is response for PutAdmins operation.
