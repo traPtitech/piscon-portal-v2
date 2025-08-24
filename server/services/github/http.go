@@ -24,8 +24,8 @@ func NewHTTPGitHubService() Service {
 	}
 }
 
-// GitHubKey represents a GitHub SSH key.
-type GitHubKey struct {
+// Key represents a GitHub SSH key.
+type Key struct {
 	ID  int    `json:"id"`
 	Key string `json:"key"`
 }
@@ -68,7 +68,7 @@ func (s *HTTPGitHubService) getUserSSHKeys(ctx context.Context, githubID string)
 		return nil, fmt.Errorf("GitHub API returned status %d for user %s", resp.StatusCode, githubID)
 	}
 
-	var keys []GitHubKey
+	var keys []Key
 	if err := json.NewDecoder(resp.Body).Decode(&keys); err != nil {
 		return nil, fmt.Errorf("decode response for user %s: %w", githubID, err)
 	}
