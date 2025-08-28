@@ -108,6 +108,11 @@ func (b *PrivateIsu) Wait(_ context.Context) (domain.Result, time.Time, error) {
 func (b *PrivateIsu) CalculateScore(_ context.Context, allStdout, allStderr string) (int, error) {
 	b.stdout, b.stderr = allStdout, allStderr
 
+	if len(b.stdout) == 0 {
+		// 標準出力が空のときはまだ実行中なので、スコア0を返す
+		return 0, nil
+	}
+
 	var stdout stdOut
 	err := json.Unmarshal([]byte(b.stdout), &stdout)
 	if err != nil {
