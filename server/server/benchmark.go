@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 
 	"github.com/google/uuid"
@@ -40,8 +41,8 @@ func (bs *BenchmarkService) GetBenchmarkJob(ctx context.Context, _ *portalv1.Get
 
 	return &portalv1.GetBenchmarkJobResponse{
 		BenchmarkJob: &portalv1.BenchmarkJob{
-			BenchmarkId: bench.ID.String(),
-			TargetUrl:   *bench.Instance.Infra.PrivateIP,
+			BenchmarkId:     bench.ID.String(),
+			TargetIpAddress: *bench.Instance.Infra.PrivateIP,
 		},
 	}, nil
 }
@@ -67,7 +68,7 @@ func (bs *BenchmarkService) SendBenchmarkProgress(stream grpc.ClientStreamingSer
 			AdminLog: req.Stderr,
 		}, req.Score, req.StartedAt.AsTime())
 		if usecase.IsUseCaseError(err) {
-			return status.Error(codes.InvalidArgument, "invalid benchmark status")
+			return status.Error(codes.InvalidArgument, fmt.Sprintf("invalid benchmark status: %v", err))
 		}
 		if errors.Is(err, usecase.ErrNotFound) {
 			return status.Error(codes.NotFound, "benchmark not found")
@@ -100,7 +101,7 @@ func (bs *BenchmarkService) PostJobFinished(ctx context.Context, req *portalv1.P
 
 	err = bs.b.FinalizeBenchmark(ctx, benchID, result, req.FinishedAt.AsTime(), req.RunnerError)
 	if usecase.IsUseCaseError(err) {
-		return nil, status.Error(codes.InvalidArgument, "invalid benchmark status")
+		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("invalid benchmark status: %v", err))
 	}
 	if errors.Is(err, usecase.ErrNotFound) {
 		return nil, status.Error(codes.NotFound, "benchmark not found")

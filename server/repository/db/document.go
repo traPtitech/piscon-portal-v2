@@ -16,7 +16,7 @@ import (
 )
 
 func (r *Repository) GetDocument(ctx context.Context) (domain.Document, error) {
-	doc, err := models.Documents.Query(sm.OrderBy(models.DocumentColumns.CreatedAt).Desc()).One(ctx, r.executor(ctx))
+	doc, err := models.Documents.Query(sm.OrderBy(models.Documents.Columns.CreatedAt).Desc()).One(ctx, r.executor(ctx))
 	if errors.Is(err, sql.ErrNoRows) {
 		return domain.Document{}, repository.ErrNotFound
 	}

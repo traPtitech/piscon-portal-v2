@@ -42,8 +42,8 @@ func TestGetBenchmarkJob(t *testing.T) {
 				},
 			},
 			job: &portalv1.BenchmarkJob{
-				BenchmarkId: benchID.String(),
-				TargetUrl:   targetIP,
+				BenchmarkId:     benchID.String(),
+				TargetIpAddress: targetIP,
 			},
 		},
 		"StartBenchmarkがErrNotFound": {

@@ -14,7 +14,11 @@ import (
 )
 
 func (r *Repository) FindTeam(ctx context.Context, id uuid.UUID) (domain.Team, error) {
-	team, err := models.Teams.Query(models.SelectWhere.Teams.ID.EQ(id.String()), models.SelectThenLoad.Team.Users()).One(ctx, r.executor(ctx))
+	team, err := models.Teams.Query(
+		models.SelectWhere.Teams.ID.EQ(id.String()),
+		models.SelectThenLoad.Team.Users(),
+		models.SelectThenLoad.Team.TeamGithubAccounts(),
+	).One(ctx, r.executor(ctx))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Team{}, repository.ErrNotFound
@@ -25,7 +29,10 @@ func (r *Repository) FindTeam(ctx context.Context, id uuid.UUID) (domain.Team, e
 }
 
 func (r *Repository) GetTeams(ctx context.Context) ([]domain.Team, error) {
-	teams, err := models.Teams.Query(models.SelectThenLoad.Team.Users()).All(ctx, r.executor(ctx))
+	teams, err := models.Teams.Query(
+		models.SelectThenLoad.Team.Users(),
+		models.SelectThenLoad.Team.TeamGithubAccounts(),
+	).All(ctx, r.executor(ctx))
 	if err != nil {
 		return nil, fmt.Errorf("get teams: %w", err)
 	}
@@ -68,6 +75,18 @@ func (r *Repository) CreateTeam(ctx context.Context, team domain.Team) error {
 		return fmt.Errorf("update users: %w", err)
 	}
 
+	// Insert GitHub accounts
+	for _, githubID := range team.GitHubIDs {
+		_, err = models.TeamGithubAccounts.Insert(&models.TeamGithubAccountSetter{
+			ID:       lo.ToPtr(uuid.New().String()),
+			TeamID:   lo.ToPtr(team.ID.String()),
+			GithubID: lo.ToPtr(githubID),
+		}).Exec(ctx, r.executor(ctx))
+		if err != nil {
+			return fmt.Errorf("create team github account: %w", err)
+		}
+	}
+
 	return nil
 }
 
@@ -100,6 +119,26 @@ func (r *Repository) UpdateTeam(ctx context.Context, team domain.Team) error {
 		return fmt.Errorf("update users: %w", err)
 	}
 
+	// Delete existing GitHub accounts
+	_, err = models.TeamGithubAccounts.Delete(
+		models.DeleteWhere.TeamGithubAccounts.TeamID.EQ(team.ID.String()),
+	).Exec(ctx, r.executor(ctx))
+	if err != nil {
+		return fmt.Errorf("delete team github accounts: %w", err)
+	}
+
+	// Insert new GitHub accounts
+	for _, githubID := range team.GitHubIDs {
+		_, err = models.TeamGithubAccounts.Insert(&models.TeamGithubAccountSetter{
+			ID:       lo.ToPtr(uuid.New().String()),
+			TeamID:   lo.ToPtr(team.ID.String()),
+			GithubID: lo.ToPtr(githubID),
+		}).Exec(ctx, r.executor(ctx))
+		if err != nil {
+			return fmt.Errorf("create team github account: %w", err)
+		}
+	}
+
 	return nil
 }
 
@@ -112,6 +151,12 @@ func toDomainTeam(team *models.Team) (domain.Team, error) {
 		}
 		members = append(members, domainUser)
 	}
+
+	githubIDs := make([]string, 0, len(team.R.TeamGithubAccounts))
+	for _, githubAccount := range team.R.TeamGithubAccounts {
+		githubIDs = append(githubIDs, githubAccount.GithubID)
+	}
+
 	teamID, err := uuid.Parse(team.ID)
 	if err != nil {
 		return domain.Team{}, fmt.Errorf("parse team ID: %w", err)
@@ -120,6 +165,7 @@ func toDomainTeam(team *models.Team) (domain.Team, error) {
 		ID:        teamID,
 		Name:      team.Name,
 		Members:   members,
+		GitHubIDs: githubIDs,
 		CreatedAt: team.CreatedAt,
 	}, nil
 }

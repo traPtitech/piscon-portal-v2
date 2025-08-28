@@ -18,6 +18,8 @@ import (
 	"github.com/stephenafamo/scan"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
+	"github.com/traPtitech/piscon-portal-v2/server/repository/db/dbinfo"
+	"github.com/traPtitech/piscon-portal-v2/server/repository/db/enums"
 	"github.com/traPtitech/piscon-portal-v2/server/repository/db/models"
 	"github.com/traPtitech/piscon-portal-v2/server/utils/ptr"
 )
@@ -63,14 +65,14 @@ func (r *Repository) GetBenchmarks(ctx context.Context, query repository.Benchma
 
 	mods := bob.Mods[*dialect.SelectQuery]{
 		models.Preload.Benchmark.Instance(),
-		sm.OrderBy(models.BenchmarkColumns.CreatedAt).Asc(),
+		sm.OrderBy(models.Benchmarks.Columns.CreatedAt).Asc(),
 	}
 	if query.TeamID.IsSet() {
 		teamID := query.TeamID.Get().String()
 		mods = append(mods, where.TeamID.EQ(teamID))
 	}
 	if query.StatusIn.IsSet() {
-		var statuses []models.BenchmarksStatus
+		var statuses []enums.BenchmarksStatus
 		for _, status := range query.StatusIn.Get() {
 			dbModelStatus, err := fromDomainBenchmarkStatus(status)
 			if err != nil {
@@ -99,8 +101,8 @@ func (r *Repository) GetBenchmarks(ctx context.Context, query repository.Benchma
 }
 
 func (r *Repository) GetOldestQueuedBenchmark(ctx context.Context) (domain.Benchmark, error) {
-	statusWaiting := models.SelectWhere.Benchmarks.Status.EQ(models.BenchmarksStatusWaiting)
-	orderByCreatedAtAsc := sm.OrderBy(models.BenchmarkColumns.CreatedAt).Asc()
+	statusWaiting := models.SelectWhere.Benchmarks.Status.EQ(enums.BenchmarksStatusWaiting)
+	orderByCreatedAtAsc := sm.OrderBy(models.Benchmarks.Columns.CreatedAt).Asc()
 	limit1 := sm.Limit(1)
 	benchmark, err := models.Benchmarks.Query(
 		models.Preload.Benchmark.Instance(),
@@ -168,7 +170,7 @@ func (r *Repository) UpdateBenchmarkLog(ctx context.Context, benchmarkID uuid.UU
 			AdminLog:    lo.ToPtr(log.AdminLog),
 		},
 		im.OnDuplicateKeyUpdate(
-			im.UpdateWithValues(models.ColumnNames.BenchmarkLogs.UserLog, models.ColumnNames.BenchmarkLogs.AdminLog),
+			im.UpdateWithValues(dbinfo.BenchmarkLogs.Columns.UserLog.Name, dbinfo.BenchmarkLogs.Columns.AdminLog.Name),
 		),
 	).Exec(ctx, r.executor(ctx))
 	if err != nil {
@@ -193,14 +195,14 @@ func (r *Repository) GetRanking(ctx context.Context, query repository.RankingQue
 		sm.From(
 			models.Benchmarks.Query(
 				sm.Columns(
-					models.Benchmarks.Columns(),
+					models.Benchmarks.Columns,
 					mysql.F("RANK")(
 						fm.Over(
-							wm.PartitionBy(models.BenchmarkColumns.TeamID),
+							wm.PartitionBy(models.Benchmarks.Columns.TeamID),
 							wm.OrderBy(maxColumn).Desc()),
 					).As("rank_in_team"),
 				),
-				models.SelectWhere.Benchmarks.Status.EQ(models.BenchmarksStatusFinished),
+				models.SelectWhere.Benchmarks.Status.EQ(enums.BenchmarksStatusFinished),
 			),
 		).As("rank_team"),
 		sm.Where(mysql.Quote("rank_team", "rank_in_team").EQ(mysql.Arg(1))),
@@ -230,30 +232,30 @@ func (r *Repository) GetRanking(ctx context.Context, query repository.RankingQue
 	return ranking, nil
 }
 
-func fromDomainBenchmarkStatus(status domain.BenchmarkStatus) (models.BenchmarksStatus, error) {
+func fromDomainBenchmarkStatus(status domain.BenchmarkStatus) (enums.BenchmarksStatus, error) {
 	switch status {
 	case domain.BenchmarkStatusWaiting:
-		return models.BenchmarksStatusWaiting, nil
+		return enums.BenchmarksStatusWaiting, nil
 	case domain.BenchmarkStatusReadying:
-		return models.BenchmarksStatusReadying, nil
+		return enums.BenchmarksStatusReadying, nil
 	case domain.BenchmarkStatusRunning:
-		return models.BenchmarksStatusRunning, nil
+		return enums.BenchmarksStatusRunning, nil
 	case domain.BenchmarkStatusFinished:
-		return models.BenchmarksStatusFinished, nil
+		return enums.BenchmarksStatusFinished, nil
 	default:
 		return "", errors.New("unknown benchmark status")
 	}
 }
 
-func toDomainBenchmarkStatus(status models.BenchmarksStatus) (domain.BenchmarkStatus, error) {
+func toDomainBenchmarkStatus(status enums.BenchmarksStatus) (domain.BenchmarkStatus, error) {
 	switch status {
-	case models.BenchmarksStatusWaiting:
+	case enums.BenchmarksStatusWaiting:
 		return domain.BenchmarkStatusWaiting, nil
-	case models.BenchmarksStatusReadying:
+	case enums.BenchmarksStatusReadying:
 		return domain.BenchmarkStatusReadying, nil
-	case models.BenchmarksStatusRunning:
+	case enums.BenchmarksStatusRunning:
 		return domain.BenchmarkStatusRunning, nil
-	case models.BenchmarksStatusFinished:
+	case enums.BenchmarksStatusFinished:
 		return domain.BenchmarkStatusFinished, nil
 	default:
 		return "", errors.New("unknown benchmark status")
@@ -308,33 +310,33 @@ func toDomainBenchmarkLog(log *models.BenchmarkLog) (domain.BenchmarkLog, error)
 	}, nil
 }
 
-func toDomainBenchmarkResult(result sql.Null[models.BenchmarksResult]) (*domain.BenchmarkResult, error) {
+func toDomainBenchmarkResult(result sql.Null[enums.BenchmarksResult]) (*domain.BenchmarkResult, error) {
 	if !result.Valid {
 		return nil, nil
 	}
 	switch result.V {
-	case models.BenchmarksResultPassed:
+	case enums.BenchmarksResultPassed:
 		return ptr.Of(domain.BenchmarkResultStatusPassed), nil
-	case models.BenchmarksResultFailed:
+	case enums.BenchmarksResultFailed:
 		return ptr.Of(domain.BenchmarkResultStatusFailed), nil
-	case models.BenchmarksResultError:
+	case enums.BenchmarksResultError:
 		return ptr.Of(domain.BenchmarkResultStatusError), nil
 	default:
 		return nil, fmt.Errorf("unknown benchmark result: %v", result.V)
 	}
 }
 
-func fromDomainBenchmarkResult(result *domain.BenchmarkResult) (*models.BenchmarksResult, error) {
+func fromDomainBenchmarkResult(result *domain.BenchmarkResult) (*enums.BenchmarksResult, error) {
 	if result == nil {
 		return nil, nil
 	}
 	switch *result {
 	case domain.BenchmarkResultStatusPassed:
-		return ptr.Of(models.BenchmarksResultPassed), nil
+		return ptr.Of(enums.BenchmarksResultPassed), nil
 	case domain.BenchmarkResultStatusFailed:
-		return ptr.Of(models.BenchmarksResultFailed), nil
+		return ptr.Of(enums.BenchmarksResultFailed), nil
 	case domain.BenchmarkResultStatusError:
-		return ptr.Of(models.BenchmarksResultError), nil
+		return ptr.Of(enums.BenchmarksResultError), nil
 	default:
 		return nil, fmt.Errorf("unknown benchmark result: %v", *result)
 	}

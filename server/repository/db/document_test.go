@@ -48,7 +48,7 @@ func TestGetDocument(t *testing.T) {
 				mustMakeDocument(t, db, d)
 				t.Cleanup(func() {
 					_, err := models.Documents.Delete(
-						dm.Where(models.DocumentColumns.ID.EQ(mysql.Arg(d.ID.String()))),
+						dm.Where(models.Documents.Columns.ID.EQ(mysql.Arg(d.ID.String()))),
 					).Exec(context.Background(), db)
 					require.NoError(t, err)
 				})
@@ -113,7 +113,7 @@ func TestCreateDocument(t *testing.T) {
 			assert.WithinDuration(t, newDoc.CreatedAt, time.Now(), time.Second)
 
 			resultDoc, err := models.Documents.Query(
-				sm.Where(models.DocumentColumns.ID.EQ(mysql.Arg(newDoc.ID.String()))),
+				sm.Where(models.Documents.Columns.ID.EQ(mysql.Arg(newDoc.ID.String()))),
 				sm.Limit(1),
 			).One(t.Context(), db)
 			assert.NoError(t, err)
@@ -123,7 +123,7 @@ func TestCreateDocument(t *testing.T) {
 
 			t.Cleanup(func() {
 				_, err := models.Documents.Delete(
-					dm.Where(models.DocumentColumns.ID.EQ(mysql.Arg(newDoc.ID.String()))),
+					dm.Where(models.Documents.Columns.ID.EQ(mysql.Arg(newDoc.ID.String()))),
 				).Exec(context.Background(), db)
 				require.NoError(t, err)
 			})

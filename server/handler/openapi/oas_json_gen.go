@@ -3574,11 +3574,22 @@ func (s *PostTeamReq) encodeFields(e *jx.Encoder) {
 		}
 		e.ArrEnd()
 	}
+	{
+		if s.GithubIds != nil {
+			e.FieldStart("githubIds")
+			e.ArrStart()
+			for _, elem := range s.GithubIds {
+				elem.Encode(e)
+			}
+			e.ArrEnd()
+		}
+	}
 }
 
-var jsonFieldsNameOfPostTeamReq = [2]string{
+var jsonFieldsNameOfPostTeamReq = [3]string{
 	0: "name",
 	1: "members",
+	2: "githubIds",
 }
 
 // Decode decodes PostTeamReq from json.
@@ -3617,6 +3628,23 @@ func (s *PostTeamReq) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"members\"")
+			}
+		case "githubIds":
+			if err := func() error {
+				s.GithubIds = make([]GitHubId, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem GitHubId
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.GithubIds = append(s.GithubIds, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"githubIds\"")
 			}
 		default:
 			return d.Skip()
