@@ -7,7 +7,7 @@ const { action } = defineProps<{
   icon: string
   title: string
   inputPlaceholder: string
-  action: (value: string) => void
+  action: (value: string) => boolean
   actionIcon: string
   actionLabel: string
 }>()
@@ -16,8 +16,8 @@ const value = ref('')
 
 const actionHandler = () => {
   if (value.value === '') return
-  action(value.value)
-  value.value = ''
+  const success = action(value.value)
+  if (success) value.value = ''
 }
 </script>
 
