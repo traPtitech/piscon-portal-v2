@@ -9,8 +9,9 @@ const { data: me } = useMe()
 const { mutate: createTeam } = useCreateTeam()
 
 const createTeamHandler = (teamName: string) => {
-  if (me.value === undefined) return
+  if (me.value === undefined) return false
   createTeam({ name: teamName, members: [me.value.id] })
+  return true
 }
 </script>
 
