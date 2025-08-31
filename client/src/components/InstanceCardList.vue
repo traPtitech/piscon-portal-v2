@@ -12,20 +12,61 @@ import {
 } from '@/lib/useServerData'
 import { Icon } from '@iconify/vue'
 import notfoundImage from '@/assets/not-found.png'
+import { ref, stop } from 'vue'
 
 type Instance = components['schemas']['Instance']
 const { teamId, instances } = defineProps<{ teamId: string; instances: Instance[] }>()
 
 const { mutate: createInstance, isPending: createInstanceInProgress } = useCreateTeamInstance()
-const { mutate: startInstance, isPending: startInstanceInProgress } = useStartTeamInstance()
-const { mutate: stopInstance, isPending: stopInstanceInProgress } = useStopTeamInstance()
-const { mutate: deleteInstance, isPending: deleteInstanceInProgress } = useDeleteTeamInstance()
+const { mutateAsync: startInstanceRequest } = useStartTeamInstance()
+const { mutateAsync: stopInstanceRequest } = useStopTeamInstance()
+const { mutateAsync: deleteInstanceRequest } = useDeleteTeamInstance()
 const { mutate: enqueueBenchmark } = useEnqueueBenchmark({
   redirect: true,
 })
 
 const enqueueBenchmarkHandler = (instanceId: string) => {
   enqueueBenchmark({ teamId, instanceId })
+}
+
+const startingInstances = ref<string[]>([])
+const stoppingInstances = ref<string[]>([])
+const deletingInstances = ref<string[]>([])
+
+const startInstance = async (args: { teamId: string; instanceId: string }) => {
+  startingInstances.value.push(args.instanceId)
+  try {
+    await startInstanceRequest(args)
+  } catch (e) {
+    // FIXME: handle error
+    console.error(e)
+  } finally {
+    startingInstances.value = startingInstances.value.filter((id) => id !== args.instanceId)
+  }
+}
+
+const stopInstance = async (args: { teamId: string; instanceId: string }) => {
+  stoppingInstances.value.push(args.instanceId)
+  try {
+    await stopInstanceRequest(args)
+  } catch (e) {
+    // FIXME: handle error
+    console.error(e)
+  } finally {
+    stoppingInstances.value = stoppingInstances.value.filter((id) => id !== args.instanceId)
+  }
+}
+
+const deleteInstance = async (args: { teamId: string; instanceId: string }) => {
+  deletingInstances.value.push(args.instanceId)
+  try {
+    await deleteInstanceRequest(args)
+  } catch (e) {
+    // FIXME: handle error
+    console.error(e)
+  } finally {
+    deletingInstances.value = deletingInstances.value.filter((id) => id !== args.instanceId)
+  }
 }
 </script>
 
@@ -79,7 +120,7 @@ const enqueueBenchmarkHandler = (instanceId: string) => {
             class="management-button"
             :disabled="instance.status !== 'stopped'"
             @click="startInstance({ teamId, instanceId: instance.id })"
-            :loading="startInstanceInProgress"
+            :loading="startingInstances.includes(instance.id)"
           >
             <Icon icon="mdi:play-circle" width="20" height="20" />
             <span>起動</span>
@@ -88,7 +129,7 @@ const enqueueBenchmarkHandler = (instanceId: string) => {
             class="management-button"
             :disabled="instance.status !== 'running'"
             @click="stopInstance({ teamId, instanceId: instance.id })"
-            :loading="stopInstanceInProgress"
+            :loading="stoppingInstances.includes(instance.id)"
           >
             <Icon icon="mdi:stop-pause" width="20" height="20" />
             <span>停止</span>
@@ -98,7 +139,7 @@ const enqueueBenchmarkHandler = (instanceId: string) => {
             variant="destructive"
             :disabled="instance.status !== 'stopped'"
             @click="deleteInstance({ teamId, instanceId: instance.id })"
-            :loading="deleteInstanceInProgress"
+            :loading="deletingInstances.includes(instance.id)"
           >
             <Icon icon="mdi:trash-can" width="20" height="20" />
             <span>削除</span>
