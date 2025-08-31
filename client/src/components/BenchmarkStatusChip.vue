@@ -28,15 +28,15 @@ const labels: Record<Status, string> = {
 }
 .status-chip.waiting {
   background-color: #f0ad4e33;
-  color: #f0ad4e;
+  color: #f09e2a;
 }
 .status-chip.readying {
-  background-color: #f0ad4e33;
-  color: #f0ad4e;
+  background-color: #e4751a33;
+  color: #e4751a;
 }
 .status-chip.running {
   background-color: #5bc0de33;
-  color: #5bc0de;
+  color: #40a8c7;
 }
 .status-chip.finished {
   background-color: #5cb85c33;

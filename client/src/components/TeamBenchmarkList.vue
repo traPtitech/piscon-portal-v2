@@ -9,7 +9,7 @@ const { data: benches, error: benchesError, refetch } = useTeamBenches(teamId)
 const { data: instances } = useTeamInstances(teamId)
 
 useInterval(() => {
-  const loadingStatuses = ['waiting', 'running']
+  const loadingStatuses = ['waiting', 'running', 'readying']
   if (benches.value?.some((b) => loadingStatuses.includes(b.status))) {
     void refetch()
   }
