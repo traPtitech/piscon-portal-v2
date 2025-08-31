@@ -2,7 +2,7 @@
 import { defineProps } from 'vue'
 import { Icon } from '@iconify/vue'
 
-const props = defineProps<{
+defineProps<{
   variant?: 'primary' | 'destructive'
   loading?: boolean
   disabled?: boolean
