@@ -120,10 +120,15 @@ export const useCreateTeam = () => {
 export const useUpdateTeam = () => {
   const client = useQueryClient()
   return useMutation({
-    mutationFn: (params: { teamId: string; name: string; members: string[] }) =>
+    mutationFn: (params: {
+      teamId: string
+      name?: string
+      members?: string[]
+      githubIds?: string[]
+    }) =>
       api.PATCH('/teams/{teamId}', {
         params: { path: { teamId: params.teamId } },
-        body: params,
+        body: { name: params.name, members: params.members, githubIds: params.githubIds },
       }),
     onSuccess: (_, params) => {
       void client.invalidateQueries({ queryKey: ['team', params.teamId] })

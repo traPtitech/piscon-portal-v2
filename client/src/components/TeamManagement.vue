@@ -6,6 +6,7 @@ import MainButton from '@/components/MainButton.vue'
 import ActionFormCard from '@/components/ActionFormCard.vue'
 import { useUsers } from '@/lib/useUsers'
 import ErrorMessage from '@/components/ErrorMessage.vue'
+import { ref } from 'vue'
 
 const { teamId } = defineProps<{ teamId: string }>()
 
@@ -15,30 +16,54 @@ const { getUserById, getUserByName } = useUsers()
 const { mutate: updateTeam } = useUpdateTeam()
 
 const changeTeamName = (name: string) => {
-  if (team.value === undefined) return
-  updateTeam({ teamId: team.value.id, name, members: team.value.members })
+  if (team.value === undefined) return false
+  updateTeam({ teamId: team.value.id, name })
 }
 
 const removeMember = (memberId: string) => {
-  if (team.value === undefined) return
-  if (!team.value.members.includes(memberId)) return
+  if (team.value === undefined) return false
+  if (!team.value.members.includes(memberId)) return false
 
   const newMembers = team.value.members.filter((member) => member !== memberId)
-  updateTeam({ teamId: team.value.id, name: team.value.name, members: newMembers })
+  updateTeam({ teamId: team.value.id, members: newMembers })
+  return true
 }
 
 const addMember = (memberId: string) => {
-  if (team.value === undefined) return
-  if (team.value.members.includes(memberId)) return
-
+  if (team.value === undefined) return false
+  if (team.value.members.includes(memberId)) return false
   const newMembers = [...team.value.members, memberId]
-  updateTeam({ teamId: team.value.id, name: team.value.name, members: newMembers })
+  updateTeam({ teamId: team.value.id, members: newMembers })
+  return true
 }
 
 const addNewMemberHandler = (newMemberName: string) => {
   const user = getUserByName(newMemberName)
-  if (user === undefined) return
-  addMember(user.id)
+  if (user === undefined) return false
+  return addMember(user.id)
+}
+
+const githubIdValue = ref('')
+
+const addGitHubId = () => {
+  if (githubIdValue.value === '') return
+  if (team.value?.githubIds?.includes(githubIdValue.value)) return
+
+  updateTeam({
+    teamId: teamId,
+    githubIds: [...(team.value?.githubIds ?? []), githubIdValue.value],
+  })
+
+  githubIdValue.value = ''
+}
+
+const removeGitHubId = (id: string) => {
+  if (team.value === undefined) return
+  if (!team.value.githubIds?.includes(id)) return
+
+  const newGithubIds = team.value.githubIds.filter((githubId) => githubId !== id)
+  updateTeam({ teamId: team.value.id, githubIds: newGithubIds })
+  githubIdValue.value = ''
 }
 </script>
 
@@ -90,6 +115,48 @@ const addNewMemberHandler = (newMemberName: string) => {
           actionIcon="mdi:content-save"
           actionLabel="保存"
         />
+      </div>
+      <div class="github-id-management-card">
+        <div>
+          <div class="github-id-management-card-title">GitHub ID 管理</div>
+          <div class="github-id-management-card-description">
+            チームメンバーの GitHub ID を追加すると、GitHub
+            に登録されている公開鍵が自動的にインスタンスに登録されます
+          </div>
+          <div class="github-id-management-card-description">
+            ※設定が反映されるのは新しく作成されたインスタンスのみです
+          </div>
+        </div>
+        <div>
+          <div class="github-id-chip-container">
+            <div v-for="id in team.githubIds" :key="id" class="github-id-chip">
+              <Icon icon="mdi:github" width="20" height="20" />
+              <a :href="`https://github.com/${id}`">
+                {{ id }}
+              </a>
+              <button @click.prevent="removeGitHubId(id)">
+                <Icon icon="mdi:close" width="20" height="20" />
+              </button>
+            </div>
+          </div>
+          <div
+            v-if="team.githubIds === undefined || team.githubIds.length === 0"
+            class="no-github-id-registered"
+          >
+            まだ GitHub ID が登録されていません
+          </div>
+          <form class="github-id-management-form" @submit.prevent="addGitHubId">
+            <InputText
+              v-model="githubIdValue"
+              placeholder="GitHub ID (例: cp-20)"
+              class="github-id-management-form-input"
+            />
+            <MainButton type="submit">
+              <Icon icon="mdi:account-plus" width="20" height="20" />
+              <span>追加</span>
+            </MainButton>
+          </form>
+        </div>
       </div>
     </div>
   </div>
@@ -178,6 +245,84 @@ const addNewMemberHandler = (newMemberName: string) => {
 @container (max-width: 768px) {
   .team-management-forms {
     grid-template-columns: 1fr;
+  }
+}
+
+.github-id-management-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border: 1px solid var(--ct-slate-300);
+  border-radius: 4px;
+  padding: 1rem;
+  container-type: inline-size;
+}
+
+.github-id-chip-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.github-id-management-card-title {
+  font-weight: 600;
+  font-size: 1.2rem;
+  margin-bottom: 0.25rem;
+}
+
+.github-id-management-card-description {
+  font-size: 0.9rem;
+  color: var(--ct-slate-500);
+}
+.github-id-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  background-color: var(--ct-slate-100);
+  color: inherit;
+  text-decoration: none;
+}
+
+.github-id-chip a {
+  color: inherit;
+}
+
+.github-id-chip button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  margin-left: 0.25rem;
+}
+
+.no-github-id-registered {
+  color: var(--ct-slate-500);
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.github-id-management-form {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.github-id-management-form-input {
+  flex: 1;
+  font-size: 0.8rem;
+}
+
+@container (max-width: 320px) {
+  .github-id-management-form {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
 </style>
