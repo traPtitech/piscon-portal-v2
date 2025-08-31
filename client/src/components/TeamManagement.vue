@@ -15,30 +15,34 @@ const { getUserById, getUserByName } = useUsers()
 const { mutate: updateTeam } = useUpdateTeam()
 
 const changeTeamName = (name: string) => {
-  if (team.value === undefined) return
+  if (team.value === undefined) return false
+
   updateTeam({ teamId: team.value.id, name, members: team.value.members })
+  return true
 }
 
 const removeMember = (memberId: string) => {
-  if (team.value === undefined) return
-  if (!team.value.members.includes(memberId)) return
+  if (team.value === undefined) return false
+  if (!team.value.members.includes(memberId)) return false
 
   const newMembers = team.value.members.filter((member) => member !== memberId)
   updateTeam({ teamId: team.value.id, name: team.value.name, members: newMembers })
+  return true
 }
 
 const addMember = (memberId: string) => {
-  if (team.value === undefined) return
-  if (team.value.members.includes(memberId)) return
+  if (team.value === undefined) return false
+  if (team.value.members.includes(memberId)) return false
 
   const newMembers = [...team.value.members, memberId]
   updateTeam({ teamId: team.value.id, name: team.value.name, members: newMembers })
+  return true
 }
 
 const addNewMemberHandler = (newMemberName: string) => {
   const user = getUserByName(newMemberName)
-  if (user === undefined) return
-  addMember(user.id)
+  if (user === undefined) return false
+  return addMember(user.id)
 }
 </script>
 

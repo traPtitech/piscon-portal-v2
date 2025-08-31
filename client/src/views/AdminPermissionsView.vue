@@ -14,11 +14,12 @@ const { mutate: updateAdmins } = useUpdateAdmins()
 const admins = computed(() => users.value?.filter((u) => u.isAdmin))
 
 const addAdminHandler = (value: string) => {
-  if (value === '') return
+  if (value === '') return false
   const newUser = getUserByName(value)
-  if (!newUser) return
+  if (!newUser) return false
   const newAdmins = [...(admins.value?.map((u) => u.id) ?? []), newUser.id]
   updateAdmins(newAdmins)
+  return true
 }
 
 const removeAdminHandler = (userId: string) => {
