@@ -17,7 +17,9 @@ const { mutate: updateTeam } = useUpdateTeam()
 
 const changeTeamName = (name: string) => {
   if (team.value === undefined) return false
+
   updateTeam({ teamId: team.value.id, name })
+  return true
 }
 
 const removeMember = (memberId: string) => {
@@ -32,6 +34,7 @@ const removeMember = (memberId: string) => {
 const addMember = (memberId: string) => {
   if (team.value === undefined) return false
   if (team.value.members.includes(memberId)) return false
+
   const newMembers = [...team.value.members, memberId]
   updateTeam({ teamId: team.value.id, members: newMembers })
   return true
