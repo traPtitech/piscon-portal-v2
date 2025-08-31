@@ -16,11 +16,13 @@ import notfoundImage from '@/assets/not-found.png'
 type Instance = components['schemas']['Instance']
 const { teamId, instances } = defineProps<{ teamId: string; instances: Instance[] }>()
 
-const { mutate: createInstance } = useCreateTeamInstance()
-const { mutate: startInstance } = useStartTeamInstance()
-const { mutate: stopInstance } = useStopTeamInstance()
-const { mutate: deleteInstance } = useDeleteTeamInstance()
-const { mutate: enqueueBenchmark } = useEnqueueBenchmark({ redirect: true })
+const { mutate: createInstance, isPending: createInstanceInProgress } = useCreateTeamInstance()
+const { mutate: startInstance, isPending: startInstanceInProgress } = useStartTeamInstance()
+const { mutate: stopInstance, isPending: stopInstanceInProgress } = useStopTeamInstance()
+const { mutate: deleteInstance, isPending: deleteInstanceInProgress } = useDeleteTeamInstance()
+const { mutate: enqueueBenchmark } = useEnqueueBenchmark({
+  redirect: true,
+})
 
 const enqueueBenchmarkHandler = (instanceId: string) => {
   enqueueBenchmark({ teamId, instanceId })
@@ -77,6 +79,7 @@ const enqueueBenchmarkHandler = (instanceId: string) => {
             class="management-button"
             :disabled="instance.status !== 'stopped'"
             @click="startInstance({ teamId, instanceId: instance.id })"
+            :loading="startInstanceInProgress"
           >
             <Icon icon="mdi:play-circle" width="20" height="20" />
             <span>起動</span>
@@ -85,6 +88,7 @@ const enqueueBenchmarkHandler = (instanceId: string) => {
             class="management-button"
             :disabled="instance.status !== 'running'"
             @click="stopInstance({ teamId, instanceId: instance.id })"
+            :loading="stopInstanceInProgress"
           >
             <Icon icon="mdi:stop-pause" width="20" height="20" />
             <span>停止</span>
@@ -94,6 +98,7 @@ const enqueueBenchmarkHandler = (instanceId: string) => {
             variant="destructive"
             :disabled="instance.status !== 'stopped'"
             @click="deleteInstance({ teamId, instanceId: instance.id })"
+            :loading="deleteInstanceInProgress"
           >
             <Icon icon="mdi:trash-can" width="20" height="20" />
             <span>削除</span>
@@ -101,7 +106,11 @@ const enqueueBenchmarkHandler = (instanceId: string) => {
         </div>
       </div>
     </div>
-    <MainButton @click="createInstance({ teamId })" class="create-instance-button">
+    <MainButton
+      @click="createInstance({ teamId })"
+      class="create-instance-button"
+      :loading="createInstanceInProgress"
+    >
       <Icon icon="mdi:tools" width="20" height="20" />
       <span>新しいサーバーを作成</span>
     </MainButton>
