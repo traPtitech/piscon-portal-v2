@@ -83,7 +83,8 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
           <UserChip :name="getUserName(bench.userId)" />
         </div>
         <div>
-          <BenchmarkStatusChip :status="bench.status" />
+          <BenchmarkStatusChip :status="bench.status" v-if="bench.status !== 'finished'" />
+          <BenchmarkResultChip :result="bench.result" v-else />
         </div>
         <div>
           <NavigationLink

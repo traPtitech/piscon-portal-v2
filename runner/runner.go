@@ -130,6 +130,12 @@ func (r *Runner) streamJobProgress(
 	}
 	defer streamClient.Close()
 
+	// 初期状態を送信して、ポータルに開始を通知する。
+	initialProgress := domain.NewProgress(job.GetID(), "", "", 0, startedAt)
+	if err := streamClient.SendProgress(ctx, initialProgress); err != nil {
+		return fmt.Errorf("send initial progress: %w", err)
+	}
+
 	calcAndSendProgress := func() error {
 		stdout := stdoutBdr.String()
 		stderr := stderrBdr.String()

@@ -34,7 +34,8 @@ const user = computed(() => getUserById(bench?.userId))
         <div v-else class="bench-score-content-dimmed">未計測</div>
       </div>
       <div class="bench-status">
-        <BenchmarkStatusChip :status="bench.status" />
+        <BenchmarkStatusChip :status="bench.status" v-if="bench.status !== 'finished'" />
+        <BenchmarkResultChip :result="bench.result" v-else />
       </div>
     </div>
     <div class="bench-detail-element-container">
