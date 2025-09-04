@@ -460,6 +460,7 @@ func TestFinalizeBenchmark(t *testing.T) {
 					CreatedAt:  testCase.FindBenchmarkResult.benchmark.CreatedAt,
 					StartedAt:  testCase.FindBenchmarkResult.benchmark.StartedAt,
 					FinishedAt: &testCase.finishedAt,
+					Score:      testCase.FindBenchmarkResult.benchmark.Score,
 					Result:     &testCase.result,
 					ErrorMes:   testCase.errorMes,
 				}).
