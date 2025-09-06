@@ -23,7 +23,7 @@ require (
 	github.com/ogen-go/ogen v1.14.0
 	github.com/samber/lo v1.51.0
 	github.com/spf13/viper v1.20.1
-	github.com/stephenafamo/bob v0.40.2
+	github.com/stephenafamo/bob v0.41.1
 	github.com/stephenafamo/scan v0.7.0
 	github.com/stretchr/testify v1.11.1
 	github.com/testcontainers/testcontainers-go/modules/mysql v0.38.0
