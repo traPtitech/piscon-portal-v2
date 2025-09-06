@@ -82,5 +82,5 @@ func (b *Example) CalculateScore(_ context.Context, allStdout, allStderr string)
 		}
 	}
 
-	return 0, fmt.Errorf("score not found")
+	return 0, nil
 }
