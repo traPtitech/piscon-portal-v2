@@ -259,6 +259,7 @@ func (u *benchmarkUseCaseImpl) FinalizeBenchmark(ctx context.Context, benchmarkI
 			CreatedAt:  bench.CreatedAt,
 			StartedAt:  bench.StartedAt,
 			FinishedAt: &finishedAt, // 終了時間を更新
+			Score:      bench.Score,
 			Result:     &result,
 			ErrorMes:   errorMes, // エラーメッセージを更新
 		})

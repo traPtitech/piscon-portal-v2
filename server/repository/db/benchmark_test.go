@@ -468,6 +468,7 @@ func TestUpdateBenchmark(t *testing.T) {
 			assert.Equal(t, testCase.afterBench.Instance.ID.String(), bench.InstanceID)
 			assert.Equal(t, testCase.afterBench.TeamID.String(), bench.TeamID)
 			assert.Equal(t, testCase.afterBench.UserID.String(), bench.UserID)
+			assert.Equal(t, testCase.afterBench.Score, bench.Score)
 			status, err := db.FromDomainBenchmarkStatus(testCase.afterBench.Status)
 			require.NoError(t, err)
 			assert.Equal(t, status, bench.Status)
