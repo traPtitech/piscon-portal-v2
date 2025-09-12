@@ -28,7 +28,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/testcontainers/testcontainers-go/modules/mysql v0.38.0
 	go.uber.org/mock v0.6.0
-	golang.org/x/oauth2 v0.30.0
+	golang.org/x/oauth2 v0.31.0
 	golang.org/x/sync v0.16.0
 	google.golang.org/grpc v1.75.0
 	google.golang.org/protobuf v1.36.8
