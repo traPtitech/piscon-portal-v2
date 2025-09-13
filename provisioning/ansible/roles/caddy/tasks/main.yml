@@ -19,7 +19,7 @@
     update_cache: true
   become: true
 
-- name: Confiugure Caddy
+- name: Configure Caddy
   ansible.builtin.template:
     src: Caddyfile.j2
     dest: /etc/caddy/Caddyfile
