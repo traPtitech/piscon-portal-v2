@@ -2,7 +2,6 @@ portal:
   domain: piscon.ikura-hamu.work
   git_ref: main
   git_ref_type: heads
-  private_ip: "{{ local.portal.private_ip }}"
 
   frontend:
     host_port: 3000
@@ -22,6 +21,7 @@ portal:
 
 runner:
   git_ref: "{{ portal.git_ref }}"
+  portal_address: "{{ local.runner.portal_address }}"
   problem_volumes:
     private_isu:
       - /home/isucon/private_isu/benchmarker:/benchmarker
