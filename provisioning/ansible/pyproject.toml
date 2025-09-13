@@ -1,7 +1,7 @@
 [project]
 name = "piscon-portal-v2-ansible"
 version = "0.1.0"
-description = "Add your description here"
+description = "PISCON Portal v2 and runner provisioning with Ansible"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
