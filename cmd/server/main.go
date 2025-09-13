@@ -1,15 +1,19 @@
 package main
 
 import (
+	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"os"
 	"strconv"
 
 	"github.com/go-sql-driver/mysql"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/handler"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
 	dbrepo "github.com/traPtitech/piscon-portal-v2/server/repository/db"
@@ -59,6 +63,10 @@ func main() {
 		panic(err)
 	}
 	handler.SetupRoutes(e)
+
+	if err := setupAdminUser(repo); err != nil {
+		log.Fatal("failed to setup admin user:", err)
+	}
 
 	benchService := server.NewBenchmarkService(useCase)
 	go func() {
@@ -135,4 +143,46 @@ func provideAWSInstanceManager() (instance.Manager, error) {
 		return nil, fmt.Errorf("create AWS instance manager: %w", err)
 	}
 	return manager, nil
+}
+
+func setupAdminUser(repo repository.Repository) error {
+	adminUserIDStr := os.Getenv("ADMIN_USER_ID")
+	if adminUserIDStr == "" {
+		return nil
+	}
+
+	adminUserID, err := uuid.Parse(adminUserIDStr)
+	if err != nil {
+		return fmt.Errorf("parse ADMIN_USER_ID: %w", err)
+	}
+
+	adminUserName := os.Getenv("ADMIN_USER_NAME")
+	if adminUserName == "" {
+		adminUserName = "admin"
+	}
+
+	ctx := context.Background()
+
+	_, err = repo.FindUser(ctx, adminUserID)
+	if err == nil {
+		// user already exists
+		err := repo.AddAdmins(ctx, []uuid.UUID{adminUserID})
+		if err != nil {
+			return fmt.Errorf("add admin role: %w", err)
+		}
+		return nil
+	}
+	if !errors.Is(err, repository.ErrNotFound) {
+		return fmt.Errorf("find user: %w", err)
+	}
+
+	// user not found, create new user
+	adminUser := domain.NewUser(adminUserID, adminUserName)
+	adminUser.IsAdmin = true
+
+	err = repo.CreateUser(ctx, adminUser)
+	if err != nil {
+		return fmt.Errorf("create admin user: %w", err)
+	}
+	return nil
 }
