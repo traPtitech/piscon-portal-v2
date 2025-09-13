@@ -1,0 +1,13 @@
+[Unit]
+Description=PISCON Runner
+
+[Service]
+Type=simple
+RemainAfterExit=true
+WorkingDirectory=/srv/runner
+ExecStart={{ bin_dir }}/runner
+TimeoutStartSec=300
+Restart=no
+
+[Install]
+WantedBy=multi-user.target

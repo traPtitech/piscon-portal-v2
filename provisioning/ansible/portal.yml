@@ -1,0 +1,11 @@
+- name: Deploy Piscon Portal
+  hosts: portal
+  remote_user: ubuntu
+  vars:
+    hostname: portal
+  become: true
+  roles:
+    - common
+    - docker
+    - caddy
+    - portal

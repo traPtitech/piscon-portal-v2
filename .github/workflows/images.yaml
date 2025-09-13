@@ -18,8 +18,6 @@ jobs:
         image:
           - name: portal
             dockerfile: portal.Dockerfile
-          - name: runner
-            dockerfile: runner.Dockerfile
           - name: frontend
             dockerfile: frontend.Dockerfile
 

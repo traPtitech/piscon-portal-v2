@@ -1,0 +1,43 @@
+services:
+  db:
+    image: mysql:8
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "{{ portal.db.root_password }}"
+      MYSQL_DATABASE: "{{ portal.db.database }}"
+      MYSQL_USER: "{{ portal.db.user }}"
+      MYSQL_PASSWORD: "{{ portal.db.user_password }}"
+    ports:
+      - "127.0.0.1:{{ portal.db.host_port }}:3306"
+    volumes:
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  portal:
+    image: "ghcr.io/traptitech/piscon-portal-v2/portal:{{ portal.git_ref }}"
+    restart: always
+    ports:
+      - "8080:8080"
+      - "{{ portal.backend.host_grpc_port }}:50051"
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+
+  frontend:
+    image: "ghcr.io/traptitech/piscon-portal-v2/frontend:{{ portal.git_ref }}"
+    restart: always
+    ports:
+      - "{{ portal.frontend.host_port }}:80"
+    env_file:
+      - .env
+
+volumes:
+  db_data:
+    driver: local

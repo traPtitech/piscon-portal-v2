@@ -1,0 +1,48 @@
+---
+- name: Make portal directory
+  ansible.builtin.file:
+    path: /srv/portal
+    state: directory
+    mode: "0755"
+  become: true
+
+- name: Set portal compose.yaml
+  ansible.builtin.template:
+    src: compose.yaml.j2
+    dest: /srv/portal/compose.yaml
+    mode: "0644"
+  notify:
+    - Restart portal service
+
+- name: Set portal environment variables
+  ansible.builtin.template:
+    src: .env.j2
+    dest: /srv/portal/.env
+    mode: "0644"
+  notify:
+    - Restart portal service
+
+- name: Get DB schema file
+  ansible.builtin.get_url:
+    url: "https://raw.githubusercontent.com/traPtitech/piscon-portal-v2/refs/{{ portal.git_ref_type }}/{{ portal.git_ref }}/server/schema.sql"
+    dest: /srv/portal/schema.sql
+    mode: "0644"
+  notify:
+    - Restart portal service
+
+- name: Create piscon-portal service
+  ansible.builtin.copy:
+    src: piscon-portal.service
+    dest: /etc/systemd/system/piscon-portal.service
+    mode: "0644"
+  become: true
+  notify:
+    - Reload systemd
+    - Restart portal service
+
+- name: Enable piscon-portal service
+  ansible.builtin.systemd:
+    name: piscon-portal
+    enabled: true
+    state: started
+  become: true
