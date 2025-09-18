@@ -16,7 +16,6 @@ SESSION_SECRET=secret
 CLIENT_ID=my-client-id
 CLIENT_SECRET=my-client-secret
 
-# オプション
 ADMIN_USER_ID={{ traQ user ID (UUID) }}
 ADMIN_USER_NAME={{ traQ user name }}
 ```

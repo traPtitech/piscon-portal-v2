@@ -148,7 +148,7 @@ func provideAWSInstanceManager() (instance.Manager, error) {
 func setupAdminUser(repo repository.Repository) error {
 	adminUserIDStr := os.Getenv("ADMIN_USER_ID")
 	if adminUserIDStr == "" {
-		return nil
+		return errors.New("ADMIN_USER_ID is not set")
 	}
 
 	adminUserID, err := uuid.Parse(adminUserIDStr)
@@ -158,7 +158,7 @@ func setupAdminUser(repo repository.Repository) error {
 
 	adminUserName := os.Getenv("ADMIN_USER_NAME")
 	if adminUserName == "" {
-		adminUserName = "admin"
+		return errors.New("ADMIN_USER_NAME is not set")
 	}
 
 	ctx := context.Background()
