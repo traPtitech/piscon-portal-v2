@@ -58,8 +58,9 @@ func findUser(ctx context.Context, executor bob.Executor, id string) (domain.Use
 
 func createUser(ctx context.Context, executor bob.Executor, user domain.User) error {
 	_, err := models.Users.Insert(&models.UserSetter{
-		ID:   lo.ToPtr(user.ID.String()),
-		Name: lo.ToPtr(user.Name),
+		ID:      lo.ToPtr(user.ID.String()),
+		Name:    lo.ToPtr(user.Name),
+		IsAdmin: &user.IsAdmin,
 	}).Exec(ctx, executor)
 	if err != nil {
 		return fmt.Errorf("create user: %w", err)

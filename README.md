@@ -15,6 +15,9 @@ SESSION_SECRET=secret
 
 CLIENT_ID=my-client-id
 CLIENT_SECRET=my-client-secret
+
+ADMIN_USER_ID={{ traQ user ID (UUID) }}
+ADMIN_USER_NAME={{ traQ user name }}
 ```
 traQで作成するClientは リダイレクトURL に `http://localhost:8080/api/oauth2/callback`、スコープに `openid`, `profile` を指定します。
 `task up` で portal server が 8080番 ポートで起動します。`task dev` でホットリロード付きで起動します。
