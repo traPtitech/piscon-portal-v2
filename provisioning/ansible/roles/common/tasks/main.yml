@@ -1,0 +1,15 @@
+---
+- name: Set hostname
+  ansible.builtin.hostname:
+    name: "{{ hostname }}"
+  become: true
+
+- name: Apt update
+  ansible.builtin.apt:
+    update_cache: true
+  become: true
+
+- name: Apt upgrade
+  ansible.builtin.apt:
+    upgrade: dist
+  become: true
