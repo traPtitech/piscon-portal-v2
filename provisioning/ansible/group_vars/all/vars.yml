@@ -19,6 +19,10 @@ portal:
     id: "{{ secrets.traq_client.id }}"
     secret: "{{ secrets.traq_client.secret }}"
 
+  admin:
+    user_id: "{{ local.portal.admin.user_id }}"
+    user_name: "{{ local.portal.admin.user_name }}"
+
 runner:
   git_ref: "{{ portal.git_ref }}"
   portal_address: "{{ local.runner.portal_address }}"

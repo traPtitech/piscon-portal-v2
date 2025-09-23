@@ -69,6 +69,10 @@ local:
 
   runner:
     portal_address: "{{ ポータルの gRPC サーバーのアドレス }}"
+
+  admin:
+    user_id: "{{ 初期管理者の traQ user ID (UUID) }}"
+    user_name: "{{ 初期管理者の traQ user name }}"
 ```
 
 ### `hosts`
