@@ -25,7 +25,7 @@ type GetBenchmarkResultParams struct {
 // GetBenchmarksParams is parameters of getBenchmarks operation.
 type GetBenchmarksParams struct {
 	// ベンチマークのステータス。指定が無い場合は全て.
-	Status OptBenchmarkStatus
+	Status OptBenchmarkStatus `json:",omitempty,omitzero"`
 }
 
 // GetOauth2CallbackParams is parameters of getOauth2Callback operation.
@@ -59,7 +59,7 @@ type GetTeamBenchmarksParams struct {
 	// チームID.
 	TeamId TeamId
 	// ベンチマークのステータス。指定が無い場合は全て.
-	Status OptBenchmarkStatus
+	Status OptBenchmarkStatus `json:",omitempty,omitzero"`
 }
 
 // GetTeamInstancesParams is parameters of getTeamInstances operation.
