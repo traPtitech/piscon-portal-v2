@@ -20,8 +20,8 @@ require (
 	github.com/jellydator/ttlcache/v3 v3.4.0
 	github.com/labstack/echo-contrib v0.17.4
 	github.com/labstack/echo/v4 v4.13.4
-	github.com/samber/lo v1.52.0
 	github.com/ogen-go/ogen v1.16.0
+	github.com/samber/lo v1.52.0
 	github.com/spf13/viper v1.21.0
 	github.com/stephenafamo/bob v0.41.1
 	github.com/stephenafamo/scan v0.7.0
