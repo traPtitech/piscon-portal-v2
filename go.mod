@@ -6,7 +6,7 @@ toolchain go1.24.3
 
 require (
 	github.com/aarondl/opt v0.0.0-20250607033636-982744e1bd65
-	github.com/aws/aws-sdk-go-v2 v1.39.4
+	github.com/aws/aws-sdk-go-v2 v1.39.5
 	github.com/aws/aws-sdk-go-v2/config v1.31.15
 	github.com/aws/aws-sdk-go-v2/credentials v1.18.19
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.258.1
