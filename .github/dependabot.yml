@@ -9,6 +9,10 @@ updates:
       time: "00:00"
       day: saturday
       timezone: Asia/Tokyo
+    groups:
+      all-go-dependencies:
+        patterns:
+          - "*"
 
   - directory: /
     open-pull-requests-limit: 5
