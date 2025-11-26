@@ -12,6 +12,8 @@ const http = createOpenApiHttp<paths>({
 
 startJobs()
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
 export const handlers = [
   http.get(`/oauth2/code`, () => {
     // TODO
@@ -22,10 +24,20 @@ export const handlers = [
   http.post(`/oauth2/logout`, () => {
     // TODO
   }),
-  http.get(`/users`, () => HttpResponse.json(users)),
-  http.get(`/users/me`, () => HttpResponse.json(users[0])),
-  http.get(`/teams`, () => HttpResponse.json(teams)),
+  http.get(`/users`, async () => {
+    await sleep(100)
+    return HttpResponse.json(users)
+  }),
+  http.get(`/users/me`, async () => {
+    await sleep(100)
+    return HttpResponse.json(users[0])
+  }),
+  http.get(`/teams`, async () => {
+    await sleep(100)
+    return HttpResponse.json(teams)
+  }),
   http.post(`/teams`, async (c) => {
+    await sleep(100)
     const body = await c.request.json()
     if (body === undefined) {
       return HttpResponse.json({ message: 'Bad request' }, { status: 400 })
@@ -43,13 +55,15 @@ export const handlers = [
     }
     return HttpResponse.json(newTeam)
   }),
-  http.get('/teams/{teamId}', (c) => {
+  http.get('/teams/{teamId}', async (c) => {
+    await sleep(20)
     const teamId = c.params.teamId
     const team = teams.find((t) => t.id === teamId)
     if (team === undefined) return HttpResponse.json({ message: 'Not found' }, { status: 404 })
     return HttpResponse.json(team)
   }),
   http.patch('/teams/{teamId}', async (c) => {
+    await sleep(200)
     const teamId = c.params.teamId
     const team = teams.find((t) => t.id === teamId)
     if (team === undefined) return HttpResponse.json({ message: 'Not found' }, { status: 404 })
@@ -85,14 +99,16 @@ export const handlers = [
 
     return HttpResponse.json(team)
   }),
-  http.get('/teams/{teamId}/instances', (c) => {
+  http.get('/teams/{teamId}/instances', async (c) => {
+    await sleep(100)
     const teamId = c.params.teamId
     const team = teams.find((t) => t.id === teamId)
     if (team === undefined) return HttpResponse.json({ message: 'Not found' }, { status: 404 })
     const res = instances.filter((i) => i.teamId === teamId)
     return HttpResponse.json(res)
   }),
-  http.post('/teams/{teamId}/instances', (c) => {
+  http.post('/teams/{teamId}/instances', async (c) => {
+    await sleep(3000)
     const teamId = c.params.teamId
     const newServerId = instances.reduce((max, i) => Math.max(max, i.serverId), 0) + 1
     const newInstance: components['schemas']['Instance'] = {
@@ -106,13 +122,15 @@ export const handlers = [
     }
     instances.push(newInstance)
   }),
-  http.delete('/teams/{teamId}/instances/{instanceId}', (c) => {
+  http.delete('/teams/{teamId}/instances/{instanceId}', async (c) => {
+    await sleep(2000)
     const teamId = c.params.teamId
     const instanceId = c.params.instanceId
     const index = instances.findIndex((i) => i.teamId === teamId && i.id === instanceId)
     instances[index] = { ...instances[index], status: 'deleting' }
   }),
   http.patch('/teams/{teamId}/instances/{instanceId}', async (c) => {
+    await sleep(2000)
     const teamId = c.params.teamId
     const instanceId = c.params.instanceId
     const index = instances.findIndex((i) => i.teamId === teamId && i.id === instanceId)
@@ -132,8 +150,12 @@ export const handlers = [
     }
     return HttpResponse.json({ message: 'Bad request' }, { status: 400 })
   }),
-  http.get(`/instances`, () => HttpResponse.json(instances)),
+  http.get(`/instances`, async () => {
+    await sleep(1000)
+    return HttpResponse.json(instances)
+  }),
   http.post(`/benchmarks`, async (c) => {
+    await sleep(300)
     const body = await c.request.json()
     if (body === undefined) {
       return HttpResponse.json({ message: 'Bad request' }, { status: 400 })
@@ -158,19 +180,25 @@ export const handlers = [
     benchmarks.push(benchmark)
     return HttpResponse.json(benchmark, { status: 201 })
   }),
-  http.get(`/benchmarks`, () => HttpResponse.json(benchmarks)),
-  http.get(`/benchmarks/queue`, () => {
+  http.get(`/benchmarks`, async () => {
+    await sleep(100)
+    HttpResponse.json(benchmarks)
+  }),
+  http.get(`/benchmarks/queue`, async () => {
+    await sleep(100)
     const res = benchmarks.filter((b) => b.status !== 'finished')
     return HttpResponse.json(res)
   }),
-  http.get('/teams/{teamId}/benchmarks', (c) => {
+  http.get('/teams/{teamId}/benchmarks', async (c) => {
+    await sleep(100)
     const teamId = c.params.teamId
     const team = teams.find((t) => t.id === teamId)
     if (team === undefined) return HttpResponse.json({ message: 'Not found' }, { status: 404 })
     const res = benchmarks.filter((b) => b.teamId === teamId)
     return HttpResponse.json(res)
   }),
-  http.get('/teams/{teamId}/benchmarks/{benchmarkId}', (c) => {
+  http.get('/teams/{teamId}/benchmarks/{benchmarkId}', async (c) => {
+    await sleep(20)
     const teamId = c.params.teamId
     const team = teams.find((t) => t.id === teamId)
     if (team === undefined) return HttpResponse.json({ message: 'Not found' }, { status: 404 })
@@ -180,13 +208,16 @@ export const handlers = [
     const { adminLog: _, ...res } = benchmark
     return HttpResponse.json(res)
   }),
-  http.get('/benchmarks/{benchmarkId}', (c) => {
+  http.get('/benchmarks/{benchmarkId}', async (c) => {
+    await sleep(20)
     const benchmarkId = c.params.benchmarkId
     const benchmark = benchmarks.find((b) => b.id === benchmarkId)
     if (benchmark === undefined) return HttpResponse.json({ message: 'Not found' }, { status: 404 })
     return HttpResponse.json(benchmark)
   }),
-  http.get(`/scores`, () => {
+  http.get(`/scores`, async () => {
+    await sleep(100)
+
     const res: paths['/scores']['get']['responses']['200']['content']['application/json'] =
       teams.map((team) => ({
         teamId: team.id,
@@ -203,7 +234,9 @@ export const handlers = [
 
     return HttpResponse.json(res)
   }),
-  http.get(`/scores/ranking`, () => {
+  http.get(`/scores/ranking`, async () => {
+    await sleep(100)
+
     const sortFn = (
       a: components['schemas']['FinishedBenchmark'],
       b: components['schemas']['FinishedBenchmark'],
@@ -236,6 +269,7 @@ export const handlers = [
     return HttpResponse.json(res)
   }),
   http.put(`/admins`, async (c) => {
+    await sleep(30)
     const body = await c.request.json()
 
     for (const user of users) {
@@ -244,7 +278,8 @@ export const handlers = [
 
     return HttpResponse.json({})
   }),
-  http.get(`/docs`, () => {
+  http.get(`/docs`, async () => {
+    await sleep(100)
     const res: paths['/docs']['get']['responses']['200']['content']['application/json'] = {
       body: docs,
     }
@@ -252,6 +287,7 @@ export const handlers = [
     return HttpResponse.json(res)
   }),
   http.patch(`/docs`, async (c) => {
+    await sleep(200)
     const body = await c.request.json()
     if (body === undefined) {
       return HttpResponse.json({ message: 'Bad request' }, { status: 400 })
