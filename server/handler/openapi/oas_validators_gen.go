@@ -488,6 +488,7 @@ func (s *Instance) Validate() error {
 			MaxExclusive:  false,
 			MultipleOfSet: false,
 			MultipleOf:    0,
+			Pattern:       nil,
 		}).Validate(int64(s.ServerId)); err != nil {
 			return errors.Wrap(err, "int")
 		}
