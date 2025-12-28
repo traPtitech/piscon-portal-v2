@@ -29,7 +29,7 @@ import (
 func main() {
 	e := echo.New()
 
-	e.Use(middleware.Logger())
+	e.Use(middleware.RequestLogger())
 
 	handlerConfig := handler.Config{
 		RootURL:       os.Getenv("ROOT_URL"),
