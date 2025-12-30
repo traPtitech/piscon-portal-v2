@@ -32,7 +32,10 @@ RUNNER_AMI_ID="ami-xxxxxxxxxxxxxxxxx"
 # RUNNER_COUNT=1
 
 # Runner インスタンスのタイプ (任意、デフォルト: t3a.small)
-# RUNNER_TYPE="t3a.small"
+# RUNNER_INSTANCE_TYPE="t3a.small"
+
+# Portal インスタンスのタイプ (任意、デフォルト: t3a.small)
+# PORTAL_INSTANCE_TYPE="t3a.small"
 
 # EC2 に登録する SSH 公開鍵のパス (任意、デフォルト: ~/.ssh/id_ed25519.pub)
 # SSH_PUBLIC_KEY="~/.ssh/id_rsa.pub"

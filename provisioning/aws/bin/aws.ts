@@ -13,9 +13,16 @@ if (!runnerAmiId) {
 }
 
 const config = {
+	portal: {
+		instanceType: new ec2.InstanceType(
+			process.env.PORTAL_INSTANCE_TYPE || "t3a.small",
+		),
+	},
 	runner: {
 		count: parseInt(process.env.RUNNER_COUNT || "1"),
-		instanceType: new ec2.InstanceType(process.env.RUNNER_TYPE || "t3a.small"),
+		instanceType: new ec2.InstanceType(
+			process.env.RUNNER_INSTANCE_TYPE || "t3a.small",
+		),
 		amiId: runnerAmiId,
 	},
 	sshPublicKeyPath:
@@ -24,6 +31,7 @@ const config = {
 };
 
 new AwsStack(app, "PisconStack", {
+	portal: config.portal,
 	runner: config.runner,
 	sshPublicKeyPath: config.sshPublicKeyPath,
 	env: {
