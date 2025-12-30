@@ -97,3 +97,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+svg.iconify {
+  flex-shrink: 0;
+}
