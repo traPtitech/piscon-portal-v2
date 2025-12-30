@@ -56,8 +56,10 @@ const changeTeamNameHandler = () => {
       <div class="team-name">チーム: {{ team.name }}</div>
       <div class="members-list">
         <div v-for="member in team.members" :key="member" class="member-container">
-          <UserAvatar :name="getUserById(member)?.name ?? ''" />
-          <div>{{ getUserById(member)?.name }}</div>
+          <div class="member-info">
+            <UserAvatar :name="getUserById(member)?.name ?? ''" />
+            <div>{{ getUserById(member)?.name }}</div>
+          </div>
           <MainButton
             @click="removeMember(member)"
             class="remove-member-button"
@@ -137,11 +139,17 @@ const changeTeamNameHandler = () => {
 .member-container {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.5rem;
   font-weight: 600;
   padding: 0.5rem 1rem;
   border-radius: 4px;
   border: 1px solid var(--ct-slate-300);
+}
+
+.member-info {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .remove-member-button {
@@ -181,6 +189,23 @@ const changeTeamNameHandler = () => {
 @container (max-width: 768px) {
   .team-management-forms {
     grid-template-columns: 1fr;
+  }
+}
+
+@container (max-width: 400px) {
+  .member-container {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem;
+  }
+
+  .remove-member-button {
+    width: 100%;
+  }
+
+  .team-management-form-body {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
 </style>

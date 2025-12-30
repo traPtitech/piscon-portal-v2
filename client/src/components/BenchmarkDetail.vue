@@ -106,6 +106,7 @@ const user = computed(() => getUserById(bench?.userId))
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  container-type: inline-size;
 }
 
 .bench-score-container {
@@ -143,6 +144,19 @@ const user = computed(() => getUserById(bench?.userId))
   grid-template-columns: repeat(3, 1fr);
   gap: 0.5rem;
 }
+
+@container (max-width: 600px) {
+  .bench-detail-element-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@container (max-width: 400px) {
+  .bench-detail-element-container {
+    grid-template-columns: 1fr;
+  }
+}
+
 .bench-detail-element {
   display: flex;
   flex-direction: column;
@@ -172,6 +186,12 @@ const user = computed(() => getUserById(bench?.userId))
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+@container (max-width: 600px) {
+  .bench-log-container {
+    font-size: 0.7rem;
+  }
 }
 
 .bench-log-label {

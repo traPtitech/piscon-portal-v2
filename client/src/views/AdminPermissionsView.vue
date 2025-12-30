@@ -35,8 +35,10 @@ const removeAdminHandler = (userId: string) => {
 
     <div class="admin-containers">
       <div v-for="admin in admins" :key="admin.id" class="admin-container">
-        <UserAvatar :name="admin.name" />
-        <div>{{ admin.name }}</div>
+        <div class="admin-info">
+          <UserAvatar :name="admin.name" />
+          <div>{{ admin.name }}</div>
+        </div>
         <MainButton
           @click="removeAdminHandler(admin.id)"
           variant="destructive"
@@ -65,6 +67,7 @@ const removeAdminHandler = (userId: string) => {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  container-type: inline-size;
 }
 
 .admin-containers {
@@ -83,7 +86,25 @@ const removeAdminHandler = (userId: string) => {
   font-weight: 600;
 }
 
+.admin-info {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
 .admin-delete-button {
   margin-left: auto;
+}
+
+@container (max-width: 400px) {
+  .admin-container {
+    padding: 1rem;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-delete-button {
+    width: 100%;
+  }
 }
 </style>
