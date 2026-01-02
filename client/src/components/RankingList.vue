@@ -154,4 +154,23 @@ const { getTeamName, getTeamMembers } = useTeams()
   text-align: right;
   color: var(--ct-slate-900);
 }
+
+@container (max-width: 560px) {
+  .ranking-list-header,
+  .ranking-list-row {
+    grid-template-columns: 30px 1fr 60px;
+    gap: 0.5rem;
+    padding: 0.5rem 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .ranking-list-row.highlight {
+    padding-left: calc(0.5rem - 4px);
+  }
+
+  .ranking-list-team-members {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
 </style>

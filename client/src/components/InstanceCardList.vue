@@ -150,6 +150,7 @@ const enqueueBenchmarkHandler = (instanceId: string) => {
   font-weight: 600;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 0.5rem;
 }
 
@@ -196,6 +197,23 @@ const enqueueBenchmarkHandler = (instanceId: string) => {
 @container (max-width: 600px) {
   .info-elements {
     grid-template-columns: 1fr;
+  }
+}
+
+@container (max-width: 480px) {
+  .instance-card {
+    flex-direction: column;
+  }
+
+  .management-buttons {
+    flex-direction: row;
+    width: 100%;
+  }
+}
+
+@container (max-width: 320px) {
+  .management-buttons {
+    flex-direction: column;
   }
 }
 </style>

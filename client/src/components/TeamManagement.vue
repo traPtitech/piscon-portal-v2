@@ -88,8 +88,10 @@ const removeGitHubId = (id: string) => {
       </div>
       <div class="members-list">
         <div v-for="member in team.members" :key="member" class="member-container">
-          <UserAvatar :name="getUserById(member)?.name ?? ''" />
-          <div>{{ getUserById(member)?.name }}</div>
+          <div class="member-info">
+            <UserAvatar :name="getUserById(member)?.name ?? ''" />
+            <div>{{ getUserById(member)?.name }}</div>
+          </div>
           <MainButton
             @click="removeMember(member)"
             :disabled="me?.id === member"
@@ -188,6 +190,18 @@ const removeGitHubId = (id: string) => {
   margin-left: auto;
 }
 
+@container (max-width: 480px) {
+  .team-info {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem;
+  }
+
+  .leave-team-button {
+    width: 100%;
+  }
+}
+
 .members-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
@@ -197,15 +211,34 @@ const removeGitHubId = (id: string) => {
 .member-container {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
   font-weight: 600;
   padding: 0.5rem 1rem;
   border-radius: 4px;
+  gap: 0.25rem;
   border: 1px solid var(--ct-slate-300);
+}
+
+.member-info {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem;
 }
 
 .remove-member-button {
   margin-left: auto;
+}
+
+@container (max-width: 400px) {
+  .member-container {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem;
+  }
+
+  .remove-member-button {
+    width: 100%;
+  }
 }
 
 .team-management-forms {
@@ -278,6 +311,13 @@ const removeGitHubId = (id: string) => {
   font-size: 0.9rem;
   color: var(--ct-slate-500);
 }
+
+@container (max-width: 400px) {
+  .github-id-management-card-description {
+    font-size: 0.8rem;
+  }
+}
+
 .github-id-chip {
   display: flex;
   align-items: center;

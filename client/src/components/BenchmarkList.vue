@@ -35,7 +35,7 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
 <template>
   <div class="bench-list-container">
     <div class="bench-list">
-      <div class="list-label">
+      <div class="list-label list-score">
         <Icon icon="mdi:score" width="24" height="24" />
         <span>スコア</span>
       </div>
@@ -55,11 +55,11 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
         <Icon icon="mdi:account" width="24" height="24" />
         <span>実行ユーザー</span>
       </div>
-      <div class="list-label">
+      <div class="list-label list-status">
         <Icon icon="mdi:progress-clock" width="24" height="24" />
         <span>ステータス</span>
       </div>
-      <div class="list-label"></div>
+      <div class="list-label list-go-detail"></div>
       <template v-for="bench in sortedBenches" :key="bench.id">
         <div v-if="bench.status === 'running' || bench.status === 'finished'" class="bench-score">
           {{ formatScore(bench.score) }}
@@ -82,11 +82,11 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
         <div class="bench-user list-user">
           <UserChip :name="getUserName(bench.userId)" />
         </div>
-        <div>
+        <div class="bench-status list-status">
           <BenchmarkStatusChip :status="bench.status" v-if="bench.status !== 'finished'" />
           <BenchmarkResultChip :result="bench.result" v-else />
         </div>
-        <div>
+        <div class="bench-go-detail list-go-detail">
           <NavigationLink
             :to="isAdmin ? `/admin/benches/${bench.id}` : `/benches/${bench.id}`"
             class="bench-link"
@@ -95,6 +95,8 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
             <Icon icon="mdi:chevron-right" width="24" height="24" />
           </NavigationLink>
         </div>
+        <div class="padding"></div>
+        <div class="padding" v-if="isAdmin"></div>
       </template>
     </div>
   </div>
@@ -193,6 +195,37 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
 
   .list-user.list-user {
     display: none;
+  }
+}
+
+.padding {
+  display: none;
+  position: absolute;
+}
+
+@container (max-width: 400px) {
+  .bench-list {
+    grid-template-columns: repeat(v-bind(columns-4), auto);
+  }
+
+  .list-label.list-go-detail {
+    display: none;
+  }
+
+  .bench-score.bench-score,
+  .bench-score-loading.bench-score-loading,
+  .bench-team.bench-team,
+  .bench-status.bench-status {
+    border-bottom: none;
+  }
+
+  .bench-go-detail {
+    margin-top: -0.5rem;
+  }
+
+  .padding {
+    display: block;
+    position: static;
   }
 }
 </style>
