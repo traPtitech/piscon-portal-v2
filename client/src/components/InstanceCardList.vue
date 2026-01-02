@@ -12,7 +12,7 @@ import {
 } from '@/lib/useServerData'
 import { Icon } from '@iconify/vue'
 import notfoundImage from '@/assets/not-found.png'
-import { ref, stop } from 'vue'
+import { ref } from 'vue'
 
 type Instance = components['schemas']['Instance']
 const { teamId, instances } = defineProps<{ teamId: string; instances: Instance[] }>()
