@@ -1,0 +1,37 @@
+name: "Ansible CI"
+on:
+  push:
+    branches: [main]
+    paths:
+      - "provisioning/ansible/**"
+      - ".github/workflows/ansible-ci.yaml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "provisioning/ansible/**"
+      - ".github/workflows/ansible-ci.yaml"
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: provisioning/ansible
+    shell: bash
+
+jobs:
+  ansible-lint:
+    name: Ansible Lint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --locked --all-extras --dev
+
+      - name: Lint Ansible Playbooks and Roles
+        run: uv run ansible-lint ./ ./roles/

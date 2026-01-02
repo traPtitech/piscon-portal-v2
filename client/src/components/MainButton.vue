@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import { defineProps } from 'vue'
-import { Icon } from '@iconify/vue'
-
 defineProps<{
   variant?: 'primary' | 'destructive'
   loading?: boolean

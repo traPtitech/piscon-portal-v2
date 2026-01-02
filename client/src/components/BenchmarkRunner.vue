@@ -85,6 +85,12 @@ const enqueueBenchmark = (instanceId: string | null) => {
   gap: 0.5rem;
 }
 
+@media screen and (max-width: 480px) {
+  .benchmark-runner-content {
+    grid-template-columns: 1fr;
+  }
+}
+
 .benchmark-runner-instance-selector-label {
   display: block;
   font-size: 0.9rem;

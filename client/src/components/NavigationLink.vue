@@ -4,7 +4,7 @@ defineProps<RouterLinkProps>()
 </script>
 
 <template>
-  <RouterLink v-bind="$props" :class="['navigation-link', $props.class]">
+  <RouterLink v-bind="$props" class="navigation-link">
     <slot />
   </RouterLink>
 </template>

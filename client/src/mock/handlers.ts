@@ -93,6 +93,10 @@ export const handlers = [
       }
     }
 
+    if (body.githubIds !== undefined) {
+      team.githubIds = body.githubIds
+    }
+
     return HttpResponse.json(team)
   }),
   http.get('/teams/{teamId}/instances', async (c) => {

@@ -43,8 +43,8 @@ onBeforeRouteLeave((_to, _from, next) => {
 
     <div class="docs-container">
       <div class="docs-two-column-container">
-        <Textarea autoResize rows="5" v-model="docsValue"></Textarea>
-        <DocsMarkdown :markdown="docsValue" />
+        <Textarea autoResize rows="5" v-model="docsValue" class="docs-editor"></Textarea>
+        <DocsMarkdown :markdown="docsValue" class="docs-preview" />
       </div>
       <MainButton @click="updateDocs({ body: docsValue })" :disabled="docsValue === docs?.body">
         <Icon icon="mdi:content-save" width="20" height="20" />
@@ -84,6 +84,7 @@ onBeforeRouteLeave((_to, _from, next) => {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  container-type: inline-size;
 }
 
 .docs-container {
@@ -97,6 +98,28 @@ onBeforeRouteLeave((_to, _from, next) => {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
+}
+
+.docs-preview {
+  min-width: 0;
+}
+
+@container (max-width: 800px) {
+  .docs-two-column-container {
+    grid-template-columns: 1fr;
+  }
+
+  .docs-editor,
+  .docs-preview {
+    font-size: 0.9rem;
+  }
+}
+
+@container (max-width: 480px) {
+  .docs-editor,
+  .docs-preview {
+    font-size: 0.8rem;
+  }
 }
 
 .confirm-dialog-container {

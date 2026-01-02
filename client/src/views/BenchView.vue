@@ -17,7 +17,7 @@ const benchId = params.id as string
         <span>ベンチマーク一覧に戻る</span>
       </NavigationLink>
     </div>
-    <div v-if="me?.teamId !== undefined">
+    <div v-if="me?.teamId !== undefined" class="bench-detail-wrapper">
       <TeamBenchmarkDetail :teamId="me.teamId" :benchId="benchId" />
     </div>
     <div v-if="me !== undefined && me?.teamId === undefined">
@@ -31,7 +31,18 @@ const benchId = params.id as string
   padding: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 0.5rem;
+  container-type: inline-size;
+}
+
+.bench-detail-wrapper {
+  margin-top: -3rem;
+}
+
+@container (max-width: 480px) {
+  .bench-detail-wrapper {
+    margin-top: 0rem;
+  }
 }
 
 .back-button {

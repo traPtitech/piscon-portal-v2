@@ -1,0 +1,43 @@
+portal:
+  domain: piscon.ikura-hamu.work
+  git_ref: main
+  git_ref_type: heads
+
+  frontend:
+    host_port: 3000
+  backend:
+    host_grpc_port: 50051
+    session_secret: secret
+  db:
+    host_port: 3306
+    root_password: password
+    database: portal
+    user: portal
+    user_password: password
+
+  traq_client:
+    id: "{{ secrets.traq_client.id }}"
+    secret: "{{ secrets.traq_client.secret }}"
+
+  admin:
+    user_id: "{{ local.portal.admin.user_id }}"
+    user_name: "{{ local.portal.admin.user_name }}"
+
+runner:
+  git_ref: "{{ portal.git_ref }}"
+  portal_address: "{{ local.runner.portal_address }}"
+  problem_volumes:
+    private_isu:
+      - /home/isucon/private_isu/benchmarker:/benchmarker
+
+problem:
+  name: "{{ local.problem.name }}"
+  instance_limit: "{{ local.problem.instance_limit }}"
+  image_id: "{{ local.problem.image_id }}"
+  instance_type: "{{ local.problem.instance_type }}"
+
+aws:
+  region: "{{ local.aws.region }}"
+  subnet_id: "{{ local.aws.subnet_id }}"
+  security_group_id: "{{ local.aws.security_group_id }}"
+  key_pair_name: "{{ local.aws.key_pair_name }}"

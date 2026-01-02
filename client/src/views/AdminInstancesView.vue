@@ -38,7 +38,7 @@ const collapseStates = ref<Record<string, boolean>>({})
     <div class="team-instances">
       <div v-for="team in instancesByTeams" :key="team.team.id" class="team-instance">
         <h2 class="team-instance-title" :id="team.team.id">
-          <div>{{ team.team.name }}</div>
+          <div class="team-name">{{ team.team.name }}</div>
           <div class="team-members">
             <UserChip
               v-for="member in team.team.members"
@@ -68,6 +68,7 @@ const collapseStates = ref<Record<string, boolean>>({})
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  container-type: inline-size;
 }
 
 .admin-instances-header {
@@ -93,17 +94,33 @@ const collapseStates = ref<Record<string, boolean>>({})
 .team-instance-title {
   font-size: 1.5rem;
   font-weight: bold;
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-template-areas: 'team-name team-members team-accordion-button';
+  grid-template-columns: auto 1fr auto;
   gap: 0.5rem;
 }
 
+@container (max-width: 480px) {
+  .team-instance-title {
+    grid-template-areas:
+      'team-name team-accordion-button'
+      'team-members team-members';
+    grid-template-columns: 1fr auto;
+  }
+}
+
+.team-name {
+  grid-area: team-name;
+}
+
 .team-members {
+  grid-area: team-members;
   display: flex;
   gap: 0.5rem;
 }
 
 .team-accordion-button {
+  grid-area: team-accordion-button;
   margin-left: auto;
   background: none;
   border: none;
