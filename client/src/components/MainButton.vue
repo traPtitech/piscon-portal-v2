@@ -1,12 +1,20 @@
 <script setup lang="ts">
 defineProps<{
   variant?: 'primary' | 'destructive'
+  loading?: boolean
+  disabled?: boolean
 }>()
 </script>
 
 <template>
-  <button class="button" :class="variant ?? 'primary'" v-bind="$attrs">
+  <button
+    class="button"
+    :class="variant ?? 'primary'"
+    :disabled="disabled || loading"
+    v-bind="$attrs"
+  >
     <slot></slot>
+    <Icon v-if="loading" icon="mdi:loading" width="20" height="20" class="loading-spinner" />
   </button>
 </template>
 
@@ -23,6 +31,7 @@ defineProps<{
   justify-content: center;
   align-items: center;
   gap: 0.25rem;
+  position: relative;
 }
 .button:disabled:disabled {
   background-color: var(--ct-slate-100);
@@ -44,5 +53,22 @@ defineProps<{
 }
 .destructive:hover {
   background-color: var(--ct-red-200);
+}
+
+.loading-spinner {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+  margin-left: 0.5rem;
+  position: absolute;
+  right: 0.5rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>
