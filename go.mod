@@ -19,7 +19,7 @@ require (
 	github.com/gorilla/sessions v1.4.0
 	github.com/jellydator/ttlcache/v3 v3.4.0
 	github.com/labstack/echo-contrib v0.17.4
-	github.com/labstack/echo/v4 v4.14.0
+	github.com/labstack/echo/v4 v4.15.0
 	github.com/ogen-go/ogen v1.18.0
 	github.com/samber/lo v1.52.0
 	github.com/spf13/viper v1.21.0
