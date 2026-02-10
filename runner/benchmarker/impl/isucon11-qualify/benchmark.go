@@ -92,7 +92,7 @@ func (b *Isucon11Qualify) Start(ctx context.Context, job *domain.Job) (benchmark
 	}, time.Now(), nil
 }
 
-func (b *Isucon11Qualify) Wait(ctx context.Context) (domain.Result, time.Time, error) {
+func (b *Isucon11Qualify) Wait(_ context.Context) (domain.Result, time.Time, error) {
 	if err := b.cmd.Wait(); err != nil {
 		return domain.ResultError, time.Now(), fmt.Errorf("wait command: %w", err)
 	}
@@ -105,9 +105,8 @@ func (b *Isucon11Qualify) Wait(ctx context.Context) (domain.Result, time.Time, e
 
 	if <-b.passedCh {
 		return domain.ResultPassed, endTime, nil
-	} else {
-		return domain.ResultFailed, endTime, nil
 	}
+	return domain.ResultFailed, endTime, nil
 }
 
 func (b *Isucon11Qualify) CalculateScore(_ context.Context, _, _ string) (int, error) {
