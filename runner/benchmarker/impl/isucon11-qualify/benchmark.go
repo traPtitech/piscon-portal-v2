@@ -41,8 +41,8 @@ func New(conf config.Problem) (*Isucon11Qualify, error) {
 		return nil, fmt.Errorf("invalid or missing 'benchmarker-path' option in problem configuration")
 	}
 	benchmarkerIP, ok := conf.Options["benchmarker-ip"].(string)
-	if !ok || path == "" {
-		return nil, fmt.Errorf("invalid or missing 'benchmarker-url' option in problem configuration")
+	if !ok || benchmarkerIP == "" {
+		return nil, fmt.Errorf("invalid or missing 'benchmarker-ip' option in problem configuration")
 	}
 
 	return &Isucon11Qualify{
