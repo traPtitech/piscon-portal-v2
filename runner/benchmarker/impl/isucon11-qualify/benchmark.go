@@ -66,7 +66,10 @@ func (b *Isucon11Qualify) Start(ctx context.Context, job *domain.Job) (benchmark
 		"--all-addresses", job.GetTargetIPAdress(),
 		"--jia-service-url", jiaServiceURL.String())
 
-	reportReader, reportWriter, _ := os.Pipe()
+	reportReader, reportWriter, err := os.Pipe()
+	if err != nil {
+		return benchmarker.Outputs{}, time.Time{}, fmt.Errorf("create report pipe: %w", err)
+	}
 	b.cmd.Env = append(b.cmd.Environ(), "ISUXBENCH_REPORT_FD=3")
 	b.cmd.ExtraFiles = []*os.File{reportWriter}
 
