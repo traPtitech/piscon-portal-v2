@@ -116,7 +116,8 @@ func (b *Isucon11Qualify) CalculateScore(_ context.Context, _, _ string) (int, e
 	return int(b.latestScore.Load()), nil
 }
 
-func (b *Isucon11Qualify) watchReport(report io.Reader) {
+func (b *Isucon11Qualify) watchReport(report io.ReadCloser) {
+	defer report.Close()
 	defer close(b.errCh)
 	defer close(b.passedCh)
 	for {
