@@ -22,16 +22,6 @@
   vars:
     runner_git_ref: "{{ (runner | default({})).git_ref | default('') | trim }}"
 
-- name: Get runner release metadata
-  ansible.builtin.uri:
-    url: "{{ runner_release_api_url }}"
-    return_content: true
-  register: runner_release
-  changed_when: false
-  vars:
-    runner_release_api_url: "https://api.github.com/repos/traPtitech/piscon-portal-\
-      v2/releases/tags/{{ runner.git_ref }}"
-
 - name: Set runner release architecture
   ansible.builtin.set_fact:
     runner_release_arch: "{{ runner_arch_map.get(ansible_architecture, '') }}"
@@ -47,22 +37,14 @@
     msg: "Unsupported runner architecture: {{ ansible_architecture }}"
   when: runner_release_arch == ''
 
-- name: Select runner release asset
+- name: Set runner release version
   ansible.builtin.set_fact:
-    runner_release_asset: >-
-      {{
-        runner_release.json.assets
-        | selectattr('name', 'match', '^piscon-runner_.*_linux_' ~ runner_release_arch ~ '\.tar\.gz$')
-        | list
-        | first
-        | default({})
-      }}
+    runner_release_version: "{{ runner.git_ref | regex_replace('^v', '') }}"
 
-- name: Check runner release asset
-  ansible.builtin.fail:
-    msg: "Runner release asset for linux_{{ runner_release_arch }} was not found in
-      runner.git_ref={{ runner.git_ref }}"
-  when: runner_release_asset.browser_download_url is not defined
+- name: Set runner release asset URL
+  ansible.builtin.set_fact:
+    runner_release_asset_name: "piscon-runner_{{ runner_release_version }}_linux_{{ runner_release_arch }}.tar.gz"
+    runner_release_asset_url: "https://github.com/traPtitech/piscon-portal-v2/releases/download/{{ runner.git_ref }}/piscon-runner_{{ runner_release_version }}_linux_{{ runner_release_arch }}.tar.gz"
 
 - name: Make runner archive cache directory
   ansible.builtin.file:
@@ -73,8 +55,8 @@
 
 - name: Download runner archive
   ansible.builtin.get_url:
-    url: "{{ runner_release_asset.browser_download_url }}"
-    dest: "/var/cache/piscon-runner/{{ runner_release_asset.name }}"
+    url: "{{ runner_release_asset_url }}"
+    dest: "/var/cache/piscon-runner/{{ runner_release_asset_name }}"
     mode: "0644"
   become: true
   register: runner_archive
@@ -86,7 +68,7 @@
 
 - name: Install runner binary
   ansible.builtin.unarchive:
-    src: "/var/cache/piscon-runner/{{ runner_release_asset.name }}"
+    src: "/var/cache/piscon-runner/{{ runner_release_asset_name }}"
     dest: /usr/local/bin
     remote_src: true
     include:
