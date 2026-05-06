@@ -15,30 +15,79 @@
   notify:
     - Restart runner service
 
-- name: Install runner
-  ansible.builtin.command:
-    cmd: "go install github.com/traPtitech/piscon-portal-v2/cmd/runner@{{ runner.git_ref }}"
-  changed_when: false
+- name: Check runner release tag
+  ansible.builtin.fail:
+    msg: runner.git_ref must be set to a GitHub Release tag.
+  when: runner_git_ref == ''
+  vars:
+    runner_git_ref: "{{ (runner | default({})).git_ref | default('') | trim }}"
 
-- name: Check GOBIN
-  ansible.builtin.command:
-    cmd: "go env GOBIN"
-  register: go_gobin
-  changed_when: false
+- name: Set runner release architecture
+  ansible.builtin.set_fact:
+    runner_release_arch: "{{ runner_arch_map.get(ansible_architecture, '') }}"
+  vars:
+    runner_arch_map:
+      x86_64: amd64
+      amd64: amd64
+      aarch64: arm64
+      arm64: arm64
 
-- name: Check GOPATH
-  ansible.builtin.command:
-    cmd: "go env GOPATH"
-  register: go_gopath
-  changed_when: false
+- name: Check runner release architecture
+  ansible.builtin.fail:
+    msg: "Unsupported runner architecture: {{ ansible_architecture }}"
+  when: runner_release_arch == ''
+
+- name: Set runner release version
+  ansible.builtin.set_fact:
+    runner_release_version: "{{ runner.git_ref | regex_replace('^v', '') }}"
+
+- name: Set runner release asset URL
+  ansible.builtin.set_fact:
+    runner_release_asset_name: "piscon-runner_{{ runner_release_version }}_linux_{{
+      runner_release_arch }}.tar.gz"
+    runner_release_asset_url: |
+      "https://github.com/traPtitech/piscon-portal-v2/releases/download/
+      {{ runner.git_ref }}/piscon-runner_{{ runner_release_version }}_linux_
+      {{ runner_release_arch }}.tar.gz"
+
+- name: Make runner archive cache directory
+  ansible.builtin.file:
+    path: /var/cache/piscon-runner
+    state: directory
+    mode: "0755"
+  become: true
+
+- name: Download runner archive
+  ansible.builtin.get_url:
+    url: "{{ runner_release_asset_url }}"
+    dest: "/var/cache/piscon-runner/{{ runner_release_asset_name }}"
+    mode: "0644"
+  become: true
+  register: runner_archive
+
+- name: Check installed runner binary
+  ansible.builtin.stat:
+    path: /usr/local/bin/runner
+  register: runner_binary
+
+- name: Install runner binary
+  ansible.builtin.unarchive:
+    src: "/var/cache/piscon-runner/{{ runner_release_asset_name }}"
+    dest: /usr/local/bin
+    remote_src: true
+    include:
+      - runner
+    mode: "0755"
+  become: true
+  when: runner_archive.changed or not runner_binary.stat.exists
+  notify:
+    - Restart runner service
 
 - name: Create piscon-runner service
-  ansible.builtin.template:
+  ansible.builtin.copy:
     src: piscon-runner.service
     dest: /etc/systemd/system/piscon-runner.service
     mode: "0644"
-  vars:
-    bin_dir: "{{ go_gobin.stdout if go_gobin.stdout else (go_gopath.stdout + '/bin') }}"
   become: true
   notify:
     - Reload systemd

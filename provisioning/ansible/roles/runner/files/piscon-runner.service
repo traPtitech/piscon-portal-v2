@@ -5,7 +5,7 @@ Description=PISCON Runner
 Type=simple
 RemainAfterExit=true
 WorkingDirectory=/srv/runner
-ExecStart={{ bin_dir }}/runner
+ExecStart=/usr/local/bin/runner
 TimeoutStartSec=300
 Restart=no
 
