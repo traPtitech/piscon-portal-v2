@@ -5,5 +5,4 @@
     hostname: runner
   roles:
     - common
-    - go
     - runner
