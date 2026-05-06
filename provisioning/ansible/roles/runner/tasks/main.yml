@@ -29,7 +29,8 @@
   register: runner_release
   changed_when: false
   vars:
-    runner_release_api_url: "https://api.github.com/repos/traPtitech/piscon-portal-v2/releases/tags/{{ runner.git_ref }}"
+    runner_release_api_url: "https://api.github.com/repos/traPtitech/piscon-portal-\
+      v2/releases/tags/{{ runner.git_ref }}"
 
 - name: Set runner release architecture
   ansible.builtin.set_fact:
@@ -59,7 +60,8 @@
 
 - name: Check runner release asset
   ansible.builtin.fail:
-    msg: "Runner release asset for linux_{{ runner_release_arch }} was not found in runner.git_ref={{ runner.git_ref }}"
+    msg: "Runner release asset for linux_{{ runner_release_arch }} was not found in
+      runner.git_ref={{ runner.git_ref }}"
   when: runner_release_asset.browser_download_url is not defined
 
 - name: Make runner archive cache directory
@@ -87,6 +89,8 @@
     src: "/var/cache/piscon-runner/{{ runner_release_asset.name }}"
     dest: /usr/local/bin
     remote_src: true
+    include:
+      - runner
     mode: "0755"
   become: true
   when: runner_archive.changed or not runner_binary.stat.exists
