@@ -28,6 +28,10 @@ npm install
 # Runner インスタンスの AMI ID (必須)
 RUNNER_AMI_ID="ami-xxxxxxxxxxxxxxxxx"
 
+# Portal インスタンスの AMI ID (必須)
+# 2026/05/16 時点 Ubuntu Server 24.04 x86 を推奨
+PORTAL_AMI_ID="ami-xxxxxxxxxxxxxxxxx"
+
 # 作成する Runner インスタンスの数 (任意、デフォルト: 1)
 # RUNNER_COUNT=1
 
