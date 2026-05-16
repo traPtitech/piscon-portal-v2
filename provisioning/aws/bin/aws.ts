@@ -12,11 +12,17 @@ if (!runnerAmiId) {
 	throw new Error("RUNNER_AMI_ID is not configured");
 }
 
+const portalAmiId = process.env.PORTAL_AMI_ID;
+if (!portalAmiId) {
+	throw new Error("PORTAL_AMI_ID is not configured");
+}
+
 const config = {
 	portal: {
 		instanceType: new ec2.InstanceType(
 			process.env.PORTAL_INSTANCE_TYPE || "t3a.small",
 		),
+		amiId: portalAmiId,
 	},
 	runner: {
 		count: parseInt(process.env.RUNNER_COUNT || "1"),

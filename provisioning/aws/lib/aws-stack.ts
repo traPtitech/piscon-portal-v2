@@ -6,6 +6,7 @@ import { Construct } from "constructs";
 
 interface PortalConfig {
 	readonly instanceType: ec2.InstanceType;
+	readonly amiId: string;
 }
 
 interface RunnerConfig {
@@ -23,7 +24,6 @@ interface PisconStackProps extends cdk.StackProps {
 export class AwsStack extends cdk.Stack {
 	constructor(scope: Construct, id: string, props: PisconStackProps) {
 		super(scope, id, props);
-
 		const keyPair = new ec2.KeyPair(this, "ImportedKey", {
 			publicKeyMaterial: fs.readFileSync(props.sshPublicKeyPath, "utf8"),
 			keyPairName: "piscon-key-from-local",
@@ -62,7 +62,7 @@ export class AwsStack extends cdk.Stack {
 			vpc,
 			instanceType: props.portal.instanceType,
 			machineImage: ec2.MachineImage.genericLinux({
-				"ap-northeast-1": "ami-0aec5ae807cea9ce0", // Ubuntu 24.04 x86_64
+				"ap-northeast-1": props.portal.amiId,
 			}),
 			securityGroup: portalSg,
 			vpcSubnets: {
