@@ -35,6 +35,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Read Go version
+        id: go-version
+        run: |
+          go_version="$(awk '$1 == "go" { print $2; exit }' go.mod)"
+          echo "version=${go_version}" >> "${GITHUB_OUTPUT}"
+
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v6
@@ -53,5 +59,9 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: >
+            ${{ matrix.image.name == 'portal'
+              && format('GO_VERSION={0}', steps.go-version.outputs.version)
+              || '' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
