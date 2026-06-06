@@ -2,7 +2,7 @@
 
 # use the official Bun image
 # see all versions at https://hub.docker.com/r/oven/bun/tags
-FROM oven/bun:1 AS base
+FROM oven/bun:1@sha256:e10577f0db68676a7024391c6e5cb4b879ebd17188ab750cf10024a6d700e5c4 AS base
 WORKDIR /usr/src/app
 
 # install dependencies into temp directory
@@ -20,7 +20,7 @@ RUN --mount=type=bind,source=./client/,target=/usr/src/app,readwrite \
   mkdir -p /usr/src/dist && \
   bun run build-only --outDir /usr/src/dist --emptyOutDir
 
-FROM nginx:1-alpine AS production
+FROM nginx:1-alpine@sha256:8b1e78743a03dbb2c95171cc58639fef29abc8816598e27fb910ed2e621e589a AS production
 
 COPY --from=prerelease /usr/src/dist /usr/share/nginx/html
 
