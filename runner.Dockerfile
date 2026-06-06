@@ -8,8 +8,7 @@
 
 ################################################################################
 # Create a stage for building the application.
-ARG GO_VERSION=1.24.4
-FROM --platform=$BUILDPLATFORM golang:${GO_VERSION} AS build
+FROM --platform=$BUILDPLATFORM golang:1.26.4@sha256:68cb6d68bed024785b69195b89af7ac7a444f27791435f98647edff595aa0479 AS build
 WORKDIR /src
 
 # Download dependencies as a separate step to take advantage of Docker's caching.
@@ -44,7 +43,7 @@ RUN --mount=type=cache,target=/go/pkg/mod/ --mount=type=cache,target=/root/.cach
 # most recent version of that image when you build your Dockerfile. If
 # reproducibility is important, consider using a versioned tag
 # (e.g., alpine:3.17.2) or SHA (e.g., alpine@sha256:c41ab5c992deb4fe7e5da09f67a8804a46bd0592bfdf0b1847dde0e0889d2bff).
-FROM alpine:latest AS final
+FROM alpine:latest@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11 AS final
 
 # Install any runtime dependencies that are needed to run your application.
 # Leverage a cache mount to /var/cache/apk/ to speed up subsequent builds.
