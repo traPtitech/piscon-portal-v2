@@ -17,10 +17,10 @@
 
 - name: Check runner release tag
   ansible.builtin.fail:
-    msg: runner.git_ref must be set to a GitHub Release tag.
-  when: runner_git_ref == ''
+    msg: runner.git_tag must be set to a GitHub Release tag.
+  when: runner_git_tag == ''
   vars:
-    runner_git_ref: "{{ (runner | default({})).git_ref | default('') | trim }}"
+    runner_git_tag: "{{ (runner | default({})).git_tag | default('') | trim }}"
 
 - name: Set runner release architecture
   ansible.builtin.set_fact:
@@ -39,16 +39,16 @@
 
 - name: Set runner release version
   ansible.builtin.set_fact:
-    runner_release_version: "{{ runner.git_ref | regex_replace('^v', '') }}"
+    runner_release_version: "{{ runner.git_tag | regex_replace('^v', '') }}"
 
 - name: Set runner release asset URL
   ansible.builtin.set_fact:
     runner_release_asset_name:
       "piscon-runner_{{ runner_release_version }}_linux_{{
       runner_release_arch }}.tar.gz"
-    runner_release_asset_url:
-      "https://github.com/traPtitech/piscon-portal-v2/releases/download/\
-      {{ runner.git_ref }}/piscon-runner_{{ runner_release_version }}_linux_\
+    runner_release_asset_url: |
+      "https://github.com/traPtitech/piscon-portal-v2/releases/download/
+      {{ runner.git_tag }}/piscon-runner_{{ runner_release_version }}_linux_
       {{ runner_release_arch }}.tar.gz"
 
 - name: Make runner archive cache directory

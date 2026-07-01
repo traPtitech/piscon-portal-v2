@@ -14,7 +14,7 @@
   notify:
     - Restart portal service
   vars:
-    image_tag: "{{ portal.git_ref | regex_replace('^v', '') if portal.git_ref_type == 'tags' else portal.git_ref }}"
+    image_tag: "{{ portal.git_tag | regex_replace('^v', '') }}"
 
 - name: Set portal environment variables
   ansible.builtin.template:
@@ -26,7 +26,7 @@
 
 - name: Get DB schema file
   ansible.builtin.get_url:
-    url: "https://raw.githubusercontent.com/traPtitech/piscon-portal-v2/refs/{{ portal.git_ref_type }}/{{ portal.git_ref }}/server/schema.sql"
+    url: "https://raw.githubusercontent.com/traPtitech/piscon-portal-v2/refs/tags/{{ portal.git_tag }}/server/schema.sql"
     dest: /srv/portal/schema.sql
     mode: "0644"
   notify:

@@ -55,8 +55,7 @@ secrets:
 
 ```yaml:local.yml
 local:
-  git_ref: "{{ PISCON Portal のリポジトリの git ref (タグ、ブランチなど） }}"
-  git_ref_type: "{{ ブランチなら heads、タグなら tags }}"
+  git_tag: "{{ 利用する piscon-portal-v2 の Git tag (例: v0.1.0) }}"
   problem:
     name: "{{ 問題名 (vars.yml の runner.problem_volumes に含まれるキーのうちどれか 1 つ) }}"
     instance_limit: {{ インスタンス数の上限 }}

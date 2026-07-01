@@ -31,7 +31,7 @@ services:
       - .env
 
   frontend:
-    image: "ghcr.io/traptitech/piscon-portal-v2/frontend:{{ portal.git_ref | regex_replace('^v', '') if portal.git_ref_type == 'tags' else portal.git_ref }}"
+    image: "ghcr.io/traptitech/piscon-portal-v2/frontend:{{ image_tag }}"
     restart: always
     ports:
       - "{{ portal.frontend.host_port }}:80"
