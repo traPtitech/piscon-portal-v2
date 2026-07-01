@@ -158,7 +158,8 @@ func (*BenchmarkAdminResult) getBenchmarkResultRes() {}
 
 // BenchmarkAdminResultSum represents sum type.
 type BenchmarkAdminResultSum struct {
-	Type              BenchmarkAdminResultSumType // switch on this field
+	// Type selects the active sum variant, switch on this field.
+	Type              BenchmarkAdminResultSumType
 	WaitingBenchmark  WaitingBenchmark
 	ReadyingBenchmark ReadyingBenchmark
 	RunningBenchmark  RunningBenchmark
@@ -302,7 +303,8 @@ func (*BenchmarkListItem) postBenchmarkRes() {}
 
 // BenchmarkListItemSum represents sum type.
 type BenchmarkListItemSum struct {
-	Type              BenchmarkListItemSumType // switch on this field
+	// Type selects the active sum variant, switch on this field.
+	Type              BenchmarkListItemSumType
 	WaitingBenchmark  WaitingBenchmark
 	ReadyingBenchmark ReadyingBenchmark
 	RunningBenchmark  RunningBenchmark
@@ -425,11 +427,13 @@ func NewFinishedBenchmarkBenchmarkListItemSum(v FinishedBenchmark) BenchmarkList
 }
 
 // ベンチマークのステータス
-// - waiting: ベンチマークキューの中で実行を待っている
-// - readying:
-// ベンチマークキューから取り出され、実行が始まるのを待っている
-// - running: ベンチマークが実行されている
-// - finished: ベンチマークが終了している.
+//
+//   - waiting: ベンチマークキューの中で実行を待っている
+//   - readying:
+//     ベンチマークキューから取り出され、実行が始まるのを待っている
+//   - running: ベンチマークが実行されている
+//   - finished: ベンチマークが終了している
+//
 // Ref: #/components/schemas/BenchmarkStatus
 type BenchmarkStatus string
 
@@ -488,7 +492,8 @@ func (s *BenchmarkStatus) UnmarshalText(data []byte) error {
 
 // BenchmarkSum represents sum type.
 type BenchmarkSum struct {
-	Type              BenchmarkSumType // switch on this field
+	// Type selects the active sum variant, switch on this field.
+	Type              BenchmarkSumType
 	WaitingBenchmark  WaitingBenchmark
 	ReadyingBenchmark ReadyingBenchmark
 	RunningBenchmark  RunningBenchmark
