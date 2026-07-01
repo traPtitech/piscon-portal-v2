@@ -41,13 +41,21 @@
   ansible.builtin.set_fact:
     runner_release_version: "{{ runner.git_tag | regex_replace('^v', '') }}"
 
-- name: Set runner release asset URL
+- name: Set runner release asset name
   ansible.builtin.set_fact:
     runner_release_asset_name:
       "piscon-runner_{{ runner_release_version }}_linux_{{
       runner_release_arch }}.tar.gz"
+
+- name: Set runner release asset URL
+  ansible.builtin.set_fact:
     runner_release_asset_url: >-
-      https://github.com/traPtitech/piscon-portal-v2/releases/download/{{ runner.git_tag }}/piscon-runner_{{ runner_release_version }}_linux_{{ runner_release_arch }}.tar.gz
+      {{
+        'https://github.com/traPtitech/piscon-portal-v2/releases/download/'
+        ~ runner.git_tag
+        ~ '/'
+        ~ runner_release_asset_name
+      }}
 
 - name: Make runner archive cache directory
   ansible.builtin.file:
