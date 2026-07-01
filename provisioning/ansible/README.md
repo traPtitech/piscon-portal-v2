@@ -72,6 +72,7 @@ local:
     portal_address: "{{ Portal の gRPC サーバーのアドレス（PortalのプライベートIP:50051） }}"
 
   portal:
+    domain: "{{ ポータルを配信するドメイン (例: piscon.trap.jp) }}"
     admin:
       user_id: "{{ 初期管理者の traQ user ID (UUID) }}"
       user_name: "{{ 初期管理者の traQ user name }}"

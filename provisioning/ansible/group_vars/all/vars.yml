@@ -1,5 +1,5 @@
 portal:
-  domain: piscon.ikura-hamu.work
+  domain: "{{ local.portal.domain }}"
   git_tag: "{{ local.git_tag }}"
 
   frontend:
