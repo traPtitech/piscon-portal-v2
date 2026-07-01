@@ -19,7 +19,7 @@ services:
       retries: 5
 
   portal:
-    image: "ghcr.io/traptitech/piscon-portal-v2/portal:{{ portal.git_ref }}"
+    image: "ghcr.io/traptitech/piscon-portal-v2/portal:{{ image_tag }}"
     restart: always
     ports:
       - "8080:8080"
@@ -31,7 +31,7 @@ services:
       - .env
 
   frontend:
-    image: "ghcr.io/traptitech/piscon-portal-v2/frontend:{{ portal.git_ref }}"
+    image: "ghcr.io/traptitech/piscon-portal-v2/frontend:{{ image_tag }}"
     restart: always
     ports:
       - "{{ portal.frontend.host_port }}:80"

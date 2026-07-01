@@ -55,6 +55,7 @@ secrets:
 
 ```yaml:local.yml
 local:
+  git_tag: "{{ 利用する piscon-portal-v2 の Git tag (例: v0.1.0) }}"
   problem:
     name: "{{ 問題名 (vars.yml の runner.problem_volumes に含まれるキーのうちどれか 1 つ) }}"
     instance_limit: {{ インスタンス数の上限 }}
@@ -63,14 +64,15 @@ local:
 
   aws:
     region: "{{ AWSのリージョン }}"
-    subnet_id: "{{ AWSのサブネットID }}"
-    security_group_id: "{{ AWSのセキュリティグループID }}"
+    subnet_id: "{{ 問題サーバーを配置するAWSのサブネットID }}"
+    security_group_id: "{{ 問題サーバーを配置するAWSのセキュリティグループID }}"
     key_pair_name: "{{ AWSのキーペア名 }}"
 
   runner:
-    portal_address: "{{ ポータルの gRPC サーバーのアドレス }}"
+    portal_address: "{{ Portal の gRPC サーバーのアドレス（PortalのプライベートIP:50051） }}"
 
   portal:
+    domain: "{{ ポータルを配信するドメイン (例: piscon.trap.jp) }}"
     admin:
       user_id: "{{ 初期管理者の traQ user ID (UUID) }}"
       user_name: "{{ 初期管理者の traQ user name }}"

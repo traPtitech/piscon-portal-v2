@@ -1,7 +1,6 @@
 portal:
-  domain: piscon.ikura-hamu.work
-  git_ref: main
-  git_ref_type: heads
+  domain: "{{ local.portal.domain }}"
+  git_tag: "{{ local.git_tag }}"
 
   frontend:
     host_port: 3000
@@ -24,7 +23,7 @@ portal:
     user_name: "{{ local.portal.admin.user_name }}"
 
 runner:
-  git_ref: "{{ portal.git_ref }}"
+  git_tag: "{{ local.git_tag }}"
   portal_address: "{{ local.runner.portal_address }}"
   problem_volumes:
     private_isu:
