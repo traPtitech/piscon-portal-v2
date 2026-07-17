@@ -104,9 +104,10 @@ func (r *Repository) GetOldestQueuedBenchmark(ctx context.Context) (domain.Bench
 	statusWaiting := models.SelectWhere.Benchmarks.Status.EQ(enums.BenchmarksStatusWaiting)
 	orderByCreatedAtAsc := sm.OrderBy(models.Benchmarks.Columns.CreatedAt).Asc()
 	limit1 := sm.Limit(1)
+	lockForUpdate := sm.ForUpdate().SkipLocked()
 	benchmark, err := models.Benchmarks.Query(
 		models.Preload.Benchmark.Instance(),
-		statusWaiting, orderByCreatedAtAsc, limit1).One(ctx, r.executor(ctx))
+		statusWaiting, orderByCreatedAtAsc, limit1, lockForUpdate).One(ctx, r.executor(ctx))
 	if errors.Is(err, sql.ErrNoRows) {
 		return domain.Benchmark{}, repository.ErrNotFound
 	}
