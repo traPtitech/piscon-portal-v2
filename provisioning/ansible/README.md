@@ -65,7 +65,7 @@ local:
   aws:
     region: "{{ AWSのリージョン }}"
     subnet_id: "{{ 問題サーバーを配置するAWSのサブネットID }}"
-    security_group_id: "{{ 問題サーバーを配置するAWSのセキュリティグループID }}"
+    security_group_id: "{{ CDK の ProblemSecurityGroupId に出力された問題サーバー用セキュリティグループID }}"
     key_pair_name: "{{ AWSのキーペア名 }}"
 
   runner:
