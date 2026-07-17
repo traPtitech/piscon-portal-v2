@@ -64,3 +64,5 @@ cdk deploy
 ```
 
 デプロイが完了すると、Portal サーバーの IP アドレスなどがコンソールに出力されます。
+出力される `ProblemSecurityGroupId` は、Portal が起動する問題サーバー用の Security Group ID です。
+Ansible で Portal を設定するときは、この値を `local.aws.security_group_id` に指定してください。

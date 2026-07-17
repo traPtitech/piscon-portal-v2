@@ -52,10 +52,45 @@ export class AwsStack extends cdk.Stack {
 			description: "Securty group for Runners",
 		});
 
+		const problemServerSg = new ec2.SecurityGroup(this, "ProblemServerSg", {
+			vpc,
+			description: "Security group for problem servers",
+		});
+
 		portalSg.addIngressRule(
 			runnerSg,
 			ec2.Port.tcp(50051),
 			"Allow gRPC from any Runner",
+		);
+		problemServerSg.addIngressRule(
+			runnerSg,
+			ec2.Port.allTcp(),
+			"Allow TCP from runners",
+		);
+		problemServerSg.addIngressRule(
+			runnerSg,
+			ec2.Port.allUdp(),
+			"Allow UDP from runners",
+		);
+		problemServerSg.addIngressRule(
+			problemServerSg,
+			ec2.Port.allTcp(),
+			"Allow TCP between problem servers",
+		);
+		problemServerSg.addIngressRule(
+			problemServerSg,
+			ec2.Port.allUdp(),
+			"Allow UDP between problem servers",
+		);
+		runnerSg.addIngressRule(
+			problemServerSg,
+			ec2.Port.allTcp(),
+			"Allow TCP from problem servers",
+		);
+		runnerSg.addIngressRule(
+			problemServerSg,
+			ec2.Port.allUdp(),
+			"Allow UDP from problem servers",
 		);
 
 		const portal = new ec2.Instance(this, "Portal", {
@@ -129,6 +164,10 @@ export class AwsStack extends cdk.Stack {
 		new cdk.CfnOutput(this, "PortalPublicIp", {
 			value: portal.instancePublicIp,
 			description: "Portal server public IP address",
+		});
+		new cdk.CfnOutput(this, "ProblemSecurityGroupId", {
+			value: problemServerSg.securityGroupId,
+			description: "Security group ID for problem servers",
 		});
 
 		for (let i = 0; i < props.runner.count; i++) {
