@@ -19,6 +19,7 @@ type BenchmarkRepository interface {
 	// GetBenchmarkLog returns a benchmark log.
 	GetBenchmarkLog(ctx context.Context, benchmarkID uuid.UUID) (domain.BenchmarkLog, error)
 	// GetOldestQueuedBenchmark returns the oldest queued benchmark.
+	// To prevent the same benchmark from being claimed concurrently, it must be called in a transaction.
 	// If there are no queued benchmarks, it returns [ErrNotFound].
 	GetOldestQueuedBenchmark(ctx context.Context) (domain.Benchmark, error)
 	// UpdateBenchmark updates a benchmark record.
