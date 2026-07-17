@@ -20,8 +20,9 @@ import (
 )
 
 type problemConf struct {
-	benchmarkerIP string
-	execPath      string
+	benchmarkerIP  string
+	execPath       string
+	benchmarkerDir string
 }
 
 type Isucon11Qualify struct {
@@ -44,11 +45,16 @@ func New(conf config.Problem) (*Isucon11Qualify, error) {
 	if !ok || benchmarkerIP == "" {
 		return nil, fmt.Errorf("invalid or missing 'benchmarker-ip' option in problem configuration")
 	}
+	benchmarkerDir, ok := conf.Options["benchmarker-dir"].(string)
+	if !ok || benchmarkerDir == "" {
+		return nil, fmt.Errorf("invalid or missing 'benchmarker-dir' option in problem configuration")
+	}
 
 	return &Isucon11Qualify{
 		conf: problemConf{
-			execPath:      path,
-			benchmarkerIP: benchmarkerIP,
+			execPath:       path,
+			benchmarkerIP:  benchmarkerIP,
+			benchmarkerDir: benchmarkerDir,
 		},
 	}, nil
 }
@@ -67,7 +73,7 @@ func (b *Isucon11Qualify) Start(ctx context.Context, job *domain.Job) (benchmark
 		"--all-addresses", job.GetTargetIPAdress(),
 		"--jia-service-url", jiaServiceURL.String())
 
-	b.cmd.Dir = "/home/isucon/bench"
+	b.cmd.Dir = b.conf.benchmarkerDir
 
 	reportReader, reportWriter, err := os.Pipe()
 	if err != nil {

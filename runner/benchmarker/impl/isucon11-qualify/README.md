@@ -10,5 +10,5 @@ problem:
   options:
     benchmarker-path: /home/isucon/bench/bench
     benchmarker-ip: 192.168.0.3 # ベンチマーカー自身のipアドレス
+    benchmarker-dir: /home/isucon/bench # ベンチマーカーを実行するときのディレクトリ
 ```
-
