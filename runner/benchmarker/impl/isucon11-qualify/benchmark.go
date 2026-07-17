@@ -20,8 +20,9 @@ import (
 )
 
 type problemConf struct {
-	benchmarkerIP string
-	execPath      string
+	benchmarkerIP  string
+	execPath       string
+	benchmarkerDir string
 }
 
 type Isucon11Qualify struct {
@@ -44,27 +45,35 @@ func New(conf config.Problem) (*Isucon11Qualify, error) {
 	if !ok || benchmarkerIP == "" {
 		return nil, fmt.Errorf("invalid or missing 'benchmarker-ip' option in problem configuration")
 	}
+	benchmarkerDir, ok := conf.Options["benchmarker-dir"].(string)
+	if !ok || benchmarkerDir == "" {
+		return nil, fmt.Errorf("invalid or missing 'benchmarker-dir' option in problem configuration")
+	}
 
 	return &Isucon11Qualify{
-		errCh:    make(chan error, 1),
-		passedCh: make(chan bool, 1),
 		conf: problemConf{
-			execPath:      path,
-			benchmarkerIP: benchmarkerIP,
+			execPath:       path,
+			benchmarkerIP:  benchmarkerIP,
+			benchmarkerDir: benchmarkerDir,
 		},
 	}, nil
 }
 
 func (b *Isucon11Qualify) Start(ctx context.Context, job *domain.Job) (benchmarker.Outputs, time.Time, error) {
+	errCh := make(chan error, 1)
+	passedCh := make(chan bool, 1)
+
 	jiaServiceURL := url.URL{
 		Scheme: "http",
-		Host:   net.JoinHostPort(b.conf.benchmarkerIP, "5000"),
+		Host:   net.JoinHostPort(b.conf.benchmarkerIP, "4999"),
 	}
 	b.cmd = exec.CommandContext(ctx, b.conf.execPath,
 		"--target", job.GetTargetIPAdress(),
 		// tlsを使わない場合は`--all-adresses`にtargetだけ指定すればok
 		"--all-addresses", job.GetTargetIPAdress(),
 		"--jia-service-url", jiaServiceURL.String())
+
+	b.cmd.Dir = b.conf.benchmarkerDir
 
 	reportReader, reportWriter, err := os.Pipe()
 	if err != nil {
@@ -87,7 +96,11 @@ func (b *Isucon11Qualify) Start(ctx context.Context, job *domain.Job) (benchmark
 	}
 	reportWriter.Close()
 
-	go b.watchReport(reportReader)
+	b.errCh = errCh
+	b.passedCh = passedCh
+	b.latestScore.Store(0)
+
+	go b.watchReport(reportReader, errCh, passedCh)
 
 	return benchmarker.Outputs{
 		Stdout: stdout,
@@ -116,19 +129,19 @@ func (b *Isucon11Qualify) CalculateScore(_ context.Context, _, _ string) (int, e
 	return int(b.latestScore.Load()), nil
 }
 
-func (b *Isucon11Qualify) watchReport(report io.ReadCloser) {
+func (b *Isucon11Qualify) watchReport(report io.ReadCloser, errCh chan<- error, passedCh chan<- bool) {
 	defer report.Close()
-	defer close(b.errCh)
-	defer close(b.passedCh)
+	defer close(errCh)
+	defer close(passedCh)
 	for {
 		result, err := readResult(report)
 		if err != nil {
-			b.errCh <- err
+			errCh <- err
 			return
 		}
 		b.latestScore.Store(result.Score)
 		if result.Finished {
-			b.passedCh <- result.Passed
+			passedCh <- result.Passed
 			return
 		}
 	}
