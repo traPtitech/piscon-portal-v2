@@ -9,6 +9,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/samber/lo"
+	"github.com/stephenafamo/bob"
+	"github.com/stephenafamo/bob/dialect/mysql/dialect"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
 	"github.com/traPtitech/piscon-portal-v2/server/repository/db/models"
@@ -38,10 +40,15 @@ func (r *Repository) FindInstance(ctx context.Context, id uuid.UUID) (domain.Ins
 	return toDomainInstance(instance)
 }
 
-func (r *Repository) GetTeamInstances(ctx context.Context, teamID uuid.UUID) ([]domain.Instance, error) {
-	instances, err := models.Instances.Query(
+func (r *Repository) GetTeamInstances(ctx context.Context, teamID uuid.UUID, includeDeleted bool) ([]domain.Instance, error) {
+	conditions := []bob.Mod[*dialect.SelectQuery]{
 		models.SelectWhere.Instances.TeamID.EQ(teamID.String()),
-	).All(ctx, r.executor(ctx))
+	}
+	if !includeDeleted {
+		conditions = append(conditions, models.SelectWhere.Instances.DeletedAt.IsNull())
+	}
+
+	instances, err := models.Instances.Query(conditions...).All(ctx, r.executor(ctx))
 	if err != nil {
 		return nil, fmt.Errorf("get team instances: %w", err)
 	}

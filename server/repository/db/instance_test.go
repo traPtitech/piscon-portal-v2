@@ -124,11 +124,68 @@ func TestGetTeamInstances(t *testing.T) {
 		mustMakeInstance(t, db, inst)
 	}
 
-	got, err := repo.GetTeamInstances(t.Context(), teamID)
+	got, err := repo.GetTeamInstances(t.Context(), teamID, true)
 	assert.NoError(t, err)
 	assert.Len(t, got, 2)
 	testutil.ContainsInstance(t, got, instances[0])
 	testutil.ContainsInstance(t, got, instances[1])
+}
+
+func TestGetTeamInstancesExcludeDeleted(t *testing.T) {
+	t.Parallel()
+
+	repo, db := setupRepository(t)
+
+	teamID := uuid.New()
+	otherTeamID := uuid.New()
+	instances := []domain.Instance{
+		{
+			ID:     uuid.New(),
+			TeamID: teamID,
+			Index:  1,
+			Infra: domain.InfraInstance{
+				ProviderInstanceID: "prov-instance-id-1",
+			},
+			CreatedAt: time.Now(),
+		},
+		{
+			ID:     uuid.New(),
+			TeamID: teamID,
+			Index:  2,
+			Infra: domain.InfraInstance{
+				ProviderInstanceID: "prov-instance-id-2",
+			},
+			CreatedAt: time.Now(),
+			DeletedAt: ptr.Of(time.Now()),
+		},
+		{
+			ID:     uuid.New(),
+			TeamID: otherTeamID,
+			Index:  1,
+			Infra: domain.InfraInstance{
+				ProviderInstanceID: "prov-instance-id-3",
+			},
+			CreatedAt: time.Now(),
+		},
+		{
+			ID:     uuid.New(),
+			TeamID: otherTeamID,
+			Index:  2,
+			Infra: domain.InfraInstance{
+				ProviderInstanceID: "prov-instance-id-4",
+			},
+			CreatedAt: time.Now(),
+			DeletedAt: ptr.Of(time.Now()),
+		},
+	}
+	for _, inst := range instances {
+		mustMakeInstance(t, db, inst)
+	}
+
+	got, err := repo.GetTeamInstances(t.Context(), teamID, false)
+	assert.NoError(t, err)
+	assert.Len(t, got, 1)
+	testutil.ContainsInstance(t, got, instances[0])
 }
 
 func TestGetAllInstances(t *testing.T) {
