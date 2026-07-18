@@ -893,18 +893,18 @@ func (c *MockRepositoryGetRankingCall) DoAndReturn(f func(context.Context, repos
 }
 
 // GetTeamInstances mocks base method.
-func (m *MockRepository) GetTeamInstances(ctx context.Context, teamID uuid.UUID) ([]domain.Instance, error) {
+func (m *MockRepository) GetTeamInstances(ctx context.Context, teamID uuid.UUID, includeDeleted bool) ([]domain.Instance, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTeamInstances", ctx, teamID)
+	ret := m.ctrl.Call(m, "GetTeamInstances", ctx, teamID, includeDeleted)
 	ret0, _ := ret[0].([]domain.Instance)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetTeamInstances indicates an expected call of GetTeamInstances.
-func (mr *MockRepositoryMockRecorder) GetTeamInstances(ctx, teamID any) *MockRepositoryGetTeamInstancesCall {
+func (mr *MockRepositoryMockRecorder) GetTeamInstances(ctx, teamID, includeDeleted any) *MockRepositoryGetTeamInstancesCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTeamInstances", reflect.TypeOf((*MockRepository)(nil).GetTeamInstances), ctx, teamID)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTeamInstances", reflect.TypeOf((*MockRepository)(nil).GetTeamInstances), ctx, teamID, includeDeleted)
 	return &MockRepositoryGetTeamInstancesCall{Call: call}
 }
 
@@ -920,13 +920,13 @@ func (c *MockRepositoryGetTeamInstancesCall) Return(arg0 []domain.Instance, arg1
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockRepositoryGetTeamInstancesCall) Do(f func(context.Context, uuid.UUID) ([]domain.Instance, error)) *MockRepositoryGetTeamInstancesCall {
+func (c *MockRepositoryGetTeamInstancesCall) Do(f func(context.Context, uuid.UUID, bool) ([]domain.Instance, error)) *MockRepositoryGetTeamInstancesCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockRepositoryGetTeamInstancesCall) DoAndReturn(f func(context.Context, uuid.UUID) ([]domain.Instance, error)) *MockRepositoryGetTeamInstancesCall {
+func (c *MockRepositoryGetTeamInstancesCall) DoAndReturn(f func(context.Context, uuid.UUID, bool) ([]domain.Instance, error)) *MockRepositoryGetTeamInstancesCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
