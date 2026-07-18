@@ -58,7 +58,6 @@ onMounted(async () => {
   Chart.register(LineController, LineElement, LinearScale, PointElement, TimeScale, Tooltip)
 
   chart = new Chart(ctx, structuredClone(props.config))
-  chart.update()
 })
 
 onUnmounted(() => {
@@ -83,10 +82,8 @@ watch(
       return
     }
 
-    console.log('Updating chart data', newData)
-
     chart.data.datasets = newData.datasets
-    chart.update()
+    chart.update('none')
   },
   { deep: true },
 )

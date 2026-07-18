@@ -36,14 +36,19 @@ const colors = [
   '#fd7e1499',
 ]
 
+const getTeamColor = (teamId: string) => {
+  const hash = [...teamId].reduce((value, char) => (value * 31 + char.charCodeAt(0)) >>> 0, 0)
+  return colors[hash % colors.length]
+}
+
 const config = computed<ChartConfiguration<'line', { x: string; y: number }[], unknown>>(() => ({
   type: 'line',
   data: {
-    datasets: Object.entries(scoresByTeam.value).map(([teamId, scores], index) => ({
+    datasets: Object.entries(scoresByTeam.value).map(([teamId, scores]) => ({
       label: getTeamName(teamId),
       data: scores,
       fill: false,
-      borderColor: colors[index % colors.length],
+      borderColor: getTeamColor(teamId),
       tension: 0.1,
     })),
   },
