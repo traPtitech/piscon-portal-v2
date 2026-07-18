@@ -33,7 +33,7 @@ func TestCreateInstance(t *testing.T) {
 	repo.EXPECT().Transaction(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, f func(context.Context) error) error {
 		return f(ctx)
 	})
-	repo.EXPECT().GetTeamInstances(gomock.Any(), teamID).Times(1)
+	repo.EXPECT().GetTeamInstances(gomock.Any(), teamID, false).Times(1)
 	repo.EXPECT().FindTeam(gomock.Any(), teamID).Return(domain.Team{
 		ID:        teamID,
 		GitHubIDs: []string{"user1", "user2"},
@@ -64,7 +64,7 @@ func TestCreateInstance_githubUserNotFound(t *testing.T) {
 	repo.EXPECT().Transaction(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, f func(context.Context) error) error {
 		return f(ctx)
 	})
-	repo.EXPECT().GetTeamInstances(gomock.Any(), teamID).Times(1)
+	repo.EXPECT().GetTeamInstances(gomock.Any(), teamID, false).Times(1)
 	repo.EXPECT().FindTeam(gomock.Any(), teamID).Return(domain.Team{
 		ID:        teamID,
 		GitHubIDs: []string{"nonexistentuser"},
@@ -92,7 +92,7 @@ func TestCreateInstance_tooManyInstances(t *testing.T) {
 	repo.EXPECT().Transaction(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, f func(context.Context) error) error {
 		return f(ctx)
 	})
-	repo.EXPECT().GetTeamInstances(gomock.Any(), teamID).Times(1).Return([]domain.Instance{
+	repo.EXPECT().GetTeamInstances(gomock.Any(), teamID, false).Times(1).Return([]domain.Instance{
 		{Index: 1}, {Index: 2}, {Index: 3},
 	}, nil)
 
@@ -446,7 +446,7 @@ func TestGetTeamInstances(t *testing.T) {
 			manager := instancemock.NewMockManager(ctrl)
 			u := usecase.NewInstanceUseCase(repo, domain.NewInstanceFactory(3), manager, githubService)
 
-			repo.EXPECT().GetTeamInstances(gomock.Any(), testCase.teamID).
+			repo.EXPECT().GetTeamInstances(gomock.Any(), testCase.teamID, true).
 				Return(testCase.instances, testCase.GetTeamInstancesErr)
 
 			if testCase.executeGetAll {

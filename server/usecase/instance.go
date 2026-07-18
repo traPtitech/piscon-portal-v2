@@ -67,7 +67,7 @@ func (i *InstanceUseCaseImpl) CreateInstance(ctx context.Context, teamID uuid.UU
 	var instance domain.Instance
 	var infraCreated bool
 	err := i.repo.Transaction(ctx, func(ctx context.Context) error {
-		existing, err := i.repo.GetTeamInstances(ctx, teamID)
+		existing, err := i.repo.GetTeamInstances(ctx, teamID, false)
 		if err != nil {
 			return fmt.Errorf("get team instances: %w", err)
 		}
@@ -118,7 +118,7 @@ func (i *InstanceUseCaseImpl) CreateInstance(ctx context.Context, teamID uuid.UU
 }
 
 func (i *InstanceUseCaseImpl) GetTeamInstances(ctx context.Context, teamID uuid.UUID) ([]domain.Instance, error) {
-	instances, err := i.repo.GetTeamInstances(ctx, teamID)
+	instances, err := i.repo.GetTeamInstances(ctx, teamID, true)
 	if err != nil {
 		return nil, fmt.Errorf("get team instances: %w", err)
 	}
