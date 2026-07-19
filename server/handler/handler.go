@@ -98,6 +98,6 @@ func (h *Handler) SetupRoutes(e *echo.Echo) {
 	docs.GET("", h.GetDocument)
 	docs.PATCH("", h.PatchDocument, h.AdminAuthMiddleware())
 
-	admins := api.Group("/admins", h.AdminAuthMiddleware())
+	admins := api.Group("/admins", h.AuthMiddleware(), h.AdminAuthMiddleware())
 	admins.PUT("", h.PutAdmins)
 }
