@@ -11,17 +11,13 @@ const benchId = params.id as string
 
 <template>
   <main class="bench-container">
-    <div>
+    <TeamBenchmarkDetail v-if="me?.teamId !== undefined" :teamId="me.teamId" :benchId="benchId" />
+    <div v-else>
       <NavigationLink to="/benches" class="back-button">
         <Icon icon="mdi:chevron-left" width="24" height="24" />
         <span>ベンチマーク一覧に戻る</span>
       </NavigationLink>
-    </div>
-    <div v-if="me?.teamId !== undefined" class="bench-detail-wrapper">
-      <TeamBenchmarkDetail :teamId="me.teamId" :benchId="benchId" />
-    </div>
-    <div v-if="me !== undefined && me?.teamId === undefined">
-      <p>チームに所属していません</p>
+      <p v-if="me !== undefined">チームに所属していません</p>
     </div>
   </main>
 </template>
@@ -32,17 +28,6 @@ const benchId = params.id as string
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  container-type: inline-size;
-}
-
-.bench-detail-wrapper {
-  margin-top: -3rem;
-}
-
-@container (max-width: 480px) {
-  .bench-detail-wrapper {
-    margin-top: 0rem;
-  }
 }
 
 .back-button {

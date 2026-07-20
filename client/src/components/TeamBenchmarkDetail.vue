@@ -43,6 +43,10 @@ watch(
 <template>
   <div>
     <div class="bench-detail-actions">
+      <NavigationLink to="/benches" class="back-button">
+        <Icon icon="mdi:chevron-left" width="24" height="24" />
+        <span>ベンチマーク一覧に戻る</span>
+      </NavigationLink>
       <MainButton
         @click="reEnqueueBenchmark"
         :disabled="!canReEnqueue"
@@ -80,7 +84,20 @@ watch(
 <style scoped>
 .bench-detail-actions {
   display: flex;
-  justify-content: flex-end;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
   margin-bottom: 1rem;
+}
+
+.back-button {
+  width: fit-content;
+  padding: 0.25rem 0.5rem;
+  display: flex;
+  align-items: center;
+}
+.back-button svg {
+  margin-top: 0.15rem;
 }
 </style>
