@@ -21,15 +21,25 @@ export const useTeamBenches = (teamId: string) =>
       api.GET('/teams/{teamId}/benchmarks', { params: { path: { teamId } } }).then((r) => r.data),
   })
 
-export const useTeamBench = (teamId: string, benchmarkId: string) =>
+const fetchTeamBench = (teamId: string, benchmarkId: string) =>
+  api
+    .GET('/teams/{teamId}/benchmarks/{benchmarkId}', {
+      params: { path: { teamId, benchmarkId } },
+    })
+    .then((r) => r.data)
+
+export const useTeamBench = (
+  teamId: string,
+  benchmarkId: string,
+  options?: {
+    // ポーリング間隔(ms)を返す。false を返すとポーリングを止める
+    refetchInterval?: (bench: Awaited<ReturnType<typeof fetchTeamBench>>) => number | false
+  },
+) =>
   useQuery({
     queryKey: ['team-bench', teamId, benchmarkId],
-    queryFn: () =>
-      api
-        .GET('/teams/{teamId}/benchmarks/{benchmarkId}', {
-          params: { path: { teamId, benchmarkId } },
-        })
-        .then((r) => r.data),
+    queryFn: () => fetchTeamBench(teamId, benchmarkId),
+    refetchInterval: (query) => options?.refetchInterval?.(query.state.data) ?? false,
   })
 
 export const useTeamInstances = (teamId: string) =>
