@@ -6,14 +6,17 @@ import {
   useTeamInstances,
 } from '@/lib/useServerData'
 import { Icon } from '@iconify/vue'
-import { computed, watch } from 'vue'
+import { computed } from 'vue'
 
 const { teamId, benchId } = defineProps<{
   teamId: string
   benchId: string
 }>()
 
-const { data: bench, error: benchError, refetch } = useTeamBench(teamId, benchId)
+const { data: bench, error: benchError } = useTeamBench(teamId, benchId, {
+  refetchInterval: (bench) =>
+    bench?.status === 'running' || bench?.status === 'waiting' ? 1000 : false,
+})
 const { data: benches } = useTeamBenches(teamId)
 const { mutate: enqueueBenchmark } = useEnqueueBenchmark({ redirect: true })
 const { data: instances } = useTeamInstances(teamId)
@@ -25,19 +28,6 @@ const reEnqueueBenchmark = () => {
 
   enqueueBenchmark({ teamId, instanceId: bench.value?.instanceId })
 }
-
-watch(
-  bench,
-  () => {
-    if (bench.value?.status === 'running' || bench.value?.status === 'waiting') {
-      const interval = setInterval(() => {
-        void refetch()
-      }, 1000)
-      return () => clearInterval(interval)
-    }
-  },
-  { immediate: true },
-)
 </script>
 
 <template>
