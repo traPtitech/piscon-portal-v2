@@ -65,6 +65,7 @@ func (u *teamUseCaseImpl) CreateTeam(ctx context.Context, input CreateTeamInput)
 	team := domain.NewTeam(input.Name)
 	team.GitHubIDs = input.GitHubIDs
 
+	members := make([]domain.User, 0, len(input.MemberIDs))
 	for _, memberID := range input.MemberIDs {
 		user, err := u.repo.FindUser(ctx, memberID)
 		if err != nil {
@@ -73,9 +74,10 @@ func (u *teamUseCaseImpl) CreateTeam(ctx context.Context, input CreateTeamInput)
 			}
 			return domain.Team{}, fmt.Errorf("find user: %w", err)
 		}
-		if err := team.AddMember(user); err != nil {
-			return domain.Team{}, NewUseCaseError(err)
-		}
+		members = append(members, user)
+	}
+	if err := team.SetMembers(members); err != nil {
+		return domain.Team{}, NewUseCaseError(err)
 	}
 
 	if err := u.repo.CreateTeam(ctx, team); err != nil {
@@ -107,14 +109,17 @@ func (u *teamUseCaseImpl) UpdateTeam(ctx context.Context, input UpdateTeamInput)
 		team.GitHubIDs = input.GitHubIDs
 	}
 
+	members := make([]domain.User, 0, len(input.MemberIDs))
 	for _, memberID := range input.MemberIDs {
 		user, err := u.repo.FindUser(ctx, memberID)
 		if err != nil {
 			return domain.Team{}, fmt.Errorf("find user: %w", err)
 		}
-		if err := team.AddMember(user); err != nil {
-			return domain.Team{}, fmt.Errorf("add member: %w", err)
-		}
+		members = append(members, user)
+	}
+
+	if err := team.SetMembers(members); err != nil {
+		return domain.Team{}, fmt.Errorf("set members: %w", err)
 	}
 
 	err = u.repo.UpdateTeam(ctx, team)

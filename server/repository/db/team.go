@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"slices"
 
 	"github.com/google/uuid"
 	"github.com/samber/lo"
@@ -107,7 +108,35 @@ func (r *Repository) UpdateTeam(ctx context.Context, team domain.Team) error {
 		return fmt.Errorf("update team: %w", err)
 	}
 
+	eixistingMembers, err := models.Users.Query(
+		models.SelectWhere.Users.TeamID.EQ(team.ID.String()),
+	).All(ctx, r.executor(ctx))
+	if err != nil {
+		return fmt.Errorf("get existing team members: %w", err)
+	}
+
+	existingMemberIDs := lo.Map(eixistingMembers, func(member *models.User, _ int) string { return member.ID })
 	memberIDs := lo.Map(team.Members, func(m domain.User, _ int) string { return m.ID.String() })
+
+	deletingMemberIDs := make([]string, 0, len(existingMemberIDs))
+	for _, existingID := range existingMemberIDs {
+		if !slices.Contains(memberIDs, existingID) {
+			deletingMemberIDs = append(deletingMemberIDs, existingID)
+		}
+	}
+
+	if len(deletingMemberIDs) > 0 {
+		_, err = models.Users.Update(
+			models.UpdateWhere.Users.ID.In(deletingMemberIDs...),
+			models.UserSetter{
+				TeamID: &sql.Null[string]{},
+			}.UpdateMod(),
+		).Exec(ctx, r.executor(ctx))
+		if err != nil {
+			return fmt.Errorf("update user team id to null: %w", err)
+		}
+	}
+
 	_, err = models.Users.Update(
 		models.UpdateWhere.Users.ID.In(memberIDs...),
 		models.UserSetter{
