@@ -8,6 +8,7 @@ WorkingDirectory=/srv/runner
 ExecStart=/usr/local/bin/runner
 TimeoutStartSec=300
 Restart=no
+LimitNOFILE=524288:524288
 
 [Install]
 WantedBy=multi-user.target
