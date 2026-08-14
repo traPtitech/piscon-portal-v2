@@ -151,30 +151,41 @@ func TestUpdateTeam(t *testing.T) {
 
 	repo, db := setupRepository(t)
 
+	existingMember := domain.User{
+		ID:   uuid.New(),
+		Name: "user1",
+	}
 	team := domain.Team{
 		ID:        uuid.New(),
 		Name:      "team1",
-		Members:   nil,
+		Members:   []domain.User{existingMember},
 		CreatedAt: time.Now(),
 	}
 	newMember := domain.User{
 		ID:   uuid.New(),
 		Name: "user2",
 	}
+	mustMakeUser(t, db, existingMember)
 	mustMakeUser(t, db, newMember)
 	mustMakeTeam(t, db, team)
 
 	// change the team name and add a new member
 	team.Name = "team2"
-	require.NoError(t, team.AddMember(newMember))
+	newMember.TeamID = uuid.NullUUID{UUID: team.ID, Valid: true}
+	updateQueryTeam := domain.Team{
+		ID:        team.ID,
+		Name:      team.Name,
+		Members:   []domain.User{newMember},
+		CreatedAt: team.CreatedAt,
+	}
 
-	err := repo.UpdateTeam(t.Context(), team)
+	err := repo.UpdateTeam(t.Context(), updateQueryTeam)
 	assert.NoError(t, err)
 
 	got, err := repo.FindTeam(t.Context(), team.ID)
 	require.NoError(t, err)
 
-	testutil.CompareTeam(t, team, got)
+	testutil.CompareTeam(t, updateQueryTeam, got)
 }
 
 func TestCreateTeamWithGitHubIDs(t *testing.T) {
