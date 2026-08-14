@@ -26,6 +26,22 @@ func NewTeam(name string) Team {
 	}
 }
 
+func (t *Team) SetMembers(users []User) error {
+	if len(users) >= MaxTeamMembers {
+		return errors.New("team is full")
+	}
+
+	for i, user := range users {
+		if user.TeamID.Valid && user.TeamID.UUID != t.ID {
+			return errors.New("user is already in another team")
+		}
+		users[i].TeamID = uuid.NullUUID{UUID: t.ID, Valid: true}
+	}
+
+	t.Members = users
+	return nil
+}
+
 func (t *Team) AddMember(user User) error {
 	if slices.ContainsFunc(t.Members, func(u User) bool { return u.ID == user.ID }) {
 		return nil
