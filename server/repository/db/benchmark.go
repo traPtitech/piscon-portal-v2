@@ -233,6 +233,13 @@ func (r *Repository) GetRanking(ctx context.Context, query repository.RankingQue
 	return ranking, nil
 }
 
+func (r *Repository) DeleteBenchmark(_ context.Context, _ uuid.UUID) error {
+	return nil
+}
+func (r *Repository) DeleteBenchmarkLogs(_ context.Context, _ uuid.UUID) error {
+	return nil
+}
+
 func fromDomainBenchmarkStatus(status domain.BenchmarkStatus) (enums.BenchmarksStatus, error) {
 	switch status {
 	case domain.BenchmarkStatusWaiting:

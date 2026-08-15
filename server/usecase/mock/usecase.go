@@ -200,6 +200,44 @@ func (c *MockUseCaseCreateTeamCall) DoAndReturn(f func(context.Context, usecase.
 	return c
 }
 
+// DeleteBenchmark mocks base method.
+func (m *MockUseCase) DeleteBenchmark(ctx context.Context, benchmarkID uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteBenchmark", ctx, benchmarkID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteBenchmark indicates an expected call of DeleteBenchmark.
+func (mr *MockUseCaseMockRecorder) DeleteBenchmark(ctx, benchmarkID any) *MockUseCaseDeleteBenchmarkCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteBenchmark", reflect.TypeOf((*MockUseCase)(nil).DeleteBenchmark), ctx, benchmarkID)
+	return &MockUseCaseDeleteBenchmarkCall{Call: call}
+}
+
+// MockUseCaseDeleteBenchmarkCall wrap *gomock.Call
+type MockUseCaseDeleteBenchmarkCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockUseCaseDeleteBenchmarkCall) Return(arg0 error) *MockUseCaseDeleteBenchmarkCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockUseCaseDeleteBenchmarkCall) Do(f func(context.Context, uuid.UUID) error) *MockUseCaseDeleteBenchmarkCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockUseCaseDeleteBenchmarkCall) DoAndReturn(f func(context.Context, uuid.UUID) error) *MockUseCaseDeleteBenchmarkCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // DeleteInstance mocks base method.
 func (m *MockUseCase) DeleteInstance(ctx context.Context, id uuid.UUID) error {
 	m.ctrl.T.Helper()

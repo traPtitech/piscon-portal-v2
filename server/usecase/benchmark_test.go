@@ -599,3 +599,75 @@ func TestStartBenchmark(t *testing.T) {
 		})
 	}
 }
+
+func TestDeleteBenchmark(t *testing.T) {
+	t.Parallel()
+
+	testCases := map[string]struct {
+		benchmarkID            uuid.UUID
+		DeleteBenchmarkLogsErr error
+		executeDeleteBenchmark bool
+		DeleteBenchmarkErr     error
+		err                    error
+	}{
+		"DeleteBenchmarkLogsがエラーなのでエラー": {
+			benchmarkID:            uuid.New(),
+			DeleteBenchmarkLogsErr: assert.AnError,
+			err:                    assert.AnError,
+		},
+		"DeleteBenchmarkがエラーなのでエラー": {
+			benchmarkID:            uuid.New(),
+			executeDeleteBenchmark: true,
+			DeleteBenchmarkErr:     assert.AnError,
+			err:                    assert.AnError,
+		},
+		"DeleteBenchmarkがErrNotFoundなのでErrNotFound": {
+			benchmarkID:            uuid.New(),
+			executeDeleteBenchmark: true,
+			DeleteBenchmarkErr:     repository.ErrNotFound,
+			err:                    usecase.ErrNotFound,
+		},
+		"benchmarkを正しく削除できる": {
+			benchmarkID:            uuid.New(),
+			executeDeleteBenchmark: true,
+		},
+		"DeleteBenchmarkLogsがErrNotFoundでも削除できる": {
+			benchmarkID:            uuid.New(),
+			DeleteBenchmarkLogsErr: repository.ErrNotFound,
+			executeDeleteBenchmark: true,
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+
+			repoMock := mock.NewMockRepository(ctrl)
+
+			repoMock.EXPECT().Transaction(gomock.Any(), gomock.Any()).
+				DoAndReturn(func(ctx context.Context, f func(context.Context) error) error {
+					return f(ctx)
+				})
+			repoMock.EXPECT().
+				DeleteBenchmarkLogs(gomock.Any(), testCase.benchmarkID).
+				Return(testCase.DeleteBenchmarkLogsErr)
+			if testCase.executeDeleteBenchmark {
+				repoMock.EXPECT().
+					DeleteBenchmark(gomock.Any(), testCase.benchmarkID).
+					Return(testCase.DeleteBenchmarkErr)
+			}
+
+			b := usecase.NewBenchmarkUseCase(repoMock, nil)
+
+			err := b.DeleteBenchmark(t.Context(), testCase.benchmarkID)
+
+			if err != nil {
+				assert.ErrorIs(t, err, testCase.err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}

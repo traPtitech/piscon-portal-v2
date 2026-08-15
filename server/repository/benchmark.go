@@ -28,6 +28,12 @@ type BenchmarkRepository interface {
 	UpdateBenchmarkLog(ctx context.Context, benchmarkID uuid.UUID, log domain.BenchmarkLog) error
 	// GetRanking returns the ranking of score. It does not contains teams without score.
 	GetRanking(ctx context.Context, query RankingQuery) ([]domain.Score, error)
+	// DeleteBenchmark deletes a benchmark.
+	// If the benchmark is not found, it returns [ErrNotFound].
+	DeleteBenchmark(ctx context.Context, id uuid.UUID) error
+	// DeleteBenchmarkLogs deletes benchmark logs.
+	// If the benchmark logs are not found, it returns [ErrNotFound].
+	DeleteBenchmarkLogs(ctx context.Context, benchmarkID uuid.UUID) error
 }
 
 type BenchmarkQuery struct {
