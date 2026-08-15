@@ -563,6 +563,26 @@ paths:
           $ref: "#/components/responses/NotFound"
         500:
           $ref: "#/components/responses/InternalServerError"
+    delete:
+      tags: ["benchmark"]
+      summary: "ベンチマークの削除"
+      description: "指定されたベンチマークを削除します。adminのみが削除可能です。"
+      operationId: "deleteBenchmark"
+      security:
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/benchmarkId"
+      responses:
+        200:
+          description: "ベンチマークの削除に成功"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
 
   /scores:
     get:
