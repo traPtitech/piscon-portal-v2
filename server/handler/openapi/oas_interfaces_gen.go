@@ -5,6 +5,10 @@ type CreateTeamInstanceRes interface {
 	createTeamInstanceRes()
 }
 
+type DeleteBenchmarkRes interface {
+	deleteBenchmarkRes()
+}
+
 type DeleteTeamInstanceRes interface {
 	deleteTeamInstanceRes()
 }
