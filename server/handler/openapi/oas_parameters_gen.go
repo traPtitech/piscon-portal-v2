@@ -8,6 +8,12 @@ type CreateTeamInstanceParams struct {
 	TeamId TeamId
 }
 
+// DeleteBenchmarkParams is parameters of deleteBenchmark operation.
+type DeleteBenchmarkParams struct {
+	// ベンチマークID.
+	BenchmarkId BenchmarkId
+}
+
 // DeleteTeamInstanceParams is parameters of deleteTeamInstance operation.
 type DeleteTeamInstanceParams struct {
 	// チームID.

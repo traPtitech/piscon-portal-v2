@@ -324,7 +324,11 @@ export interface paths {
     get: operations['getBenchmarkResult']
     put?: never
     post?: never
-    delete?: never
+    /**
+     * ベンチマークの削除
+     * @description 指定されたベンチマークを削除します。adminのみが削除可能です。
+     */
+    delete: operations['deleteBenchmark']
     options?: never
     head?: never
     patch?: never
@@ -747,6 +751,8 @@ export interface components {
           name: components['schemas']['TeamName']
           /** @description チームに所属させる部員のID */
           members: components['schemas']['UserId'][]
+          /** @description メンバーのGitHub のID */
+          githubIds?: components['schemas']['GitHubId'][]
         }
       }
     }
@@ -1318,6 +1324,31 @@ export interface operations {
         content: {
           'application/json': components['schemas']['BenchmarkAdminResult']
         }
+      }
+      401: components['responses']['Unauthorized']
+      403: components['responses']['Forbidden']
+      404: components['responses']['NotFound']
+      500: components['responses']['InternalServerError']
+    }
+  }
+  deleteBenchmark: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /** @description ベンチマークID */
+        benchmarkId: components['parameters']['benchmarkId']
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description ベンチマークの削除に成功 */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
       }
       401: components['responses']['Unauthorized']
       403: components['responses']['Forbidden']

@@ -609,6 +609,11 @@ func NewFinishedBenchmarkBenchmarkSum(v FinishedBenchmark) BenchmarkSum {
 
 type CreatedAt time.Time
 
+// DeleteBenchmarkOK is response for DeleteBenchmark operation.
+type DeleteBenchmarkOK struct{}
+
+func (*DeleteBenchmarkOK) deleteBenchmarkRes() {}
+
 // DeleteTeamInstanceOK is response for DeleteTeamInstance operation.
 type DeleteTeamInstanceOK struct{}
 
@@ -851,6 +856,7 @@ func (s *Forbidden) SetMessage(val OptString) {
 }
 
 func (*Forbidden) createTeamInstanceRes()     {}
+func (*Forbidden) deleteBenchmarkRes()        {}
 func (*Forbidden) deleteTeamInstanceRes()     {}
 func (*Forbidden) getBenchmarkResultRes()     {}
 func (*Forbidden) getBenchmarksRes()          {}
@@ -1193,6 +1199,7 @@ func (s *InternalServerError) SetMessage(val OptString) {
 }
 
 func (*InternalServerError) createTeamInstanceRes()     {}
+func (*InternalServerError) deleteBenchmarkRes()        {}
 func (*InternalServerError) deleteTeamInstanceRes()     {}
 func (*InternalServerError) getBenchmarkQueueRes()      {}
 func (*InternalServerError) getBenchmarkResultRes()     {}
@@ -1235,6 +1242,7 @@ func (s *NotFound) SetMessage(val OptString) {
 }
 
 func (*NotFound) createTeamInstanceRes()     {}
+func (*NotFound) deleteBenchmarkRes()        {}
 func (*NotFound) deleteTeamInstanceRes()     {}
 func (*NotFound) getBenchmarkResultRes()     {}
 func (*NotFound) getTeamBenchmarkResultRes() {}
@@ -2288,6 +2296,7 @@ func (s *Unauthorized) SetMessage(val OptString) {
 }
 
 func (*Unauthorized) createTeamInstanceRes()     {}
+func (*Unauthorized) deleteBenchmarkRes()        {}
 func (*Unauthorized) deleteTeamInstanceRes()     {}
 func (*Unauthorized) getBenchmarkQueueRes()      {}
 func (*Unauthorized) getBenchmarkResultRes()     {}
