@@ -348,6 +348,82 @@ func (c *MockRepositoryDeleteAdminsCall) DoAndReturn(f func(context.Context, []u
 	return c
 }
 
+// DeleteBenchmark mocks base method.
+func (m *MockRepository) DeleteBenchmark(ctx context.Context, id uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteBenchmark", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteBenchmark indicates an expected call of DeleteBenchmark.
+func (mr *MockRepositoryMockRecorder) DeleteBenchmark(ctx, id any) *MockRepositoryDeleteBenchmarkCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteBenchmark", reflect.TypeOf((*MockRepository)(nil).DeleteBenchmark), ctx, id)
+	return &MockRepositoryDeleteBenchmarkCall{Call: call}
+}
+
+// MockRepositoryDeleteBenchmarkCall wrap *gomock.Call
+type MockRepositoryDeleteBenchmarkCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockRepositoryDeleteBenchmarkCall) Return(arg0 error) *MockRepositoryDeleteBenchmarkCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockRepositoryDeleteBenchmarkCall) Do(f func(context.Context, uuid.UUID) error) *MockRepositoryDeleteBenchmarkCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockRepositoryDeleteBenchmarkCall) DoAndReturn(f func(context.Context, uuid.UUID) error) *MockRepositoryDeleteBenchmarkCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// DeleteBenchmarkLogs mocks base method.
+func (m *MockRepository) DeleteBenchmarkLogs(ctx context.Context, benchmarkID uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteBenchmarkLogs", ctx, benchmarkID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteBenchmarkLogs indicates an expected call of DeleteBenchmarkLogs.
+func (mr *MockRepositoryMockRecorder) DeleteBenchmarkLogs(ctx, benchmarkID any) *MockRepositoryDeleteBenchmarkLogsCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteBenchmarkLogs", reflect.TypeOf((*MockRepository)(nil).DeleteBenchmarkLogs), ctx, benchmarkID)
+	return &MockRepositoryDeleteBenchmarkLogsCall{Call: call}
+}
+
+// MockRepositoryDeleteBenchmarkLogsCall wrap *gomock.Call
+type MockRepositoryDeleteBenchmarkLogsCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockRepositoryDeleteBenchmarkLogsCall) Return(arg0 error) *MockRepositoryDeleteBenchmarkLogsCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockRepositoryDeleteBenchmarkLogsCall) Do(f func(context.Context, uuid.UUID) error) *MockRepositoryDeleteBenchmarkLogsCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockRepositoryDeleteBenchmarkLogsCall) DoAndReturn(f func(context.Context, uuid.UUID) error) *MockRepositoryDeleteBenchmarkLogsCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // DeleteInstance mocks base method.
 func (m *MockRepository) DeleteInstance(ctx context.Context, id uuid.UUID) error {
 	m.ctrl.T.Helper()
