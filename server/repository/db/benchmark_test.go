@@ -729,3 +729,55 @@ func TestDeleteBenchmark(t *testing.T) {
 		})
 	}
 }
+
+func TestDeleteBenchmarkLogs(t *testing.T) {
+	t.Parallel()
+
+	repo, testDB := setupRepository(t)
+
+	instanceID := uuid.New()
+
+	mustMakeInstance(t, testDB, domain.Instance{
+		ID: instanceID,
+		Infra: domain.InfraInstance{
+			ProviderInstanceID: "provider-instance-id",
+			Status:             domain.InstanceStatusRunning,
+		},
+	})
+	benchmark := domain.Benchmark{
+		ID:        uuid.New(),
+		Status:    domain.BenchmarkStatusRunning,
+		CreatedAt: time.Now(),
+		Instance: domain.Instance{
+			ID: instanceID,
+		},
+	}
+	mustMakeBenchmark(t, testDB, benchmark)
+	mustMakeBenchmarkLog(t, testDB, benchmark.ID, domain.BenchmarkLog{})
+
+	testCases := map[string]struct {
+		id  uuid.UUID
+		err error
+	}{
+		"存在するベンチマークのログを削除": {
+			id:  benchmark.ID,
+			err: nil,
+		},
+		"存在しないベンチマークのログを削除": {
+			id:  uuid.New(),
+			err: repository.ErrNotFound,
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			err := repo.DeleteBenchmarkLogs(t.Context(), testCase.id)
+
+			if testCase.err != nil {
+				assert.ErrorIs(t, err, testCase.err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
