@@ -247,7 +247,17 @@ func (r *Repository) DeleteBenchmark(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func (r *Repository) DeleteBenchmarkLogs(_ context.Context, _ uuid.UUID) error {
+func (r *Repository) DeleteBenchmarkLogs(ctx context.Context, id uuid.UUID) error {
+	rowsAffected, err := models.BenchmarkLogs.
+		Delete(models.DeleteWhere.BenchmarkLogs.BenchmarkID.EQ(id.String())).
+		Exec(ctx, r.executor(ctx))
+	if err != nil {
+		return fmt.Errorf("delete benchmark logs: %w", err)
+	}
+	if rowsAffected == 0 {
+		return repository.ErrNotFound
+	}
+
 	return nil
 }
 
