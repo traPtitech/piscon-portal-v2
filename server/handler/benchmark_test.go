@@ -501,6 +501,58 @@ func TestGetTeamBenchmark_GetBenchmarkError(t *testing.T) {
 	}
 }
 
+func TestDeleteBenchmark(t *testing.T) {
+	t.Parallel()
+
+	ctrl := gomock.NewController(t)
+
+	repoMock := repomock.NewMockRepository(ctrl)
+	useCaseMock := usecasemock.NewMockUseCase(ctrl)
+
+	e := echo.New()
+	benchmarkID := uuid.New()
+	req := httptest.NewRequest(http.MethodDelete, "/benchmarks/"+benchmarkID.String(), nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetParamNames("benchmarkID")
+	c.SetParamValues(benchmarkID.String())
+	h := NewHandler(useCaseMock, repoMock, nil)
+
+	useCaseMock.EXPECT().DeleteBenchmark(gomock.Any(), benchmarkID).Return(nil)
+
+	_ = h.DeleteBenchmark(c)
+
+	if !assert.Equal(t, http.StatusOK, rec.Code, "status code") {
+		t.Log(rec.Body.String())
+	}
+}
+
+func TestDeleteBenchmark_NotFound(t *testing.T) {
+	t.Parallel()
+
+	ctrl := gomock.NewController(t)
+
+	repoMock := repomock.NewMockRepository(ctrl)
+	useCaseMock := usecasemock.NewMockUseCase(ctrl)
+
+	e := echo.New()
+	benchmarkID := uuid.New()
+	req := httptest.NewRequest(http.MethodDelete, "/benchmarks/"+benchmarkID.String(), nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetParamNames("benchmarkID")
+	c.SetParamValues(benchmarkID.String())
+	h := NewHandler(useCaseMock, repoMock, nil)
+
+	useCaseMock.EXPECT().DeleteBenchmark(gomock.Any(), benchmarkID).Return(usecase.ErrNotFound)
+
+	_ = h.DeleteBenchmark(c)
+
+	if !assert.Equal(t, http.StatusNotFound, rec.Code, "status code") {
+		t.Log(rec.Body.String())
+	}
+}
+
 func compareWaitingBenchmark(t *testing.T, expected domain.Benchmark, actual openapi.WaitingBenchmark) {
 	t.Helper()
 	assert.Equal(t, expected.ID, uuid.UUID(actual.ID))
