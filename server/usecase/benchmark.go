@@ -34,6 +34,9 @@ type BenchmarkUseCase interface {
 	FinalizeBenchmark(ctx context.Context, benchmarkID uuid.UUID, result domain.BenchmarkResult, finishedAt time.Time, errorMessage *string) error
 
 	GetBenchmarkLog(ctx context.Context, benchmarkID uuid.UUID) (domain.BenchmarkLog, error)
+	// DeleteBenchmark
+	// ベンチマークを削除する。該当のベンチマークが存在しなかった場合、usecase.ErrNotFound を返す。
+	DeleteBenchmark(ctx context.Context, benchmarkID uuid.UUID) error
 }
 
 type benchmarkUseCaseImpl struct {
@@ -265,6 +268,32 @@ func (u *benchmarkUseCaseImpl) FinalizeBenchmark(ctx context.Context, benchmarkI
 		})
 		if err != nil {
 			return fmt.Errorf("update benchmark: %w", err)
+		}
+
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("transaction: %w", err)
+	}
+
+	return nil
+}
+
+func (u *benchmarkUseCaseImpl) DeleteBenchmark(ctx context.Context, benchmarkID uuid.UUID) error {
+	err := u.repo.Transaction(ctx, func(ctx context.Context) error {
+		err := u.repo.DeleteBenchmarkLogs(ctx, benchmarkID)
+		if err != nil && !errors.Is(err, repository.ErrNotFound) {
+			// 開始していないベンチマークの場合、benchmark logsは存在しないので、
+			// ErrNotFoundのときは無視する。
+			return fmt.Errorf("delete benchmark logs: %w", err)
+		}
+
+		err = u.repo.DeleteBenchmark(ctx, benchmarkID)
+		if errors.Is(err, repository.ErrNotFound) {
+			return ErrNotFound
+		}
+		if err != nil {
+			return fmt.Errorf("delete benchmark: %w", err)
 		}
 
 		return nil
