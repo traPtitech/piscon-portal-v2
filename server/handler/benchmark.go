@@ -188,6 +188,23 @@ func (h *Handler) GetTeamBenchmark(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
+func (h *Handler) DeleteBenchmark(c echo.Context) error {
+	benchmarkID, err := uuid.Parse(c.Param("benchmarkID"))
+	if err != nil {
+		return badRequestResponse(c, "invalid benchmark id")
+	}
+
+	err = h.useCase.DeleteBenchmark(c.Request().Context(), benchmarkID)
+	if err != nil {
+		if errors.Is(err, usecase.ErrNotFound) {
+			return notFoundResponse(c)
+		}
+		return internalServerErrorResponse(c, err)
+	}
+
+	return c.NoContent(http.StatusOK)
+}
+
 func toOpenAPIBenchmarkListItem(benchmark domain.Benchmark) (openapi.BenchmarkListItemSum, error) {
 	switch benchmark.Status {
 	case domain.BenchmarkStatusWaiting:
