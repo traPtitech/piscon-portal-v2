@@ -89,6 +89,7 @@ func (h *Handler) SetupRoutes(e *echo.Echo) {
 	benchmarks.POST("", h.EnqueueBenchmark)
 	benchmarks.GET("/queue", h.GetQueuedBenchmarks)
 	benchmarks.GET("/:benchmarkID", h.GetBenchmark, h.AdminAuthMiddleware())
+	benchmarks.DELETE("/:benchmarkID", h.DeleteBenchmark, h.AdminAuthMiddleware())
 
 	scores := api.Group("/scores", h.AuthMiddleware())
 	scores.GET("", h.GetScores)
