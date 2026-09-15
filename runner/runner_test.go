@@ -1,5 +1,3 @@
-//go:build 1.24
-
 package runner_test
 
 import (
@@ -29,6 +27,7 @@ func Test_captureStreamOutput(t *testing.T) {
 	}{
 		"ok": {
 			writeFunc: func(t *testing.T, w io.WriteCloser, b *runner.SyncStringBuilder) {
+				t.Helper()
 				for i := range 10 {
 					_, err := w.Write(bytes.Repeat([]byte("a"), runner.BufSizeExported))
 					require.NoError(t, err)
@@ -83,138 +82,49 @@ func Test_captureStreamOutput(t *testing.T) {
 }
 
 func Test_streamJobProgress(t *testing.T) {
-	ctrl := gomock.NewController(t)
-
-	setupRunner := func(t *testing.T) (*runner.Runner, *mock.MockPortal, *mock.MockProgressStreamClient, *benchmarkerMock.MockBenchmarker) {
-		t.Helper()
-		portal := mock.NewMockPortal(ctrl)
-		benchmarker := benchmarkerMock.NewMockBenchmarker(ctrl)
-		streamClient := mock.NewMockProgressStreamClient(ctrl)
-		r := runner.Prepare(portal, benchmarker)
-
-		portal.EXPECT().MakeProgressStreamClient(gomock.Any()).
-			Return(streamClient, nil)
-		streamClient.EXPECT().Close().Return(nil)
-
-		return r, portal, streamClient, benchmarker
-	}
-
-	setupArgs := func(t *testing.T) (*domain.Job, time.Time, *runner.SyncStringBuilder, *runner.SyncStringBuilder, chan error, chan error) {
-		t.Helper()
-		job := domain.NewJob("id", "target")
-		startedAt := time.Now()
-		stdoutBdr := &runner.SyncStringBuilder{}
-		stderrBdr := &runner.SyncStringBuilder{}
-		stdoutErrChan := make(chan error, 1)
-		stderrErrChan := make(chan error, 1)
-		return job, startedAt, stdoutBdr, stderrBdr, stdoutErrChan, stderrErrChan
-	}
-
 	type testCase struct {
 		useSynctest bool
+		// setupMocks には初期進捗の送信以降に期待する呼び出しを書く。
 		setupMocks  func(sc *mock.MockProgressStreamClient, bm *benchmarkerMock.MockBenchmarker, startedAt time.Time)
-		writeFunc   func(stdoutBdr, stderrBdr *runner.SyncStringBuilder, stdoutErrChan, stderrErrChan chan error)
+		writeFunc   func(t *testing.T, stdoutBdr, stderrBdr *runner.SyncStringBuilder, stdoutErrChan, stderrErrChan chan error)
 		expectedErr error
 	}
 
 	tests := map[string]testCase{
 		"stdoutとstderrから何も来ずにすぐ終わる": {
-			useSynctest: false,
-			setupMocks: func(sc *mock.MockProgressStreamClient, bm *benchmarkerMock.MockBenchmarker, startedAt time.Time) {
-				bm.EXPECT().CalculateScore(gomock.Any(), "", "").Return(0, nil)
-				sc.EXPECT().SendProgress(gomock.Any(), domain.NewProgress("id", "", "", 0, startedAt)).Return(nil)
-			},
-			writeFunc: func(_, _ *runner.SyncStringBuilder, stdoutErrChan, stderrErrChan chan error) {
-				go func() {
-					stdoutErrChan <- nil
-					stderrErrChan <- nil
-				}()
+			setupMocks: func(_ *mock.MockProgressStreamClient, _ *benchmarkerMock.MockBenchmarker, _ time.Time) {},
+			writeFunc: func(_ *testing.T, _, _ *runner.SyncStringBuilder, stdoutErrChan, stderrErrChan chan error) {
+				stdoutErrChan <- nil
+				stderrErrChan <- nil
 			},
 			expectedErr: nil,
 		},
-		"stdoutにデータが来てすぐ終わる": {
-			useSynctest: false,
-			setupMocks: func(sc *mock.MockProgressStreamClient, bm *benchmarkerMock.MockBenchmarker, startedAt time.Time) {
-				bm.EXPECT().CalculateScore(gomock.Any(), "abc", "").Return(0, nil)
-				sc.EXPECT().SendProgress(gomock.Any(), domain.NewProgress("id", "abc", "", 0, startedAt)).Return(nil)
-			},
-			writeFunc: func(stdoutBdr, _ *runner.SyncStringBuilder, stdoutErrChan, stderrErrChan chan error) {
-				go func() {
-					_, err := stdoutBdr.WriteString("abc")
-					require.NoError(t, err)
-					stdoutErrChan <- nil
-					stderrErrChan <- nil
-				}()
-			},
-			expectedErr: nil,
-		},
-		"stderrにデータが来てすぐ終わる": {
-			useSynctest: false,
-			setupMocks: func(sc *mock.MockProgressStreamClient, bm *benchmarkerMock.MockBenchmarker, startedAt time.Time) {
-				bm.EXPECT().CalculateScore(gomock.Any(), "", "abc").Return(0, nil)
-				sc.EXPECT().SendProgress(gomock.Any(), domain.NewProgress("id", "", "abc", 0, startedAt)).Return(nil)
-			},
-			writeFunc: func(_, stderrBdr *runner.SyncStringBuilder, stdoutErrChan, stderrErrChan chan error) {
-				go func() {
-					_, err := stderrBdr.WriteString("abc")
-					require.NoError(t, err)
-					stdoutErrChan <- nil
-					stderrErrChan <- nil
-				}()
-			},
-			expectedErr: nil,
-		},
-		"stdoutとstderrにデータが来てすぐ終わる": {
-			useSynctest: false,
-			setupMocks: func(sc *mock.MockProgressStreamClient, bm *benchmarkerMock.MockBenchmarker, startedAt time.Time) {
-				bm.EXPECT().CalculateScore(gomock.Any(), "abc", "def").Return(0, nil)
-				sc.EXPECT().SendProgress(gomock.Any(), domain.NewProgress("id", "abc", "def", 0, startedAt)).Return(nil)
-			},
-			writeFunc: func(stdoutBdr, stderrBdr *runner.SyncStringBuilder, stdoutErrChan, stderrErrChan chan error) {
-				go func() {
-					_, err := stdoutBdr.WriteString("abc")
-					require.NoError(t, err)
-					_, err = stderrBdr.WriteString("def")
-					require.NoError(t, err)
-					stdoutErrChan <- nil
-					stderrErrChan <- nil
-				}()
+		"データが来てもintervalをまたがなければ送信しない": {
+			setupMocks: func(_ *mock.MockProgressStreamClient, _ *benchmarkerMock.MockBenchmarker, _ time.Time) {},
+			writeFunc: func(t *testing.T, stdoutBdr, stderrBdr *runner.SyncStringBuilder, stdoutErrChan, stderrErrChan chan error) {
+				t.Helper()
+				_, err := stdoutBdr.WriteString("abc")
+				require.NoError(t, err)
+				_, err = stderrBdr.WriteString("def")
+				require.NoError(t, err)
+				stdoutErrChan <- nil
+				stderrErrChan <- nil
 			},
 			expectedErr: nil,
 		},
 		"stdoutでエラー": {
-			useSynctest: false,
-			setupMocks: func(sc *mock.MockProgressStreamClient, bm *benchmarkerMock.MockBenchmarker, startedAt time.Time) {
-				bm.EXPECT().CalculateScore(gomock.Any(), "abc", "def").Return(0, nil)
-				sc.EXPECT().SendProgress(gomock.Any(), domain.NewProgress("id", "abc", "def", 0, startedAt)).Return(nil)
-			},
-			writeFunc: func(stdoutBdr, stderrBdr *runner.SyncStringBuilder, stdoutErrChan, stderrErrChan chan error) {
-				go func() {
-					_, err := stdoutBdr.WriteString("abc")
-					require.NoError(t, err)
-					_, err = stderrBdr.WriteString("def")
-					require.NoError(t, err)
-					stdoutErrChan <- assert.AnError
-					stderrErrChan <- nil
-				}()
+			setupMocks: func(_ *mock.MockProgressStreamClient, _ *benchmarkerMock.MockBenchmarker, _ time.Time) {},
+			writeFunc: func(_ *testing.T, _, _ *runner.SyncStringBuilder, stdoutErrChan, stderrErrChan chan error) {
+				stdoutErrChan <- assert.AnError
+				stderrErrChan <- nil
 			},
 			expectedErr: assert.AnError,
 		},
 		"stderrでエラー": {
-			useSynctest: false,
-			setupMocks: func(sc *mock.MockProgressStreamClient, bm *benchmarkerMock.MockBenchmarker, startedAt time.Time) {
-				bm.EXPECT().CalculateScore(gomock.Any(), "abc", "def").Return(0, nil)
-				sc.EXPECT().SendProgress(gomock.Any(), domain.NewProgress("id", "abc", "def", 0, startedAt)).Return(nil)
-			},
-			writeFunc: func(stdoutBdr, stderrBdr *runner.SyncStringBuilder, stdoutErrChan, stderrErrChan chan error) {
-				go func() {
-					_, err := stdoutBdr.WriteString("abc")
-					require.NoError(t, err)
-					_, err = stderrBdr.WriteString("def")
-					require.NoError(t, err)
-					stdoutErrChan <- nil
-					stderrErrChan <- assert.AnError
-				}()
+			setupMocks: func(_ *mock.MockProgressStreamClient, _ *benchmarkerMock.MockBenchmarker, _ time.Time) {},
+			writeFunc: func(_ *testing.T, _, _ *runner.SyncStringBuilder, stdoutErrChan, stderrErrChan chan error) {
+				stderrErrChan <- assert.AnError
+				stdoutErrChan <- nil
 			},
 			expectedErr: assert.AnError,
 		},
@@ -222,114 +132,86 @@ func Test_streamJobProgress(t *testing.T) {
 			useSynctest: true,
 			setupMocks: func(sc *mock.MockProgressStreamClient, bm *benchmarkerMock.MockBenchmarker, startedAt time.Time) {
 				gomock.InOrder(
-					bm.EXPECT().CalculateScore(gomock.Any(), "abc", "def").Return(0, nil).Call,
-					sc.EXPECT().SendProgress(gomock.Any(), domain.NewProgress("id", "abc", "def", 0, startedAt)).Return(nil).Call,
-					bm.EXPECT().CalculateScore(gomock.Any(), "abcdef", "defghi").Return(100, nil).Call,
-					sc.EXPECT().SendProgress(gomock.Any(), domain.NewProgress("id", "abcdef", "defghi", 100, startedAt)).Return(nil).Call,
-				)
-			},
-			writeFunc: func(stdoutBdr, stderrBdr *runner.SyncStringBuilder, stdoutErrChan, stderrErrChan chan error) {
-				go func() {
-					_, err := stdoutBdr.WriteString("abc")
-					require.NoError(t, err)
-					_, err = stderrBdr.WriteString("def")
-					require.NoError(t, err)
-					time.Sleep(runner.SendProgressIntervalExported * 3 / 2)
-					_, err = stdoutBdr.WriteString("def")
-					require.NoError(t, err)
-					_, err = stderrBdr.WriteString("ghi")
-					require.NoError(t, err)
-					stdoutErrChan <- nil
-					stderrErrChan <- nil
-				}()
-			},
-			expectedErr: nil,
-		},
-		"intervalをまたいで最後のcalculateScoreでエラー": {
-			useSynctest: true,
-			setupMocks: func(sc *mock.MockProgressStreamClient, bm *benchmarkerMock.MockBenchmarker, startedAt time.Time) {
-				gomock.InOrder(
-					bm.EXPECT().CalculateScore(gomock.Any(), "abc", "def").Return(0, nil).Call,
-					sc.EXPECT().SendProgress(gomock.Any(), domain.NewProgress("id", "abc", "def", 0, startedAt)).Return(nil).Call,
-					bm.EXPECT().CalculateScore(gomock.Any(), "abcdef", "defghi").Return(100, assert.AnError).Call,
-				)
-			},
-			writeFunc: func(stdoutBdr, stderrBdr *runner.SyncStringBuilder, stdoutErrChan, stderrErrChan chan error) {
-				go func() {
-					_, err := stdoutBdr.WriteString("abc")
-					require.NoError(t, err)
-					_, err = stderrBdr.WriteString("def")
-					require.NoError(t, err)
-					time.Sleep(runner.SendProgressIntervalExported * 3 / 2)
-					_, err = stdoutBdr.WriteString("def")
-					require.NoError(t, err)
-					_, err = stderrBdr.WriteString("ghi")
-					require.NoError(t, err)
-					stdoutErrChan <- nil
-					stderrErrChan <- nil
-				}()
-			},
-			expectedErr: assert.AnError,
-		},
-		"intervalをまたいで最後のsendProgressでエラー": {
-			useSynctest: true,
-			setupMocks: func(sc *mock.MockProgressStreamClient, bm *benchmarkerMock.MockBenchmarker, startedAt time.Time) {
-				gomock.InOrder(
-					bm.EXPECT().CalculateScore(gomock.Any(), "abc", "def").Return(0, nil).Call,
-					sc.EXPECT().SendProgress(gomock.Any(), domain.NewProgress("id", "abc", "def", 0, startedAt)).Return(nil).Call,
-					bm.EXPECT().CalculateScore(gomock.Any(), "abcdef", "defghi").Return(100, nil).Call,
-					sc.EXPECT().SendProgress(gomock.Any(), domain.NewProgress("id", "abcdef", "defghi", 100, startedAt)).Return(assert.AnError).Call,
-				)
-			},
-			writeFunc: func(stdoutBdr, stderrBdr *runner.SyncStringBuilder, stdoutErrChan, stderrErrChan chan error) {
-				go func() {
-					_, err := stdoutBdr.WriteString("abc")
-					require.NoError(t, err)
-					_, err = stderrBdr.WriteString("def")
-					require.NoError(t, err)
-					time.Sleep(runner.SendProgressIntervalExported * 3 / 2)
-					_, err = stdoutBdr.WriteString("def")
-					require.NoError(t, err)
-					_, err = stderrBdr.WriteString("ghi")
-					require.NoError(t, err)
-					stdoutErrChan <- nil
-					stderrErrChan <- nil
-				}()
-			},
-			expectedErr: assert.AnError,
-		},
-		"intervalでデータを読んでCalculateScoreでエラー": {
-			useSynctest: true,
-			setupMocks: func(sc *mock.MockProgressStreamClient, bm *benchmarkerMock.MockBenchmarker, startedAt time.Time) {
-				gomock.InOrder(
-					bm.EXPECT().CalculateScore(gomock.Any(), "abc", "def").Return(0, assert.AnError).Call,
-					// SendProgress は呼ばれない想定
 					bm.EXPECT().CalculateScore(gomock.Any(), "abc", "def").Return(100, nil).Call,
 					sc.EXPECT().SendProgress(gomock.Any(), domain.NewProgress("id", "abc", "def", 100, startedAt)).Return(nil).Call,
 				)
 			},
-			writeFunc: func(stdoutBdr, stderrBdr *runner.SyncStringBuilder, _ chan error, _ chan error) {
-				go func() {
-					_, err := stdoutBdr.WriteString("abc")
-					require.NoError(t, err)
-					_, err = stderrBdr.WriteString("def")
-					require.NoError(t, err)
-					time.Sleep(runner.SendProgressIntervalExported * 3 / 2)
-				}()
+			writeFunc: func(t *testing.T, stdoutBdr, stderrBdr *runner.SyncStringBuilder, stdoutErrChan, stderrErrChan chan error) {
+				t.Helper()
+				_, err := stdoutBdr.WriteString("abc")
+				require.NoError(t, err)
+				_, err = stderrBdr.WriteString("def")
+				require.NoError(t, err)
+				time.Sleep(runner.SendProgressIntervalExported * 3 / 2)
+				stdoutErrChan <- nil
+				stderrErrChan <- nil
+			},
+			expectedErr: nil,
+		},
+		"intervalのCalculateScoreでエラー": {
+			useSynctest: true,
+			setupMocks: func(_ *mock.MockProgressStreamClient, bm *benchmarkerMock.MockBenchmarker, _ time.Time) {
+				bm.EXPECT().CalculateScore(gomock.Any(), "abc", "def").Return(0, assert.AnError)
+			},
+			writeFunc: func(t *testing.T, stdoutBdr, stderrBdr *runner.SyncStringBuilder, _, _ chan error) {
+				t.Helper()
+				_, err := stdoutBdr.WriteString("abc")
+				require.NoError(t, err)
+				_, err = stderrBdr.WriteString("def")
+				require.NoError(t, err)
+				time.Sleep(runner.SendProgressIntervalExported * 3 / 2)
+			},
+			expectedErr: assert.AnError,
+		},
+		"intervalのSendProgressでエラー": {
+			useSynctest: true,
+			setupMocks: func(sc *mock.MockProgressStreamClient, bm *benchmarkerMock.MockBenchmarker, startedAt time.Time) {
+				gomock.InOrder(
+					bm.EXPECT().CalculateScore(gomock.Any(), "abc", "def").Return(100, nil).Call,
+					sc.EXPECT().SendProgress(gomock.Any(), domain.NewProgress("id", "abc", "def", 100, startedAt)).Return(assert.AnError).Call,
+				)
+			},
+			writeFunc: func(t *testing.T, stdoutBdr, stderrBdr *runner.SyncStringBuilder, _, _ chan error) {
+				t.Helper()
+				_, err := stdoutBdr.WriteString("abc")
+				require.NoError(t, err)
+				_, err = stderrBdr.WriteString("def")
+				require.NoError(t, err)
+				time.Sleep(runner.SendProgressIntervalExported * 3 / 2)
 			},
 			expectedErr: assert.AnError,
 		},
 	}
 
-	runFlow := func(tc testCase, t *testing.T) {
-		r, _, sc, bm := setupRunner(t)
-		ctx := context.Background()
-		job, startedAt, stdoutBdr, stderrBdr, stdoutErrChan, stderrErrChan := setupArgs(t)
+	runFlow := func(t *testing.T, tc testCase) {
+		t.Helper()
+		ctrl := gomock.NewController(t)
+		portal := mock.NewMockPortal(ctrl)
+		bm := benchmarkerMock.NewMockBenchmarker(ctrl)
+		sc := mock.NewMockProgressStreamClient(ctrl)
+		r := runner.NewRunnerForTest(portal, bm)
 
+		job := domain.NewJob("id", "target")
+		startedAt := time.Now()
+		stdoutBdr := &runner.SyncStringBuilder{}
+		stderrBdr := &runner.SyncStringBuilder{}
+		stdoutErrChan := make(chan error, 1)
+		stderrErrChan := make(chan error, 1)
+
+		// 開始時の進捗は必ず送信される。
+		sc.EXPECT().SendProgress(gomock.Any(), domain.NewProgress("id", "", "", 0, startedAt)).Return(nil)
 		tc.setupMocks(sc, bm, startedAt)
-		tc.writeFunc(stdoutBdr, stderrBdr, stdoutErrChan, stderrErrChan)
 
-		err := r.StreamJobProgressExported(ctx, job, startedAt, stdoutBdr, stderrBdr, stdoutErrChan, stderrErrChan)
+		done := make(chan struct{})
+		go func() {
+			defer close(done)
+			tc.writeFunc(t, stdoutBdr, stderrBdr, stdoutErrChan, stderrErrChan)
+		}()
+
+		err := r.StreamJobProgressExported(context.Background(), sc, job, startedAt,
+			stdoutBdr, stderrBdr, stdoutErrChan, stderrErrChan)
+		<-done
+
 		if tc.expectedErr != nil {
 			assert.ErrorIs(t, err, tc.expectedErr)
 		} else {
@@ -338,16 +220,15 @@ func Test_streamJobProgress(t *testing.T) {
 	}
 
 	for name, tc := range tests {
-		tc := tc
 		t.Run(name, func(t *testing.T) {
-			t.Parallel()
 			if tc.useSynctest {
-				synctest.Run(func() {
-					runFlow(tc, t)
+				synctest.Test(t, func(t *testing.T) {
+					runFlow(t, tc)
 				})
-			} else {
-				runFlow(tc, t)
+				return
 			}
+			t.Parallel()
+			runFlow(t, tc)
 		})
 	}
 }
@@ -355,41 +236,71 @@ func Test_streamJobProgress(t *testing.T) {
 // 他のコンポーネントで十分テストが書かれているため、Runは一番シンプルな、すぐに入力がおわるケースのみ書く
 func TestRun(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
 
 	portal := mock.NewMockPortal(ctrl)
 	mockBenchmarker := benchmarkerMock.NewMockBenchmarker(ctrl)
 	streamClient := mock.NewMockProgressStreamClient(ctrl)
 
-	portal.EXPECT().MakeProgressStreamClient(gomock.Any()).Return(streamClient, nil)
-	portal.EXPECT().GetJob(gomock.Any()).Return(domain.NewJob("id", "target"), nil)
-
 	startedAt := time.Now()
 	stdout := strings.Repeat("a", runner.BufSizeExported*3)
 	stderr := strings.Repeat("b", runner.BufSizeExported)
+
+	portal.EXPECT().GetJob(gomock.Any()).Return(domain.NewJob("id", "target"), nil)
 	mockBenchmarker.EXPECT().Start(gomock.Any(), gomock.Any()).
 		Return(benchmarker.Outputs{
 			Stdout: strings.NewReader(stdout),
 			Stderr: strings.NewReader(stderr),
 		}, startedAt, nil)
+	portal.EXPECT().MakeProgressStreamClient(gomock.Any()).Return(streamClient, nil)
 
-	streamClient.EXPECT().Close().Return(nil)
+	// 最終スコアはベンチマーカーの最終レポートの受信を待ってから確定するため、
+	// CalculateScore と最後の SendProgress は Wait の後でなければならない。
+	gomock.InOrder(
+		streamClient.EXPECT().
+			SendProgress(gomock.Any(), domain.NewProgress("id", "", "", 0, startedAt)).
+			Return(nil).Call,
+		mockBenchmarker.EXPECT().Wait(gomock.Any()).Return(domain.ResultPassed, time.Now(), nil).Call,
+		mockBenchmarker.EXPECT().CalculateScore(gomock.Any(), stdout, stderr).Return(100, nil).Call,
+		streamClient.EXPECT().
+			SendProgress(gomock.Any(), domain.NewProgress("id", stdout, stderr, 100, startedAt)).
+			Return(nil).Call,
+		streamClient.EXPECT().Close().Return(nil).Call,
+		portal.EXPECT().PostJobFinished(gomock.Any(), "id", gomock.Any(), domain.ResultPassed, nil).Return(nil).Call,
+	)
 
-	mockBenchmarker.EXPECT().CalculateScore(gomock.Any(), stdout, stderr).Return(100, nil)
+	r := runner.NewRunnerForTest(portal, mockBenchmarker)
 
-	streamClient.EXPECT().
-		SendProgress(gomock.Any(),
-			domain.NewProgress("id", stdout, stderr, 100, startedAt)).
-		Return(nil)
+	err := r.Run()
+	assert.NoError(t, err)
+}
 
-	mockBenchmarker.EXPECT().Wait(gomock.Any()).Return(domain.ResultPassed, time.Now(), nil)
+// ログの収集に失敗した場合も、完了通知は1回だけ送信される。
+func TestRunStreamError(t *testing.T) {
+	ctrl := gomock.NewController(t)
 
-	portal.EXPECT().PostJobFinished(gomock.Any(), "id", gomock.Any(), domain.ResultPassed, nil).Return(nil)
+	portal := mock.NewMockPortal(ctrl)
+	mockBenchmarker := benchmarkerMock.NewMockBenchmarker(ctrl)
 
-	// テスト対象の関数を用意
-	r := runner.Prepare(portal, mockBenchmarker)
+	startedAt := time.Now()
 
-	// テスト対象の関数を呼び出す
+	portal.EXPECT().GetJob(gomock.Any()).Return(domain.NewJob("id", "target"), nil)
+	mockBenchmarker.EXPECT().Start(gomock.Any(), gomock.Any()).
+		Return(benchmarker.Outputs{
+			Stdout: strings.NewReader(""),
+			Stderr: strings.NewReader(""),
+		}, startedAt, nil)
+	portal.EXPECT().MakeProgressStreamClient(gomock.Any()).Return(nil, assert.AnError)
+
+	// 進捗を送れないので、ベンチマーカーは停止させて回収するだけ。
+	mockBenchmarker.EXPECT().Wait(gomock.Any()).Return(domain.ResultError, time.Now(), nil)
+
+	portal.EXPECT().
+		PostJobFinished(gomock.Any(), "id", gomock.Any(), domain.ResultError, gomock.Not(gomock.Nil())).
+		Return(nil).
+		Times(1)
+
+	r := runner.NewRunnerForTest(portal, mockBenchmarker)
+
 	err := r.Run()
 	assert.NoError(t, err)
 }
