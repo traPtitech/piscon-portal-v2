@@ -304,3 +304,58 @@ func TestRunStreamError(t *testing.T) {
 	err := r.Run()
 	assert.NoError(t, err)
 }
+
+// 最終スコアの送信に失敗しても、ベンチマークの合否自体は確定しているため、
+// resultは変えずにエラーだけ完了通知に載せる。
+func TestRunFinalProgressError(t *testing.T) {
+	tests := map[string]struct {
+		calcErr  error
+		sendErr  error
+		closeErr error
+	}{
+		"最終のCalculateScoreでエラー": {calcErr: assert.AnError},
+		"最終のSendProgressでエラー":   {sendErr: assert.AnError},
+		"進捗ストリームのCloseでエラー":     {closeErr: assert.AnError},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			ctrl := gomock.NewController(t)
+			portal := mock.NewMockPortal(ctrl)
+			mockBenchmarker := benchmarkerMock.NewMockBenchmarker(ctrl)
+			streamClient := mock.NewMockProgressStreamClient(ctrl)
+
+			startedAt := time.Now()
+
+			portal.EXPECT().GetJob(gomock.Any()).Return(domain.NewJob("id", "target"), nil)
+			mockBenchmarker.EXPECT().Start(gomock.Any(), gomock.Any()).
+				Return(benchmarker.Outputs{
+					Stdout: strings.NewReader("out"),
+					Stderr: strings.NewReader("err"),
+				}, startedAt, nil)
+			portal.EXPECT().MakeProgressStreamClient(gomock.Any()).Return(streamClient, nil)
+			streamClient.EXPECT().
+				SendProgress(gomock.Any(), domain.NewProgress("id", "", "", 0, startedAt)).
+				Return(nil)
+			mockBenchmarker.EXPECT().Wait(gomock.Any()).Return(domain.ResultPassed, time.Now(), nil)
+
+			mockBenchmarker.EXPECT().CalculateScore(gomock.Any(), "out", "err").Return(100, tc.calcErr)
+			if tc.calcErr == nil {
+				streamClient.EXPECT().
+					SendProgress(gomock.Any(), domain.NewProgress("id", "out", "err", 100, startedAt)).
+					Return(tc.sendErr)
+			}
+			streamClient.EXPECT().Close().Return(tc.closeErr)
+
+			portal.EXPECT().
+				PostJobFinished(gomock.Any(), "id", gomock.Any(), domain.ResultPassed, gomock.Not(gomock.Nil())).
+				Return(nil).
+				Times(1)
+
+			r := runner.NewRunnerForTest(portal, mockBenchmarker)
+
+			assert.NoError(t, r.Run())
+		})
+	}
+}
