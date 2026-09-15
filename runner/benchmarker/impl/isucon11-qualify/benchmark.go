@@ -2,21 +2,16 @@ package isucon11qualify
 
 import (
 	"context"
-	"encoding/binary"
 	"fmt"
-	"io"
 	"net"
 	"net/url"
-	"os"
 	"os/exec"
-	"sync/atomic"
 	"time"
 
-	"github.com/isucon/isucon10-portal/proto.go/isuxportal/resources"
 	"github.com/traPtitech/piscon-portal-v2/runner/benchmarker"
+	"github.com/traPtitech/piscon-portal-v2/runner/benchmarker/internal/isuxbench"
 	"github.com/traPtitech/piscon-portal-v2/runner/config"
 	"github.com/traPtitech/piscon-portal-v2/runner/domain"
-	"google.golang.org/protobuf/proto"
 )
 
 type problemConf struct {
@@ -26,12 +21,9 @@ type problemConf struct {
 }
 
 type Isucon11Qualify struct {
-	cmd  *exec.Cmd
 	conf problemConf
 
-	errCh       chan error
-	passedCh    chan bool
-	latestScore atomic.Int64
+	proc *isuxbench.Process
 }
 
 var _ benchmarker.Benchmarker = (*Isucon11Qualify)(nil)
@@ -60,112 +52,37 @@ func New(conf config.Problem) (*Isucon11Qualify, error) {
 }
 
 func (b *Isucon11Qualify) Start(ctx context.Context, job *domain.Job) (benchmarker.Outputs, time.Time, error) {
-	errCh := make(chan error, 1)
-	passedCh := make(chan bool, 1)
-
 	jiaServiceURL := url.URL{
 		Scheme: "http",
 		Host:   net.JoinHostPort(b.conf.benchmarkerIP, "4999"),
 	}
-	b.cmd = exec.CommandContext(ctx, b.conf.execPath,
+	cmd := exec.CommandContext(ctx, b.conf.execPath,
 		"--target", job.GetTargetIPAdress(),
 		// tlsを使わない場合は`--all-adresses`にtargetだけ指定すればok
 		"--all-addresses", job.GetTargetIPAdress(),
 		"--jia-service-url", jiaServiceURL.String())
+	cmd.Dir = b.conf.benchmarkerDir
 
-	b.cmd.Dir = b.conf.benchmarkerDir
-
-	reportReader, reportWriter, err := os.Pipe()
+	proc, out, startedAt, err := isuxbench.Start(cmd)
 	if err != nil {
-		return benchmarker.Outputs{}, time.Time{}, fmt.Errorf("create report pipe: %w", err)
+		return benchmarker.Outputs{}, time.Time{}, fmt.Errorf("start benchmarker: %w", err)
 	}
-	b.cmd.Env = append(b.cmd.Environ(), "ISUXBENCH_REPORT_FD=3")
-	b.cmd.ExtraFiles = []*os.File{reportWriter}
+	b.proc = proc
 
-	stdout, err := b.cmd.StdoutPipe()
-	if err != nil {
-		return benchmarker.Outputs{}, time.Time{}, fmt.Errorf("get stdout pipe: %w", err)
-	}
-	stderr, err := b.cmd.StderrPipe()
-	if err != nil {
-		return benchmarker.Outputs{}, time.Time{}, fmt.Errorf("get stderr pipe: %w", err)
-	}
-
-	if err := b.cmd.Start(); err != nil {
-		return benchmarker.Outputs{}, time.Time{}, fmt.Errorf("start command: %w", err)
-	}
-	reportWriter.Close()
-
-	b.errCh = errCh
-	b.passedCh = passedCh
-	b.latestScore.Store(0)
-
-	go b.watchReport(reportReader, errCh, passedCh)
-
-	return benchmarker.Outputs{
-		Stdout: stdout,
-		Stderr: stderr,
-	}, time.Now(), nil
+	return out, startedAt, nil
 }
 
 func (b *Isucon11Qualify) Wait(_ context.Context) (domain.Result, time.Time, error) {
-	if err := b.cmd.Wait(); err != nil {
-		return domain.ResultError, time.Now(), fmt.Errorf("wait command: %w", err)
-	}
-	endTime := time.Now()
-
-	err := <-b.errCh
+	result, finishedAt, err := b.proc.Wait()
 	if err != nil {
-		return domain.ResultError, endTime, err
+		return result, finishedAt, fmt.Errorf("wait benchmarker: %w", err)
 	}
-
-	if <-b.passedCh {
-		return domain.ResultPassed, endTime, nil
-	}
-	return domain.ResultFailed, endTime, nil
+	return result, finishedAt, nil
 }
 
 func (b *Isucon11Qualify) CalculateScore(_ context.Context, _, _ string) (int, error) {
-	return int(b.latestScore.Load()), nil
-}
-
-func (b *Isucon11Qualify) watchReport(report io.ReadCloser, errCh chan<- error, passedCh chan<- bool) {
-	defer report.Close()
-	defer close(errCh)
-	defer close(passedCh)
-	for {
-		result, err := readResult(report)
-		if err != nil {
-			errCh <- err
-			return
-		}
-		b.latestScore.Store(result.Score)
-		if result.Finished {
-			passedCh <- result.Passed
-			return
-		}
+	if b.proc == nil {
+		return 0, nil
 	}
-}
-
-// ISUCON11予選ではISUCON10のReporterを利用している
-// https://github.com/isucon/isucon10-portal/blob/master/bench-tool.go/benchrun/reporter.go
-func readResult(report io.Reader) (*resources.BenchmarkResult, error) {
-	var sizeData [2]byte
-	_, err := io.ReadFull(report, sizeData[:])
-	if err != nil {
-		return nil, fmt.Errorf("parse benchmark result: %w", err)
-	}
-
-	size := int(binary.BigEndian.Uint16(sizeData[:]))
-	data := make([]byte, size)
-	_, err = io.ReadFull(report, data)
-	if err != nil {
-		return nil, fmt.Errorf("parse benchmark result: %w", err)
-	}
-
-	var result resources.BenchmarkResult
-	if err := proto.Unmarshal(data, &result); err != nil {
-		return nil, fmt.Errorf("decode benchmark result: %w", err)
-	}
-	return &result, nil
+	return b.proc.LatestScore(), nil
 }
