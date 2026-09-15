@@ -65,45 +65,71 @@ func Prepare(portal portal.Portal, problemConfig config.Problem) (*Runner, error
 }
 
 func (r *Runner) Run() error {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx := context.Background()
+	// ログの収集に失敗した場合にベンチマーカーを停止させる必要があるため、
+	// ポータルとの通信に使うcontextとは分けておく。
+	benchCtx, cancelBench := context.WithCancel(ctx)
+	defer cancelBench()
 
 	job, err := r.portal.GetJob(ctx)
 	if err != nil {
 		return fmt.Errorf("get benchmark: %w", err)
 	}
 
-	out, startedAt, err := r.benchmarker.Start(ctx, job)
+	out, startedAt, err := r.benchmarker.Start(benchCtx, job)
 	if err != nil {
 		return fmt.Errorf("execute: %w", err)
 	}
-	stdoutR := out.Stdout
-	stderrR := out.Stderr
 
 	stdoutBdr := &SyncStringBuilder{}
 	stderrBdr := &SyncStringBuilder{}
 
-	stdoutErrChan, stderrErrChan := make(chan error), make(chan error)
+	stdoutErrChan, stderrErrChan := make(chan error, 1), make(chan error, 1)
 
 	go func() {
-		stdoutErrChan <- captureStreamOutput(ctx, stdoutR, stdoutBdr)
+		stdoutErrChan <- captureStreamOutput(benchCtx, out.Stdout, stdoutBdr)
 	}()
 	go func() {
-		stderrErrChan <- captureStreamOutput(ctx, stderrR, stderrBdr)
+		stderrErrChan <- captureStreamOutput(benchCtx, out.Stderr, stderrBdr)
 	}()
 
-	err = r.streamJobProgress(ctx, job, startedAt, stdoutBdr, stderrBdr, stdoutErrChan, stderrErrChan)
-	if err != nil {
-		log.Printf("collect data: %v", err)
-		err := r.portal.PostJobFinished(ctx, job.GetID(), time.Now(), domain.ResultError, err)
-		if err != nil {
-			return fmt.Errorf("post job finished: %w", err)
+	streamClient, streamErr := r.portal.MakeProgressStreamClient(ctx)
+	if streamErr != nil {
+		streamErr = fmt.Errorf("create streaming client: %w", streamErr)
+	} else {
+		streamErr = r.streamJobProgress(ctx, streamClient, job, startedAt,
+			stdoutBdr, stderrBdr, stdoutErrChan, stderrErrChan)
+	}
+	if streamErr != nil {
+		// 出力を読み切れていないため、ベンチマーカーの正常な終了は待てない。
+		log.Printf("collect data: %v", streamErr)
+		cancelBench()
+	}
+
+	// ベンチマーカーのプロセス終了と最終レポートの受信を待ってから、
+	// 確定したスコアとログを送信する。
+	result, finishedAt, runnerErr := r.benchmarker.Wait(benchCtx)
+
+	switch {
+	case streamErr != nil:
+		result = domain.ResultError
+		runnerErr = errors.Join(streamErr, runnerErr)
+	case streamClient != nil:
+		if err := r.sendProgress(ctx, streamClient, job, startedAt, stdoutBdr, stderrBdr); err != nil {
+			// ベンチマークの合否自体は確定しているので、resultは変えずにエラーだけ伝える。
+			log.Printf("send final progress: %v", err)
+			runnerErr = errors.Join(runnerErr, fmt.Errorf("send final progress: %w", err))
 		}
 	}
 
-	result, finishedAt, err := r.benchmarker.Wait(ctx)
-	err = r.portal.PostJobFinished(ctx, job.GetID(), finishedAt, result, err)
-	if err != nil {
+	if streamClient != nil {
+		if err := streamClient.Close(); err != nil {
+			log.Printf("close progress stream: %v", err)
+			runnerErr = errors.Join(runnerErr, fmt.Errorf("close progress stream: %w", err))
+		}
+	}
+
+	if err := r.portal.PostJobFinished(ctx, job.GetID(), finishedAt, result, runnerErr); err != nil {
 		return fmt.Errorf("post job finished: %w", err)
 	}
 
@@ -122,47 +148,43 @@ func captureStreamOutput(_ context.Context, r io.Reader, bdr *SyncStringBuilder)
 	}
 }
 
+// sendProgress calculates the current score and sends it with the collected logs.
+func (r *Runner) sendProgress(
+	ctx context.Context, streamClient portal.ProgressStreamClient,
+	job *domain.Job, startedAt time.Time, stdoutBdr, stderrBdr *SyncStringBuilder,
+) error {
+	stdout := stdoutBdr.String()
+	stderr := stderrBdr.String()
+
+	score, err := r.benchmarker.CalculateScore(ctx, stdout, stderr)
+	if err != nil {
+		return fmt.Errorf("calculate score: %w", err)
+	}
+
+	progress := domain.NewProgress(job.GetID(), stdout, stderr, score, startedAt)
+	if err := streamClient.SendProgress(ctx, progress); err != nil {
+		return fmt.Errorf("send progress: %w", err)
+	}
+
+	return nil
+}
+
 // streamJobProgress collects the benchmark job's stdout and stderr and sends the progress to the portal.
 // It returns nil if, and only if both of stdout and stderr reach EOF.
+//
+// 最終的なスコアは [Benchmarker.Wait] がベンチマーカーの最終レポートの受信を待った後に
+// 確定するため、ここでは送信しない。streamClientのCloseも呼び出し側で行う。
 func (r *Runner) streamJobProgress(
-	ctx context.Context, job *domain.Job, startedAt time.Time,
+	ctx context.Context, streamClient portal.ProgressStreamClient,
+	job *domain.Job, startedAt time.Time,
 	stdoutBdr, stderrBdr *SyncStringBuilder,
 	stdoutErrChan, stderrErrChan chan error,
-) (err error) {
-	streamClient, err := r.portal.MakeProgressStreamClient(ctx)
-	if err != nil {
-		return fmt.Errorf("create streaming client: %w", err)
-	}
-	defer streamClient.Close()
-
+) error {
 	// 初期状態を送信して、ポータルに開始を通知する。
 	initialProgress := domain.NewProgress(job.GetID(), "", "", 0, startedAt)
 	if err := streamClient.SendProgress(ctx, initialProgress); err != nil {
 		return fmt.Errorf("send initial progress: %w", err)
 	}
-
-	calcAndSendProgress := func() error {
-		stdout := stdoutBdr.String()
-		stderr := stderrBdr.String()
-		score, err := r.benchmarker.CalculateScore(ctx, stdout, stderr)
-		if err != nil {
-			return fmt.Errorf("calculate score: %w", err)
-		}
-
-		progress := domain.NewProgress(job.GetID(), stdout, stderr, score, startedAt)
-		err = streamClient.SendProgress(ctx, progress)
-		if err != nil {
-			return fmt.Errorf("send progress: %w", err)
-		}
-		return nil
-	}
-
-	// 最後に必ず結果を計算して送信するようにする
-	defer func() {
-		if calcErr := calcAndSendProgress(); calcErr != nil {
-			err = errors.Join(err, fmt.Errorf("defer: calcAndSendProgress%w", calcErr))
-		}
-	}()
 
 	finished := struct {
 		stdout bool
@@ -175,7 +197,7 @@ func (r *Runner) streamJobProgress(
 	for {
 		select {
 		case <-ticker.C:
-			if err := calcAndSendProgress(); err != nil {
+			if err := r.sendProgress(ctx, streamClient, job, startedAt, stdoutBdr, stderrBdr); err != nil {
 				return fmt.Errorf("calc and send progress in tick: %w", err)
 			}
 		case err := <-stdoutErrChan:
