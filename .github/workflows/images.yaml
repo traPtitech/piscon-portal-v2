@@ -2,7 +2,6 @@ name: Build and Push Docker Images
 
 on:
   push:
-    branches: [main]
     tags: ["v*.*.*"]
   workflow_dispatch:
 
@@ -50,7 +49,7 @@ jobs:
           images: ghcr.io/traptitech/piscon-portal-v2/${{ matrix.image.name }}
           tags: |
             type=ref,event=branch
-            type=semver,pattern=v{{version}}
+            type=semver,pattern={{version}}
             type=sha
 
       - name: Build and push Docker image
