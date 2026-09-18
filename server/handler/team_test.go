@@ -1,10 +1,12 @@
 package handler_test
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -240,9 +242,9 @@ func TestUpdateTeam(t *testing.T) {
 
 	useCaseMock.EXPECT().UpdateTeam(gomock.Any(), usecase.UpdateTeamInput{
 		ID:        teamID,
-		Name:      "Updated Team",
-		MemberIDs: []uuid.UUID{newMemberID},
-		GitHubIDs: []string{},
+		Name:      lo.ToPtr("Updated Team"),
+		MemberIDs: lo.ToPtr([]uuid.UUID{newMemberID}),
+		GitHubIDs: nil,
 	}).Return(domain.Team{
 		ID:      teamID,
 		Name:    "Updated Team",
@@ -282,9 +284,9 @@ func TestUpdateTeamWithGitHubIDs(t *testing.T) {
 
 	useCaseMock.EXPECT().UpdateTeam(gomock.Any(), usecase.UpdateTeamInput{
 		ID:        teamID,
-		Name:      "Updated Team",
-		MemberIDs: []uuid.UUID{newMemberID},
-		GitHubIDs: []string{"updated1", "updated2"},
+		Name:      lo.ToPtr("Updated Team"),
+		MemberIDs: lo.ToPtr([]uuid.UUID{newMemberID}),
+		GitHubIDs: lo.ToPtr([]string{"updated1", "updated2"}),
 	}).Return(domain.Team{
 		ID:        teamID,
 		Name:      "Updated Team",
@@ -325,9 +327,9 @@ func TestUpdateTeam_Error(t *testing.T) {
 
 	useCaseMock.EXPECT().UpdateTeam(gomock.Any(), usecase.UpdateTeamInput{
 		ID:        teamID,
-		Name:      "Updated Team",
-		MemberIDs: []uuid.UUID{newMemberID},
-		GitHubIDs: []string{},
+		Name:      lo.ToPtr("Updated Team"),
+		MemberIDs: lo.ToPtr([]uuid.UUID{newMemberID}),
+		GitHubIDs: nil,
 	}).Return(domain.Team{}, usecase.NewUseCaseErrorFromMsg("team is full"))
 
 	_ = h.UpdateTeam(c)
@@ -347,4 +349,100 @@ func compareTeam(t *testing.T, expected domain.Team, actual openapi.Team) {
 	}
 	assert.ElementsMatch(t, expected.GitHubIDs,
 		lo.Map(actual.GithubIds, func(id openapi.GitHubId, _ int) string { return string(id) }))
+}
+
+// Exercise JSON binding and the real use case together so omitted fields stay omitted.
+func TestUpdateTeamPartialUpdate(t *testing.T) {
+	teamID := uuid.New()
+	member := domain.User{ID: uuid.New(), TeamID: uuid.NullUUID{UUID: teamID, Valid: true}}
+	otherMember := domain.User{ID: uuid.New(), TeamID: uuid.NullUUID{UUID: teamID, Valid: true}}
+	original := domain.Team{
+		ID: teamID, Name: "Team A", Members: []domain.User{member, otherMember},
+		GitHubIDs: []string{"existing"}, CreatedAt: time.Now().UTC(),
+	}
+	tests := []struct {
+		name  string
+		body  map[string]any
+		input usecase.UpdateTeamInput
+		want  domain.Team
+	}{
+		{
+			name:  "github only preserves all members",
+			body:  map[string]any{"githubIds": []string{"existing", "added"}},
+			input: usecase.UpdateTeamInput{GitHubIDs: lo.ToPtr([]string{"existing", "added"})},
+			want:  domain.Team{Name: original.Name, Members: original.Members, GitHubIDs: []string{"existing", "added"}},
+		},
+		{
+			name:  "name only preserves members and github ids",
+			body:  map[string]any{"name": "Renamed"},
+			input: usecase.UpdateTeamInput{Name: lo.ToPtr("Renamed")},
+			want:  domain.Team{Name: "Renamed", Members: original.Members, GitHubIDs: original.GitHubIDs},
+		},
+		{
+			name:  "explicit empty name updates name",
+			body:  map[string]any{"name": ""},
+			input: usecase.UpdateTeamInput{Name: lo.ToPtr("")},
+			want:  domain.Team{Name: "", Members: original.Members, GitHubIDs: original.GitHubIDs},
+		},
+		{
+			name: "empty patch preserves team",
+			body: map[string]any{},
+			want: original,
+		},
+		{
+			name:  "empty github ids removes last id and preserves members",
+			body:  map[string]any{"githubIds": []string{}},
+			input: usecase.UpdateTeamInput{GitHubIDs: lo.ToPtr([]string{})},
+			want:  domain.Team{Name: original.Name, Members: original.Members, GitHubIDs: []string{}},
+		},
+		{
+			name:  "empty members removes all members and preserves github ids",
+			body:  map[string]any{"members": []string{}},
+			input: usecase.UpdateTeamInput{MemberIDs: lo.ToPtr([]uuid.UUID{})},
+			want:  domain.Team{Name: original.Name, Members: []domain.User{}, GitHubIDs: original.GitHubIDs},
+		},
+		{
+			name:  "member removal preserves remaining member and github ids",
+			body:  map[string]any{"members": []uuid.UUID{member.ID}},
+			input: usecase.UpdateTeamInput{MemberIDs: lo.ToPtr([]uuid.UUID{member.ID})},
+			want:  domain.Team{Name: original.Name, Members: []domain.User{member}, GitHubIDs: original.GitHubIDs},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			repo := repomock.NewMockRepository(ctrl)
+			uc := usecasemock.NewMockUseCase(ctrl)
+			teamUC := usecase.NewTeamUseCase(repo)
+			tt.input.ID = teamID
+			tt.want.ID = teamID
+			tt.want.CreatedAt = original.CreatedAt
+			repo.EXPECT().FindTeam(gomock.Any(), teamID).Return(original, nil)
+			if tt.input.MemberIDs != nil {
+				for _, id := range *tt.input.MemberIDs {
+					repo.EXPECT().FindUser(gomock.Any(), id).Return(member, nil)
+				}
+			}
+			repo.EXPECT().UpdateTeam(gomock.Any(), tt.want).Return(nil)
+			uc.EXPECT().UpdateTeam(gomock.Any(), tt.input).DoAndReturn(
+				func(ctx context.Context, input usecase.UpdateTeamInput) (domain.Team, error) {
+					return teamUC.UpdateTeam(ctx, input)
+				},
+			)
+			e := echo.New()
+			body, err := json.Marshal(tt.body)
+			require.NoError(t, err)
+			req := newJSONRequest(http.MethodPatch, "/teams/"+teamID.String(), json.RawMessage(body))
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.SetParamNames("teamID")
+			c.SetParamValues(teamID.String())
+			h := NewHandler(uc, repo, nil)
+			require.NoError(t, h.UpdateTeam(c))
+			require.Equal(t, http.StatusOK, rec.Code, rec.Body.String())
+			var res openapi.Team
+			require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &res))
+			compareTeam(t, tt.want, res)
+		})
+	}
 }
