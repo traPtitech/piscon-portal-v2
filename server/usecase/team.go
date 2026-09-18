@@ -87,11 +87,14 @@ func (u *teamUseCaseImpl) CreateTeam(ctx context.Context, input CreateTeamInput)
 	return team, nil
 }
 
+// UpdateTeamInput specifies the team and the fields to update.
+// For every field except ID, nil leaves the field unchanged; a non-nil pointer
+// updates it to the pointed-to value, including an empty string or empty slice.
 type UpdateTeamInput struct {
 	ID        uuid.UUID
-	Name      string
-	MemberIDs []uuid.UUID
-	GitHubIDs []string
+	Name      *string
+	MemberIDs *[]uuid.UUID
+	GitHubIDs *[]string
 }
 
 func (u *teamUseCaseImpl) UpdateTeam(ctx context.Context, input UpdateTeamInput) (domain.Team, error) {
@@ -100,26 +103,28 @@ func (u *teamUseCaseImpl) UpdateTeam(ctx context.Context, input UpdateTeamInput)
 		return domain.Team{}, fmt.Errorf("find team: %w", err)
 	}
 
-	if input.Name != "" {
-		team.Name = input.Name
+	if input.Name != nil {
+		team.Name = *input.Name
 	}
 
 	// Update GitHub IDs if provided
-	if len(input.GitHubIDs) != 0 {
-		team.GitHubIDs = input.GitHubIDs
+	if input.GitHubIDs != nil {
+		team.GitHubIDs = *input.GitHubIDs
 	}
 
-	members := make([]domain.User, 0, len(input.MemberIDs))
-	for _, memberID := range input.MemberIDs {
-		user, err := u.repo.FindUser(ctx, memberID)
-		if err != nil {
-			return domain.Team{}, fmt.Errorf("find user: %w", err)
+	if input.MemberIDs != nil {
+		members := make([]domain.User, 0, len(*input.MemberIDs))
+		for _, memberID := range *input.MemberIDs {
+			user, err := u.repo.FindUser(ctx, memberID)
+			if err != nil {
+				return domain.Team{}, fmt.Errorf("find user: %w", err)
+			}
+			members = append(members, user)
 		}
-		members = append(members, user)
-	}
 
-	if err := team.SetMembers(members); err != nil {
-		return domain.Team{}, fmt.Errorf("set members: %w", err)
+		if err := team.SetMembers(members); err != nil {
+			return domain.Team{}, fmt.Errorf("set members: %w", err)
+		}
 	}
 
 	err = u.repo.UpdateTeam(ctx, team)

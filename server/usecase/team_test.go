@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/samber/lo"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
 	"github.com/traPtitech/piscon-portal-v2/server/repository/mock"
@@ -149,8 +150,8 @@ func TestUpdateTeam(t *testing.T) {
 			name: "valid",
 			input: usecase.UpdateTeamInput{
 				ID:        uuid.New(),
-				Name:      "valid-test-team",
-				MemberIDs: []uuid.UUID{userID},
+				Name:      lo.ToPtr("valid-test-team"),
+				MemberIDs: lo.ToPtr([]uuid.UUID{userID}),
 			},
 			expectError: false,
 			setup: func() {
@@ -172,9 +173,9 @@ func TestUpdateTeam(t *testing.T) {
 			name: "valid with github ids",
 			input: usecase.UpdateTeamInput{
 				ID:        uuid.New(),
-				Name:      "valid-test-team-with-github",
-				MemberIDs: []uuid.UUID{userID},
-				GitHubIDs: []string{"user1"},
+				Name:      lo.ToPtr("valid-test-team-with-github"),
+				MemberIDs: lo.ToPtr([]uuid.UUID{userID}),
+				GitHubIDs: lo.ToPtr([]string{"user1"}),
 			},
 			expectError: false,
 			setup: func() {
@@ -205,8 +206,8 @@ func TestUpdateTeam(t *testing.T) {
 			name: "more than 3 members team is not allowed",
 			input: usecase.UpdateTeamInput{
 				ID:        uuid.New(),
-				Name:      "4-members-test-team",
-				MemberIDs: []uuid.UUID{userID, uuid.New(), uuid.New(), uuid.New()},
+				Name:      lo.ToPtr("4-members-test-team"),
+				MemberIDs: lo.ToPtr([]uuid.UUID{userID, uuid.New(), uuid.New(), uuid.New()}),
 			},
 			expectError: true,
 			setup: func() {
@@ -224,8 +225,8 @@ func TestUpdateTeam(t *testing.T) {
 			name: "team member not found",
 			input: usecase.UpdateTeamInput{
 				ID:        uuid.New(),
-				Name:      "user-not-found-test-team",
-				MemberIDs: []uuid.UUID{userID},
+				Name:      lo.ToPtr("user-not-found-test-team"),
+				MemberIDs: lo.ToPtr([]uuid.UUID{userID}),
 			},
 			expectError: true,
 			setup: func() {
