@@ -96,12 +96,19 @@ func (h *Handler) UpdateTeam(c echo.Context) error {
 		return badRequestResponse(c, err.Error())
 	}
 
-	team, err := h.useCase.UpdateTeam(ctx, usecase.UpdateTeamInput{
-		ID:        teamID,
-		Name:      string(req.Name.Value),
-		MemberIDs: lo.Map(req.Members, func(id openapi.UserId, _ int) uuid.UUID { return uuid.UUID(id) }),
-		GitHubIDs: lo.Map(req.GithubIds, func(id openapi.GitHubId, _ int) string { return string(id) }),
-	})
+	input := usecase.UpdateTeamInput{
+		ID: teamID,
+	}
+	if req.Name.Set {
+		input.Name = lo.ToPtr(string(req.Name.Value))
+	}
+	if req.Members != nil {
+		input.MemberIDs = lo.ToPtr(lo.Map(req.Members, func(id openapi.UserId, _ int) uuid.UUID { return uuid.UUID(id) }))
+	}
+	if req.GithubIds != nil {
+		input.GitHubIDs = lo.ToPtr(lo.Map(req.GithubIds, func(id openapi.GitHubId, _ int) string { return string(id) }))
+	}
+	team, err := h.useCase.UpdateTeam(ctx, input)
 	if err != nil {
 		if usecase.IsUseCaseError(err) {
 			return badRequestResponse(c, err.Error())
