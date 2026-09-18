@@ -1,10 +1,8 @@
-package isucon11qualify
+package isucon11final
 
 import (
 	"context"
 	"fmt"
-	"net"
-	"net/url"
 	"os/exec"
 	"time"
 
@@ -15,52 +13,43 @@ import (
 )
 
 type problemConf struct {
-	benchmarkerIP  string
 	execPath       string
 	benchmarkerDir string
 }
 
-type Isucon11Qualify struct {
+type Isucon11Final struct {
 	conf problemConf
 
 	proc *isuxbench.Process
 }
 
-var _ benchmarker.Benchmarker = (*Isucon11Qualify)(nil)
+var _ benchmarker.Benchmarker = (*Isucon11Final)(nil)
 
-func New(conf config.Problem) (*Isucon11Qualify, error) {
+func New(conf config.Problem) (*Isucon11Final, error) {
 	path, ok := conf.Options["benchmarker-path"].(string)
 	if !ok || path == "" {
 		return nil, fmt.Errorf("invalid or missing 'benchmarker-path' option in problem configuration")
-	}
-	benchmarkerIP, ok := conf.Options["benchmarker-ip"].(string)
-	if !ok || benchmarkerIP == "" {
-		return nil, fmt.Errorf("invalid or missing 'benchmarker-ip' option in problem configuration")
 	}
 	benchmarkerDir, ok := conf.Options["benchmarker-dir"].(string)
 	if !ok || benchmarkerDir == "" {
 		return nil, fmt.Errorf("invalid or missing 'benchmarker-dir' option in problem configuration")
 	}
 
-	return &Isucon11Qualify{
+	return &Isucon11Final{
 		conf: problemConf{
 			execPath:       path,
-			benchmarkerIP:  benchmarkerIP,
 			benchmarkerDir: benchmarkerDir,
 		},
 	}, nil
 }
 
-func (b *Isucon11Qualify) Start(ctx context.Context, job *domain.Job) (benchmarker.Outputs, time.Time, error) {
-	jiaServiceURL := url.URL{
-		Scheme: "http",
-		Host:   net.JoinHostPort(b.conf.benchmarkerIP, "4999"),
-	}
+func (b *Isucon11Final) Start(ctx context.Context, job *domain.Job) (benchmarker.Outputs, time.Time, error) {
+	// 本選のベンチマーカーは`--target`に`host:port`を受け取り、`http://<target>/`を組み立てる。
+	// ポートを省略した場合は80番になる。
+	// `--exit-status`は付けない。競技上の失敗とプロセスの異常終了を区別するため、
+	// 合否は最終レポートから判定する。
 	cmd := exec.CommandContext(ctx, b.conf.execPath,
-		"--target", job.GetTargetIPAdress(),
-		// tlsを使わない場合は`--all-adresses`にtargetだけ指定すればok
-		"--all-addresses", job.GetTargetIPAdress(),
-		"--jia-service-url", jiaServiceURL.String())
+		"--target", job.GetTargetIPAdress())
 	cmd.Dir = b.conf.benchmarkerDir
 
 	proc, out, startedAt, err := isuxbench.Start(cmd)
@@ -72,7 +61,7 @@ func (b *Isucon11Qualify) Start(ctx context.Context, job *domain.Job) (benchmark
 	return out, startedAt, nil
 }
 
-func (b *Isucon11Qualify) Wait(_ context.Context) (domain.Result, time.Time, error) {
+func (b *Isucon11Final) Wait(_ context.Context) (domain.Result, time.Time, error) {
 	result, finishedAt, err := b.proc.Wait()
 	if err != nil {
 		return result, finishedAt, fmt.Errorf("wait benchmarker: %w", err)
@@ -80,7 +69,7 @@ func (b *Isucon11Qualify) Wait(_ context.Context) (domain.Result, time.Time, err
 	return result, finishedAt, nil
 }
 
-func (b *Isucon11Qualify) CalculateScore(_ context.Context, _, _ string) (int, error) {
+func (b *Isucon11Final) CalculateScore(_ context.Context, _, _ string) (int, error) {
 	if b.proc == nil {
 		return 0, nil
 	}
