@@ -26,8 +26,8 @@ func NewTeam(name string) Team {
 }
 
 func (t *Team) SetMembers(users []User) error {
-	if len(users) >= MaxTeamMembers {
-		return errors.New("team is full")
+	if len(users) > MaxTeamMembers {
+		return errors.New("team members exceed the limit")
 	}
 
 	for i, user := range users {
