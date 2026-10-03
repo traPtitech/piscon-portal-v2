@@ -190,6 +190,10 @@ export class AwsStack extends cdk.Stack {
 			value: problemServerSg.securityGroupId,
 			description: "Security group ID for problem servers",
 		});
+		new cdk.CfnOutput(this, "SubnetId", {
+			value: vpc.publicSubnets[0].subnetId,
+			description: "Subnet ID",
+		});
 
 		for (let i = 0; i < props.runner.count; i++) {
 			const runner = new ec2.Instance(this, `Runner-${i}`, {
