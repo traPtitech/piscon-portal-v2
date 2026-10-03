@@ -7,11 +7,14 @@
 	"scripts": {
 		"build": "tsc",
 		"watch": "tsc -w",
-		"cdk": "cdk"
+		"cdk": "cdk",
+		"format": "prettier --write .",
+		"format:check": "prettier --check ."
 	},
 	"devDependencies": {
 		"@types/node": "^24.10.1",
 		"aws-cdk": "2.1100.1",
+		"prettier": "^3.9.9",
 		"ts-node": "^10.9.2",
 		"typescript": "~5.9.3"
 	},
