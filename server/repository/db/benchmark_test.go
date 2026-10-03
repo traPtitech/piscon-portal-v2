@@ -712,7 +712,7 @@ func TestGetRanking(t *testing.T) {
 		TeamID:    score7.TeamID,
 		Score:     score7.Score,
 		CreatedAt: score7.CreatedAt,
-		Status:    domain.BenchmarkStatusRunning,
+		Status:    domain.BenchmarkStatusFinished,
 		Result:    lo.ToPtr(domain.BenchmarkResultStatusFailed),
 		Instance:  domain.Instance{ID: instanceID},
 	})
