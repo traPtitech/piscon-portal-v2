@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
@@ -192,6 +193,59 @@ func TestGetQueuedBenchmarks(t *testing.T) {
 	assert.NoError(t, err)
 
 	testutil.CompareBenchmarks(t, benchmarks[:1], got)
+}
+
+func TestGetBenchmarks_ByResult(t *testing.T) {
+	t.Parallel()
+
+	repo, db := setupRepository(t)
+
+	teamID := uuid.New()
+	userID := uuid.New()
+	instance := domain.Instance{
+		ID:     uuid.New(),
+		TeamID: teamID,
+		Infra: domain.InfraInstance{
+			ProviderInstanceID: "provider-instance-id",
+			Status:             domain.InstanceStatusRunning,
+		},
+	}
+
+	benchmarks := []domain.Benchmark{
+		{
+			ID:         uuid.New(),
+			Instance:   instance,
+			TeamID:     teamID,
+			UserID:     userID,
+			Status:     domain.BenchmarkStatusWaiting,
+			CreatedAt:  time.Now(),
+			StartedAt:  nil,
+			FinishedAt: nil,
+		},
+		{
+			ID:         uuid.New(),
+			Instance:   instance,
+			TeamID:     teamID,
+			UserID:     userID,
+			Status:     domain.BenchmarkStatusFinished,
+			CreatedAt:  time.Now(),
+			StartedAt:  ptr.Of(time.Now()),
+			FinishedAt: ptr.Of(time.Now()),
+			Score:      100,
+			Result:     ptr.Of(domain.BenchmarkResultStatusPassed),
+		},
+	}
+	mustMakeInstance(t, db, instance)
+	for _, benchmark := range benchmarks {
+		mustMakeBenchmark(t, db, benchmark)
+	}
+
+	got, err := repo.GetBenchmarks(t.Context(), repository.BenchmarkQuery{
+		ResultIn: optional.From([]domain.BenchmarkResult{domain.BenchmarkResultStatusPassed}),
+	})
+	assert.NoError(t, err)
+
+	testutil.CompareBenchmarks(t, benchmarks[1:], got)
 }
 
 func TestGetBenchmarkLog(t *testing.T) {
@@ -614,6 +668,12 @@ func TestGetRanking(t *testing.T) {
 		Score:       150,
 		CreatedAt:   time.Now().Add(-time.Hour * 3),
 	}
+	score7 := domain.Score{
+		BenchmarkID: uuid.New(),
+		TeamID:      team3,
+		Score:       1000,
+		CreatedAt:   time.Now().Add(-time.Hour * 3),
+	}
 	scores := []domain.Score{score1, score2, score3, score4, score5, score6}
 
 	instanceID := uuid.New()
@@ -635,6 +695,7 @@ func TestGetRanking(t *testing.T) {
 			Score:     score.Score,
 			CreatedAt: score.CreatedAt,
 			Status:    domain.BenchmarkStatusFinished,
+			Result:    lo.ToPtr(domain.BenchmarkResultStatusPassed),
 			Instance:  domain.Instance{ID: instanceID},
 		})
 	}
@@ -644,6 +705,15 @@ func TestGetRanking(t *testing.T) {
 		Score:     score0.Score,
 		CreatedAt: score0.CreatedAt,
 		Status:    domain.BenchmarkStatusRunning,
+		Instance:  domain.Instance{ID: instanceID},
+	})
+	mustMakeBenchmark(t, testDB, domain.Benchmark{
+		ID:        score7.BenchmarkID,
+		TeamID:    score7.TeamID,
+		Score:     score7.Score,
+		CreatedAt: score7.CreatedAt,
+		Status:    domain.BenchmarkStatusFinished,
+		Result:    lo.ToPtr(domain.BenchmarkResultStatusFailed),
 		Instance:  domain.Instance{ID: instanceID},
 	})
 

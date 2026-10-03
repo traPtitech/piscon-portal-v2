@@ -39,6 +39,7 @@ type BenchmarkRepository interface {
 type BenchmarkQuery struct {
 	TeamID   optional.Of[uuid.UUID]
 	StatusIn optional.Of[[]domain.BenchmarkStatus]
+	ResultIn optional.Of[[]domain.BenchmarkResult]
 }
 
 type RankingQuery struct {

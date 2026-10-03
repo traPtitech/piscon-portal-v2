@@ -82,6 +82,17 @@ func (r *Repository) GetBenchmarks(ctx context.Context, query repository.Benchma
 		}
 		mods = append(mods, where.Status.In(statuses...))
 	}
+	if query.ResultIn.IsSet() {
+		var results []enums.BenchmarksResult
+		for _, result := range query.ResultIn.Get() {
+			dbModelResult, err := fromDomainBenchmarkResult(&result)
+			if err != nil {
+				return nil, err
+			}
+			results = append(results, *dbModelResult)
+		}
+		mods = append(mods, where.Result.In(results...))
+	}
 
 	benchmarks, err := models.Benchmarks.Query(mods...).All(ctx, r.executor(ctx))
 	if err != nil {
@@ -204,6 +215,7 @@ func (r *Repository) GetRanking(ctx context.Context, query repository.RankingQue
 					).As("rank_in_team"),
 				),
 				models.SelectWhere.Benchmarks.Status.EQ(enums.BenchmarksStatusFinished),
+				models.SelectWhere.Benchmarks.Result.EQ(enums.BenchmarksResultPassed),
 			),
 		).As("rank_team"),
 		sm.Where(mysql.Quote("rank_team", "rank_in_team").EQ(mysql.Arg(1))),
