@@ -42,6 +42,7 @@ func NewScoreUseCase(repo repository.Repository) ScoreUseCase {
 func (u *scoreUseCaseImpl) GetScores(ctx context.Context) ([]TeamScores, error) {
 	benchmarks, err := u.repo.GetBenchmarks(ctx, repository.BenchmarkQuery{
 		StatusIn: optional.From([]domain.BenchmarkStatus{domain.BenchmarkStatusFinished}),
+		ResultIn: optional.From([]domain.BenchmarkResult{domain.BenchmarkResultStatusPassed}),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("get benchmarks: %w", err)
