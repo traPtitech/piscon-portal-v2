@@ -119,6 +119,12 @@ export class AwsStack extends cdk.Stack {
 				subnetType: ec2.SubnetType.PUBLIC,
 			},
 			keyPair,
+			blockDevices: [
+				{
+					deviceName: "/dev/sda1",
+					volume: ec2.BlockDeviceVolume.ebs(16),
+				},
+			],
 		});
 		portal.connections.allowFrom(ec2.Peer.anyIpv4(), ec2.Port.SSH, "Allow SSH");
 		portal.connections.allowFrom(
