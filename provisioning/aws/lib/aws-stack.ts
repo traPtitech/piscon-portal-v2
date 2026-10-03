@@ -82,6 +82,21 @@ export class AwsStack extends cdk.Stack {
 			ec2.Port.allUdp(),
 			"Allow UDP between problem servers",
 		);
+		problemServerSg.addIngressRule(
+			ec2.Peer.anyIpv4(),
+			ec2.Port.SSH,
+			"Allow SSH",
+		);
+		problemServerSg.addIngressRule(
+			ec2.Peer.anyIpv4(),
+			ec2.Port.HTTP,
+			"Allow HTTP",
+		);
+		problemServerSg.addIngressRule(
+			ec2.Peer.anyIpv4(),
+			ec2.Port.HTTPS,
+			"Allow HTTPS",
+		);
 		runnerSg.addIngressRule(
 			problemServerSg,
 			ec2.Port.allTcp(),
