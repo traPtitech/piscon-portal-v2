@@ -1,8 +1,5 @@
 version: "3"
 
-env:
-  GOEXPERIMENT: "synctest"
-
 tasks:
   test:
     cmds:
