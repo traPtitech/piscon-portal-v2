@@ -94,6 +94,7 @@ func TestGetScores(t *testing.T) {
 			r.EXPECT().
 				GetBenchmarks(gomock.Any(), repository.BenchmarkQuery{
 					StatusIn: optional.From([]domain.BenchmarkStatus{domain.BenchmarkStatusFinished}),
+					ResultIn: optional.From([]domain.BenchmarkResult{domain.BenchmarkResultStatusPassed}),
 				}).
 				Return(testCase.benchmarks, testCase.GetBenchmarksErr)
 
