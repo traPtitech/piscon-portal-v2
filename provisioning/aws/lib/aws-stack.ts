@@ -82,6 +82,21 @@ export class AwsStack extends cdk.Stack {
 			ec2.Port.allUdp(),
 			"Allow UDP between problem servers",
 		);
+		problemServerSg.addIngressRule(
+			ec2.Peer.anyIpv4(),
+			ec2.Port.SSH,
+			"Allow SSH",
+		);
+		problemServerSg.addIngressRule(
+			ec2.Peer.anyIpv4(),
+			ec2.Port.HTTP,
+			"Allow HTTP",
+		);
+		problemServerSg.addIngressRule(
+			ec2.Peer.anyIpv4(),
+			ec2.Port.HTTPS,
+			"Allow HTTPS",
+		);
 		runnerSg.addIngressRule(
 			problemServerSg,
 			ec2.Port.allTcp(),
@@ -104,6 +119,12 @@ export class AwsStack extends cdk.Stack {
 				subnetType: ec2.SubnetType.PUBLIC,
 			},
 			keyPair,
+			blockDevices: [
+				{
+					deviceName: "/dev/sda1",
+					volume: ec2.BlockDeviceVolume.ebs(16),
+				},
+			],
 		});
 		portal.connections.allowFrom(ec2.Peer.anyIpv4(), ec2.Port.SSH, "Allow SSH");
 		portal.connections.allowFrom(
@@ -168,6 +189,10 @@ export class AwsStack extends cdk.Stack {
 		new cdk.CfnOutput(this, "ProblemSecurityGroupId", {
 			value: problemServerSg.securityGroupId,
 			description: "Security group ID for problem servers",
+		});
+		new cdk.CfnOutput(this, "SubnetId", {
+			value: vpc.publicSubnets[0].subnetId,
+			description: "Subnet ID",
 		});
 
 		for (let i = 0; i < props.runner.count; i++) {
