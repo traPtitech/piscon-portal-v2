@@ -8,6 +8,7 @@ package isuxbench
 
 import (
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -24,6 +25,11 @@ import (
 // reportFD is the file descriptor number that the child process writes reports to.
 // [exec.Cmd.ExtraFiles] の先頭がfd 3になる。
 const reportFD = 3
+
+// ErrNoFinalReport は、最終レポート(finished=true)を受け取る前にレポートのストリームが
+// レポートの区切りで終わったことを表す。
+// ベンチマーカーによっては、競技上の失敗でも最終レポートを送らずに終了することがある。
+var ErrNoFinalReport = errors.New("report stream ended without final report")
 
 // Process is a running benchmarker child process.
 type Process struct {
@@ -121,6 +127,9 @@ func (p *Process) watchReport(report io.ReadCloser) {
 		res, err := readResult(report)
 		if err != nil {
 			// 最終レポートを受け取る前にストリームが終わった場合もここに来る。
+			if errors.Is(err, io.EOF) {
+				err = fmt.Errorf("%w: %w", ErrNoFinalReport, err)
+			}
 			p.resultCh <- result{err: err}
 			return
 		}
@@ -141,6 +150,10 @@ func readResult(report io.Reader) (*resources.BenchmarkResult, error) {
 	size := int(binary.BigEndian.Uint16(sizeData[:]))
 	data := make([]byte, size)
 	if _, err := io.ReadFull(report, data); err != nil {
+		// 長さを読んだ後に本体がない場合はレポートの途中で切れている。
+		if errors.Is(err, io.EOF) {
+			err = io.ErrUnexpectedEOF
+		}
 		return nil, fmt.Errorf("parse benchmark result: %w", err)
 	}
 
