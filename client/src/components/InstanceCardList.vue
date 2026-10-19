@@ -30,7 +30,7 @@ const enqueueBenchmarkHandler = (instanceId: string) => {
 }
 
 const getMissingIPAddressMessage = (status: Instance['status'], kind: 'public' | 'private') => {
-  if (status === 'deleting' || status === 'deleted') return '解放済みです'
+  if (status === 'deleting' || status === 'deleted') return '削除済みです'
   if (kind === 'public' && (status === 'stopped' || status === 'stopping')) {
     return '起動時に割り振られます'
   }
