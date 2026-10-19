@@ -102,22 +102,35 @@ export const startJobs = () => {
 
     // building -> running
     for (const i of buildingInstances) {
-      if (Math.random() < 0.2) i.status = 'running'
+      if (Math.random() < 0.2) {
+        i.status = 'running'
+        i.publicIPAddress = `203.0.113.${i.serverId}`
+      }
     }
 
     // starting -> running
     for (const i of startingInstances) {
-      if (Math.random() < 0.3) i.status = 'running'
+      if (Math.random() < 0.3) {
+        i.status = 'running'
+        i.publicIPAddress = `203.0.113.${i.serverId}`
+      }
     }
 
     // stopping -> stopped
     for (const i of stoppingInstances) {
-      if (Math.random() < 0.3) i.status = 'stopped'
+      if (Math.random() < 0.3) {
+        i.status = 'stopped'
+        i.publicIPAddress = ''
+      }
     }
 
     // deleting -> deleted
     for (const i of deletingInstances) {
-      if (Math.random() < 0.3) i.status = 'deleted'
+      if (Math.random() < 0.3) {
+        i.status = 'deleted'
+        i.publicIPAddress = ''
+        i.privateIPAddress = ''
+      }
     }
   }, 500)
 }

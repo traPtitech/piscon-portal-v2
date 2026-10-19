@@ -869,8 +869,10 @@ components:
             新しくインスタンスを起動する場合は、1以上の現在使われていない整数が採用される。
             インスタンスを削除したら、そのIDは使用されていないものとし、再利用できる。
         publicIPAddress:
+          description: "パブリックIPアドレス。未割り当て・停止・削除などで取得できない場合は空文字を返します。停止後の起動時には新しいアドレスが割り振られます。"
           $ref: "#/components/schemas/IPAddress"
         privateIPAddress:
+          description: "プライベートIPアドレス。停止中も保持されます。未割り当て・削除などで取得できない場合は空文字を返します。"
           $ref: "#/components/schemas/IPAddress"
         status:
           $ref: "#/components/schemas/InstanceStatus"

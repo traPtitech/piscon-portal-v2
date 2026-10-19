@@ -29,6 +29,15 @@ const enqueueBenchmarkHandler = (instanceId: string) => {
   enqueueBenchmark({ teamId, instanceId })
 }
 
+const getMissingIPAddressMessage = (status: Instance['status'], kind: 'public' | 'private') => {
+  if (status === 'deleting' || status === 'deleted') return '削除済みです'
+  if (kind === 'public' && (status === 'stopped' || status === 'stopping')) {
+    return '起動時に割り振られます'
+  }
+  if (status === 'building' || status === 'starting') return '割り当て待ちです'
+  return '取得できません'
+}
+
 const startingInstances = ref<string[]>([])
 const stoppingInstances = ref<string[]>([])
 const deletingInstances = ref<string[]>([])
@@ -89,18 +98,30 @@ const deleteInstance = async (args: { teamId: string; instanceId: string }) => {
               <div class="info-label">プライベートIPアドレス</div>
               <div class="info-value">
                 <span>
-                  {{ instance.privateIPAddress }}
+                  {{
+                    instance.privateIPAddress ||
+                    getMissingIPAddressMessage(instance.status, 'private')
+                  }}
                 </span>
-                <CopyToClipboardButton :text="instance.privateIPAddress" />
+                <CopyToClipboardButton
+                  v-if="instance.privateIPAddress"
+                  :text="instance.privateIPAddress"
+                />
               </div>
             </div>
             <div class="info-element">
               <div class="info-label">パブリックIPアドレス</div>
               <div class="info-value">
                 <span>
-                  {{ instance.publicIPAddress }}
+                  {{
+                    instance.publicIPAddress ||
+                    getMissingIPAddressMessage(instance.status, 'public')
+                  }}
                 </span>
-                <CopyToClipboardButton :text="instance.publicIPAddress" />
+                <CopyToClipboardButton
+                  v-if="instance.publicIPAddress"
+                  :text="instance.publicIPAddress"
+                />
               </div>
             </div>
           </div>
