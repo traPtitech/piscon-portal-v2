@@ -459,7 +459,9 @@ export interface components {
        * @example 1
        */
       serverId: number
+      /** @description パブリックIPアドレス。未割り当て・停止・削除などで取得できない場合は空文字を返します。停止後の起動時には新しいアドレスが割り振られます。 */
       publicIPAddress: components['schemas']['IPAddress']
+      /** @description プライベートIPアドレス。停止中も保持されます。未割り当て・削除などで取得できない場合は空文字を返します。 */
       privateIPAddress: components['schemas']['IPAddress']
       status: components['schemas']['InstanceStatus']
       /**

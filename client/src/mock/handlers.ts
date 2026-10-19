@@ -116,7 +116,7 @@ export const handlers = [
       teamId,
       serverId: newServerId,
       privateIPAddress: `192.168.0.${newServerId}`,
-      publicIPAddress: `203.0.113.${newServerId}`,
+      publicIPAddress: '',
       status: 'building',
       createdAt: new Date().toISOString(),
     }

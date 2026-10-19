@@ -984,8 +984,10 @@ type Instance struct {
 	// サーバーのID。チームごとに1から始まる。表示用。
 	// 新しくインスタンスを起動する場合は、1以上の現在使われていない整数が採用される。
 	// インスタンスを削除したら、そのIDは使用されていないものとし、再利用できる。.
-	ServerId         int            `json:"serverId"`
-	PublicIPAddress  IPAddress      `json:"publicIPAddress"`
+	ServerId int `json:"serverId"`
+	// パブリックIPアドレス。未割り当て・停止・削除などで取得できない場合は空文字を返します。停止後の起動時には新しいアドレスが割り振られます。.
+	PublicIPAddress IPAddress `json:"publicIPAddress"`
+	// プライベートIPアドレス。停止中も保持されます。未割り当て・削除などで取得できない場合は空文字を返します。.
 	PrivateIPAddress IPAddress      `json:"privateIPAddress"`
 	Status           InstanceStatus `json:"status"`
 	CreatedAt        time.Time      `json:"createdAt"`
