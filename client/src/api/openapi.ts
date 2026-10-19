@@ -162,7 +162,7 @@ export interface paths {
     }
     /**
      * インスタンス一覧取得
-     * @description チームに所属しているインスタンス一覧を取得します (0件の場合も200で空配列が返ります)
+     * @description チームに所属しているインスタンス一覧を取得します。削除済みのインスタンスも含まれます (0件の場合も200で空配列が返ります)
      */
     get: operations['getTeamInstances']
     put?: never
@@ -210,7 +210,7 @@ export interface paths {
     }
     /**
      * インスタンス一覧取得
-     * @description 全インスタンス一覧を取得します (0件の場合も200で空配列が返ります)
+     * @description 全インスタンス一覧を取得します。削除済みのインスタンスも含まれます (0件の場合も200で空配列が返ります)
      */
     get: operations['getInstances']
     put?: never
