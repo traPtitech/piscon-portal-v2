@@ -98,6 +98,15 @@ export const instances: paths['/teams/{teamId}/instances']['get']['responses']['
       status: 'running',
       createdAt: justBefore.toISOString(),
     },
+    {
+      id: '01943f4c-3662-7cac-9674-2b0a39da6726',
+      teamId: teamIds['ikura-cp'],
+      serverId: 1,
+      privateIPAddress: '',
+      publicIPAddress: '',
+      status: 'deleted',
+      createdAt: justBefore.toISOString(),
+    },
   ]
 
 export const benchmarks: components['schemas']['BenchmarkAdminResult'][] = [

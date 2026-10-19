@@ -164,6 +164,10 @@ export const handlers = [
     const instance = instances.find((i) => i.id === body.instanceId)
     if (instance === undefined) return HttpResponse.json({ message: 'Not found' }, { status: 404 })
 
+    if (instance.status !== 'running') {
+      return HttpResponse.json({ message: 'instance is not running' }, { status: 400 })
+    }
+
     const me = users[0]
 
     const benchmark: components['schemas']['BenchmarkAdminResult'] = {

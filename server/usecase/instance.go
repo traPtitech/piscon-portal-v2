@@ -15,9 +15,9 @@ import (
 type InstanceUseCase interface {
 	// GetInstance returns the instance with the given ID. If the instance is not found, [ErrNotFound] is returned.
 	GetInstance(ctx context.Context, id uuid.UUID) (domain.Instance, error)
-	// GetTeamInstances returns all instances for the given team. Deleted instances are not included.
+	// GetTeamInstances returns all instances for the given team. Deleted instances are included for historical references.
 	GetTeamInstances(ctx context.Context, teamID uuid.UUID) ([]domain.Instance, error)
-	// GetAllInstances returns all instances. Deleted instances are not included.
+	// GetAllInstances returns all instances. Deleted instances are included for historical references.
 	GetAllInstances(ctx context.Context) ([]domain.Instance, error)
 	// CreateInstance creates a new instance for the given team. If the team already has the maximum number of instances, [UseCaseError] is returned.
 	CreateInstance(ctx context.Context, teamID uuid.UUID) (domain.Instance, error)
