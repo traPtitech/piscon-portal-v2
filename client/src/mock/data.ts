@@ -100,6 +100,17 @@ export const instances: paths['/teams/{teamId}/instances']['get']['responses']['
     },
   ]
 
+// 削除済みサーバーも履歴表示用に API に含まれる。実行先には表示しない。
+instances.push({
+  id: '01943f4c-3662-7cac-9674-2b0a39da6726',
+  teamId: teamIds['ikura-cp'],
+  serverId: 1,
+  privateIPAddress: '',
+  publicIPAddress: '',
+  status: 'deleted',
+  createdAt: justBefore.toISOString(),
+})
+
 export const benchmarks: components['schemas']['BenchmarkAdminResult'][] = [
   {
     id: '01943f67-d9ed-7bbb-81eb-20f81391ffea',

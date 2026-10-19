@@ -3,7 +3,7 @@ import { Icon } from '@iconify/vue'
 import type { components } from '@/api/openapi'
 import MainButton from '@/components/MainButton.vue'
 import { useEnqueueBenchmark } from '@/lib/useServerData'
-import { computed, ref, useId } from 'vue'
+import { computed, ref, useId, watch } from 'vue'
 
 const id = useId()
 
@@ -18,16 +18,31 @@ const props = defineProps<{
 const { mutate: enqueueRequest, isPending } = useEnqueueBenchmark()
 
 const instances = computed(() =>
-  props.instances.map((i) => ({
-    label: `サーバー${i.serverId} (${i.privateIPAddress})`,
-    value: i.id,
-  })),
+  props.instances
+    .filter((i) => i.status === 'running')
+    .map((i) => ({
+      label: `サーバー${i.serverId} (${i.privateIPAddress})`,
+      value: i.id,
+    })),
 )
 const canEnqueue = computed(() => props.benches.every((b) => b.status === 'finished'))
 
 const targetInstanceId = ref<string | null>(null)
 
+watch(instances, (options) => {
+  if (!options.some((i) => i.value === targetInstanceId.value)) {
+    targetInstanceId.value = null
+  }
+})
+
 const enqueueBenchmark = (instanceId: string | null) => {
+  if (
+    !instances.value.some((i) => i.value === instanceId) ||
+    isPending.value ||
+    !canEnqueue.value
+  ) {
+    return
+  }
   if (instanceId === null) return
   enqueueRequest({ teamId: props.teamId, instanceId })
 }
