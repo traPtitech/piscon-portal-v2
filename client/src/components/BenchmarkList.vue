@@ -198,9 +198,8 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
   }
 }
 
-.padding {
+.bench-list > .padding {
   display: none;
-  position: absolute;
 }
 
 @container (max-width: 400px) {
@@ -223,9 +222,8 @@ const getUserName = (userId: string) => getUserById(userId)?.name ?? ''
     margin-top: -0.5rem;
   }
 
-  .padding {
+  .bench-list > .padding {
     display: block;
-    position: static;
   }
 }
 </style>
