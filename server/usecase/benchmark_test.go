@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/repository"
 	"github.com/traPtitech/piscon-portal-v2/server/repository/mock"
@@ -491,9 +492,12 @@ func TestStartBenchmark(t *testing.T) {
 
 	ctrl := gomock.NewController(t)
 
+	targetIP := "10.0.0.1"
 	bench := domain.Benchmark{
-		ID:        uuid.New(),
-		Instance:  domain.Instance{ID: uuid.New()},
+		ID: uuid.New(),
+		Instance: domain.Instance{ID: uuid.New(), Infra: domain.InfraInstance{
+			ProviderInstanceID: "i-target", PrivateIP: &targetIP,
+		}},
 		TeamID:    uuid.New(),
 		UserID:    uuid.New(),
 		Status:    domain.BenchmarkStatusWaiting,
@@ -572,6 +576,10 @@ func TestStartBenchmark(t *testing.T) {
 				infraMock.EXPECT().
 					Get(gomock.Any(), testCase.oldestBench.Instance.Infra.ProviderInstanceID).
 					Return(testCase.oldestBench.Instance.Infra, testCase.GetInfraInstanceErr)
+				if testCase.GetInfraInstanceErr == nil {
+					repoMock.EXPECT().GetTeamInstances(gomock.Any(), bench.TeamID, false).
+						Return([]domain.Instance{bench.Instance}, nil)
+				}
 			}
 			if testCase.executeUpdateBenchmark {
 				bench := testCase.oldestBench
@@ -595,7 +603,93 @@ func TestStartBenchmark(t *testing.T) {
 				return
 			}
 
-			testutil.CompareBenchmark(t, testCase.bench, bench)
+			testutil.CompareBenchmark(t, testCase.bench, bench.Benchmark)
+			assert.Equal(t, []string{targetIP}, bench.InstanceIPAddresses)
+		})
+	}
+}
+
+func TestStartBenchmarkInstanceIPAddresses(t *testing.T) {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name       string
+		teamErr    error
+		infraErr   error
+		noTargetIP bool
+	}{
+		{name: "同じチームの稼働中サーバーのprivate IPを取得する"},
+		{name: "チームの一覧取得に失敗したら開始しない", teamErr: assert.AnError},
+		{name: "インフラの一覧取得に失敗したら開始しない", infraErr: assert.AnError},
+		{name: "対象にprivate IPがなければ開始しない", noTargetIP: true},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			ctrl := gomock.NewController(t)
+			repo := mock.NewMockRepository(ctrl)
+			manager := instanceMock.NewMockManager(ctrl)
+			target := domain.InfraInstance{
+				ProviderInstanceID: "i-target", PrivateIP: ptr.Of("10.0.0.1"),
+				PublicIP: ptr.Of("192.0.2.1"), Status: domain.InstanceStatusRunning,
+			}
+			if tt.noTargetIP {
+				target.PrivateIP = nil
+			}
+			bench := domain.Benchmark{
+				ID: uuid.New(), TeamID: uuid.New(),
+				Instance: domain.Instance{ID: uuid.New(), Infra: target},
+				Status:   domain.BenchmarkStatusWaiting,
+			}
+			instances := []domain.Instance{bench.Instance}
+			ids := []string{"i-other-2", "i-other-3", "i-no-ip", "i-empty-ip", "i-deleted", "i-deleting", "i-duplicate"}
+			for _, id := range ids {
+				instances = append(instances, domain.Instance{
+					TeamID: bench.TeamID, Infra: domain.InfraInstance{ProviderInstanceID: id},
+				})
+			}
+			infraInstances := []domain.InfraInstance{
+				{ProviderInstanceID: "i-other-2", PrivateIP: ptr.Of("10.0.0.2"), PublicIP: ptr.Of("192.0.2.2"), Status: domain.InstanceStatusRunning},
+				{ProviderInstanceID: "i-other-3", PrivateIP: ptr.Of("10.0.0.3"), Status: domain.InstanceStatusStopped},
+				{ProviderInstanceID: "i-no-ip", Status: domain.InstanceStatusRunning},
+				{ProviderInstanceID: "i-empty-ip", PrivateIP: ptr.Of(""), Status: domain.InstanceStatusRunning},
+				{ProviderInstanceID: "i-deleted", PrivateIP: ptr.Of("10.0.0.4"), Status: domain.InstanceStatusDeleted},
+				{ProviderInstanceID: "i-deleting", PrivateIP: ptr.Of("10.0.0.5"), Status: domain.InstanceStatusDeleting},
+				{ProviderInstanceID: "i-duplicate", PrivateIP: ptr.Of("10.0.0.2"), Status: domain.InstanceStatusRunning},
+			}
+			repo.EXPECT().Transaction(gomock.Any(), gomock.Any()).DoAndReturn(
+				func(ctx context.Context, f func(context.Context) error) error { return f(ctx) },
+			)
+			calls := []any{
+				repo.EXPECT().GetOldestQueuedBenchmark(gomock.Any()).Return(bench, nil),
+				manager.EXPECT().Get(gomock.Any(), "i-target").Return(target, nil),
+			}
+			if !tt.noTargetIP {
+				calls = append(calls, repo.EXPECT().GetTeamInstances(gomock.Any(), bench.TeamID, false).Return(instances, tt.teamErr))
+				if tt.teamErr == nil {
+					calls = append(calls, manager.EXPECT().GetByIDs(gomock.Any(), ids).Return(infraInstances, tt.infraErr))
+				}
+			}
+			wantErr := tt.noTargetIP || tt.teamErr != nil || tt.infraErr != nil
+			if !wantErr {
+				readying := bench
+				readying.Status = domain.BenchmarkStatusReadying
+				calls = append(calls, repo.EXPECT().UpdateBenchmark(gomock.Any(), bench.ID, readying).Return(nil))
+			}
+			gomock.InOrder(calls...)
+
+			job, err := usecase.NewBenchmarkUseCase(repo, manager).StartBenchmark(t.Context())
+			if wantErr {
+				require.Error(t, err)
+				if !tt.noTargetIP {
+					require.ErrorIs(t, err, assert.AnError)
+				}
+				assert.Equal(t, domain.BenchmarkJob{}, job)
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, []string{"10.0.0.1", "10.0.0.2"}, job.InstanceIPAddresses)
+			assert.Equal(t, "10.0.0.1", *job.Benchmark.Instance.Infra.PrivateIP)
+			assert.Equal(t, domain.BenchmarkStatusReadying, job.Benchmark.Status)
 		})
 	}
 }

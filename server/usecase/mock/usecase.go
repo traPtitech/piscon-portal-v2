@@ -976,10 +976,10 @@ func (c *MockUseCaseSaveBenchmarkProgressCall) DoAndReturn(f func(context.Contex
 }
 
 // StartBenchmark mocks base method.
-func (m *MockUseCase) StartBenchmark(ctx context.Context) (domain.Benchmark, error) {
+func (m *MockUseCase) StartBenchmark(ctx context.Context) (domain.BenchmarkJob, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "StartBenchmark", ctx)
-	ret0, _ := ret[0].(domain.Benchmark)
+	ret0, _ := ret[0].(domain.BenchmarkJob)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -997,19 +997,19 @@ type MockUseCaseStartBenchmarkCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockUseCaseStartBenchmarkCall) Return(arg0 domain.Benchmark, arg1 error) *MockUseCaseStartBenchmarkCall {
+func (c *MockUseCaseStartBenchmarkCall) Return(arg0 domain.BenchmarkJob, arg1 error) *MockUseCaseStartBenchmarkCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockUseCaseStartBenchmarkCall) Do(f func(context.Context) (domain.Benchmark, error)) *MockUseCaseStartBenchmarkCall {
+func (c *MockUseCaseStartBenchmarkCall) Do(f func(context.Context) (domain.BenchmarkJob, error)) *MockUseCaseStartBenchmarkCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockUseCaseStartBenchmarkCall) DoAndReturn(f func(context.Context) (domain.Benchmark, error)) *MockUseCaseStartBenchmarkCall {
+func (c *MockUseCaseStartBenchmarkCall) DoAndReturn(f func(context.Context) (domain.BenchmarkJob, error)) *MockUseCaseStartBenchmarkCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
