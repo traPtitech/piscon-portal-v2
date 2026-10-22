@@ -1,16 +1,21 @@
 package domain
 
-import "time"
+import (
+	"slices"
+	"time"
+)
 
 type Job struct {
-	id       string
-	targetIP string
+	id          string
+	targetIP    string
+	instanceIPs []string
 }
 
-func NewJob(id string, targetIP string) *Job {
+func NewJob(id string, targetIP string, instanceIPs ...string) *Job {
 	return &Job{
-		id:       id,
-		targetIP: targetIP,
+		id:          id,
+		targetIP:    targetIP,
+		instanceIPs: slices.Clone(instanceIPs),
 	}
 }
 
@@ -20,6 +25,10 @@ func (j *Job) GetID() string {
 
 func (j *Job) GetTargetIPAdress() string {
 	return j.targetIP
+}
+
+func (j *Job) GetInstanceIPAddresses() []string {
+	return slices.Clone(j.instanceIPs)
 }
 
 type Result int

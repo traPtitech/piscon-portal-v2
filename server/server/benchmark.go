@@ -29,7 +29,7 @@ func NewBenchmarkService(u usecase.BenchmarkUseCase) *BenchmarkService {
 var _ portalv1.BenchmarkServiceServer = (*BenchmarkService)(nil)
 
 func (bs *BenchmarkService) GetBenchmarkJob(ctx context.Context, _ *portalv1.GetBenchmarkJobRequest) (*portalv1.GetBenchmarkJobResponse, error) {
-	bench, err := bs.b.StartBenchmark(ctx)
+	job, err := bs.b.StartBenchmark(ctx)
 	if errors.Is(err, usecase.ErrNotFound) {
 		return &portalv1.GetBenchmarkJobResponse{
 			BenchmarkJob: nil,
@@ -41,8 +41,9 @@ func (bs *BenchmarkService) GetBenchmarkJob(ctx context.Context, _ *portalv1.Get
 
 	return &portalv1.GetBenchmarkJobResponse{
 		BenchmarkJob: &portalv1.BenchmarkJob{
-			BenchmarkId:     bench.ID.String(),
-			TargetIpAddress: *bench.Instance.Infra.PrivateIP,
+			BenchmarkId:         job.Benchmark.ID.String(),
+			TargetIpAddress:     *job.Benchmark.Instance.Infra.PrivateIP,
+			InstanceIpAddresses: job.InstanceIPAddresses,
 		},
 	}, nil
 }

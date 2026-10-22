@@ -30,6 +30,12 @@ type Benchmark struct {
 	ErrorMes   *string
 }
 
+// BenchmarkJob contains a benchmark and its team's current problem server IPs.
+type BenchmarkJob struct {
+	Benchmark           Benchmark
+	InstanceIPAddresses []string
+}
+
 func NewBenchmark(instance Instance, user User) (Benchmark, error) {
 	if !user.TeamID.Valid {
 		return Benchmark{}, errors.New("user is not in a team")

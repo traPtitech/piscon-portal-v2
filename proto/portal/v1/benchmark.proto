@@ -9,6 +9,7 @@ message GetBenchmarkJobRequest {}
 message BenchmarkJob {
   string benchmark_id = 1;
   string target_ip_address = 2;
+  repeated string instance_ip_addresses = 3; // 対象と、同じチームの稼働中の問題サーバーのprivate IP
 }
 
 message GetBenchmarkJobResponse {
