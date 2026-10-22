@@ -57,7 +57,7 @@ secrets:
 local:
   git_tag: "{{ 利用する piscon-portal-v2 の Git tag (例: v0.1.0) }}"
   problem:
-    name: "{{ 問題名 (vars.yml の runner.problem_volumes に含まれるキーのうちどれか 1 つ) }}"
+    name: "{{ 問題名 (private_isu / isucon11-qualify / isucon11-final / isucon13 / isucon14) }}"
     instance_limit: {{ インスタンス数の上限 }}
     image_id: "{{ 問題のAMI ID }}"
     instance_type: "{{ 問題のインスタンスタイプ }}"

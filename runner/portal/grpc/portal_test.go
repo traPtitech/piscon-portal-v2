@@ -24,10 +24,11 @@ func TestGetJob(t *testing.T) {
 	}
 
 	benchmarkJob := &portalv1.BenchmarkJob{
-		BenchmarkId:     "benchmark-id",
-		TargetIpAddress: "target-ip",
+		BenchmarkId:         "benchmark-id",
+		TargetIpAddress:     "target-ip",
+		InstanceIpAddresses: []string{"target-ip", "other-ip-1", "other-ip-2"},
 	}
-	job := domain.NewJob(benchmarkJob.BenchmarkId, benchmarkJob.TargetIpAddress)
+	job := domain.NewJob(benchmarkJob.BenchmarkId, benchmarkJob.TargetIpAddress, benchmarkJob.InstanceIpAddresses...)
 
 	testCases := map[string]struct {
 		GetJobCalls []GetJobCall

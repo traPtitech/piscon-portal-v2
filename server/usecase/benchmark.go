@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"time"
 
 	"github.com/google/uuid"
@@ -21,8 +22,9 @@ type BenchmarkUseCase interface {
 	GetTeamBenchmarks(ctx context.Context, teamID uuid.UUID) ([]domain.Benchmark, error)
 	// StartBenchmark
 	// キューの先頭のベンチマークを取得し、ステータスを更新する。
-	// 先頭のベンチマークを返すが、キューが空の場合はusecase.ErrNotFoundを返す。
-	StartBenchmark(ctx context.Context) (domain.Benchmark, error)
+	// 先頭のベンチマークと同じチームの稼働中の問題サーバーのprivate IPを返す。
+	// キューが空の場合はusecase.ErrNotFoundを返す。
+	StartBenchmark(ctx context.Context) (domain.BenchmarkJob, error)
 	// SaveBenchmarkProgress
 	// ベンチマーク実行中のログやスコアを更新して保存する。
 	// 該当のベンチマークが存在しなかった場合、usecase.ErrNotFoundを返す。
@@ -154,8 +156,8 @@ func (u *benchmarkUseCaseImpl) GetBenchmarkLog(ctx context.Context, benchmarkID 
 	return log, nil
 }
 
-func (u *benchmarkUseCaseImpl) StartBenchmark(ctx context.Context) (domain.Benchmark, error) {
-	var startedBenchmark domain.Benchmark
+func (u *benchmarkUseCaseImpl) StartBenchmark(ctx context.Context) (domain.BenchmarkJob, error) {
+	var job domain.BenchmarkJob
 	err := u.repo.Transaction(ctx, func(ctx context.Context) error {
 		bench, err := u.repo.GetOldestQueuedBenchmark(ctx)
 		if errors.Is(err, repository.ErrNotFound) {
@@ -170,7 +172,34 @@ func (u *benchmarkUseCaseImpl) StartBenchmark(ctx context.Context) (domain.Bench
 			return fmt.Errorf("get infra instance: %w", err)
 		}
 
-		startedBenchmark = domain.Benchmark{
+		if bench.Instance.Infra.PrivateIP == nil || *bench.Instance.Infra.PrivateIP == "" {
+			return fmt.Errorf("target instance has no private IP address")
+		}
+		instances, err := u.repo.GetTeamInstances(ctx, bench.TeamID, false)
+		if err != nil {
+			return fmt.Errorf("get team instances: %w", err)
+		}
+		ids := make([]string, 0, len(instances))
+		for _, inst := range instances {
+			if inst.Infra.ProviderInstanceID != bench.Instance.Infra.ProviderInstanceID {
+				ids = append(ids, inst.Infra.ProviderInstanceID)
+			}
+		}
+		ips := []string{*bench.Instance.Infra.PrivateIP}
+		if len(ids) > 0 {
+			infraInstances, err := u.manager.GetByIDs(ctx, ids)
+			if err != nil {
+				return fmt.Errorf("get team infra instances: %w", err)
+			}
+			for _, inst := range infraInstances {
+				if inst.Status == domain.InstanceStatusRunning && inst.PrivateIP != nil && *inst.PrivateIP != "" {
+					ips = append(ips, *inst.PrivateIP)
+				}
+			}
+		}
+		slices.Sort(ips)
+		job.InstanceIPAddresses = slices.Compact(ips)
+		job.Benchmark = domain.Benchmark{
 			ID:        bench.ID,
 			Instance:  bench.Instance,
 			TeamID:    bench.TeamID,
@@ -178,7 +207,7 @@ func (u *benchmarkUseCaseImpl) StartBenchmark(ctx context.Context) (domain.Bench
 			Status:    domain.BenchmarkStatusReadying, // ステータスをreadyingに更新
 			CreatedAt: bench.CreatedAt,
 		}
-		err = u.repo.UpdateBenchmark(ctx, bench.ID, startedBenchmark)
+		err = u.repo.UpdateBenchmark(ctx, bench.ID, job.Benchmark)
 		if errors.Is(err, repository.ErrNotFound) {
 			return ErrNotFound
 		}
@@ -189,10 +218,10 @@ func (u *benchmarkUseCaseImpl) StartBenchmark(ctx context.Context) (domain.Bench
 		return nil
 	})
 	if err != nil {
-		return domain.Benchmark{}, fmt.Errorf("transaction: %w", err)
+		return domain.BenchmarkJob{}, fmt.Errorf("transaction: %w", err)
 	}
 
-	return startedBenchmark, nil
+	return job, nil
 }
 
 func (u *benchmarkUseCaseImpl) SaveBenchmarkProgress(ctx context.Context, benchID uuid.UUID, benchLog domain.BenchmarkLog, score int64, startedAt time.Time) error {

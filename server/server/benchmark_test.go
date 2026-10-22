@@ -42,8 +42,9 @@ func TestGetBenchmarkJob(t *testing.T) {
 				},
 			},
 			job: &portalv1.BenchmarkJob{
-				BenchmarkId:     benchID.String(),
-				TargetIpAddress: targetIP,
+				BenchmarkId:         benchID.String(),
+				TargetIpAddress:     targetIP,
+				InstanceIpAddresses: []string{targetIP, "10.0.0.2", "10.0.0.3"},
 			},
 		},
 		"StartBenchmarkがErrNotFound": {
@@ -65,7 +66,11 @@ func TestGetBenchmarkJob(t *testing.T) {
 			u := mock.NewMockUseCase(ctrl)
 			s := server.NewBenchmarkService(u)
 
-			u.EXPECT().StartBenchmark(gomock.Any()).Return(testCase.bench, testCase.StartBenchmarkErr)
+			job := domain.BenchmarkJob{Benchmark: testCase.bench}
+			if testCase.job != nil {
+				job.InstanceIPAddresses = testCase.job.InstanceIpAddresses
+			}
+			u.EXPECT().StartBenchmark(gomock.Any()).Return(job, testCase.StartBenchmarkErr)
 
 			res, err := s.GetBenchmarkJob(t.Context(), &portalv1.GetBenchmarkJobRequest{})
 

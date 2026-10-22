@@ -12,6 +12,7 @@ import (
 	"github.com/traPtitech/piscon-portal-v2/runner/benchmarker/impl"
 	isucon11final "github.com/traPtitech/piscon-portal-v2/runner/benchmarker/impl/isucon11-final"
 	isucon11qualify "github.com/traPtitech/piscon-portal-v2/runner/benchmarker/impl/isucon11-qualify"
+	"github.com/traPtitech/piscon-portal-v2/runner/benchmarker/impl/isucon13"
 	"github.com/traPtitech/piscon-portal-v2/runner/benchmarker/impl/isucon14"
 	privateisu "github.com/traPtitech/piscon-portal-v2/runner/benchmarker/impl/private_isu"
 	"github.com/traPtitech/piscon-portal-v2/runner/config"
@@ -29,6 +30,7 @@ const (
 	problemPrivateIsu      string = "private_isu"
 	problemIsucon11Qualify string = "isucon11-qualify"
 	problemIsucon11Final   string = "isucon11-final"
+	problemIsucon13        string = "isucon13"
 	problemIsucon14        string = "isucon14"
 )
 
@@ -45,6 +47,9 @@ var (
 		},
 		problemIsucon11Final: func(conf config.Problem) (benchmarker.Benchmarker, error) {
 			return isucon11final.New(conf)
+		},
+		problemIsucon13: func(conf config.Problem) (benchmarker.Benchmarker, error) {
+			return isucon13.New(conf)
 		},
 		problemIsucon14: func(conf config.Problem) (benchmarker.Benchmarker, error) {
 			return isucon14.New(conf)
