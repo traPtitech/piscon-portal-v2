@@ -26,7 +26,7 @@ var BenchmarkLogs = Table[
 		},
 		UserLog: column{
 			Name:      "user_log",
-			DBType:    "text",
+			DBType:    "mediumtext",
 			Default:   "",
 			Comment:   "",
 			Nullable:  false,
@@ -35,7 +35,7 @@ var BenchmarkLogs = Table[
 		},
 		AdminLog: column{
 			Name:      "admin_log",
-			DBType:    "text",
+			DBType:    "mediumtext",
 			Default:   "",
 			Comment:   "",
 			Nullable:  false,
