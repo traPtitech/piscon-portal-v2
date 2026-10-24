@@ -60,8 +60,8 @@ CREATE TABLE IF NOT EXISTS `benchmarks` (
 
 CREATE TABLE IF NOT EXISTS `benchmark_logs` (
     `benchmark_id` VARCHAR(36) NOT NULL,
-    `user_log` TEXT NOT NULL,
-    `admin_log` TEXT NOT NULL,
+    `user_log` MEDIUMTEXT NOT NULL,
+    `admin_log` MEDIUMTEXT NOT NULL,
     PRIMARY KEY (`benchmark_id`),
     FOREIGN KEY (`benchmark_id`) REFERENCES `benchmarks` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -3,6 +3,7 @@ package db_test
 import (
 	"context"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -600,6 +601,13 @@ func TestUpdateBenchmarkLog(t *testing.T) {
 			benchLog: domain.BenchmarkLog{
 				UserLog:  "new user log",
 				AdminLog: "new admin log",
+			},
+		},
+		"64KiBを超えるlogを保存する": {
+			benchID: benchID,
+			benchLog: domain.BenchmarkLog{
+				UserLog:  strings.Repeat("a", 64*1024),
+				AdminLog: strings.Repeat("b", 64*1024),
 			},
 		},
 	}
