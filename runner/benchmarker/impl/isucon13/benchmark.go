@@ -127,7 +127,7 @@ func (b *Isucon13) Start(ctx context.Context, job *domain.Job) (benchmarker.Outp
 	started = true
 	b.cmd, b.outputDir, b.score = cmd, dir, 0
 	return benchmarker.Outputs{
-		Stdout: &infoFilter{reader: bufio.NewReader(stdout)},
+		Stdout: stdout,
 		Stderr: &infoFilter{reader: bufio.NewReader(stderr)},
 	}, time.Now(), nil
 }
