@@ -70,7 +70,7 @@ exit %d
 				previousOutputDir = outputDir
 				stdout, err := io.ReadAll(out.Stdout)
 				require.NoError(t, err)
-				assert.Equal(t, "2026-10-24T00:00:00Z\twarn\tstdout warning\n", string(stdout))
+				assert.Equal(t, "2026-10-24T00:00:00Z\tinfo\tstdout progress\n2026-10-24T00:00:00Z\twarn\tstdout warning\n", string(stdout))
 				stderr, err := io.ReadAll(out.Stderr)
 				require.NoError(t, err)
 				assert.Equal(t, "2026-10-24T00:00:00Z\terror\tstderr error\n", string(stderr))
