@@ -1,6 +1,8 @@
 package isucon13
 
 import (
+	"bufio"
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -124,7 +126,36 @@ func (b *Isucon13) Start(ctx context.Context, job *domain.Job) (benchmarker.Outp
 	}
 	started = true
 	b.cmd, b.outputDir, b.score = cmd, dir, 0
-	return benchmarker.Outputs{Stdout: stdout, Stderr: stderr}, time.Now(), nil
+	return benchmarker.Outputs{
+		Stdout: &infoFilter{reader: bufio.NewReader(stdout)},
+		Stderr: &infoFilter{reader: bufio.NewReader(stderr)},
+	}, time.Now(), nil
+}
+
+// infoFilter removes INFO entries from zap's tab-separated console output.
+type infoFilter struct {
+	reader  *bufio.Reader
+	pending []byte
+	err     error
+}
+
+func (r *infoFilter) Read(p []byte) (int, error) {
+	if len(p) == 0 {
+		return 0, nil
+	}
+	for len(r.pending) == 0 && r.err == nil {
+		r.pending, r.err = r.reader.ReadBytes('\n')
+		fields := bytes.SplitN(r.pending, []byte{'\t'}, 3)
+		if len(fields) == 3 && bytes.Equal(fields[1], []byte("info")) {
+			r.pending = nil
+		}
+	}
+	n := copy(p, r.pending)
+	r.pending = r.pending[n:]
+	if len(r.pending) > 0 {
+		return n, nil
+	}
+	return n, r.err
 }
 
 // 成功時はstdoutに結果JSONが出ないため、--result-path のファイルを読む。
