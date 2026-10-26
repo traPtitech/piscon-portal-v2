@@ -30,17 +30,19 @@ func TestPreviewPreservesShortLogsAndBothEnds(t *testing.T) {
 	}
 }
 
-func TestPreviewBoundsAfterUTF8Replacement(t *testing.T) {
+func TestPreviewRemovesInvalidUTF8(t *testing.T) {
 	for _, tc := range []struct {
 		name, input, want string
 	}{
-		{"短い不正UTF8", "start\xffend", "start�end"},
-		{"置換後に初めて上限を超える", strings.Repeat("\xffa", 12000),
-			strings.Repeat("�a", 4096) + logpreview.Omitted + strings.Repeat("�a", 4096)},
+		{"短い不正UTF8", "start\xffend", "startend"},
+		{"上限以内の不正UTF8", strings.Repeat("\xffa", 12000),
+			strings.Repeat("a", 12000)},
 		{"長い不正UTF8", strings.Repeat("\xffa", 20000),
-			strings.Repeat("�a", 4096) + logpreview.Omitted + strings.Repeat("�a", 4096)},
-		{"上限が文字の途中にある", strings.Repeat("\xff日", 10000),
-			strings.Repeat("�日", 2730) + "�" + logpreview.Omitted + "日" + strings.Repeat("�日", 2730)},
+			strings.Repeat("a", 8192) + logpreview.Omitted + strings.Repeat("a", 8192)},
+		{"上限が文字の途中にある", strings.Repeat("日", 12000),
+			strings.Repeat("日", 5461) + logpreview.Omitted + strings.Repeat("日", 5461)},
+		{"不正UTF8と日本語の混在", strings.Repeat("\xff日", 10000),
+			strings.Repeat("日", 4096) + logpreview.Omitted + strings.Repeat("日", 4096)},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			for _, chunk := range []int{7, 1024, len(tc.input) + 1} {

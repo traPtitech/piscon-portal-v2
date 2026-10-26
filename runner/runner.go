@@ -105,18 +105,15 @@ func (r *Runner) Run() error {
 
 	stdoutErrChan, stderrErrChan := make(chan error, 1), make(chan error, 1)
 	var readers sync.WaitGroup
-	readers.Add(2)
 
-	go func() {
-		defer readers.Done()
+	readers.Go(func() {
 		err := captureStreamOutput(ctx, stdoutR, io.MultiWriter(stdoutArchive, stdoutBdr))
 		stdoutErrChan <- errors.Join(err, stdoutArchive.Close())
-	}()
-	go func() {
-		defer readers.Done()
+	})
+	readers.Go(func() {
 		err := captureStreamOutput(ctx, stderrR, io.MultiWriter(stderrArchive, stderrBdr))
 		stderrErrChan <- errors.Join(err, stderrArchive.Close())
-	}()
+	})
 
 	progressErr := r.streamJobProgress(ctx, job, startedAt, stdoutBdr, stderrBdr, stdoutErrChan, stderrErrChan)
 	if progressErr != nil {
