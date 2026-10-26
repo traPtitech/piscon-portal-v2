@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
+	"sync"
 	"time"
 
 	"github.com/traPtitech/piscon-portal-v2/runner/benchmarker"
@@ -88,9 +88,14 @@ func (r *Runner) Run() error {
 		return fmt.Errorf("get benchmark: %w", err)
 	}
 
+	stdoutArchive, stderrArchive, err := openLogArchive(job.GetID())
+	if err != nil {
+		archiveErr := fmt.Errorf("create log archive: %w", err)
+		return errors.Join(archiveErr, r.portal.PostJobFinished(ctx, job.GetID(), time.Now(), domain.ResultError, archiveErr))
+	}
 	out, startedAt, err := r.benchmarker.Start(ctx, job)
 	if err != nil {
-		return fmt.Errorf("execute: %w", err)
+		return errors.Join(fmt.Errorf("execute: %w", err), stdoutArchive.Close(), stderrArchive.Close())
 	}
 	stdoutR := out.Stdout
 	stderrR := out.Stderr
@@ -98,36 +103,41 @@ func (r *Runner) Run() error {
 	stdoutBdr := &SyncStringBuilder{}
 	stderrBdr := &SyncStringBuilder{}
 
-	stdoutErrChan, stderrErrChan := make(chan error), make(chan error)
+	stdoutErrChan, stderrErrChan := make(chan error, 1), make(chan error, 1)
+	var readers sync.WaitGroup
 
-	go func() {
-		stdoutErrChan <- captureStreamOutput(ctx, stdoutR, stdoutBdr)
-	}()
-	go func() {
-		stderrErrChan <- captureStreamOutput(ctx, stderrR, stderrBdr)
-	}()
+	readers.Go(func() {
+		err := captureStreamOutput(ctx, stdoutR, io.MultiWriter(stdoutArchive, stdoutBdr))
+		stdoutErrChan <- errors.Join(err, stdoutArchive.Close())
+	})
+	readers.Go(func() {
+		err := captureStreamOutput(ctx, stderrR, io.MultiWriter(stderrArchive, stderrBdr))
+		stderrErrChan <- errors.Join(err, stderrArchive.Close())
+	})
 
-	err = r.streamJobProgress(ctx, job, startedAt, stdoutBdr, stderrBdr, stdoutErrChan, stderrErrChan)
-	if err != nil {
-		log.Printf("collect data: %v", err)
-		err := r.portal.PostJobFinished(ctx, job.GetID(), time.Now(), domain.ResultError, err)
-		if err != nil {
-			return fmt.Errorf("post job finished: %w", err)
-		}
+	progressErr := r.streamJobProgress(ctx, job, startedAt, stdoutBdr, stderrBdr, stdoutErrChan, stderrErrChan)
+	if progressErr != nil {
+		cancel()
 	}
-
-	result, finishedAt, err := r.benchmarker.Wait(ctx)
-	err = r.portal.PostJobFinished(ctx, job.GetID(), finishedAt, result, err)
-	if err != nil {
-		return fmt.Errorf("post job finished: %w", err)
+	// パイプの読み取りとgzipの書き込み完了後に、子プロセスを回収して結果を報告する。
+	readers.Wait()
+	result, finishedAt, waitErr := r.benchmarker.Wait(ctx)
+	runErr := errors.Join(progressErr, waitErr)
+	if runErr != nil {
+		result = domain.ResultError
 	}
-
-	return nil
+	// 送信失敗時は実行用のコンテキストがキャンセル済みなので、完了報告用に作り直す。
+	reportCtx, reportCancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer reportCancel()
+	if err := r.portal.PostJobFinished(reportCtx, job.GetID(), finishedAt, result, runErr); err != nil {
+		return errors.Join(runErr, fmt.Errorf("post job finished: %w", err))
+	}
+	return runErr
 }
 
-func captureStreamOutput(_ context.Context, r io.Reader, bdr *SyncStringBuilder) error {
+func captureStreamOutput(_ context.Context, r io.Reader, w io.Writer) error {
 	for {
-		n, err := io.Copy(bdr, io.LimitReader(r, bufSize))
+		n, err := io.Copy(w, io.LimitReader(r, bufSize))
 		if err != nil {
 			return fmt.Errorf("copy: %w", err)
 		}
@@ -137,8 +147,8 @@ func captureStreamOutput(_ context.Context, r io.Reader, bdr *SyncStringBuilder)
 	}
 }
 
-// streamJobProgress collects the benchmark job's stdout and stderr and sends the progress to the portal.
-// It returns nil if, and only if both of stdout and stderr reach EOF.
+// streamJobProgress はstdout/stderrを収集し、終了時に最終進捗を送信する。
+// 読み取り・送信・portal側の保存に失敗した場合はエラーを返す。
 func (r *Runner) streamJobProgress(
 	ctx context.Context, job *domain.Job, startedAt time.Time,
 	stdoutBdr, stderrBdr *SyncStringBuilder,
@@ -148,7 +158,7 @@ func (r *Runner) streamJobProgress(
 	if err != nil {
 		return fmt.Errorf("create streaming client: %w", err)
 	}
-	defer streamClient.Close()
+	defer func() { err = errors.Join(err, streamClient.Close()) }()
 
 	// 初期状態を送信して、ポータルに開始を通知する。
 	initialProgress := domain.NewProgress(job.GetID(), "", "", 0, startedAt)
@@ -156,6 +166,7 @@ func (r *Runner) streamJobProgress(
 		return fmt.Errorf("send initial progress: %w", err)
 	}
 
+	sendFailed := false
 	calcAndSendProgress := func() error {
 		stdout := stdoutBdr.String()
 		stderr := stderrBdr.String()
@@ -167,15 +178,19 @@ func (r *Runner) streamJobProgress(
 		progress := domain.NewProgress(job.GetID(), stdout, stderr, score, startedAt)
 		err = streamClient.SendProgress(ctx, progress)
 		if err != nil {
+			sendFailed = true
 			return fmt.Errorf("send progress: %w", err)
 		}
 		return nil
 	}
 
-	// 最後に必ず結果を計算して送信するようにする
+	// 送信失敗後のストリームには再送せず、同じエラーを重複して返さない。
 	defer func() {
+		if sendFailed {
+			return
+		}
 		if calcErr := calcAndSendProgress(); calcErr != nil {
-			err = errors.Join(err, fmt.Errorf("defer: calcAndSendProgress%w", calcErr))
+			err = errors.Join(err, fmt.Errorf("send final progress: %w", calcErr))
 		}
 	}()
 

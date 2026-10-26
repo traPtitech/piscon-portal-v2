@@ -267,9 +267,10 @@ func TestGetBenchmarkLog(t *testing.T) {
 		},
 		CreatedAt: time.Now(),
 	}
+	// 旧形式で保存済みの全文は、新しいプレビュー上限を超えていても切らずに取得する。
 	benchmarkLog := domain.BenchmarkLog{
-		UserLog:  "user log",
-		AdminLog: "admin log",
+		UserLog:  strings.Repeat("user log\n", 10000),
+		AdminLog: strings.Repeat("admin log\n", 10000),
 	}
 	mustMakeInstance(t, db, benchmark.Instance)
 	mustMakeBenchmark(t, db, benchmark)

@@ -129,7 +129,7 @@ func TestMakeProgressStreamClient(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			client := mock.NewMockBenchmarkServiceClient(ctrl)
 
-			client.EXPECT().SendBenchmarkProgress(gomock.Any()).Return(nil, testCase.MakeProgressStreamClientErr)
+			client.EXPECT().SendBenchmarkProgress(gomock.Any(), gomock.Any()).Return(nil, testCase.MakeProgressStreamClientErr)
 
 			portal := grpc.NewPortal(client, 0)
 

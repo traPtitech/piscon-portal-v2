@@ -40,11 +40,12 @@ func TestSendProgress(t *testing.T) {
 			streamClient := mock.NewMockClientStreamingClient[portalv1.SendBenchmarkProgressRequest, portalv1.SendBenchmarkProgressResponse](ctrl)
 
 			streamClient.EXPECT().Send(gomock.Eq(&portalv1.SendBenchmarkProgressRequest{
-				BenchmarkId: testCase.progress.GetBenchmarkID(),
-				StartedAt:   timestamppb.New(testCase.progress.GetStartedAt()),
-				Stdout:      testCase.progress.GetStdout(),
-				Stderr:      testCase.progress.GetStderr(),
-				Score:       int64(testCase.progress.GetScore()),
+				BenchmarkId:  testCase.progress.GetBenchmarkID(),
+				StartedAt:    timestamppb.New(testCase.progress.GetStartedAt()),
+				StdoutDelta:  []byte(testCase.progress.GetStdout()),
+				StderrDelta:  []byte(testCase.progress.GetStderr()),
+				Score:        int64(testCase.progress.GetScore()),
+				LogsAreDelta: true,
 			})).Return(testCase.SendErr)
 
 			client := grpc.NewProgressStreamClient(streamClient)

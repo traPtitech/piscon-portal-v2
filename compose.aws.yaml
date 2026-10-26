@@ -17,3 +17,6 @@ services:
     extends:
       file: compose.yaml
       service: runner
+
+volumes:
+  runner-logs:

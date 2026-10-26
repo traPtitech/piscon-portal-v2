@@ -65,6 +65,8 @@ RUN adduser \
   --no-create-home \
   --uid "${UID}" \
   appuser
+RUN mkdir -p /logs && chown appuser /logs
+ENV PISCON_LOG_DIR=/logs
 USER appuser
 
 # Copy the executable from the "build" stage.

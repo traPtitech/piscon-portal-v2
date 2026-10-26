@@ -55,6 +55,7 @@ services:
     volumes:
       - ./runner/benchmarker/impl/example.sh:/bin/example.sh
       - ./piscon_runner_example.yaml:/piscon_runner.yaml
+      - runner-logs:/logs
     develop:
       watch:
         - path: ./runner
@@ -63,3 +64,6 @@ services:
           action: "rebuild"
         - path: ./gen
           action: "rebuild"
+
+volumes:
+  runner-logs:
