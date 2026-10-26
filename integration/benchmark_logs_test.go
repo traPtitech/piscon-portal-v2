@@ -80,8 +80,7 @@ func logPortal(t *testing.T, store *progressStore) (*client.Portal, <-chan strin
 func TestLogTransportAndPersistence(t *testing.T) {
 	store := &progressStore{}
 	p, headers := logPortal(t, store)
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	ctx := t.Context()
 	stream, err := p.MakeProgressStreamClient(ctx)
 	require.NoError(t, err)
 	id, started := uuid.New(), time.Now()
@@ -136,8 +135,7 @@ func TestLogTransportAndPersistence(t *testing.T) {
 
 func TestLogPersistenceFailureIsReturnedToRunner(t *testing.T) {
 	p, _ := logPortal(t, &progressStore{err: io.ErrUnexpectedEOF})
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	ctx := t.Context()
 	stream, err := p.MakeProgressStreamClient(ctx)
 	require.NoError(t, err)
 	_ = stream.SendProgress(ctx, rd.NewProgress(uuid.NewString(), "log", "", 0, time.Now()))
