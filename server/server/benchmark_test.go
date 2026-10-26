@@ -224,6 +224,9 @@ func TestSendBenchmarkProgress(t *testing.T) {
 				}
 			}
 
+			if !testCase.isError {
+				client.EXPECT().SendAndClose(gomock.Any()).Return(nil)
+			}
 			s := server.NewBenchmarkService(u)
 
 			err := s.SendBenchmarkProgress(client)

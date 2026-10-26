@@ -79,6 +79,9 @@ func (bs *BenchmarkService) SendBenchmarkProgress(stream grpc.ClientStreamingSer
 		}
 	}
 
+	if err := stream.SendAndClose(&portalv1.SendBenchmarkProgressResponse{}); err != nil {
+		return fmt.Errorf("send progress response: %w", err)
+	}
 	return nil
 }
 
