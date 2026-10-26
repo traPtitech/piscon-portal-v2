@@ -66,3 +66,7 @@ docker compose --file compose.aws.yaml up
 ## protobuf について
 
 [proto/README.md](proto/README.md) を参照してください。
+
+## ベンチマークログ
+
+保存先と確認方法は [runner/README.md](runner/README.md) を参照してください。

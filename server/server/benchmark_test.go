@@ -112,18 +112,20 @@ func TestSendBenchmarkProgress(t *testing.T) {
 	benchID := uuid.New()
 	startedAt := time.Now()
 	req1 := &portalv1.SendBenchmarkProgressRequest{
-		BenchmarkId: benchID.String(),
-		Stdout:      "stdout",
-		Stderr:      "stderr",
-		Score:       100,
-		StartedAt:   timestamppb.New(startedAt),
+		BenchmarkId:  benchID.String(),
+		StdoutDelta:  []byte("stdout"),
+		LogsAreDelta: true,
+		StderrDelta:  []byte("stderr"),
+		Score:        100,
+		StartedAt:    timestamppb.New(startedAt),
 	}
 	req2 := &portalv1.SendBenchmarkProgressRequest{
-		BenchmarkId: benchID.String(),
-		Stdout:      "stdout 2",
-		Stderr:      "stderr 2",
-		Score:       200,
-		StartedAt:   timestamppb.New(startedAt),
+		BenchmarkId:  benchID.String(),
+		StdoutDelta:  []byte(" 2"),
+		LogsAreDelta: true,
+		StderrDelta:  []byte(" 2"),
+		Score:        200,
+		StartedAt:    timestamppb.New(startedAt),
 	}
 
 	testCases := map[string]struct {
@@ -133,6 +135,11 @@ func TestSendBenchmarkProgress(t *testing.T) {
 		err                         error
 		errCode                     codes.Code
 	}{
+		"旧runnerは更新を要求する": {
+			recvResults: []RecvResult{{req: &portalv1.SendBenchmarkProgressRequest{BenchmarkId: benchID.String(), StartedAt: timestamppb.New(startedAt)}}},
+			isError:     true,
+			errCode:     codes.FailedPrecondition,
+		},
 		"1回受信できる": {
 			recvResults: []RecvResult{
 				{req: req1, err: nil, save: true},
@@ -160,11 +167,12 @@ func TestSendBenchmarkProgress(t *testing.T) {
 		"idがUUIDでないのでエラー": {
 			recvResults: []RecvResult{
 				{req: &portalv1.SendBenchmarkProgressRequest{
-					BenchmarkId: "invalid id",
-					Stdout:      "stdout",
-					Stderr:      "stderr",
-					Score:       100,
-					StartedAt:   timestamppb.New(startedAt),
+					BenchmarkId:  "invalid id",
+					StdoutDelta:  []byte("stdout"),
+					LogsAreDelta: true,
+					StderrDelta:  []byte("stderr"),
+					Score:        100,
+					StartedAt:    timestamppb.New(startedAt),
 				}, err: nil, save: false},
 			},
 			isError: true,
@@ -201,6 +209,7 @@ func TestSendBenchmarkProgress(t *testing.T) {
 
 			client.EXPECT().Context().Return(t.Context()).AnyTimes()
 
+			var stdout, stderr string
 			for i, recvResult := range testCase.recvResults {
 				client.EXPECT().Recv().Return(recvResult.req, recvResult.err)
 
@@ -210,9 +219,11 @@ func TestSendBenchmarkProgress(t *testing.T) {
 
 					saveResult := testCase.SaveBenchmarkProgressResult[i]
 
+					stdout += string(recvResult.req.StdoutDelta)
+					stderr += string(recvResult.req.StderrDelta)
 					benchLog := domain.BenchmarkLog{
-						UserLog:  recvResult.req.Stdout,
-						AdminLog: recvResult.req.Stderr,
+						UserLog:  stdout,
+						AdminLog: stderr,
 					}
 					u.EXPECT().
 						SaveBenchmarkProgress(gomock.Any(), benchID, benchLog, recvResult.req.Score, gomock.Cond(

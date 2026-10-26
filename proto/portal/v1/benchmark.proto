@@ -19,9 +19,13 @@ message GetBenchmarkJobResponse {
 message SendBenchmarkProgressRequest {
   string benchmark_id = 1;
   google.protobuf.Timestamp started_at = 2;
-  string stdout = 3; // stdout, stderrどちらも、実行中でも全てのログを送る
-  string stderr = 4;
+  string stdout = 3 [deprecated = true]; // 未使用。次のAPIバージョンで削除する。
+  string stderr = 4 [deprecated = true]; // 未使用。次のAPIバージョンで削除する。
   int64 score = 5;
+  bool logs_are_delta = 6; // true必須。全文送信する旧runnerの誤受信を防ぐ。
+  bool more_log_chunks = 7; // 同じ進捗の分割送信が続く。最後のチャンクでDBを更新する
+  bytes stdout_delta = 8; // UTF-8の途中でも分割できる追記分
+  bytes stderr_delta = 9;
 }
 
 message SendBenchmarkProgressResponse {}

@@ -21,6 +21,7 @@ type Portal interface {
 
 type ProgressStreamClient interface {
 	// SendProgress sends the progress of the job.
+	// After an error, the caller must close the stream without sending further progress.
 	SendProgress(ctx context.Context, progress *domain.Progress) error
 	// Close closes the client.
 	Close() error

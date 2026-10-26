@@ -8,6 +8,8 @@ import (
 	portalv1 "github.com/traPtitech/piscon-portal-v2/gen/portal/v1"
 	"github.com/traPtitech/piscon-portal-v2/runner/domain"
 	"github.com/traPtitech/piscon-portal-v2/runner/portal"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/encoding/gzip"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -42,7 +44,7 @@ func (p *Portal) GetJob(ctx context.Context) (*domain.Job, error) {
 }
 
 func (p *Portal) MakeProgressStreamClient(ctx context.Context) (portal.ProgressStreamClient, error) {
-	streamClient, err := p.cl.SendBenchmarkProgress(ctx)
+	streamClient, err := p.cl.SendBenchmarkProgress(ctx, grpc.UseCompressor(gzip.Name))
 	if err != nil {
 		return nil, fmt.Errorf("send benchmark progress: %w", err)
 	}

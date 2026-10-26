@@ -61,6 +61,7 @@ func TestRunReportsOutcomeOnce(t *testing.T) {
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
+			t.Setenv("PISCON_LOG_DIR", t.TempDir())
 			p := &recordingPortal{closeErr: tc.closeErr}
 			r := &Runner{portal: p, benchmarker: outputProcess{stdout: "log", stderr: "staff log"}}
 			err := r.Run()
@@ -88,6 +89,7 @@ func (waitingProcess) Start(ctx context.Context, _ *domain.Job) (benchmarker.Out
 }
 
 func TestRunReportsProgressSendFailureOnce(t *testing.T) {
+	t.Setenv("PISCON_LOG_DIR", t.TempDir())
 	synctest.Test(t, func(t *testing.T) {
 		sendErr := errors.New("progress unavailable")
 		p := &recordingPortal{sendErr: sendErr}

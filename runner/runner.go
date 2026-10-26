@@ -88,9 +88,14 @@ func (r *Runner) Run() error {
 		return fmt.Errorf("get benchmark: %w", err)
 	}
 
+	stdoutArchive, stderrArchive, err := openLogArchive(job.GetID())
+	if err != nil {
+		archiveErr := fmt.Errorf("create log archive: %w", err)
+		return errors.Join(archiveErr, r.portal.PostJobFinished(ctx, job.GetID(), time.Now(), domain.ResultError, archiveErr))
+	}
 	out, startedAt, err := r.benchmarker.Start(ctx, job)
 	if err != nil {
-		return fmt.Errorf("execute: %w", err)
+		return errors.Join(fmt.Errorf("execute: %w", err), stdoutArchive.Close(), stderrArchive.Close())
 	}
 	stdoutR := out.Stdout
 	stderrR := out.Stderr
@@ -104,18 +109,20 @@ func (r *Runner) Run() error {
 
 	go func() {
 		defer readers.Done()
-		stdoutErrChan <- captureStreamOutput(ctx, stdoutR, stdoutBdr)
+		err := captureStreamOutput(ctx, stdoutR, io.MultiWriter(stdoutArchive, stdoutBdr))
+		stdoutErrChan <- errors.Join(err, stdoutArchive.Close())
 	}()
 	go func() {
 		defer readers.Done()
-		stderrErrChan <- captureStreamOutput(ctx, stderrR, stderrBdr)
+		err := captureStreamOutput(ctx, stderrR, io.MultiWriter(stderrArchive, stderrBdr))
+		stderrErrChan <- errors.Join(err, stderrArchive.Close())
 	}()
 
 	progressErr := r.streamJobProgress(ctx, job, startedAt, stdoutBdr, stderrBdr, stdoutErrChan, stderrErrChan)
 	if progressErr != nil {
 		cancel()
 	}
-	// パイプの読み取り完了後に、子プロセスを回収して結果を報告する。
+	// パイプの読み取りとgzipの書き込み完了後に、子プロセスを回収して結果を報告する。
 	readers.Wait()
 	result, finishedAt, waitErr := r.benchmarker.Wait(ctx)
 	runErr := errors.Join(progressErr, waitErr)
@@ -131,9 +138,9 @@ func (r *Runner) Run() error {
 	return runErr
 }
 
-func captureStreamOutput(_ context.Context, r io.Reader, bdr *SyncStringBuilder) error {
+func captureStreamOutput(_ context.Context, r io.Reader, w io.Writer) error {
 	for {
-		n, err := io.Copy(bdr, io.LimitReader(r, bufSize))
+		n, err := io.Copy(w, io.LimitReader(r, bufSize))
 		if err != nil {
 			return fmt.Errorf("copy: %w", err)
 		}

@@ -10,8 +10,10 @@ import (
 	portalv1 "github.com/traPtitech/piscon-portal-v2/gen/portal/v1"
 	"github.com/traPtitech/piscon-portal-v2/server/domain"
 	"github.com/traPtitech/piscon-portal-v2/server/usecase"
+	"github.com/traPtitech/piscon-portal-v2/server/utils/logpreview"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	_ "google.golang.org/grpc/encoding/gzip" // gRPCのgzip展開を登録する。
 	"google.golang.org/grpc/status"
 )
 
@@ -50,13 +52,23 @@ func (bs *BenchmarkService) GetBenchmarkJob(ctx context.Context, _ *portalv1.Get
 
 func (bs *BenchmarkService) SendBenchmarkProgress(stream grpc.ClientStreamingServer[portalv1.SendBenchmarkProgressRequest, portalv1.SendBenchmarkProgressResponse]) error {
 	ctx := stream.Context()
+	var stdout, stderr logpreview.Buffer
+	var streamID string
+	var moreChunks bool
 	for {
 		req, err := stream.Recv()
 		if errors.Is(err, io.EOF) {
+			if moreChunks {
+				return status.Error(codes.InvalidArgument, "incomplete log batch")
+			}
 			break
 		}
 		if err != nil {
 			return handleError("failed to receive progress", err)
+		}
+
+		if !req.LogsAreDelta {
+			return status.Error(codes.FailedPrecondition, "runner must support delta log streaming; update runner")
 		}
 
 		benchID, err := uuid.Parse(req.BenchmarkId)
@@ -64,9 +76,20 @@ func (bs *BenchmarkService) SendBenchmarkProgress(stream grpc.ClientStreamingSer
 			return status.Error(codes.InvalidArgument, "invalid benchmark ID")
 		}
 
+		if streamID == "" {
+			streamID = req.BenchmarkId
+		} else if streamID != req.BenchmarkId {
+			return status.Error(codes.InvalidArgument, "benchmark ID must not change within a stream")
+		}
+		stdout.WriteString(string(req.StdoutDelta))
+		stderr.WriteString(string(req.StderrDelta))
+		moreChunks = req.MoreLogChunks
+		if moreChunks {
+			continue
+		}
 		err = bs.b.SaveBenchmarkProgress(ctx, benchID, domain.BenchmarkLog{
-			UserLog:  req.Stdout,
-			AdminLog: req.Stderr,
+			UserLog:  stdout.String(),
+			AdminLog: stderr.String(),
 		}, req.Score, req.StartedAt.AsTime())
 		if usecase.IsUseCaseError(err) {
 			return status.Error(codes.InvalidArgument, fmt.Sprintf("invalid benchmark status: %v", err))
