@@ -23,3 +23,13 @@ updates:
       time: "00:00"
       day: saturday
       timezone: Asia/Tokyo
+
+  - directory: /
+    open-pull-requests-limit: 5
+    rebase-strategy: auto
+    package-ecosystem: docker
+    schedule:
+      interval: weekly
+      time: "00:00"
+      day: saturday
+      timezone: Asia/Tokyo
