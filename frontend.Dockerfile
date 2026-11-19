@@ -20,7 +20,7 @@ RUN --mount=type=bind,source=./client/,target=/usr/src/app,readwrite \
   mkdir -p /usr/src/dist && \
   bun run build-only --outDir /usr/src/dist --emptyOutDir
 
-FROM nginx:1-alpine@sha256:8b1e78743a03dbb2c95171cc58639fef29abc8816598e27fb910ed2e621e589a AS production
+FROM nginx:1-alpine@sha256:0563c36f94a6d3ec3584161b77859f740f7e20b4853f52c796a864ce6908e8ea AS production
 
 COPY --from=prerelease /usr/src/dist /usr/share/nginx/html
 
